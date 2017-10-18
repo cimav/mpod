@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang='es'>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Giancarlo Pepponi, Diana Ramírez, Miguel Chávez">
+    <meta name="description" content="MPOD Material Properties Open Database">
+    <meta name="keywords" content="material, properties, open, database, search, solid state, material science, 3D, surface, mpod">
+    <title>MPOD - {% block titulo %}{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel='shortcut icon' href='{{STATIC_URL}}img/icono.png'>
+
+
+    <link rel="stylesheet" href="{{STATIC_URL}}css/bootstrap.min.css">
+    <link href="{{STATIC_URL}}css/sticky-footer.css" rel="stylesheet"> <!-- Pie de página abajo -->
+    <link href="{{STATIC_URL}}css/general.css" rel="stylesheet">
+    <link href="{{STATIC_URL}}css/carousel.css" rel="stylesheet"> <!-- Home's carousel -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700' rel='stylesheet' type='text/css'> <!-- Menu font -->
+    <link href="{{STATIC_URL}}css/dashboard.css" rel="stylesheet"> <!-- Credits -->
+    <link href="{{STATIC_URL}}css/navbar.css" rel="stylesheet"> <!-- Submenu black and yellow -->
+    {% block style_css %}{% endblock %}
+
+    <!-- JS -->
+    <!--<script src='{{STATIC_URL}}js/jquery-1.7.2.min.js'></script>-->
+    <!--<script src='{{STATIC_URL}}js/demo.js'></script>-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{{STATIC_URL}}js/bootstrap.min.js"></script>
+    <script src="{{STATIC_URL}}js/general.js"></script>
+
+  </head>
+
+  <body>
+  	<script>
+  		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  		ga('create', 'UA-93718653-1', 'auto');
+  		ga('send', 'pageview');
+
+	</script>  
+    <header>
+      <div id="logo"> 
+        <a href="/"><img class="img-responsive" src="{{STATIC_URL}}img/logo_estructure.png" height="75" width="320"/>
+        <img id="top" class="img-responsive" src="{{STATIC_URL}}img/logo.png" height="75" width="320"/></a> 
+      </div>
+      <div>
+      <img src="{{STATIC_URL}}img/title.png" style="float:rigth;" class="img-responsive" height="100" width="700" alt="MPOD logo"/>
+      </div>
+    	{% block encabezado %}{% endblock %}
+      <nav class="navbar-custom navbar-inverse navbar-static-top">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand"></a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/">HOME</a></li>
+                <!-- DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY -->
+                <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">SEARCH BY<span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="/sbproperty">PROPERTY</a></li>
+                  <li><a href="/sbcomposition">COMPOSITION</a></li>
+                  <li><a href="/sbreference">REFERENCES</a></li>
+                </ul>
+                </li>
+                <!-- DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY DROPDOWN SEARCH BY -->
+
+                <!-- DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION -->
+                <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">DOCUMENTATION<span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="/docintroduction">MPOD INTRODUCTION</a></li>
+                  <li><a href="/docmpodfiles">MPOD FILES</a></li>
+                  <li><a href="/docdictionary">DICTIONARY</a></li>
+                  <li><a href="/references">REFERENCES</a></li>
+                </ul>
+                </li>
+                <!-- DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION DROPDOWN DOCUMENTATION -->
+
+                <!-- DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT-->
+                <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">ABOUT MPOD<span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="/introduction">INTRODUCTION</a></li>
+                  <li><a href="/mpodteam">MPOD TEAM</a></li>
+                  <li><a href="/terms">TERMS</a></li>
+                </ul>
+                </li>
+                <!-- 
+                 <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">USERS<span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="/signup">SIGN UP - MPOD</a></li>
+                  <li><a href="/login">LOGIN- MPOD</a></li>
+                   <li><a href="/logout">LOGOUT - MPOD</a></li>
+                  <li><a href="/newcase">NEW PROPERTY - MPOD</a></li>
+                </ul>
+                </li>
+                -->
+                <!-- DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT-->
+              </ul>
+          </div>
+        </div>
+      </nav>   
+    	<!--<hr>-->
+    </header>
+
+    <section class='contenido'>
+  	{% block contenido %}{% endblock %}
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <hr/>
+        <p class="text-muted"><center>MPOD 2015</center></p>
+      </div>
+    </footer>
+  </body>
+</html>

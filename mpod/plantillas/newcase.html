@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} Search by References {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+  <div class="content">
+      <h3>New Property</h3>
+      <br/>
+      <h4></h4>
+	  <h4></h4>
+	  <p>Please enter the required data below.</p>
+	  <form role="form" action="/addcase/" method="POST">
+	  <input type='hidden' id="eventonchange" name="eventonchange" value="0" />
+	  <input type='hidden' id="proccesing" name="proccesing" value="0" />
+	    <div class="form-group searches">
+	      <label for="title">Title:</label>
+	      <input type="text" name="title" value="" class="form-control" placeholder="Example: Elasticity of single-crystalline graphite: inelastic X-ray scattering study">
+	    </div>
+	    <div class="form-group searches">
+	      <label for="author">Authors: </label>
+	      <input type="text" name="author" value="" class="form-control" placeholder="Example: Bosak, A.">
+	    </div>
+	    <div class="form-group searches">
+	      <label for="journal">Journal:</label>
+	      <input type="text" name="journal" value="" class="form-control" placeholder="Example: Physical Review B">
+	    </div>
+	    
+	     {% if list_Property %}  
+	    <div class="form-group searches">
+	      <label for="journal">Property:</label>
+	      <br/>
+	       <select  id="catalogproperty_name"  name="catalogproperty_name" onchange="changeFunc();" >
+	     
+	       {% for obj in list_Property %}       
+	        {% if catalogproperty_name == obj.name %} 
+			       <option  selected="selected" value="{{obj.name}}"  >{{obj.description}} </option>
+			 {% else %}
+			       <option value="{{obj.name}}"   >{{obj.description}}</option>
+			{% endif %}
+	        {% endfor %}
+       
+         </select>	
+     
+          
+
+         
+	    </div>
+	     {% endif %} 
+	    
+	    
+	    
+	    
+
+	    
+	    
+	   {% if catalogCrystalSystemList %}  
+	  <div class="form-group searches">
+	      <label for="journal">Crystal system</label>
+	      
+	      <select id="crystalsystem_name" name="crystalsystem_name" onchange="changeFunc()" >       
+	      
+	       {% for ccs in catalogCrystalSystemList %}       
+	        {% if crystalsystem_name == ccs.name %} 
+			       <option  selected="selected" value="{{ccs.name }}"  >{{ccs.description }}</option>
+			 {% else %}
+			      <option value="{{ccs.name}}"   >{{ccs.description }} </option>
+			{% endif %}    
+	        {% endfor %}
+             
+	      </select>
+	  
+	    </div>
+	     {% endif %}    
+	    
+	    
+	    <div class="form-group searches">
+	      <label for="journal">
+	       {% if questiontype %} 
+               {{questiontype }}  
+          {% endif %}        
+	      </label>
+	    </div>
+	
+	{% if typeList %}  
+	<div class="form-group searches"> 
+	   
+	    	<select id="type" name="type" onchange="changeFunc()" >       
+	     
+	       {% for type in typeList %}       
+	        {% if typeselected == type.name %} 
+			       <option  selected="selected" value="{{type.name }}"  > {{type.description }} </option>
+			 {% else %}
+			      <option value="{{type.name}}"   > {{type.description }} </option>
+			{% endif %}    
+	        {% endfor %}
+           
+	      </select>
+	    
+	    </div>
+	    {% endif %} 
+	    
+	   	  	<div class="form-group searches">
+	      <label for="journal">
+	       {% if questionGp %} 
+               {{questionGp }}  
+          {% endif %}        
+	      </label>
+	    </div>   
+	      
+	    
+	   
+	    
+	   {% if puntualGroupList %}  
+	<div class="form-group searches"> 
+	   
+	    	<select id="puntualgroupselected_name" name="puntualgroupselected_name" onchange="changeFunc()" >       
+	     
+	       {% for gp in puntualGroupList %}       
+	        {% if puntualgroupselected_name == gp.name %} 
+			       <option  selected="selected" value="{{gp.name }}"  > ({{gp.name }}) </option>
+			 {% else %}
+			      <option value="{{gp.name}}"   > ({{gp.name }}) </option>
+			{% endif %}    
+	        {% endfor %}
+           
+	      </select>
+	    
+	    </div>
+	 {% endif %}  
+	
+		 <div class="form-group searches">
+	      <label for="journal">
+	       {% if questionAxis %} 
+               {{questionAxis }}  
+          {% endif %}        
+	      </label>
+	    </div>   
+	   
+	     {% if axisList %}  
+	    <div class="form-group searches"> 
+	   
+	    	<select id="axisselected_name" name="axisselected_name"  onchange="changeFunc()" >       
+	     
+	       {% for axis in axisList %}       
+	        {% if axisselected_name == axis.name %} 
+			       <option  selected="selected" value="{{axis.name }}"  > {{axis.name }} </option>
+			 {% else %}
+			      <option value="{{axis.name}}"   > {{axis.name }} </option>
+			{% endif %}    
+	        {% endfor %}
+           
+	      </select>
+	    
+	    </div>
+	    {% endif %}  
+	    
+	    
+	    
+	  
+	  <div class="form-group searches">
+	      <label for="journal">
+	       {% if message %} 
+               {{message }}  
+           {% endif %}         
+	      </label>
+	    </div>   
+	    
+	    
+
+	    
+	    
+   {% if inputList %}  
+	<div class="form-group searches"> 
+	    {% for ipt  in inputList %}   
+		    {% if   ipt.name != "---"%} 
+	         	<label for="journal">{{ipt.name }}</label>
+		      <input type="text" id="{{ipt.name }}" name="{{ipt.name }}" value="" class="form-control" placeholder="{{ipt.name }} value">
+		      {% endif %}    
+	      {% endfor %}
+	    </div>
+	  {% endif %}  
+	  
+
+	  
+	 {% if printings  != 0 %}  
+	 <h6>Properties' values</h6>
+	  		<div class="table-responsive">
+			<table class="table table-striped table-condensed table-hover sm_table">
+				<tbody>
+				      {% for r  in results %}  
+				      <tr>      
+				              {% for e in r %} 
+				               
+				                  	
+				                      <td>{{e}}  </td>
+				                 
+				                
+				              {% endfor %}     
+				       </tr>         
+				        {% endfor %}
+           </tbody>
+		</table>
+	    </div>
+    {% endif %}  
+ 
+                                                                                  
+
+      	 {% if printingc  != 0 %}  
+      	 <h6>Properties' values</h6>
+	   	 <div class="table-responsive">
+			<table class="table table-striped table-condensed table-hover sm_table">
+				<tbody>
+				      {% for r  in resultc %}  
+				      <tr>      
+				              {% for e in r %} 
+				              <label for="journal">
+				                  	
+				                      <td>{{e}}  </td>
+				                  </label>
+				              {% endfor %}     
+				       </tr>         
+				        {% endfor %}
+           </tbody>
+		</table>
+	    </div>
+	  {% endif %}  
+       
+	   {% if printingd  != 0 %}  
+	   <h6>Properties' values</h6>
+	  	  <div class="table-responsive">
+			<table class="table table-striped table-condensed table-hover sm_table">
+				<tbody>
+				      {% for r  in resultd %}  
+				      <tr>      
+				              {% for e in r %} 
+				              <label for="journal">
+				                  	
+				                      <td>{{e}}  </td>
+				                  </label>
+				              {% endfor %}     
+				       </tr>         
+				        {% endfor %}
+           </tbody>
+		</table>
+	    </div>
+	  	{% endif %}    
+
+	  
+	  
+
+	    
+	    {% if error %}  
+	    <div class="form-group searches">
+	      <label for="journal">
+	       
+               {{error }}  
+           
+	      </label>
+	    </div>
+	     {% endif %}      
+
+ <script type="text/javascript">
+
+   function changeFunc() {
+    document.getElementById("eventonchange").value=1;
+   //alert(document.getElementById("eventonchange").value)
+    document.forms[0].submit();
+   }
+   
+   function process() {
+	    document.getElementById("proccesing").value=1;
+	   //alert(document.getElementById("eventonchange").value)
+	
+	    document.forms[0].submit();
+	   }
+   
+  </script>
+	    
+	     
+	    {% if ShowBtnSend  != 0 %}  
+	    <button type="submit" class="btn btn-warning">Send</button>
+	     {% endif %}     
+	    
+		  {% if ShowBtnProcess  != 0 %}  
+		    <button type="submit" class="btn btn-warning" onclick="process();">Process</button>
+		  {% endif %}     
+	  </form>
+    
+	 
+      <br/><br/>
+  </div>
+{% endblock %}

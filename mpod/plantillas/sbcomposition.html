@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} Search by Composition {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+  <div class="content">
+	  <h3>Search by Composition</h3>
+	  <br/>
+	  <p>Please, below insert the parameter(s) for your search.</p>
+	  <form role="form" action="/sbcomposition/" method="GET">
+	    <div class="form-group searches">
+	      <label for="title">Phase Name:</label>
+	      <input type="text" name="phase_name" value="{{ query_phase_name|escape }}" class="form-control" placeholder="Example: graphite">
+	    </div>
+	    <div class="form-group searches">
+	      <label for="author">Formula contains:</label>
+	      <input type="text" name="formula" value="{{ query_formula|escape }}" class="form-control" placeholder="Example: C">
+	    </div>
+	    <div class="form-group searches">
+	      <label for="journal">MPOD code:</label>
+	      <input type="text" name="mpod_code" value="{{ query_mpod_code|escape }}" class="form-control" placeholder="Example: 73">
+	    </div>
+	    <div class="form-group searches">
+	      <label for="journal">COD code:</label>
+	      <input type="text" name="cod_code" value="{{ query_cod_code|escape }}" class="form-control" placeholder="Example: 9008569">
+	    </div>
+	    <div class="form-group searches">
+	      <label for="journal">Publication author:</label>
+	      <input type="text" name="publ_author" value="{{ query_publ_author|escape }}" class="form-control" placeholder="Example: Bosak, A.">
+	    </div>
+	    <button type="submit" class="btn btn-warning">Search</button>
+	  </form>
+	  <br />
+	  {% if results %}
+	    <h4>Search Results:</h4>
+		{{results|escape}}
+	  {% else %}
+	      {% if query_phase_name or query_formula or query_cod_code %}
+	      	<h4>Sorry, no datafiles found.</h4>
+	      {% endif %}
+	  {% endif %}
+	  <br/><br/>
+  </div>
+{% endblock %}

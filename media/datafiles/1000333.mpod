@@ -1,0 +1,63 @@
+#------------------------------------------------------------------------------
+#$Date: 2013-5-12 14:35:00 +0000 $
+#$Revision: 001 $ Daniel Chateigner
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.mpod.net/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_1000333
+_cod_database_code 1512396
+_structure_refined 'yes'
+_phase_name 'Iron Tetraborate'
+_chemical_formula_structural 'FeB4'
+_chemical_formula_sum 'Fe1 11B4'
+_symmetry_point_group_name_H-M 'm m m'
+_cell_length_a                     4.5786(3)
+_cell_length_b                     5.2981(3)
+_cell_length_c                     2.9991(2)
+_cell_angle_alpha                  90.
+_cell_angle_beta                   90
+_cell_angle_gamma                  90
+
+loop_
+_publ_author_name
+'Gou, Huiyang'
+'Dubrovinskaia, Natalia'
+'Bykova, Elena'
+'Tsirlin, Alexander A.'
+'Kasinathan, Deepa'
+'Schelle, Walter'
+'Richter, Asta'
+'Merlini, Marco'
+'Hanfland, Michael'
+'Abakumov, Artem M.'
+'Batuk, Dmitry'
+'van Tendeloo, Gustaaf'
+'Nakajima, Yoichi'
+'Kolmogorov, Aleksey N.'
+'Dubrovinsky, Leonid'
+_publ_section_title
+;
+Discovery of a superhard iron tetraboride superconductor
+;
+_journal_name_full               'Physical Review Letters'
+_journal_volume                  111
+_journal_issue                   15
+_journal_article_reference       157002
+_journal_pages_number            5
+_journal_year                    2013
+
+_phase_debye_temperature 730
+
+_prop_measurement_method 'SQUID-ZFC'
+_prop_frame '1=[100] 2=[010] 3=[001]'
+
+_prop_superconducting_critical_temperature_onset 2.89
+_prop_superconducting_critical_temperature_mid_50 2.70
+
+_prop_conditions_magnetic_field 0.001

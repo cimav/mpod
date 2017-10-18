@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} Search by Property {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+  <div class="content">
+    <h3>Search by Property</h3>
+    <br/>
+    Here a list of all the properties present in the database is given. Following the link associated to the property name you can view the properties details and the set of datafiles associated with the property.<br/><br/>
+
+    {% if properties_list_table %}
+      {{properties_list_table|escape}}
+    {% else %}
+      Sorry! No properties found.
+    {% endif %}
+    <br/><br/>
+  </div>
+{% endblock %}

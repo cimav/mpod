@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} Dictionary {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+  <div class="content">
+	  <h3>Dictionary</h3>
+	  <br/>
+	  For the structural information, available items in the <a href="http://www.iucr.org/resources/cif/dictionaries/cif_core" target="_blank">CORE CIF dictionary</a> used. A dictionary containing new definitions for the material properties has been written according to the <a href="http://www.iucr.org/resources/cif/ddl/ddl1" target="_blank">Dictionary Definition Language DDL1</a>.
+	  <br/><br/>
+	  Units are univocally defined in the dictionary itself. The current version of the dictionary can be downloaded here.
+	  <br/><br/>
+	  The <a href="http://www.iucr.org/" target="_blank">IUCR</a> maintains general information about the <a href="http://www.iucr.org/resources/cif/spec/star-file" target="_blank">STAR File</a> syntax, the various "official" CIF <a href="http://www.iucr.org/resources/cif/dictionaries" target="_blank">dictionaries</a> and the <a href="http://www.iucr.org/resources/cif/ddl" target="_blank">Dictionary Definition Languages</a>.
+	  <br/><br/>
+	  The material properties dictionary defines new keywords properties and experimental conditions.As also mentioned in the datafiles documentation some tricks were adopted to adapt the relatively strict STAR File syntax to allow for multiple entries still avoiding ambiguousness.
+	  <br/><br/>
+	  In the dictionary the type of a property is a char (string) and not a numb (number, float) as could be expected and it is meant to hold a labelassociated to the property. Two special <a href="http://www.iucr.org/resources/cif/spec/version1.1/semantics" target="_blank">data name</a> _prop_data_label and _prop_data_value are defined with type char and numb respectively to hold the label defined with the specific property data name and a value. For tensorial properties the _prop_data_tensorial_index data name has been defined to descern among the different components of the tensor.
+	  <br/><br/>
+	  All properties and experimental conditions belong to the same _prop_ category, because only properties belonging to the same category can be in the same loop. In the dictionary, to ease the reading, subcategories are defined and indicated but they are commented out.
+	  <br/><br/>
+  </div>
+{% endblock %}

@@ -1,0 +1,96 @@
+.content {
+	padding-left: 10%;
+	padding-right: 10%;
+	text-align: justify;
+}
+
+nav, .navbar-brand{
+	font-family: 'Open Sans Condensed', sans-serif;
+	font-size: 18px;
+}
+
+/* CREDITS */
+.contentCredits {
+	padding-left: 5%;
+	padding-right: 5%;
+	text-align: justify;
+}
+
+.backgroundCredits{
+	border: #ffcc33 2px solid; 
+	padding: 10px;
+	background-color: #F6F6F7;
+	border-radius: 20px;
+}
+
+.academicGrades{
+	color: #2A56C5;
+}
+
+.areasInterest{
+	color: #3B60C0;
+}
+
+.awardsDistinctions{
+	color: #4A6CC2;
+}
+
+.homeCenter{
+	text-align: center;
+}
+
+#contentHome{
+	padding-left: 3%;
+	padding-right: 3%;
+	text-align: justify;
+}
+
+
+/** LOGO HOVER EFFECT **/
+#logo {
+	float:left;
+	height:75px;
+	width:320px;
+	margin:0 auto;
+}
+#logo img {
+	position:absolute;
+	left:0;
+	-webkit-transition: opacity 1s ease-in-out;
+	-moz-transition: opacity 1s ease-in-out;
+	-o-transition: opacity 1s ease-in-out;
+	-ms-transition: opacity 1s ease-in-out;		
+	transition: opacity 1s ease-in-out;
+}
+#logo img#top:hover {
+	opacity:0;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+	filter: alpha(opacity=0);
+}
+
+/* TABLES DESIGN */
+
+.tables{
+	margin:0px; 
+	padding:0px; 
+	border:0px;
+}
+
+.sm_table{
+	width: 320px;
+}
+
+.table-hover tbody tr:hover td {
+    /*background: #F5CB92;*/
+    background: #F7CF9B;
+}
+
+/* SEARCH */
+.searches{
+	width: 210px;
+}
+
+.sequency-align{
+	clear: both;
+}
+

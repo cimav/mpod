@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} View Datafile {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+  <div class="content">
+    <h3>View Datafile</h3>
+    <br/>
+      {% if html_dataitem %}
+        {{html_dataitem|escape}}
+        <br />
+      {% endif %}
+      {% if html_tables %}        
+        {{html_gen_props|escape}}
+        <br />
+        {{html_tables|escape}}
+      {% else %}
+        Sorry! Property not found. No Associated datafiles.
+      {% endif %}
+    <br/><br/>
+  </div>
+{% endblock %}

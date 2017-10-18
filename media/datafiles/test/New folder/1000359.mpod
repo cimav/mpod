@@ -1,0 +1,56 @@
+#------------------------------------------------------------------------------
+#$Date: 2015-07-11 08:00:00 +0000 $
+#$Revision: 001 $ Luis Fuentes
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.materialproperties.org/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+
+data_1000359
+_cod_database_code   9008084
+_structure_refined 'no'
+_phase_name 'High temperature chromium oxide'
+_chemical_name_mineral  'High temperature eskolaite'
+_phase_formula 'Cr2O3'
+_chemical_formula_sum 'Cr2O3'
+_symmetry_point_group_name_H-M '-3´ m´'
+_cell_length_a  4.96
+_cell_length_b  4.96
+_cell_length_c  13.599
+_cell_angle_alpha  90
+_cell_angle_beta   90
+_cell_angle_gamma  120
+
+loop_
+_publ_author_name
+'Wiegelmann H.'
+'Jansen AGM.'
+'Wyder P.'
+'Rivera JP.'
+'Schmid H.'
+_publ_section_title
+
+;
+'Magnetoelectric effect of Cr2O3 in strong static magnetic fields'
+;
+
+_journal_name_full               'Ferroelectrics '
+_journal_page_first               141
+_journal_page_last                146
+_journal_volume                   162
+_journal_year                     1994
+
+_prop_conditions_temperature 270K
+_prop_magnetoelectric_MEalphaij 'MEalphaij'
+
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+MEalphaij 11 0.73
+MEalphaij 22 0.73
+MEalphaij 33 4.14

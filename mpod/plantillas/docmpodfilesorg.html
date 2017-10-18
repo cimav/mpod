@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} MPOD Files {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+  <div class="content">
+	  <h3>MPOD Files</h3>
+	  <br/>
+	  Properties are reported in “.mpod” files, where the original published paper containing the data is cited and structural and experimental information is also given. One mpod file contains information relative to only one publication and one phase. When known, a <a href="http://www.crystallography.net/">COD</a> reference to a CIF File associated to the same phase/material is indicated. The information contained in a file can be visualized online and the .mpod file can also be downloaded for local use.
+	  <br/><br/>
+	  Information can be <a href="mpodbeta.cimav.edu.mx/sbcomposition">searched</a> for, according to the considered property, the name of the phase, the elements contained, the MPOD or COD code or an author of the publication referenced in the file.
+	  <br/><br/>
+	  As its inspirer (COD), MPOD files use a Starfile syntax used and developed for the CIF files. However some tricks were adopted to adapt the its relatively strict syntax to allow for multiple entries still avoiding ambiguousness.
+	  <br/><br/>
+	  Unlike the crystal structure that is univocally described, material properties are not easily defined with one single value.  Tensorial properties are described by a matrix of values. Often the change of properties under changing environment is of interest. The value of a property tag is a label. This label is then used in a _loop structure where the tensorial index and/or changing experimental conditions (temperature, pressure, … ) as well as the actual value are given. CIF files are checked for consistency against one or more dictionaries. .mpod files are checked against the material properties dictionary and the <a href="http://www.iucr.org/resources/cif/dictionaries/cif_cor">CORE CIF dictionary</a>.
+	  <br/><br/>
+	  PyCifRW is currently being used to check the syntactical correctness of the .mpod files. Further automatic checking routines are under development.
+	  <br/><br/>
+  </div>
+{% endblock %}

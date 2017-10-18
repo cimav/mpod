@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} Search by Composition {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+<div class="content">
+	  <h3>Sign up</h3>
+	  <br/>
+	  <p>Please, below insert the .</p>
+	  <form role="form" action="/signup/" method="POST">
+	
+	     {% csrf_token %}
+	     
+	      
+	  
+        {% for field in form %}
+		     
+		       <div class="form-group searches">
+			      
+			      
+			      
+			         <div class="form-group searches">
+				      <label for="title">{{ field.label_tag }}:</label>
+				      <input type="text" id="id_{{ field.name}}" name="{{ field.name}}" value="" class="form-control" placeholder="">
+				    </div>
+			       
+			        {% if field.help_text %}
+			          <small style="color: grey">{{ field.help_text }}</small>
+			        {% endif %}
+			        {% for error in field.errors %}
+			          <p style="color: red">{{ error }}</p>
+			        {% endfor %}
+			    </div>
+		   {% endfor %}      
+
+		   
+
+	    <button type="submit" class="btn btn-warning">Register</button>
+	  </form>
+	   </div>
+	  
+
+{% endblock %}

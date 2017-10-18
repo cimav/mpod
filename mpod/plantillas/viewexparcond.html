@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} View Conditions and Parameters {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+	<div class="content">
+		<h3>View Conditions and Parameters</h3>
+		<br/>
+		{% if property_table %}
+			{{property_table|escape}}
+		{% else %}
+			Sorry! Experimental Parameter/Condition not found.
+		{% endif %}
+		<br/><br/>
+	</div>
+{% endblock %}

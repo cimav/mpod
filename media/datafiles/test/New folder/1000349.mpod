@@ -1,0 +1,39 @@
+#------------------------------------------------------------------------------
+#$Date: 2014-11-10 18:59:00 +0000 $
+#$Revision: 001 $ Daniel Chateigner
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.materialproperties.org/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+
+data_1000349
+_cod_database_code 9004141
+_structure_refined 'no'
+_chemical_name_mineral  'rutile'
+_phase_name 'rutile'
+_phase_formula 'TiO2'
+_chemical_formula_sum 'Ti1 O2'
+_symmetry_point_group_name_H-M '4/m m m'
+_cell_length_a  4.593
+_cell_length_b  4.593
+_cell_length_c  2.959
+_cell_angle_alpha  90
+_cell_angle_beta   90
+_cell_angle_gamma  90
+_phase_cell_temperature 298
+
+_prop_frame '1=[100],2=[010],3=[001]'
+
+_prop_thermal_conductivity_kappaij 'kappaij'
+
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+kappaij 11 9.3
+kappaij 22 9.3
+kappaij 33 12.9

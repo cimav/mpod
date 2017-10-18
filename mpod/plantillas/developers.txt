@@ -1,0 +1,40 @@
+<!-- GIANCARLO PEPPONI GIANCARLO PEPPONI GIANCARLO PEPPONI GIANCARLO PEPPONI -->
+          <div class="backgroundCredits">
+            <center><h3><a  name="giancarlo">Giancarlo Pepponi</a></h3><br/>
+            <img class="img-circle" src="{{STATIC_URL}}img/giancarlo.jpg" alt="Generic placeholder image" style="width: 140px; height: 140px;"></center><br/>
+            <p>
+              Giancarlo is a research scientist at the Fondazione Bruno Kessler, and works in the MiNALab Unit of the Centre for Materials and Microsystems, Trento, Italy.
+              <br/><br/>
+              <center>
+                <div>
+                  <a href="http://www.fbk.eu" target="_blank" name="fbk">
+                    <img src="{{STATIC_URL}}img/fbk_logo.jpg" style="width: 80px; height: 70px;">
+                  </a>
+                        &#160;&#160;&#160;&#160;&#160;&#160;
+                  <a href="http://cmm.fbk.eu/" target="_blank" name="cmm">
+                    <img src="{{STATIC_URL}}img/logo-en.png" style="width: 160px; height: 70px;">
+                  </a>
+                </div>
+              </center>
+            </p>
+          </div>
+          <!-- GIANCARLO PEPPONI GIANCARLO PEPPONI GIANCARLO PEPPONI GIANCARLO PEPPONI -->
+          <br/><br/>
+          <!-- SAULIUS GRAZULIS SAULIUS GRAZULIS SAULIUS GRAZULIS SAULIUS GRAZULIS SAULIUS GRAZULIS -->
+          <div class="backgroundCredits">
+            <center><h3><a  name="saulius">Saulius Grazulis</a></h3><br/>
+            <img class="img-circle" src="{{STATIC_URL}}img/saulius.jpg" alt="Generic placeholder image" style="width: 140px; height: 140px;"></center><br/>
+            <p>
+              Department of Protein – DNA Interactions, Vilnius University Institute of Biotechnology,
+Vilnius and Department of Mathematical Computer Science, Vilnius University Faculty of Mathematics and Informatics, Vilnius, Lithuania.
+              <br/><br/>
+              <center>
+                <div>
+                  <a href="http://www.vu.lt/en/" target="_blank" name="fbk">
+                    <img src="{{STATIC_URL}}img/vilnius.png" style="width: 70px; height: 70px;">
+                  </a>
+                </div>
+              </center>
+            </p>
+          </div>
+          <!-- SAULIUS GRAZULIS SAULIUS GRAZULIS SAULIUS GRAZULIS SAULIUS GRAZULIS SAULIUS GRAZULIS -->

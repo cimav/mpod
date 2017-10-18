@@ -1,0 +1,450 @@
+{% if formatted_data_blocks %}
+	{% for block in formatted_data_blocks %}
+		{% if block.0 %}
+			<h5>General experimental conditions/parameters</h5>
+			<div class="table-responsive">
+				<table class="table table-striped table-condensed table-hover sm_table">
+					<tbody>
+						{% for nlp in block.0 %}
+							<tr>
+								<td><a href="/exparcond/{{nlp.1}}">{{nlp.0}}</a></td>
+								<td>{{nlp.2}}</td>
+								<td>:</td> 
+								<td>{{nlp.3}} </td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<br />
+		{% endif %}
+		{% if block.1 %}
+			           <script type="text/javascript">
+							var totalProperties = 0;
+						</script>
+			{% for sec in block.1 %}
+				{% if sec.0 %}
+					{% if sec.0.0 %}
+							<h6>Other experimental conditions/parameters</h6>
+							<div class="table-responsive">
+								<table class="table table-striped table-condensed table-hover sm_table">
+									<tbody>
+										{% for lp in sec.0 %}
+											<tr>
+												<td><a href="/exparcond/{{lp.1}}">{{lp.0}}</a></td>
+												<td>{{lp.2}}</td>
+												<td>:</td>
+												<td>{{lp.3}}</td>
+											</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+							<br />
+					{% endif %}
+					{% if sec.1 %}
+					
+						<h6>Properties' values</h6>
+						{% for tens_prop in sec.1 %}						   
+							<a href="/properties/{{tens_prop.1}}">{{tens_prop.0}}</a> {{tens_prop.2}}
+								<div class="table-responsive">
+									<table class="table table-striped table-condensed table-hover sm_table">
+										<tbody>
+											<script type="text/javascript">
+												var counterElements = 0;
+												var type = "";
+												//type: [0 --> range 2] [1 --> range 3] [2 --> range 4 compliance] [3 --> range 4 stiffness] [4 --> range 4 general] [5 --> no range]
+											</script>
+											{% for tens_row in tens_prop.3 %}
+												<tr>
+													{% for tens_val in tens_row %}
+														<script type="text/javascript">
+															counterElements++;
+															var file_name ="";
+															var value = "{{tens_val}}";
+															var valueTen = "";
+															var promertyname="";
+
+															if(isNaN(value)){
+
+																var end = value.indexOf("(");
+																if(end > 0){
+																	valueTen = value.slice(0,end);
+																}
+
+																else{
+																	valueTen = 0;
+																}
+						
+															}
+
+															else{
+																valueTen = "{{tens_val}}"
+															}
+
+															switch(counterElements){
+																case 1:
+																	var val1 = valueTen;
+																	break;
+																case 2:
+																	var val2 = valueTen;
+																	break;
+																case 3:
+																	var val3 = valueTen;
+																	break;
+																case 4:
+																	var val4 = valueTen;
+																	break;
+																case 5:
+																	var val5 = valueTen;
+																	break;
+																case 6:
+																	var val6 = valueTen;
+																	break;
+																case 7:
+																	var val7 = valueTen;
+																	break;
+																case 8:
+																	var val8 = valueTen;
+																	break;
+																case 9:
+																	var val9 = valueTen;
+																	break;
+																case 10:
+																	var val10 = valueTen;
+																	break;
+																case 11:
+																	var val11 = valueTen;
+																	break;
+																case 12:
+																	var val12 = valueTen;
+																	break;
+																case 13:
+																	var val13 = valueTen;
+																	break;
+																case 14:
+																	var val14 = valueTen;
+																	break;
+																case 15:
+																	var val15 = valueTen;
+																	break;
+																case 16:
+																	var val16 = valueTen;
+																	break;
+																case 17:
+																	var val17 = valueTen;
+																	break;
+																case 18:
+																	var val18 = valueTen;
+																	break;
+																case 19:
+																	var val19 = valueTen;
+																	break;
+																case 20:
+																	var val20 = valueTen;
+																	break;
+																case 21:
+																	var val21 = valueTen;
+																	break;
+																case 22:
+																	var val22 = valueTen;
+																	break;
+																case 23:
+																	var val23 = valueTen;
+																	break;
+																case 24:
+																	var val24 = valueTen;
+																	break;
+																case 25:
+																	var val25 = valueTen;
+																	break;
+																case 26:
+																	var val26 = valueTen;
+																	break;
+																case 27:
+																	var val27 = valueTen;
+																	break;
+																case 28:
+																	var val28 = valueTen;
+																	break;
+																case 29:
+																	var val29 = valueTen;
+																	break;
+																case 30:
+																	var val30 = valueTen;
+																	break;
+																case 31:
+																	var val31 = valueTen;
+																	break;
+																case 32:
+																	var val32 = valueTen;
+																	break;
+																case 33:
+																	var val33 = valueTen;
+																	break;
+																case 34:
+																	var val34 = valueTen;
+																	break;
+																case 35:
+																	var val35 = valueTen;
+																	break;
+																case 36:
+																	var val36 = valueTen;
+																	break;
+															}
+															if("{{tens_prop.0}}" == "dielectric permittivity relative epsrij" || 
+																"{{tens_prop.0}}" == "dielectric permittivity relative epsrijS" || 
+																"{{tens_prop.0}}" == "dielectric permittivity relative epsrijT" ||
+																"{{tens_prop.0}}" == 	"dielectric stiffness relative betrijS" || 
+																"{{tens_prop.0}}" == "dielectric stiffness relative betrijT" || 
+																"{{tens_prop.0}}" == "electric resistivity rhoeij" || 
+																"{{tens_prop.0}}" == "thermal conductivity kappaij" || 
+																"{{tens_prop.0}}" == "thermal diffusivity kappadij" || 
+																"{{tens_prop.0}}" == "thermal expansion alphaij" || 
+																"{{tens_prop.0}}" == "thermoelectric Seebeck Seij" || 
+																"{{tens_prop.0}}" == "magnetoelectric MEalphaij"){
+																type = 0;
+																file_name =codefile + "{{tens_prop.0}}" 
+																
+															}
+															else if("{{tens_prop.0}}" == "electromechanical coupling kij" || "{{tens_prop.0}}" == "piezoelectric dij" || "{{tens_prop.0}}" == "piezoelectric eij" ||"{{tens_prop.0}}" == "piezoelectric gij" || "{{tens_prop.0}}" == "piezoelectric hij"){
+																type = 1;
+																file_name =codefile + "{{tens_prop.0}}" 
+															}
+															else if("{{tens_prop.0}}" == "elastic compliance sij" || 
+															"{{tens_prop.0}}" == "elastic compliance sijD" || 
+															"{{tens_prop.0}}" == "elastic compliance sijE" || 
+															"{{tens_prop.0}}" == "thermoelastic compliance 1storder sij1T" || 
+															"{{tens_prop.0}}" == "thermoelastic compliance 2ndorder sij2T" || 
+															"{{tens_prop.0}}" == "thermoelastic compliance 3rdorder sij3T" || 
+															"{{tens_prop.0}}" == "elastic compliance sijS"){
+																type = 2;
+																file_name =codefile + "{{tens_prop.0}}" 
+															}
+															else if("{{tens_prop.0}}" == "elastic stiffness cij" || 
+															"{{tens_prop.0}}" == "elastic stiffness cijD" || 
+															"{{tens_prop.0}}" == "elastic stiffness cijE" || 
+															"{{tens_prop.0}}" == "elastic stiffness cijS" || 
+															"{{tens_prop.0}}" == "elasticstiffness hydrostaticpressure 1storder cij1P" ||
+															"{{tens_prop.0}}" == "elasticstiffness hydrostaticpressure 2ndorder cij2P" ||
+															"{{tens_prop.0}}" == "thermoelasticstiffness 1storder cijS1T" || 
+															"{{tens_prop.0}}" == "thermoelasticstiffness 2ndorder cijS2T"){
+																type = 3;
+																file_name =codefile + "{{tens_prop.0}}" 
+																
+															}
+															else if("{{tens_prop.0}}" == "electrostriction Dij" || 
+															"{{tens_prop.0}}" == "electrostriction Dprimeij" || 
+															"{{tens_prop.0}}" == "internal friction Qij-1" || 
+															"{{tens_prop.0}}" == "photoelastic pij" || 
+															"{{tens_prop.0}}" == "piezooptic piij" || 
+															"{{tens_prop.0}}" == "thermal expansion Tij"){
+																type = 4;
+																file_name =codefile + "{{tens_prop.0}}" 
+																
+															}															
+															else if("{{tens_prop.0}}" == "magnetocrystalline anisotropy k1, k2")
+														    {
+																	type = 5;
+																	file_name =codefile + "{{tens_prop.0}}"; 																
+																	promertyname="Magnetocrystalline Anisotropy";
+																	
+															}
+															else if("{{tens_prop.0}}" == "magnetostriction lambda 100, lambda 111"){
+																	type = 6;
+																	file_name =codefile + "{{tens_prop.0}}";
+																	promertyname="Magnetostriction";
+																	
+															}
+															else
+														   {
+																type =7;
+																
+															}
+
+														</script>
+														<td> {{tens_val}} </td>
+													{% endfor %}
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							<br />
+							<script type="text/javascript">
+								var pathname = window.location.pathname.split( '/' );
+								var w = (window.innerWidth/2)-255;
+								var wcs = (window.innerWidth/2)-525;
+								var h = (window.innerHeight/2)-255;
+							    var options="toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=false,width=525,height=700,top="+h+",left="+w+"";
+							    var optionscs="toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=false,width=1070,height=700,top="+h+",left="+wcs+"";
+							    
+								if(type == 0){
+									type0filename=file_name;
+									values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value21="+val4+"&value22="+val5+"&value23="+val6+"&value31="+val7+"&value32="+val8+"&value33="+val9 ;
+									
+									
+									//alert('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									
+									document.write('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									totalProperties++;
+										
+									function secondranktensor(clicked_id, values) {
+										selectedColor = document.getElementById("color"+clicked_id).selectedIndex;
+										
+  										var url = values + "&color=" + selectedColor +"&filename="+type0filename;
+									    urlGraph = "/dataitem/" + pathname[2] + "/secondranktensor/" + url;
+									   //alert(urlGraph);
+									    window.open(urlGraph,"",options);
+									}
+
+								}
+
+								if(type == 1){
+									type1filename=file_name;
+									values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18;
+
+									//alert('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									document.write('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="thirdranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									totalProperties++;
+									
+									function thirdranktensor(clicked_id, values) {
+										selectedColor = document.getElementById("color"+clicked_id).selectedIndex;
+  										var url = values + "&color=" + selectedColor+"&filename="+type1filename;
+									    urlGraph = "/dataitem/" + pathname[2] + "/thirdranktensor/" + url;
+									    //alert(urlGraph);
+									    
+									    window.open(urlGraph,"",options);
+									}
+
+								}
+                                
+								if(type == 2){
+									type2filename=file_name;
+									values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18+"&value41="+val19+"&value42="+val20+"&value43="+val21+"&value44="+val22+"&value45="+val23+"&value46="+val24+"&value51="+val25+"&value52="+val26+"&value53="+val27+"&value54="+val28+"&value55="+val29+"&value56="+val30+"&value61="+val31+"&value62="+val32+"&value63="+val33+"&value64="+val34+"&value65="+val35+"&value66="+val36;
+
+									//alert('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									document.write('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="compliance(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									totalProperties++;
+									
+									function compliance(clicked_id, values) {
+										selectedColor = document.getElementById("color"+clicked_id).selectedIndex;
+										
+  										var url = values + "&color=" + selectedColor+"&filename="+type2filename;
+									    urlGraph = "/dataitem/" + pathname[2] + "/compliance/" + url;
+									    //alert(urlGraph);
+									    //window.open(urlGraph,"",optionscs);
+									    
+									    window.open(urlGraph,"",optionscs);
+									}
+
+								}
+
+								if(type == 3){
+									type3filename=file_name;
+									values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18+"&value41="+val19+"&value42="+val20+"&value43="+val21+"&value44="+val22+"&value45="+val23+"&value46="+val24+"&value51="+val25+"&value52="+val26+"&value53="+val27+"&value54="+val28+"&value55="+val29+"&value56="+val30+"&value61="+val31+"&value62="+val32+"&value63="+val33+"&value64="+val34+"&value65="+val35+"&value66="+val36;
+									//alert('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									document.write('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="stiffness(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									
+									totalProperties++;
+									
+									function stiffness(clicked_id, values) {
+										selectedColor = document.getElementById("color"+clicked_id).selectedIndex;
+  										var url = values + "&color=" + selectedColor+"&filename="+type3filename;
+									    urlGraph = "/dataitem/" + pathname[2] + "/stiffness/" + url;
+									   // alert(urlGraph);
+									  
+
+									  window.open(urlGraph,"",optionscs);
+									}
+
+								}
+
+								if(type == 4){
+									type4filename=file_name;
+									values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18+"&value41="+val19+"&value42="+val20+"&value43="+val21+"&value44="+val22+"&value45="+val23+"&value46="+val24+"&value51="+val25+"&value52="+val26+"&value53="+val27+"&value54="+val28+"&value55="+val29+"&value56="+val30+"&value61="+val31+"&value62="+val32+"&value63="+val33+"&value64="+val34+"&value65="+val35+"&value66="+val36;
+									//alert('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									document.write('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="fourthranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									totalProperties++;
+									
+									function fourthranktensor(clicked_id, values) {
+										selectedColor = document.getElementById("color"+clicked_id).selectedIndex;
+  										var url = values + "&color=" + selectedColor+"&filename="+type4filename;
+									    urlGraph = "/dataitem/" + pathname[2] + "/fourthranktensor/" + url;
+									    //alert(urlGraph);
+									    window.open(urlGraph,"",options);
+									}
+
+								}
+								
+								if(type == 5){
+									type5filename=file_name;
+									type5promertyname=promertyname
+									
+									
+									values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4;
+									//alert('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									document.write('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="magnetic(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									totalProperties++;
+									 
+									
+									function magnetic(clicked_id, values) {
+										selectedColor = document.getElementById("color"+clicked_id).selectedIndex;
+  										var url = values + "&color=" + selectedColor+"&filename="+type5filename+"&promertyname="+ type5promertyname;
+  										 
+  									    urlGraph = "/dataitem/" + pathname[2] + "/magnetocrystallineanisotropy/" + url;
+									    window.open(urlGraph,"",options);
+									}
+								}
+								if(type == 6){
+									type6filename=file_name;
+									type6promertyname=promertyname
+									
+									
+									values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4;
+									//alert('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									document.write('<select id="color'+totalProperties+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="magneto(this.id,\'' + values + '\')" id="'+totalProperties+'">Graph</button><br/><br/>');
+									totalProperties++;
+						 
+									
+									function magneto(clicked_id, values) {
+										selectedColor = document.getElementById("color"+clicked_id).selectedIndex;
+  										var url = values + "&color=" + selectedColor+"&filename="+type6filename+"&promertyname="+ type6promertyname;
+  										
+									    urlGraph = "/dataitem/" + pathname[2] + "/magnetostriction/" + url;
+									    //alert(urlGraph);
+									    window.open(urlGraph,"",options);
+									}
+								}
+
+							</script>
+						{% endfor %}
+					{% endif %}
+				{% else %}
+					{% if sec.1 %}
+						<div class="table-responsive sm_table">
+							<table class="table table-striped table-condensed table-hover">
+								<th>
+									<tr> {% for item in sec.1.0 %}
+												{% if item.3 %}
+													<th> <a href="/properties/{{item.1}}">{{item.0}}{{item.2}}</a> </th>
+												{% else %}
+												   <th> <a href="/exparcond/{{item.1}}">{{item.0}}{{item.2}}</a> </th>
+												{% endif %}  
+										  {% endfor %} 
+									</tr>
+								</th>
+								<tbody>
+									{% for riga in sec.1.1 %}
+										<tr>{%for ele in riga%}<td>{{ele}}</td>{% endfor %}</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+							<br />
+						</div>					
+					{% endif %}
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	{% endfor %}
+{% endif %}
