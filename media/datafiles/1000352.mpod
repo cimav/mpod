@@ -1,0 +1,196 @@
+#------------------------------------------------------------------------------
+#$Date: 2014-11-20 14:31:00 +0000 $
+#$Revision: 001 $ Daniel Chateigner
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.materialproperties.org/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+
+data_1000352
+_cod_database_code 9008565
+_structure_refined 'no'
+_phase_name 'silicon'
+_chemical_formula_structural 'Si'
+_chemical_formula_sum 'Si1'
+_phase_generic 'P-doped silicon'
+_symmetry_point_group_name_H-M 'm -3 m'
+_cell_length_a  5.4307
+_cell_length_b  5.4307
+_cell_length_c  5.4307
+_cell_angle_alpha  90
+_cell_angle_beta   90
+_cell_angle_gamma  90
+_phase_cell_temperature 298
+
+loop_
+_publ_author_name
+'Thurber, Robert. W.'
+_publ_section_title
+;
+A Comparison of Measurement Techniques for Determining Phosphorus Densities in Semiconductor Silicon
+;
+_journal_name_full               'Journal of Electronic Materials'
+_journal_volume                  9
+_journal_page_first              551
+_journal_page_last               560
+_journal_year                    1980
+
+_phase_dopant 'P'
+_prop_measurement_method 'FP'
+_prop_frame '1=[100],2=[010],3=[001]'
+#_prop_symmetry_point_group_name_H-M '4 m m'
+
+_prop_electric_resistivity_rhoeij 'rhoeij'
+
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+rhoeij 11 1330000 0.000314 Hall 
+rhoeij 22 1330000 0.000314 Hall
+rhoeij 33 1330000 0.000314 Hall
+rhoeij 11 808000 0.000544 Hall
+rhoeij 22 808000 0.000544 Hall
+rhoeij 33 808000 0.000544 Hall
+rhoeij 11 511000 0.000934 Hall 
+rhoeij 22 511000 0.000934 Hall
+rhoeij 33 511000 0.000934 Hall
+rhoeij 11 408000 0.00118 Hall
+rhoeij 22 408000 0.00118 Hall
+rhoeij 33 408000 0.00118 Hall
+rhoeij 11 285000 0.00183 Hall 
+rhoeij 22 285000 0.00183 Hall
+rhoeij 33 285000 0.00183 Hall
+rhoeij 11 193000 0.00299 Hall
+rhoeij 22 193000 0.00299 Hall
+rhoeij 33 193000 0.00299 Hall
+rhoeij 11 77400 0.0101 Hall 
+rhoeij 22 77400 0.0101 Hall
+rhoeij 33 77400 0.0101 Hall
+rhoeij 11 51500 0.0183 Hall
+rhoeij 22 51500 0.0183 Hall
+rhoeij 33 51500 0.0183 Hall
+rhoeij 11 33900 0.0360 Hall 
+rhoeij 22 33900 0.0360 Hall
+rhoeij 33 33900 0.0360 Hall
+rhoeij 11 10300 0.378 Hall
+rhoeij 22 10300 0.378 Hall
+rhoeij 33 10300 0.378 Hall
+rhoeij 11 6870 0.76 Hall
+rhoeij 22 6870 0.76 Hall
+rhoeij 33 6870 0.76 Hall
+rhoeij 11 4340 1.43 Hall
+rhoeij 22 4340 1.43 Hall
+rhoeij 33 4340 1.43 Hall
+rhoeij 11 2000 3.46 Hall
+rhoeij 22 2000 3.46 Hall
+rhoeij 33 2000 3.46 Hall
+rhoeij 11 1200 5.96 Hall
+rhoeij 22 1200 5.96 Hall
+rhoeij 33 1200 5.96 Hall
+rhoeij 11 1400000 0.000499(39) NAA 
+rhoeij 22 1400000 0.000499(39) NAA
+rhoeij 33 1400000 0.000499(39) NAA
+rhoeij 11 1320000(50000) 0.000357(21) JCV
+rhoeij 22 1320000(50000) 0.000357(21) JCV
+rhoeij 33 1320000(50000) 0.000357(21) JCV
+rhoeij 11 805000 0.000735(35) NAA 
+rhoeij 22 805000 0.000735(35) NAA
+rhoeij 33 805000 0.000735(35) NAA
+rhoeij 11 789000(18000) 0.000621(30) JCV
+rhoeij 22 789000(18000) 0.000621(30) JCV
+rhoeij 33 789000(18000) 0.000621(30) JCV
+rhoeij 11 492000 0.00116(8) NAA 
+rhoeij 22 492000 0.00116(8) NAA
+rhoeij 33 492000 0.00116(8) NAA
+rhoeij 11 491000(13000) 0.00108(7) JCV
+rhoeij 22 491000(13000) 0.00108(7) JCV
+rhoeij 33 491000(13000) 0.00108(7) JCV
+rhoeij 11 404000 0.00150(5) NAA 
+rhoeij 22 404000 0.00150(5) NAA
+rhoeij 33 404000 0.00150(5) NAA
+rhoeij 11 398000(49000) 0.00140(24) JCV
+rhoeij 22 398000(49000) 0.00140(24) JCV
+rhoeij 33 398000(49000) 0.00140(24) JCV
+rhoeij 11 387000 0.00153(7) NAA 
+rhoeij 22 387000 0.00153(7) NAA
+rhoeij 33 387000 0.00153(7) NAA
+rhoeij 11 281000 0.00203(13) NAA
+rhoeij 22 281000 0.00203(13) NAA
+rhoeij 33 281000 0.00203(13) NAA
+rhoeij 11 285000(4000) 0.04203(6) JCV
+rhoeij 22 285000(4000) 0.04203(6) JCV
+rhoeij 33 285000(4000) 0.04203(6) JCV
+rhoeij 11 193000 0.0039(6) NAA
+rhoeij 22 193000 0.0039(6) NAA
+rhoeij 33 193000 0.0039(6) NAA
+rhoeij 11 193000(3000) 0.00328(7) JCV
+rhoeij 22 193000(3000) 0.00328(7) JCV
+rhoeij 33 193000(3000) 0.00328(7) JCV
+rhoeij 11 78500 0.0120(1) NAA
+rhoeij 22 78500 0.0120(1) NAA
+rhoeij 33 78500 0.0120(1) NAA
+rhoeij 11 79400(1100) 0.0109(4) JCV
+rhoeij 22 79400(1100) 0.0109(4) JCV
+rhoeij 33 79400(1100) 0.0109(4) JCV
+rhoeij 11 75900 0.0119(4) NAA
+rhoeij 22 75900 0.0119(4) NAA
+rhoeij 33 75900 0.0119(4) NAA
+rhoeij 11 52000 0.0228(8) NAA
+rhoeij 22 52000 0.0228(8) NAA
+rhoeij 33 52000 0.0228(8) NAA
+rhoeij 11 50100 0.0227 Color
+rhoeij 22 50100 0.0227 Color
+rhoeij 33 50100 0.0227 Color
+rhoeij 11 53300(1400) 0.0214(6) JCV
+rhoeij 22 53300(1400) 0.0214(6) JCV
+rhoeij 33 53300(1400) 0.0214(6) JCV
+rhoeij 11 53100 0.0212(5) NAA
+rhoeij 22 53100 0.0212(5) NAA
+rhoeij 33 53100 0.0212(5) NAA
+rhoeij 11 34000 0.0451(10) NAA
+rhoeij 22 34000 0.0451(10) NAA
+rhoeij 33 34000 0.0451(10) NAA
+rhoeij 11 33300 0.0430 Color
+rhoeij 22 33300 0.0430 Color
+rhoeij 33 33300 0.0430 Color
+rhoeij 11 34600(500) 0.0490(38) JCV
+rhoeij 22 34600(500) 0.0490(38) JCV
+rhoeij 33 34600(500) 0.0490(38) JCV
+rhoeij 11 10100 0.525(10) NAA
+rhoeij 22 10100 0.525(10) NAA
+rhoeij 33 10100 0.525(10) NAA
+rhoeij 11 10100 0.444 Color
+rhoeij 22 10100 0.444 Color
+rhoeij 33 10100 0.444 Color
+rhoeij 11 10500 0.493(8) NAA
+rhoeij 22 10500 0.493(8) NAA
+rhoeij 33 10500 0.493(8) NAA
+rhoeij 11 6970 0.910(9) NAA
+rhoeij 22 6970 0.910(9) NAA
+rhoeij 33 6970 0.910(9) NAA
+rhoeij 11 7300 0.77 Color
+rhoeij 22 7300 0.77 Color
+rhoeij 33 7300 0.77 Color
+rhoeij 11 4480 1.54(1) NAA
+rhoeij 22 4480 1.54(1) NAA
+rhoeij 33 4480 1.54(1) NAA
+rhoeij 11 4570 1.22 Color
+rhoeij 22 4570 1.22 Color
+rhoeij 33 4570 1.22 Color
+rhoeij 11 2010 3.66(10) NAA
+rhoeij 22 2010 3.66(10) NAA
+rhoeij 33 2010 3.66(10) NAA
+rhoeij 11 2190 3.02 Color
+rhoeij 22 2190 3.02 Color
+rhoeij 33 2190 3.02 Color
+rhoeij 11 1290 5.85(11) NAA
+rhoeij 22 1290 5.85(11) NAA
+rhoeij 33 1290 5.85(11) NAA
+rhoeij 11 1300 5.17 Color
+rhoeij 22 1300 5.17 Color
+rhoeij 33 1300 5.17 Color

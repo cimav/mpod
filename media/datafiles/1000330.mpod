@@ -1,0 +1,156 @@
+#------------------------------------------------------------------------------
+#$Date: 2013-6-10 21:34:00 +0000 $
+#$Revision: 001 $ Daniel Chateigner
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.mpod.net/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_1000330
+_cod_database_code 1000285
+_structure_refined 'no'
+_phase_name 'Bi2Sr2CaCu2O8'
+_phase_generic 'Bi-2212'
+_chemical_formula_structural 'Bi2Sr2CaCu2O8'
+_chemical_formula_sum 'Bi2 Sr2 Ca1 Cu2 O8'
+_symmetry_point_group_name_H-M 'm m m'
+_cell_length_a                     5.4054
+_cell_length_b                     5.4016
+_cell_length_c                     30.7152
+_cell_angle_alpha                  90
+_cell_angle_beta                   90
+_cell_angle_gamma                  90
+
+loop_
+_publ_author_name
+'Nakayama, Y.'
+'Kawai, S.'
+'Kiuchi, M.'
+'Otabe, E.S.'
+'Matsushita, T.'
+'Shimoyama, J.'
+'Kishio, K.'
+_publ_section_title
+;
+Evaluation of anisotropy of critical current density in stoichiometric Bi-2212 single crystals
+;
+_journal_name_full               'Physica C'
+_journal_volume                  469
+_journal_issue                   ?
+_journal_page_first              1221
+_journal_page_last               1223
+_journal_year                    2009
+
+_prop_measurement_method 'SQUID'
+_prop_frame '1=[100] 2=[010] 3=[001]'
+
+_prop_superconducting_critical_current_density_Jci 'Jci'
+_prop_superconducting_critical_temperature 89
+
+
+_prop_conditions_temperature ?
+
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+Jci 1 4000000000 20 0.003
+Jci 2 4000000000 20 0.003
+Jci 3 200000000 20 0.003
+Jci 1 4000000000 20 0.006
+Jci 2 4000000000 20 0.006
+Jci 3 200000000 20 0.006
+Jci 1 4100000000 20 0.01
+Jci 2 4100000000 20 0.01
+Jci 3 210000000 20 0.01
+Jci 1 4100000000 20 0.03
+Jci 2 4100000000 20 0.03
+Jci 3 210000000 20 0.03
+Jci 1 4200000000 20 0.06
+Jci 2 4200000000 20 0.06
+Jci 3 210000000 20 0.06
+Jci 1 4500000000 20 0.1
+Jci 2 4500000000 20 0.1
+Jci 3 220000000 20 0.1
+Jci 1 4550000000 20 0.3
+Jci 2 4550000000 20 0.3
+Jci 3 225000000 20 0.3
+Jci 1 4570000000 20 0.6
+Jci 2 4570000000 20 0.6
+Jci 3 225000000 20 0.6
+Jci 1 4600000000 20 1
+Jci 2 4600000000 20 1
+Jci 3 230000000 20 1
+Jci 1 4500000000 20 2
+Jci 2 4500000000 20 2
+Jci 3 225000000 20 2
+Jci 1 4000000000 20 3
+Jci 2 4000000000 20 3
+Jci 3 200000000 20 3
+Jci 1 3000000000 20 4
+Jci 2 3000000000 20 4
+Jci 3 140000000 20 4
+Jci 1 600000000 30 0.003
+Jci 2 600000000 30 0.003
+Jci 3 21000000 30 0.003
+Jci 1 600000000 30 0.006
+Jci 2 600000000 30 0.006
+Jci 3 21000000 30 0.006
+Jci 1 600000000 30 0.01
+Jci 2 600000000 30 0.01
+Jci 3 21000000 30 0.01
+Jci 1 610000000 30 0.03
+Jci 2 610000000 30 0.03
+Jci 3 21000000 30 0.03
+Jci 1 620000000 30 0.06
+Jci 2 620000000 30 0.06
+Jci 3 21000000 30 0.06
+Jci 1 700000000 30 0.1
+Jci 2 700000000 30 0.1
+Jci 3 30000000 30 0.1
+Jci 1 800000000 30 0.3
+Jci 2 800000000 30 0.3
+Jci 3 35000000 30 0.3
+Jci 1 1000000000 30 0.6
+Jci 2 1000000000 30 0.6
+Jci 3 40000000 30 0.6
+Jci 1 900000000 30 1
+Jci 2 900000000 30 1
+Jci 3 30000000 30 1
+Jci 1 500000000 30 2
+Jci 2 500000000 30 2
+Jci 3 20000000 30 2
+Jci 1 200000000 30 3
+Jci 2 200000000 30 3
+Jci 3 8000000 30 3
+Jci 1 310000000 40 0.003
+Jci 2 310000000 40 0.003
+Jci 3 13000000 40 0.003
+Jci 1 310000000 40 0.006
+Jci 2 310000000 40 0.006
+Jci 3 13000000 40 0.006
+Jci 1 310000000 40 0.01
+Jci 2 310000000 40 0.01
+Jci 3 14000000 40 0.01
+Jci 1 320000000 40 0.03
+Jci 2 320000000 40 0.03
+Jci 3 15000000 40 0.03
+Jci 1 320000000 40 0.06
+Jci 2 320000000 40 0.06
+Jci 3 14500000 40 0.06
+Jci 1 320000000 40 0.1
+Jci 2 320000000 40 0.1
+Jci 3 14000000 40 0.1
+Jci 1 280000000 40 0.3
+Jci 2 280000000 40 0.3
+Jci 3 13000000 40 0.3
+Jci 1 200000000 40 0.6
+Jci 2 200000000 40 0.6
+Jci 3 3500000 40 0.6
+Jci 1 11000000 40 1
+Jci 2 11000000 40 1
+Jci 3 1000000 40 1

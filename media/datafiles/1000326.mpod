@@ -1,0 +1,74 @@
+#------------------------------------------------------------------------------
+#$Date: 2013-16-09 17:18:00 +0000 $
+#$Revision: 001 $ Daniel Chateigner
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.mpod.net/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_1000326
+_cod_database_code 9006864
+_structure_refined 'no'
+_phase_name 'strontium titanate'
+_phase_generic ''
+_chemical_formula_structural 'SrTiO3'
+_chemical_formula_sum 'Sr1 Ti1 03'
+_symmetry_point_group_name_H-M 'm 3 m'
+_cell_length_a                     3.90528
+_cell_length_b                     3.90528
+_cell_length_c                     3.90528
+_cell_angle_alpha                  90
+_cell_angle_beta                   90
+_cell_angle_gamma                  90
+
+loop_
+_publ_author_name
+'Wachtman Jr., J.B.'
+'Wheat, M.L.'
+'Marzullo, S.'
+_publ_section_title
+;
+ A Method for Determining the Elastic Constants of a Cubic Crystal from Velocity Measurements in a Single Arbitrary Direction; Application to SrTi03
+;
+_journal_name_full               'JOURNAL OF RESEARCH of the National Bureau of Standards-A. Physics and Chemistry'
+_journal_volume                  67
+_journal_issue                   2
+_journal_page_first              193
+_journal_page_last               204
+_journal_year                    1963
+
+_phase_density 5116
+
+_prop_measurement_method 'AWP'
+
+_prop_elastic_compliance_sij 'sij'
+_prop_elastic_stiffness_cij 'cij'
+
+_prop_conditions_temperature 298
+
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+cij 11 315.6(2.7)
+cij 12 102.7(2.7)
+cij 13 102.7(2.7)
+cij 22 315.6(2.7)
+cij 23 102.7(2.7)
+cij 33 315.6(2.7)
+cij 44 121.5(6)
+cij 55 121.5(6)
+cij 66 121.5(6)
+sij 11 3.772(23)
+sij 12 -0.926(10)
+sij 13 -0.926(10)
+sij 22 3.772(23)
+sij 23 -0.926(10)
+sij 33 3.772(23)
+sij 44 8.233(40)
+sij 55 8.233(40)
+sij 66 8.233(40)

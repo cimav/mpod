@@ -1,0 +1,84 @@
+#------------------------------------------------------------------------------
+#$Date: 2010-09-30 10:46:17 +0000 (Thu, 30 Sep 2010) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.mpod.net/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_1000366
+_cod_database_code               2101845
+_structure_refined 'no'
+_phase_name 'alpha-BaTeMo2O9'
+_chemical_formula_sum 'BaTeMo2O9'
+_symmetry_point_group_name_H-M mm2
+_cell_length_a  5.148
+_cell_length_c  13.863
+loop_
+_publ_author_name
+'Zeliang Gao'
+'Xiangxin Tian'
+_publ_section_title
+;
+Large-Sized Crystal
+;
+_journal_name_full               'Crystal Growth and Desing'
+_journal_volume                  15
+_journal_issue                   ?
+_journal_article_reference       073510
+_journal_pages_number             759
+_journal_year                    2015
+_phase_density 4628
+_phase_transition_temperature_rhomb_tetra ?
+_phase_transition_temperature_curie ?
+_prop_measurement_poling '?'
+_prop_symmetry_point_group_name_H-M mm2
+_prop_elastic_compliance_sij 'sij'
+_prop_elastic_stiffness_cij 'cij'
+_prop_piezoelectric_dij 'dij'
+_prop_dielectric_permittivity_relative_epsrij 'epsrij'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+_prop_measurement_method
+_prop_conditions_frequency
+sij 11 16.7 'RUS' ?
+sij 12 7.69 'RUS' ?
+sij 13 -2.83 'RUS' ?
+sij 14 0 'RUS' ?
+sij 22 12.10 'RUS' ?
+sij 23 4.48 'RUS' ?
+sij 24 0 'RUS' ?
+sij 33 13.88 'RUS' ?
+sij 44 14.36 'RUS' ?
+sij 55 26.42 'RUS' ?
+sij 56 0 'RUS' ?
+sij 66 18.94 'RUS' ?
+cij 11 10.89 'RUS' ?
+cij 12 -8.8 'RUS' ?
+cij 13 5.06 'RUS' ?
+cij 14 0 'RUS' ?
+cij 22 16.49 'RUS' ?
+cij 23 -7.12 'RUS' ?
+cij 24 0 'RUS' ?
+cij 33 10.53 'RUS' ?
+cij 44 6.96 'RUS' ?
+cij 55 3.78 'RUS' ?
+cij 56 0 'RUS' ?
+cij 66 5.28 'RUS' ?
+dij 15 4.9 'RUS' ?
+dij 16 0 'RUS' ?
+dij 21 0 'RUS' ?
+dij 22 0 'RUS' ?
+dij 24 0 'RUS' ?
+dij 31 -1.8 'RUS' ?
+dij 32 -1.8 'RUS' ?
+dij 33 0.3 'RUS' ?
+epsrij 11 14.06 '?' ?
+epsrij 22 29.98 '?' ?
+epsrij 33 16.49 '?' ? 

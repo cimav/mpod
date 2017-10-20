@@ -1,0 +1,113 @@
+#------------------------------------------------------------------------------
+#$Date: 2013-5-12 22:21:00 +0000 $
+#$Revision: 001 $ Daniel Chateigner
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.mpod.net/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_1000351
+_cod_database_code 1001768
+_structure_refined 'no'
+_phase_name 'calcium hydroxide'
+_chemical_formula_structural 'Ca (O H)2'
+_chemical_formula_sum 'Ca H2 O2'
+_symmetry_point_group_name_H-M '-3 m'
+_cell_length_a  3.589(8)
+_cell_length_b  3.589(8) 
+_cell_length_c  4.911(14) 
+_cell_angle_alpha  90
+_cell_angle_beta   90
+_cell_angle_gamma  90
+
+loop_
+_publ_author_name
+'Desgranges, L'
+'Grebille, D'
+'Calvarin, g'
+'Chevrier, G'
+'Floquet, N'
+'Niepce, J-C'
+_publ_section_title
+;
+Hydrogen thermal motion in calcium hydroxide: Ca (O H)2
+;
+_journal_name_full               'Acta Crystallographica B (39,1983-)'
+_journal_volume                  49
+_journal_issue                   ?
+_journal_page_first              812
+_journal_page_last               817
+_journal_year                    1993
+
+_prop_frame '1=[100],2=[010],3=[001]'
+
+_prop_heat_capacity_Cp 'Cp' 
+
+loop_
+_prop_data_label
+_prop_data_value
+_prop_conditions_temperature
+Cp 0.02  5 
+Cp 0.18  10 
+Cp 0.61  15
+Cp 1.29  20 
+Cp 2.21  25 
+Cp 3.30  30 
+Cp 4.51  35 
+Cp 5.83  40 
+Cp 7.26  45 
+Cp 8.83  50 
+Cp 10.55 55 
+Cp 12.43 60 
+Cp 14.47 65 
+Cp 16.66 70 
+Cp 18.99 75 
+Cp 21.40 80
+Cp 23.87 85
+Cp 26.34 90
+Cp 28.77 95
+Cp 31.15 100
+Cp 33.55 105
+Cp 36.00 110
+Cp 38.27 115
+Cp 40.34 120
+Cp 42.24 125
+Cp 43.98 130
+Cp 45.60 135
+Cp 47.13 140
+Cp 48.60 145
+Cp 50.07 150
+Cp 51.54 155
+Cp 53.04 160
+Cp 54.58 165
+Cp 56.17 170
+Cp 57.81 175
+Cp 59.48 180
+Cp 61.17 185
+Cp 62.86 190
+Cp 64.52 195
+Cp 66.14 200
+Cp 67.68 205
+Cp 69.12 210
+Cp 70.45 215
+Cp 71.66 220
+Cp 72.73 225
+Cp 73.68 230
+Cp 74.52 235
+Cp 75.25 240
+Cp 75.91 245
+Cp 76.53 250
+Cp 77.14 255
+Cp 77.79 260
+Cp 78.50 265
+Cp 79.29 270
+Cp 80.19 275
+Cp 81.19 280
+Cp 82.25 285
+Cp 83.29 290
+Cp 84.20 295
+Cp 84.78 300

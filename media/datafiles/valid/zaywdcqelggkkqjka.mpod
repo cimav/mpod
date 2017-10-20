@@ -1,0 +1,77 @@
+#------------------------------------------------------------------------------
+#$Date: 2017-10-14 04:09:19 +0000 (Sat, 14 Oct 2017) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://mpod.cimav.edu.mx/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_zaywdcqelggkkqjka
+_cod_database_code ?
+_symmetry_point_group_name_H-M 6
+loop_
+_publ_author_name
+'n'
+_publ_section_title
+;
+n
+;
+_journal_name_full 'n' 
+_journal_volume  'n' 
+_journal_page_first  'n' 
+_journal_page_last  'n' 
+_journal_year  'n' 
+_phase_density_temperature 66
+_prop_conditions_range_start 33
+_phase_ortho_tetra_transition_temperature 66
+_phase_Curie_ferroelectric_temperature 66
+_phase_melting_transition_temperature 66
+_phase_rhomb_tetra_transition_temperature 66
+_phase_Curie_temperature 66
+_phase_debye_temperature 66
+_phase_rhomb_ortho_transition_temperature 66
+_prop_elastic_stiffness_cij 'cij'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+cij 11 6.0
+cij 12 9.0
+cij 13 3.0
+cij 14 0.0
+cij 15 0.0
+cij 16 0.0
+cij 21 9.0
+cij 22 6.0
+cij 23 3.0
+cij 24 0.0
+cij 25 0.0
+cij 26 0.0
+cij 31 3.0
+cij 32 3.0
+cij 33 3.0
+cij 34 0.0
+cij 35 0.0
+cij 36 0.0
+cij 41 0.0
+cij 42 0.0
+cij 43 0.0
+cij 44 9.0
+cij 45 0.0
+cij 46 0.0
+cij 51 0.0
+cij 52 0.0
+cij 53 0.0
+cij 54 0.0
+cij 55 9.0
+cij 56 0.0
+cij 61 0.0
+cij 62 0.0
+cij 63 0.0
+cij 64 0.0
+cij 65 0.0
+cij 66 -1.5
