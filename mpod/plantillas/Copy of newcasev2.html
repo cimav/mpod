@@ -1,0 +1,386 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} Search by References {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+
+
+  
+  
+  
+  <div class="content">
+       
+      <br/>
+      <h4></h4>
+	  <h4></h4>
+	 
+	  <form role="form" action="/addcasev2/#no-back" method="POST">
+	  <input type='hidden' id=selectChange name="selectChange" value="0" />
+	  <input type='hidden' id="proccess" name="proccess" value="0" />
+	  <input type='hidden' id="todo" name="todo" value="" />
+	  <input type='hidden' id="indexToDelete" name="indexToDelete" value="0" />
+	  
+	  <div class="page-header">
+        <h1>New Property</h1>
+         <p>Please enter the required data below.</p>
+      </div>
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Article Information</h3>
+            </div>
+            <div class="panel-body">
+                     {% for field  in form %}
+				        <div class="form-group searches">
+				         {% if field.name == "title" or  field.name == "author"  or  field.name == "journal" or  field.name == "volume" or  field.name == "year"%}
+							      <label for="{{field.name}}">{{field.label}}</label>
+							      <input type="text" id="{{field.name}}" name="{{field.name}}" value="{{field.value}}" class="form-control" placeholder="{{field.help_text}}">
+							        {% for error in field.errors %}
+							          <p style="color: red">{{ error }}</p>
+							        {% endfor %}
+						   {% endif %} 
+					    </div>
+				     {% endfor %}
+				 
+				 
+				     
+				     
+            </div>
+          </div>
+          <!--<div class="panel panel-primary">
+            <div class="panel-heading">
+              <h3 class="panel-title">Panel title 4  </h3>
+            </div>
+ 
+			 
+						
+			
+            <div class="panel-body">
+             body
+ 
+		     
+		      
+            </div>
+          </div>-->
+        </div> <!-- /.col-sm-4 -->
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Property information</h3>
+            </div>
+            <div class="panel-body">
+                  <!-- db table data_catalogproperty -->
+				    {% if propertyCategoryName %}  
+				    <div class="form-group searches">
+				      <label for="journal">Property:</label>
+				      <br/>
+				       <select  id="catalogproperty_name"  name="catalogproperty_name" onchange="onchangeFunc();" >
+				       {% for obj in propertyCategoryName %}       
+				        {% if catalogproperty_name == obj.name %} 
+						       <option  selected="selected" value="{{obj.name}}"  >{{obj.description}} </option>
+						 {% else %}
+						       <option value="{{obj.name}}"   >{{obj.description}}</option>
+						{% endif %}
+				        {% endfor %}
+			         </select>	
+				    </div>
+				     {% endif %} 
+				     
+				     <!-- db table catalog_crystal_system -->
+				    {% if catalogCrystalSystemList %}  
+				  <div class="form-group searches">
+				      <label for="journal">Crystal system</label>
+				      <select id="crystalsystem_name" name="crystalsystem_name" onchange="onchangeFunc()" >       
+				       {% for ccs in catalogCrystalSystemList %}       
+				        {% if crystalsystem_name == ccs.name %} 
+						       <option  selected="selected" value="{{ccs.name }}"  >{{ccs.description }}</option>
+						 {% else %}
+						      <option value="{{ccs.name}}"   >{{ccs.description }} </option>
+						{% endif %}    
+				        {% endfor %}
+				      </select>
+				    </div>
+				     {% endif %}    
+				     
+				         {% if questiontype %} 
+					    <div class="form-group searches"  >
+					      <label for="journal">{{questiontype}}</label>
+					    </div>
+					    {% endif %}    
+	    
+				     <!-- db table type -->
+				     {% if typeList %}  
+					<div class="form-group searches"> 
+					    	<select id="type" name="type" onchange="onchangeFunc()" >       
+					       {% for type in typeList %}       
+					        {% if typeselected == type.name %} 
+							       <option  selected="selected" value="{{type.name }}"  > {{type.description }} </option>
+							 {% else %}
+							      <option value="{{type.name}}"   > {{type.description }} </option>
+							{% endif %}    
+					        {% endfor %}
+					      </select>
+					    </div>
+					    {% endif %} 
+					    
+
+					    	{% if puntualGroupList %}  
+					 			<div class="form-group searches">
+							      <label for="journal">
+							       {% if questionGp %} 
+						               {{questionGp }}  
+						          {% endif %}        
+							      </label>
+							    </div>   
+							<div class="form-group searches"> 
+							    	<select id="puntualgroupselected_name" name="puntualgroupselected_name" onchange="onchangeFunc()" >       
+							       {% for gp in puntualGroupList %}       
+							        {% if puntualgroupselected_name == gp.name %} 
+									       <option  selected="selected" value="{{gp.name }}"  > ({{gp.name }}) </option>
+									 {% else %}
+									      <option value="{{gp.name}}"   > ({{gp.name }}) </option>
+									{% endif %}    
+							        {% endfor %}
+							      </select>
+							    </div>
+							 {% endif %}  
+							 
+							 
+							<div class="form-group searches">
+						      <label for="journal">
+						       {% if questionAxis %} 
+					               {{questionAxis }}  
+					          {% endif %}        
+						      </label>
+						    </div>   
+						   
+						     {% if axisList %}  
+						    <div class="form-group searches"> 
+						    	<select id="axisselected_name" name="axisselected_name"  onchange="onchangeFunc()" >       
+							       {% for axis in axisList %}       
+							        {% if axisselected_name == axis.name %} 
+									       <option  selected="selected" value="{{axis.name }}"  > {{axis.name }} </option>
+									 {% else %}
+									      <option value="{{axis.name}}"   > {{axis.name }} </option>
+									{% endif %}    
+							        {% endfor %}
+						      </select>
+						    </div>
+						    {% endif %}  
+						    
+						   <div class="form-group searches">
+					      <label for="journal">
+					       {% if message %} 
+				               {{message }}  
+				           {% endif %}         
+					      </label>
+					    </div>   
+					    
+
+					    
+					     
+            </div>
+          </div>
+ 
+        </div><!-- /.col-sm-4 -->
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Values for porperty</h3>
+            </div>
+            <div class="panel-body">
+            
+        
+
+						       <div id="divwarningpropertyvalues" class="alert alert-warning" role="alert"  >
+						        <strong>Warning!</strong>  
+						      </div>
+
+								  
+						      {% if inputListReadOnly %}  
+								<div class="form-group searches"> 
+								 <table>
+								    {% for row  in inputListReadOnly %}   
+								     <tr>
+								         {% for col  in row %}  
+								                <td>
+								                  		 {%for key,value in read_write_inputs.items%}  
+								                  		     {% if col == key%}  
+									                  		           {% if value == "w"%} 
+									                  		            {% if col in form.fields%} 
+											                  		            {% for field  in form %}
+																	               	        {% if  field.name == col   %}
+																	               	              {% if   field.errors  %}
+																					         			   {% for error in field.errors %}
+																									         <label for="journal" style="color: red;">{{col}}</label>		
+																									        {% endfor %}
+																									 {% else %}   
+																									           <label for="journal" >{{col}}</label>		
+																							       {% endif %}   
+																			         			 
+																			         		 {% endif %}     
+																		               {% endfor %} 
+																		               <input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" >
+																		               
+									                  		            	 {% else %}   
+																			<label for="journal">{{col}}</label>		
+																			<input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" >
+																		{% endif %} 
+				
+									                    			 
+									                    			 
+									                    			 {% else %}  
+									                    			      <label for="journal">{{col}}</label>		
+												     						<input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+									                    			 
+									                    			   {% endif %}  
+								                    			   
+								                    		   {% endif %}  
+								                           {% endfor %}
+												     	
+												
+												      
+								      			 </td>	
+										   {% endfor %}
+									</tr>   	     
+								      {% endfor %}
+								      
+								      </table>
+								    </div>
+								  {% endif %}  
+								  
+				 
+								  
+
+		
+            </div>
+          </div>
+
+        </div><!-- /.col-sm-4 -->
+      </div>
+	    
+	    
+	    
+	     <script type="text/javascript">
+		
+		  function removeFunc(index,element) {
+			if(element=='ElementFromStructureNewPropertyOnSesssionList'){
+					 document.getElementById("todo").value ='remove'+element
+					 document.getElementById("indexToDelete").value =index
+					 document.forms[0].submit();
+					 }
+			 else if(element=='StructureNewPropertyOnSesssionList') {
+				    document.getElementById("todo").value ='remove'+element
+				    document.forms[0].submit();
+				    }
+			}
+			 
+			 
+		   function saveFunc() {
+			 document.getElementById("todo").value ='save'				
+			 
+			 document.forms[0].submit();
+			 }
+		   
+		   var history_api = typeof history.pushState !== 'undefined'
+
+			
+			if ( location.hash == '#no-back' ) {
+			 
+			  if ( history_api ) history.pushState(null, '', '#stay')
+			  else location.hash = '#stay'
+
+			  window.onhashchange = function() {
+			    
+			    if ( location.hash == '#no-back' ) {
+			      alert("You shall not pass!")
+			      if ( history_api ) history.pushState(null, '', '#stay')
+			      else location.hash = '#stay'
+			    }
+			  }
+			}
+
+		   function onchangeFunc() {
+		    document.getElementById("selectChange").value=1;
+		     
+		    todoFunc('submit');
+		    }
+		   
+		   function process() {
+		    document.getElementById("proccesing").value=1;
+		    todoFunc('submit');
+		    }
+		   
+		   
+		   function todoFunc(todovalue) {
+			   if(todovalue='submit')
+				   {
+				     document.getElementById("todo").value =todovalue
+				     //alert(document.getElementById("todo").value)
+				   }
+			   else  if(todovalue='save')
+				  {
+				   
+				   
+				  }
+			   else  if(todovalue='process')
+				  {
+				    document.getElementById("todo").value ='submit';
+				    document.getElementById("process").value ='1';
+				    
+				  }
+			   
+			   
+			   
+			   
+			   document.forms[0].submit();
+			 }
+		   
+		    {{jquery|safe }} 
+		 
+		  </script>
+
+         
+	     
+	    {% if ShowBtnSend  != 0 %}  
+			      {% if validationbyform == 0 %}  
+			    <button type="button" class="btn btn-sm btn-default"  onclick="todoFunc('submit');" >Send</button>
+			     {% else %}    
+			    <button type="button" class="btn btn-sm btn-warning"  onclick="todoFunc('submit');" >Send</button>
+			     {% endif %}     
+	     {% endif %} 
+	     
+	    
+		  {% if ShowBtnProcess  != 0 %}  
+		    <button type="submit" class="btn btn-sm btn-info" onclick="todoFunc('process');">Process</button>
+		  {% endif %}     
+		  
+		   
+		  {% if ShowBtnSave != 0  %}  
+		     <button type="submit" class="btn btn-success" onclick="todoFunc('save');">Save</button>
+		  {% endif %}   
+		  
+		<!--   
+        <button type="button" class="btn btn-sm btn-primary">Primary</button>
+        <button type="button" class="btn btn-sm btn-success">Success</button>
+        <button type="button" class="btn btn-sm btn-info">Info</button>
+        <button type="button" class="btn btn-sm btn-warning">Warning</button>
+        <button type="button" class="btn btn-sm btn-danger">Danger</button>
+        <button type="button" class="btn btn-sm btn-link">Link</button>
+        -->        
+	  </form>
+    
+	 
+      <br/><br/>
+  </div>
+  
+
+	 
+
+{% endblock %}

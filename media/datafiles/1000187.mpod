@@ -49,7 +49,7 @@ _prop_data_label
 _prop_data_tensorial_index
 _prop_data_value
 _prop_conditions_temperature
-_prop_conditions_temperature_range_begin
+_prop_temperature_range_start
 _prop_conditions_temperature_range_end
 _prop_measurement_method 
 cij 11 279.5(4) 293 ? ? RUS

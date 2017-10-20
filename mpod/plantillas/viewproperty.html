@@ -8,20 +8,43 @@
 {% endblock %}
 
 {% block contenido %}
-  <div class="content">
-    <h3>View Property</h3>
+
+<style>
+
+ 
+.content-custom {
+    margin: 2px auto;
+    z-index: 1100 !important;
+     width:1260px;
+}
+
+</style>
+
+
+  <div class="row">
+    
+
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <h3>View Property</h3>
     <br/>
+
       {% if property_table %}
         {{property_table|escape}}
       {% else %}
         Sorry! Property not found.
       {% endif %}
-
+      </div>
+    </div>
+   <div class="row">
+   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
       {% if associated_datafiles %}
         {{associated_datafiles|escape}}
       {% else %}
         No Associated datafiles.
       {% endif %}
-    <br/><br/>
+      </div>
+
   </div>
+
+ 
 {% endblock %}

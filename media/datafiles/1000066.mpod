@@ -68,7 +68,7 @@ kappadij 22 0.00000067 303
 kappadij 33 0.00000059 303
 
 data_1000066b
-_prop_conditions_temperature_range_begin 303
+_prop_temperature_range_start 303
 _prop_conditions_temperature_range_end 773
 _prop_measurement_method SCXD
 _prop_thermal_expansion_alphaij 'alphaij'

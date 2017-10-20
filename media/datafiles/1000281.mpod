@@ -44,8 +44,8 @@ _journal_page_first              364
 _journal_page_last               369
 _journal_year                    2005
 _phase_density ?
-_phase_transition_temperature_melting 1552.85
-_phase_transition_temperature_curie_ferroelectric 638.15
+_phase_melting_temperature 1552.85
+_phase_Curie_ferroelectric_temperature 638.15
 _prop_measurement_method '?'
 _prop_piezoelectric_dij 'dij'
 _prop_electromechanical_coupling_kij 'kij'

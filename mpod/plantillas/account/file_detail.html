@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+
+  
+      <div class="container-fluid">
+      {% include "account/menu.html" %}
+  
+      
+          
+          
+           <table class="table table-striped">
+  <thead class="thead-inverse">
+    <tr>
+     
+      <th>#</th>
+        
+         <th> File Name</th>
+         <th> Date</th>
+         <th> File</th>
+
+    </tr>
+  </thead>
+  <tbody>
+    {% for element in files %}
+    <tr>
+      <th scope="row">{{forloop.counter}}</th>
+      <td>{{element.filename}}</td>
+      <td>{{element.date}}</td>
+      
+      
+      <td><a class="btn btn-primary" href="#" onclick="window.open('{% url datafilecreated3 filename=element.filename %}','name','width=800,height=800')" role="button">Show File</a>
+      </td>
+    
+    </tr>
+      {% endfor %}
+
+  </tbody>
+</table>
+
+
+
+
+
+        </div>
+      </div>
+  
+  
+  
+
+	 
+
+{% endblock %}

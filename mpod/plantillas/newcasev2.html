@@ -1,0 +1,1306 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+
+  
+      <div class="container-fluid">
+      {% include "account/menu.html" %}
+   
+      
+          <script>
+       
+            function call_ajax(url,todo) {
+            	      
+            	      
+            	           	  
+            	      //alert(url);
+            	       //alert(todo);
+            	       //return;
+ 
+            	      datasend = "";
+            	      dictionary_pk  ="";
+            	      if  (todo=="add" || todo=="change" )
+           	          {
+            	    	  value =  $('#dicvalue').val();
+            	    	  dictionary_pk  =  $('#dictionary_name').val();
+            	    	  //alert(dictionary_pk);
+         	    		  datasend ={
+				       	 		                 'todo': todo,
+				      			                  'dicvalue': value,
+				      			                  'dictionary_pk':dictionary_pk
+				      			                }
+         	    		 
+           	          }
+            	      else if  (todo=="addnew" )
+           	    	  {
+
+            	    	  valuenew =  $('#valuenew').val();
+            	    	  namenew =  $('#namenew').val();
+            	    	  unitsnew =  $('#unitsnew').val();
+            	    	  units_detailnew =  $('#units_detailnew').val();
+            	    	  definitionnew =  $('#definitionnew').val();
+            	    	  //alert(namenew);
+            	    	 
+            	    	  if (namenew == "")
+            	    		  {
+            	    		     $('#errornamenew').show();
+            	    		     return;
+            	    	      
+            	    		  }
+            	    	  else
+            	    		  {
+            	    		     $('#errornamenew').hide();
+            	    		  }
+
+            	    	  datasend ={				       	 		                 
+				      			                  'valuenew': valuenew,
+				      			                  'namenew':namenew,
+				      			                  'unitsnew':unitsnew,
+				      			                  'units_detailnew':units_detailnew,
+				      			                  'definitionnew':definitionnew,
+				      			                 
+				      			                }
+   
+            	    	  
+           	    	  }
+            	      else if  (todo=="preparenew" )
+           	    	  {
+            	    	  $( "#divdictionaryexistent" ).hide();
+             		      $( "#divdictionarynew" ).show();
+             		      return;
+           	    	  }
+            	      else if (todo == "cancel")
+            	      {
+            	    	  $( "#divdictionaryexistent" ).show();
+             		      $( "#divdictionarynew" ).hide();
+             		      return;
+            	      }
+            	      else if (todo == "addphase" || todo=="phasechange" )
+           	    	  {
+            	    	  value =  $('#phasevalue').val();
+            	    	  dictionary_pk  =  $('#phase_name').val();
+            	    	  //alert(dictionary_pk);
+         	    		  datasend ={
+				       	 		                 'todo': todo,
+				      			                  'phasevalue': value,
+				      			                  'dictionary_pk':dictionary_pk
+				      			                }
+           	    	    
+           	    	  }
+            	      else if (todo == "addphasecharacteristic" || todo=="phasecharacteristicchange" )
+           	    	  {
+            	    	  value =  $('#phasecharacteristicvalue').val();
+            	    	  dictionary_pk  =  $('#phasecharacteristic_name').val();
+            	    	  //alert(dictionary_pk);
+         	    		  datasend ={
+				       	 		                 'todo': todo,
+				      			                  'phasecharacteristicvalue': value,
+				      			                  'dictionary_pk':dictionary_pk
+				      			                }
+           	    	    
+           	    	  }
+            	      else if (todo == "addmeasurement" || todo=="measurementchange" )
+           	    	  {
+            	    	  value =  $('#measurementvalue').val();
+            	    	  dictionary_pk  =  $('#measurement_name').val();
+            	    	  //alert(dictionary_pk);
+         	    		  datasend ={
+				       	 		                 'todo': todo,
+				      			                  'measurementvalue': value,
+				      			                  'dictionary_pk':dictionary_pk
+				      			                }
+           	    	    
+           	    	  }
+
+            	            
+            	            	      
+            	      
+            	  
+		              $.ajax({
+		            	 type: "POST",
+		                url: url,
+		                data: datasend,
+		                dataType: 'json',
+		                success: function (data) {
+		                	
+			                	 if (todo == 'add')
+			                		 {
+				                		 if (data.error == "None")
+				            		    	{
+						                		 if (data.in_list) {
+						                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
+							                        alert("not added");
+						                		 }
+						                		 else
+						                		{
+						                			 alert("added" );
+						                			  $('#errordictionaryproperty').text('');
+						               	    		  $('#errordictionaryproperty').hide();
+						                		}
+				            		    	}
+				                		 else
+			                		      {
+			                		    	$('#errordictionaryproperty').text(data.error);
+				               	    		$('#errordictionaryproperty').show();
+	
+			                		      }
+			                		 
+			                		 
+			                		  }
+			                	 else if (todo == 'change')
+			                		 {
+			                		
+			                		    var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
+				                        //alert("units_detail: "+ data.units_detail);
+				                   
+				                        //$('#units_detail').val(data.units_detail);
+				                        $('#units_detail').text(data.units_detail);
+			                		 }
+			                	 else if (todo == 'addnew')
+			                		 {
+			                		 
+			            	    	    $("#divdictionaryexistent" ).show(''); 
+			             		        $("#divdictionarynew" ).hide('');
+			              	    	    $('#valuenew').val('');
+			            	    	    $('#namenew').val('');
+			            	    	    $('#unitsnew').val('');
+			            	    	    $('#units_detailnew').val('');
+			            	    	    $('#definitionnew').val('');
+			            	    	    
+			            	    	    
+			            	    	    $("#divdictionaryexistent" ).show(''); 
+			             		        $("#divdictionarynew" ).hide('');
+			              	    	    $('#valuenew').attr("placeholder", "395 ,AWP, etc.");
+			            	    	    $('#namenew').attr("placeholder", "Example: conditions temperature");
+			            	    	    $('#unitsnew').attr("placeholder", "K");
+			            	    	    $('#units_detailnew').attr("placeholder", "kelvin");
+			            	    	    $('#definitionnew').attr("placeholder", "Text of definition");
+	
+			                		 }
+			                	 else if (todo == "addphase")
+			                		 {
+			                		       
+			                		    if (data.error == "None")
+			                		    	{
+			    				                if (data.in_list) {
+						                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
+			    				                	 alert("not added" );
+						                		 }
+						                		 else
+						                		 {
+						                			 alert("added" );
+					               	    		     $('#errorphase').text('');
+					               	    		     $('#errorphase').hide();
+						                		 }
+			                		    	}
+			                		    else
+			                		      {
+			                		    	$('#errorphase').text(data.error);
+				               	    		$('#errorphase').show();
+	
+			                		      }
+			                		 
+			                		 }
+			                	 else if (todo == "addphasecharacteristic")
+		                		 {
+		                		       
+		                		    if (data.error == "None")
+		                		    	{
+		    				                if (data.in_list) {
+					                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
+		    				                	 alert("not added" );
+					                		 }
+					                		 else
+					                		 {
+					                			 alert("added" );
+				               	    		     $('#errorphasecharacteristic').text('');
+				               	    		     $('#errorphasecharacteristic').hide();
+					                		 }
+		                		    	}
+		                		    else
+		                		      {
+		                		    	$('#errorphasecharacteristic').text(data.error);
+			               	    		$('#errorphasecharacteristic').show();
+
+		                		      }
+		                		 }
+			                else if (todo == "addmeasurement")
+		                		 {
+		                		       
+		                		    if (data.error == "None")
+		                		    	{
+		    				                if (data.in_list) {
+					                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
+		    				                	 alert("not added" );
+					                		 }
+					                		 else
+					                		 {
+					                			 alert("added" );
+				               	    		     $('#errormeasurement').text('');
+				               	    		     $('#errormeasurement').hide();
+					                		 }
+		                		    	}
+		                		    else
+		                		      {
+		                		    	$('#errormeasurement').text(data.error);
+			               	    		$('#errormeasurement').show();
+
+		                		      }
+		                		 }
+			                	 
+			                	 
+			                	 
+			                	 
+			                	 
+			                	 
+			                	 
+			                	 
+		                
+		                }
+		              });
+            }
+
+         
+         
+            
+            
+            function showEditor(modal) {
+                modal= "#" + modal;
+                
+           	  $( modal).modal("show");
+           	  $(modal).appendTo("body");
+           	}
+           	
+           function hideEditor() {
+           	 
+           	  $("#exampleModal").modal("hide");
+           	  //$("#createModal").appendTo("body");
+           	 // $("body>#createModal").remove();
+           	}
+
+           function ngOnDestroy(){
+           	  $("body>#createModal").remove();
+           	}
+
+           
+           $(document).on('click', '.panel-heading span.clickable', function(e){
+        	    var $this = $(this);
+        	    
+        		if(!$this.hasClass('panel-collapsed')) {
+        			//alert('no');
+        			$this.parents('.panel').find('.panel-body').slideUp();
+        			$this.addClass('panel-collapsed');
+        			$this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+        		} else {
+        			//alert('si');
+        			$this.parents('.panel').find('.panel-body').slideDown();
+        			$this.removeClass('panel-collapsed');
+        			$this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        		}
+        	})
+        	
+        	
+        	$(function(){
+			  $('#phasecharacteristicvalue').keypress(function(e){
+				 
+			    if(e.which == 13) {
+			      //dosomething
+			      //alert('Enter pressed');
+			      call_ajax('{% url adddictionaryphasecharacteristic -1%}','addphasecharacteristic' );
+			    }
+			  })
+			})
+			
+			
+			 $(function(){
+			  $('#phasevalue').keypress(function(e){
+				 
+			    if(e.which == 13) {
+			      //dosomething
+			      //alert('Enter pressed');
+			      call_ajax('{% url adddictionaryphase -1%}','addphase' );
+			    }
+			  })
+			})
+			
+			
+			
+		 $(function(){
+			  $('#dicvalue').keypress(function(e){
+				 
+			    if(e.which == 13) {
+			      //dosomething
+			      //alert('Enter pressed');
+			      call_ajax('{% url adddictionaryproperty -1%}','add' );
+			    }
+			  })
+			})
+			
+		  $(function(){
+			  $('#measurementvalue').keypress(function(e){
+				 
+			    if(e.which == 13) {
+			      //dosomething
+			      //alert('Enter pressed');
+			      call_ajax('{% url adddictionarymeasurement -1%}','addmeasurement' );
+			    }
+			  })
+			})
+           
+        </script>
+        <style>
+        textarea {
+   resize: none;
+}
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+.modal-dialog {
+    margin: 2px auto;
+    z-index: 1100 !important;
+     width: 760px;
+}
+
+
+.row{
+    margin-top:40px;
+    padding: 0 10px;
+}
+
+.clickable{
+    cursor: pointer;   
+}
+
+.panel-heading span {
+	margin-top: -20px;
+	font-size: 15px;
+}
+
+</style>
+
+
+
+
+
+{% for property in propertySessionList%} 
+
+					      <div class="modal" id="Modal{{forloop.counter}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"  >
+						  <div class="modal-dialog" role="document">
+						    <div class="modal-content">
+						      <div class="modal-header">
+						        <h5 class="modal-title" id="exampleModalLabel">{{property.objProperty.description}} 
+																															  {{property.objCatalogCrystalSystemSelected.description}} 
+																														       {{property.objTypeSelected.description}} 
+																														       {{property.puntualgroupselected_name}} 
+																														       {{property.axisselected_name}} 
+						        </h5>
+						        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						          <span aria-hidden="true">&times;</span>
+						        </button>
+						      </div>
+						      <div class="modal-body">
+								       <table>
+										         <tr> 
+										           <td>
+															 <table>
+															 	{% if property.objTypeSelected.name    == "s"%} 
+															      {% for row  in property.s%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	      
+																		<input type="text" id="{{col}}onhold" name="{{col}}onhold" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >	
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														      {% if property.objTypeSelected.name   == "c"%} 
+															      {% for row  in property.c%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	      <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														  
+															 {% if property.objTypeSelected.name  == "d"%} 
+															      {% for row  in property.d%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	       <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														      </table>
+										      </td>
+										     <td style="vertical-align: top;" >
+										     				<table class="table">
+										     				<tr>
+										     				<td> Name </td> <td>Units</td>
+										     				</tr>
+										     				 
+														     {% for key,value in property.dictionaryValues.items %} 														    
+														                  <tr>
+														                   <td> {{key}} </td> <td>{{value}}</td>
+														                       </tr>
+														       {% endfor %}
+														   
+													     
+													      </table>
+										     
+										       </td>
+										         </tr>
+										      </table>
+									 
+						   
+						      </div>
+						      <div class="modal-footer">
+						        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						         
+						      </div>
+						    </div>
+						  </div>
+						</div>
+  {% endfor %}
+  
+  
+
+						       
+						      <br/>
+						      <h4></h4>
+							  <h4></h4>
+							 
+							  <form role="form" action="/addcasev2/#no-back" method="POST">
+							  <input type='hidden' id=selectChange name="selectChange" value="0" />
+							  <input type='hidden' id="proccess" name="proccess" value="0" />
+							  <input type='hidden' id="todo" name="todo" value="" />
+							  <input type='hidden' id="subtodo" name="subtodo" value="" />
+							  
+							  
+						      <div class="row">
+						        <div class="col-sm-4">
+						          <div class="panel panel-default">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Article Information</h3>
+						            </div>
+						            <div class="panel-body">
+						                     {% for field  in form %}
+										        <div class="form-group searches">
+										         {% if field.name == "title" or  field.name == "author"  or  field.name == "journal" or  field.name == "volume" or  field.name == "year" or  field.name == "page_first" or  field.name == "page_last"%}
+													      <label for="{{field.name}}">{{field.label}}</label>
+													      <input type="text" id="{{field.name}}" name="{{field.name}}" value="{{field.value}}" class="form-control" placeholder="{{field.help_text}}"  style="width: 290px;">
+													        {% for error in field.errors %}
+													          <p style="color: red">{{ error }}</p>
+													        {% endfor %}
+												   {% endif %} 
+											    </div>
+										     {% endfor %}
+										 
+										 
+										     
+										     
+						            </div>
+						          </div>
+						          <!--<div class="panel panel-primary">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Panel title 4  </h3>
+						            </div>
+						 
+									 
+												
+									
+						            <div class="panel-body">
+						             body
+						 
+								     
+								      
+						            </div>
+						          </div>-->
+						        </div> <!-- /.col-sm-4 -->
+						        <div class="col-sm-4">
+						         <div class="panel panel-default ">
+						            <div class="panel-heading ">
+						              <h3 class="panel-title"> Material </h3>
+						              	<span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+						            </div>
+						            <div class="panel-body collapse">
+						             <!-- db table disctionary -->
+						             
+						            
+										    
+										    
+										    <!-- ********************************************PHASE************************************** -->
+										    <div class="form-group searches" id="divdictionaryphase" >
+			 
+											
+											<table>
+													     <tr>
+													     <td>
+													     <label for="journal">Phase </label>
+											           <td>
+													     <td>
+													     </td>
+													     </tr>
+											     <tr>
+											           <td>
+										          
+												       <select  id="phase_name"  name="phase_name"  class="form-control"  onchange="call_ajax('{% url adddictionaryphase -1 %}','phasechange')"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       {% for obj in dictionaryPhaseList %}       
+														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
+												        {% endfor %}
+											         </select>	
+									         			   </td>
+													       <td><!--  
+									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-default" data-toggle="tooltip" data-placement="top" title="Add a new one">
+																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
+																	   </a>
+																	-->
+														</td>
+														 
+												    </tr>
+												    <tr>
+												        <td>
+																		   <table>
+																	         <tr><td>
+																					 
+																				   </td>
+																			       <td>
+																					 
+																				   </td>
+																		    </tr>
+																		     <tr>
+																		       			      <td>
+																						       <a href="#"  onclick="call_ajax('{% url adddictionaryphase -1%}','addphase' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
+																							   </a>
+																						     </td>
+																				            <td>
+																						      <input type="text" id="phasevalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"   >	
+																						     </td>
+																				               <td>
+																						        
+																						     </td>
+																			
+																		   </tr>
+																		    <tr>
+																		    <td colspan="2">
+																		      <p style="color: red; display: none" id="errorphase" > </p>
+																		    </td>
+																		    </tr>
+																		   
+																         </table>
+														 </td>
+													</tr>
+											</table>
+
+										    </div>
+										    
+										    <!-- **************************************END PHASE***************************************** -->
+										    
+										    
+										    <!-- ********************************************PHASE CHARACTERISTICS************************************** -->
+										    <div class="form-group searches" id="divdictionaryphase" >
+			 
+											
+											<table>
+													     <tr>
+													     <td>
+													     <label for="journal">Phase Characteristics </label>
+											           <td>
+													     <td>
+													     </td>
+													     </tr>
+											     <tr>
+											           <td>
+										          
+												       <select  id="phasecharacteristic_name"  name="phasecharacteristic_name"  class="form-control"  onchange="call_ajax('{% url adddictionaryphasecharacteristic -1 %}','phasecharacteristicchange')"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       {% for obj in dictionaryPhaseCharacteristicList %}       
+														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
+												        {% endfor %}
+											         </select>	
+									         			   </td>
+													       <td><!--  
+									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-default" data-toggle="tooltip" data-placement="top" title="Add a new one">
+																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
+																	   </a>
+																	-->
+														</td>
+														 
+												    </tr>
+												    <tr>
+												        <td>
+																		   <table>
+																	         <tr><td>
+																					 
+																				   </td>
+																			       <td>
+																					 
+																				   </td>
+																		    </tr>
+																		     <tr>
+																		       			      <td>
+																						       <a href="#"  onclick="call_ajax('{% url adddictionaryphasecharacteristic -1%}','addphasecharacteristic' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
+																							   </a>
+																						     </td>
+																				            <td>
+																						      <input type="text" id="phasecharacteristicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"   >	
+																						     </td>
+																				               <td>
+																						        
+																						     </td>
+																			
+																		   </tr>
+																		    <tr>
+																		    <td colspan="2">
+																		      <p style="color: red; display: none" id="errorphasecharacteristic" > </p>
+																		    </td>
+																		    </tr>
+																		   
+																         </table>
+														 </td>
+													</tr>
+											</table>
+
+										    </div>
+										    
+										    <!-- **************************************END PHASE CHARACTERISTICS ***************************************** -->
+										    
+										    
+										     <!-- ******************************************** NEWCONDITION************************************** -->
+						             <div class="form-group searches" id="divdictionarynew" style="display: none">
+ 
+											    <table>
+											     <tr><td colspan="2">
+															 <label id="lblnamenew" for="namenew">Name:</label>
+																      <input type="text" id="namenew" value="" class="form-control"  style="width: 250px;" placeholder="Example: conditions temperature">	
+															<p style="color: red; display: none" id="errornamenew" >Field Required</p>
+															
+														   </td>
+													       <td>
+															   
+														   </td>
+												    </tr>
+												     <tr>
+														            <td>
+														                <label for="valuenew">Value:</label>
+																      <input type="text" id="valuenew" value="" class="form-control" placeholder="395 ,AWP, etc," style="width: 120px;" >	
+																     </td>
+																     	<td>
+														               <label for="unitsnew">Units:</label>
+																      <input type="text" id="unitsnew" value="" class="form-control" placeholder="K" style="width: 90px;"   >	
+																     </td>
+														               <td>
+														               <label for="units_detailnew">Unit detail:</label>
+																      <input type="text" id="units_detailnew" value="" class="form-control" placeholder="kelvin"  style="width: 90px;"   >	
+																     </td>
+					
+												   </tr>
+												    <tr>
+												    <td colspan="2">
+												        <label for="definitionnew">Definition:</label>
+					 
+													    <textarea  id="definitionnew"  rows="6" cols="60" class="form-control"  placeholder="Text for definition"  style="width: 260px;"   ></textarea>
+												    </td>
+												    </tr>
+												    <tr>
+												      	              <td>
+		
+																     </td>
+																      <td align="right" colspan="2">
+																                 <a href="#"  onclick="call_ajax('','cancel'  )" class="btn btn-sm btn-warning">
+																			              <span class="glyphicon glyphicon glyphicon-plus"></span> Cancel 
+																	               </a>
+   																			       <a href="#"  onclick="call_ajax('{% url addnewdictionaryproperty todo='addnew' index=-2 %}','addnew'  )" class="btn btn-sm btn-warning">
+																			              <span class="glyphicon glyphicon glyphicon-plus"></span> Add 
+																	               </a>
+																     </td>
+												    </tr>
+												   
+										         </table>
+								             
+										     </div>
+										     <!-- ********************************************END NEWCONDITION************************************** -->
+										     
+										     
+										     <!-- ********************************************CONDITIONS************************************** -->
+										    <div class="form-group searches" id="divdictionaryexistent" >
+										    
+										    
+										     <table>
+													     <tr>
+													     <td>
+													     <label for="journal">Conditions </label>
+											           <td>
+													     <td>
+													     </td>
+													     </tr>
+											     <tr>
+											           <td>
+										          
+												       <select  id="dictionary_name"  name="dictionary_name"  class="form-control"  onchange="call_ajax('{% url adddictionaryproperty -1 %}','change')"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       {% for obj in dictionaryList %}       
+														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
+												        {% endfor %}
+											         </select>	
+									         			   </td>
+													       <td>
+									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Add a new one">
+																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
+																	   </a>
+														</td>
+														 
+												    </tr>
+												    <tr>
+												        <td>
+																		   <table>
+																	         <tr><td>
+																					 
+																				   </td>
+																			       <td>
+																					 
+																				   </td>
+																		    </tr>
+																		     <tr>
+																		       			      <td>
+																						       <a href="#"  onclick="call_ajax('{% url adddictionaryproperty -1%}','add' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
+																							   </a>
+																						     </td>
+																				            <td>
+																						      <input type="text" id="dicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"   >	
+																						     </td>
+																				               <td>
+																						         <label id="units_detail" for="units_detail">{{obj.units_detail}} </label>
+																						     </td>
+																			
+																		   </tr>
+																		    <tr>
+																		    <td colspan="2">
+																		          <p style="color: red; display: none" id="errordictionaryproperty" > </p>
+																		    </td>
+																		    </tr>
+																		   
+																         </table>
+														 </td>
+													</tr>
+											</table>
+											
+											
+										    </div>
+										    
+										    <!-- ********************************************END CONDITION************************************** -->
+										    
+										    <!-- ********************************************MEASUREMENT METHOD************************************** -->
+										    <div class="form-group searches" id="divdictionaryphase" >
+			 
+											
+											<table>
+													     <tr>
+													     <td>
+													     <label for="journal">Measurement </label>
+											           <td>
+													     <td>
+													     </td>
+													     </tr>
+											     <tr>
+											           <td>
+										          
+												       <select  id="measurement_name"  name="measurement_name"  class="form-control"  onchange="call_ajax('{% url adddictionarymeasurement -1 %}','measurementchange')"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       {% for obj in dictionaryMeasurementList %}       
+														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
+												        {% endfor %}
+											         </select>	
+									         			   </td>
+													       <td><!--  
+									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-default" data-toggle="tooltip" data-placement="top" title="Add a new one">
+																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
+																	   </a>
+																	-->
+														</td>
+														 
+												    </tr>
+												    <tr>
+												        <td>
+																		   <table>
+																	         <tr><td>
+																					 
+																				   </td>
+																			       <td>
+																					 
+																				   </td>
+																		    </tr>
+																		     <tr>
+																		       			      <td>
+																						       <a href="#"  onclick="call_ajax('{% url adddictionarymeasurement -1%}','addmeasurement' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
+																							   </a>
+																						     </td>
+																				            <td>
+																						      <input type="text" id="measurementvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the measurement selected above" style="width: 100px;"   >	
+																						     </td>
+																				               <td>
+																						        
+																						     </td>
+																			
+																		   </tr>
+																		    <tr>
+																		    <td colspan="2">
+																		      <p style="color: red; display: none" id="errormeasurement" > </p>
+																		    </td>
+																		    </tr>
+																		   
+																         </table>
+														 </td>
+													</tr>
+											</table>
+
+										    </div>
+										    
+										    <!-- ********************************************END MEASUREMENT METHOD************************************** -->
+										  
+						 								      
+						            </div>
+						          </div>
+						          <div class="panel panel-default">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Property information</h3>
+						            </div>
+						            <div class="panel-body">
+
+
+
+ 
+						             
+										     
+						                  <!-- db table data_catalogproperty -->
+										    {% if propertyCategoryName %}  
+										    <div class="form-group searches">
+										      <label for="journal">Property:</label>
+										      <br/>
+										       <select  id="catalogproperty_name"  name="catalogproperty_name" onchange="onchangeFunc();"  class="form-control">
+										       {% for obj in propertyCategoryName %}       
+										        {% if catalogproperty_name == obj.name %} 
+												       <option  selected="selected" value="{{obj.name}}"  >{{obj.description}} </option>
+												 {% else %}
+												       <option value="{{obj.name}}"   >{{obj.description}}</option>
+												{% endif %}
+										        {% endfor %}
+									         </select>	
+										    </div>
+										     {% endif %} 
+										     
+										     {% if questiontype %} 
+											    <div class="form-group searches"  >
+											      <label for="journal">{{questiontype}}</label>
+											    </div>
+											    {% endif %}    
+							    
+										     <!-- db table type -->
+										     {% if typeList %}  
+											<div class="form-group searches"> 
+											    	<select id="type" name="type" onchange="onchangeFunc()"  class="form-control">       
+											       {% for type in typeList %}       
+											        {% if typeselected == type.name %} 
+													       <option  selected="selected" value="{{type.name }}"  > {{type.description }} </option>
+													 {% else %}
+													      <option value="{{type.name}}"   > {{type.description }} </option>
+													{% endif %}    
+											        {% endfor %}
+											      </select>
+											    </div>
+											    {% endif %} 
+											    
+											    
+										     <!-- db table catalog_crystal_system -->
+										    {% if catalogCrystalSystemList %}  
+										  <div class="form-group searches">
+										      <label for="journal">Crystal system</label>
+										      <select id="crystalsystem_name" name="crystalsystem_name" onchange="onchangeFunc()"  class="form-control">       
+										       {% for ccs in catalogCrystalSystemList %}       
+										        {% if crystalsystem_name == ccs.name %} 
+												       <option  selected="selected" value="{{ccs.name }}"  >{{ccs.description }}</option>
+												 {% else %}
+												      <option value="{{ccs.name}}"   >{{ccs.description }} </option>
+												{% endif %}    
+										        {% endfor %}
+										      </select>
+										    </div>
+										     {% endif %}    
+										     
+				
+											    
+						
+											    	{% if puntualGroupList %}  
+											 			<div class="form-group searches">
+													      <label for="journal">
+													       {% if questionGp %} 
+												               {{questionGp }}  
+												          {% endif %}        
+													      </label>
+													    </div>   
+													<div class="form-group searches"> 
+													    	<select id="puntualgroupselected_name" name="puntualgroupselected_name" onchange="onchangeFunc()"  class="form-control">       
+													       {% for gp in puntualGroupList %}       
+													        {% if puntualgroupselected_name == gp.name %} 
+															       <option  selected="selected" value="{{gp.name }}"  > ({{gp.name }}) </option>
+															 {% else %}
+															      <option value="{{gp.name}}"   > ({{gp.name }}) </option>
+															{% endif %}    
+													        {% endfor %}
+													      </select>
+													    </div>
+													 {% endif %}  
+													 
+													 
+													<div class="form-group searches">
+												      <label for="journal">
+												       {% if questionAxis %} 
+											               {{questionAxis }}  
+											          {% endif %}        
+												      </label>
+												    </div>   
+												   
+												     {% if axisList %}  
+												    <div class="form-group searches"> 
+												    	<select id="axisselected_name" name="axisselected_name"  onchange="onchangeFunc()"  class="form-control">       
+													       {% for axis in axisList %}       
+													        {% if axisselected_name == axis.name %} 
+															       <option  selected="selected" value="{{axis.name }}"  > {{axis.name }} </option>
+															 {% else %}
+															      <option value="{{axis.name}}"   > {{axis.name }} </option>
+															{% endif %}    
+													        {% endfor %}
+												      </select>
+												    </div>
+												    {% endif %}  
+												    
+												   <div class="form-group searches">
+											
+
+										           	     {% if message %}
+														    	  <div class="alert alert-info fade in alert-dismissable">
+																	  <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a>
+																	  <strong>NOTE:</strong> {{message }}
+																	</div>
+														 {% endif %} 
+											  
+											    </div>   
+											    
+						
+											    
+											     
+						            </div>
+						          </div>
+					 
+						 
+						        </div><!-- /.col-sm-4 -->
+						        <div class="col-sm-4">
+						          <div class="panel panel-default">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Property 
+								            {% if lengthlist > 0 %}  
+										         <!--  
+										             <a href="#"  class="btn btn-sm btn-default" onclick="showEditor('Modal1');">
+										              <span class="glyphicon glyphicon-check"></span>  Check
+										             </a>
+										           --> 
+										           <a href="{% url onhold todo='save' index=-2%}"  class="btn btn-sm btn-default">
+										              <span class="glyphicon glyphicon-floppy-save"></span>  Save
+								   					</a>
+								   					
+								   					<a href="{% url onhold todo='removeall'  index=-1%}" class="btn btn-sm btn-default">
+										              <span class="glyphicon glyphicon-remove"></span>  Remove
+								   					</a>
+								   					
+								   					 
+											{% endif %}     
+						              </h3>
+						            </div>
+						            <div class="panel-body">
+						            
+						        
+						
+												       <div id="divwarningpropertyvalues" class="alert alert-warning" role="alert"  >
+												        <strong> {{propertaddedmessage}}</strong>  
+												      </div>
+						
+														  
+												      {% if inputListReadOnly %}  
+														<div class="form-group searches"> 
+														 <table>
+														    {% for row  in inputListReadOnly %}   
+														     <tr>
+														         {% for col  in row %}  
+														                <td>
+										                  		            {% if col in form.fields%} 
+												                  		                  {% for field  in form %}
+																		               	        {% if  field.name == col   %}
+																		               	              {% if   field.errors  %}
+																						         			   {% for error in field.errors %}
+																										         <label for="journal" style="color: red;">{{col}}</label>	
+																										         <input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" >	
+																										        {% endfor %}
+																										 {% else %}   
+																										           <label for="journal" >{{col}}</label>		
+																								       {% endif %}   
+																				         			 
+																				         		 {% endif %}     
+																			               {% endfor %} 
+																		                  	 	{%for key,value in inputListValues.items%} 
+														                  		            	        {% if col == key%}   
+																		                  		            	     <input type="text" id="{{col}}" name="{{col}}" value="{{value}}" class="form-control" placeholder=""  style="width: 50px;" >
+																		                  		                          
+																		                  		         {% endif %} 
+																		                  		         
+																                  		          {% endfor %} 
+												                  		          
+																	                  		       
+								
+										                  		            	 {% else %}  
+						                 		          
+										                  		            	 
+												                  		            	 
+																				<label for="journal">{{col}}</label>		
+																				<input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" >
+																			{% endif %} 
+														      			 </td>	
+																   {% endfor %}
+															</tr>   	     
+														      {% endfor %}
+														      
+														      
+														      </table>
+														    </div>
+														  {% endif %}  
+														  
+														  
+														  {% for property in propertySessionList%} 
+														               <table>
+														                 <tr>
+														                    <tr>
+														                    <td colspan="6"> 
+														                       Property Information
+														                    </td>
+														                 </tr>
+														                    <td colspan="6"> 
+														                    |
+														                     {{property.objProperty.description}} |
+																		  {{property.objCatalogCrystalSystemSelected.description}} |
+																	       {{property.objTypeSelected.description}} |
+																	       {{property.puntualgroupselected_name}} |
+																	       {{property.axisselected_name}} 
+														                    </td>
+														                 </tr>
+														                  <tr>
+														                    <td colspan="6"> 
+														              
+														                    </td>
+														                 </tr>
+														               
+														               </table>
+																	    <table>
+																		 	{% if property.objTypeSelected.name    == "s"%} 
+																		      {% for row  in property.s%} 
+																		       <tr>
+																					{% for col  in row %}  
+																				   <td>
+																				      
+																					<input type="text" id="{{col}}onhold" name="{{col}}onhold" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >	
+																				   </td>	
+																				 {% endfor %}
+																		      
+																		      {% endfor %}
+																	      {% endif %}  
+																	      {% if property.objTypeSelected.name   == "c"%} 
+																		      {% for row  in property.c%} 
+																		       <tr>
+																					{% for col  in row %}  
+																				   <td>
+																				      <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																				   </td>	
+																				 {% endfor %}
+																		      
+																		      {% endfor %}
+																	      {% endif %}  
+																	  
+																		 {% if property.objTypeSelected.name  == "d"%} 
+																		      {% for row  in property.d%} 
+																		       <tr>
+																					{% for col  in row %}  
+																				   <td>
+																				       <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																				   </td>	
+																				 {% endfor %}
+																		      
+																		      {% endfor %}
+																	      {% endif %}  
+																	      </table>
+													      </td>
+													     <td>
+													            {% if property.dictionaryValues %} 
+													     				<table class="table">
+													     				<tr>
+													     				<td> Property Name </td> <td>Units</td>
+													     				</tr>
+													     				 
+																	     {% for key,value in property.dictionaryValues.items %} 														    
+																	                  <tr>
+																	                   <td> {{key.0}} </td> <td>{{value}}</td>
+																	                       </tr>
+																	       {% endfor %}
+																	   
+																     
+																      </table>
+													            {% endif %}  
+													       </td>
+													         </tr>
+													      </table>
+														  
+														  
+														    {% endfor %}
+										 
+														  
+						
+								
+						            </div>
+						          </div>
+						
+						        </div><!-- /.col-sm-4 -->
+						      </div>
+							    
+							    
+							    
+							     <script type="text/javascript">
+								
+								  function removeFunc(index,element) {
+									if(element=='ElementFromStructureNewPropertyOnSesssionList'){
+											 document.getElementById("todo").value ='remove'+element
+											 document.getElementById("indexToDelete").value =index
+											 document.forms[0].submit();
+											 }
+									 else if(element=='StructureNewPropertyOnSesssionList') {
+										    document.getElementById("todo").value ='remove'+element
+										    document.forms[0].submit();
+										    }
+									}
+									 
+								  function addFunc(param) {
+									  
+									  
+									    document.getElementById("subtodo").value ='addcond';
+										 document.getElementById("todo").value ='submit';				
+										 document.forms[0].submit();
+										 }
+									 
+								   function saveFunc() {
+									 document.getElementById("todo").value ='save'				
+									 document.forms[0].submit();
+									 }
+								   
+								   var history_api = typeof history.pushState !== 'undefined'
+						
+									
+									if ( location.hash == '#no-back' ) {
+									 
+									  if ( history_api ) history.pushState(null, '', '#stay')
+									  else location.hash = '#stay'
+						
+									  window.onhashchange = function() {
+									    
+									    if ( location.hash == '#no-back' ) {
+									      alert("You shall not pass!")
+									      if ( history_api ) history.pushState(null, '', '#stay')
+									      else location.hash = '#stay'
+									    }
+									  }
+									}
+						
+								   function onchangeFunc() {
+								    document.getElementById("selectChange").value=1;
+								     
+								    todoFunc('submit');
+								    }
+								   
+								   function process() {
+								    document.getElementById("proccesing").value=1;
+								    todoFunc('submit');
+								    }
+								   
+								   
+								   function todoFunc(todovalue) {
+									   if(todovalue='submit')
+										   {
+										     document.getElementById("todo").value =todovalue
+										     //alert(document.getElementById("todo").value)
+										   }
+									   else  if(todovalue='save')
+										  {
+										   
+										   
+										  }
+									   else  if(todovalue='process')
+										  {
+										    document.getElementById("todo").value ='submit';
+										    document.getElementById("process").value ='1';
+										    
+										  }
+									   
+									   
+									   
+									   
+									   document.forms[0].submit();
+									 }
+								   
+								    {{jquery|safe }} 
+								 
+								  </script>
+						
+						        
+							     
+							    {% if ShowBtnSend == 1%}  
+									    <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Send</button>
+							     {% endif %}    
+							     
+                                {% if ShowBtnSend == 0%}  
+						               <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Process</button>
+						       {% endif %}   
+
+							      {% if ShowBtnSend == 2 %}  
+							           <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');"  disabled="disabled" >Process</button>
+							      {% endif %}   
+							     
+		 
+								  
+								<!--   
+						        <button type="button" class="btn btn-sm btn-primary">Primary</button>
+						        <button type="button" class="btn btn-sm btn-success">Success</button>
+						        <button type="button" class="btn btn-sm btn-info">Info</button>
+						        <button type="button" class="btn btn-sm btn-warning">Warning</button>
+						        <button type="button" class="btn btn-sm btn-danger">Danger</button>
+						        <button type="button" class="btn btn-sm btn-link">Link</button>
+						        -->        
+							  </form>
+						    
+							 
+						      <br/><br/>
+						
+  
+
+        </div>
+      </div>
+  
+  
+  
+
+	 
+
+{% endblock %}

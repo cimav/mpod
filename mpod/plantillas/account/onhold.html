@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+
+  
+      <div class="container-fluid">
+      {% include "account/menu.html" %}
+   
+      
+          
+
+						       
+						      <br/>
+						      <h4></h4>
+							  <h4></h4>
+							 
+							  <form role="form" action="" method="POST">
+							  <input type='hidden' id=selectChange name="selectChange" value="0" />
+							  <input type='hidden' id="proccess" name="proccess" value="0" />
+							  <input type='hidden' id="todo" name="todo" value="" />
+							  <input type='hidden' id="indexToDelete" name="indexToDelete" value="0" />
+							  
+							  
+ 
+
+
+
+      
+      
+
+
+
+{% for property in propertySessionList%} 
+
+					      <div class="modal" id="Modal{{forloop.counter}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"  >
+						  <div class="modal-dialog" role="document">
+						    <div class="modal-content">
+						      <div class="modal-header">
+						        <h5 class="modal-title" id="exampleModalLabel">{{property.objProperty.description}} 
+																															  {{property.objCatalogCrystalSystemSelected.description}} 
+																														       {{property.objTypeSelected.description}} 
+																														       {{property.puntualgroupselected_name}} 
+																														       {{property.axisselected_name}} 
+						        </h5>
+						        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						          <span aria-hidden="true">&times;</span>
+						        </button>
+						      </div>
+						      <div class="modal-body">
+								       <table>
+										         <tr> 
+										           <td>
+															 <table>
+															 	{% if property.objTypeSelected.name    == "s"%} 
+															      {% for row  in property.s%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	      
+																		<input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >	
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														      {% if property.objTypeSelected.name   == "c"%} 
+															      {% for row  in property.c%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	      <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														  
+															 {% if property.objTypeSelected.name  == "d"%} 
+															      {% for row  in property.d%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	       <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														      </table>
+										      </td>
+										     <td style="vertical-align: top;" >
+										     				<table class="table">
+										     				<tr>
+										     				<td> Name </td> <td>Units</td>
+										     				</tr>
+										     				 
+														     {% for field  in property.objExperimentalParCondSelectedList%} 
+														                  <tr>
+														                   <td> {{field.name}} </td> <td>{{field.units}}</td>
+														                       </tr>
+														       {% endfor %}
+														   
+													     
+													      </table>
+										     
+										       </td>
+										         </tr>
+										      </table>
+									 
+						   
+						      </div>
+						      <div class="modal-footer">
+						        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						         
+						      </div>
+						    </div>
+						  </div>
+						</div>
+  {% endfor %}
+ 
+
+<style>
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+.modal-dialog {
+    margin: 2px auto;
+    z-index: 1100 !important;
+     width: 760px;
+}
+
+</style>
+<script type="text/javascript">
+function showEditor(modal) {
+     modal= "#" + modal;
+     
+	  $( modal).modal("show");
+	  $(modal).appendTo("body");
+	}
+	
+function hideEditor() {
+	 
+	  $("#exampleModal").modal("hide");
+	  //$("#createModal").appendTo("body");
+	 // $("body>#createModal").remove();
+	}
+
+function ngOnDestroy(){
+	  $("body>#createModal").remove();
+	}
+</script>
+
+					<table class="table table-striped">
+					  <thead>
+					    <tr>
+					      <th>#</th>
+					      <th>Title</th>
+		
+					      <th>Property</th>
+					      <th>Crystal System</th>
+					      <th>Type</th>
+					      <th>Point Group</th>
+					      <th>Axis</th>
+					      
+					      
+					      
+					      <th> 
+					      <a href="{% url onhold todo='removeall'  index=-1%}"> <span class="badge">Remove All</span></a>
+					      </th>
+					    </tr>
+					  </thead>
+					  <tbody>
+					  
+					     {% for property  in propertySessionList%} 
+						  
+				 
+				            
+				           <tr >
+					      <th scope="row" >{{forloop.counter}}</th>
+					      <td >{{property.title}}</td>
+					      <td>{{property.objProperty.description}}</td>
+					      <td>{{property.objCatalogCrystalSystemSelected.description}}</td>
+					      <td>{{property.objTypeSelected.description}}</td>
+					      <td>{{property.puntualgroupselected_name}}</td>
+					      <td>{{property.axisselected_name}}</td>
+
+					       <td> 
+					           <a href="{% url onhold todo='remove'  index=forloop.counter%}"> <span class="badge">Remove</span></a>
+					       </td>
+					      
+					      <td><a href="#" onclick="showEditor('Modal{{forloop.counter}}');"> <span class="badge">View</span></a></td>
+		
+					      
+					    </tr>
+						  
+						  {% endfor %}
+						  
+						  
+					  
+
+					  </tbody>
+					</table>
+							    
+
+						         
+						           <a href="{% url onhold todo='save' index=-2%}"  class="btn btn-sm btn-default">
+										              <span class="glyphicon glyphicon-floppy-save"></span>  Save All
+								   </a>
+							     
+					
+								
+			
+		 
+								  
+								<!--   
+						        <button type="button" class="btn btn-sm btn-primary">Primary</button>
+						        <button type="button" class="btn btn-sm btn-success">Success</button>
+						        <button type="button" class="btn btn-sm btn-info">Info</button>
+						        <button type="button" class="btn btn-sm btn-warning">Warning</button>
+						        <button type="button" class="btn btn-sm btn-danger">Danger</button>
+						        <button type="button" class="btn btn-sm btn-link">Link</button>
+						        -->        
+							  </form>
+						    
+							 
+						      <br/><br/>
+						
+  
+
+        </div>
+      </div>
+  
+  
+  
+
+	 
+
+{% endblock %}

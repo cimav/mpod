@@ -8,49 +8,49 @@
 {% endblock %}
 
 {% block contenido %}
-<div class="content">
-	  <h3>Login</h3>
-	  <br/>
-	  <p>Please, below insert the .</p>
  
-	  <form role="form" action="/viewloginauthentication/" method="POST">
-	
-	     {% csrf_token %}
- 
-	     
-	     
-	      {% for field in form %}
-	                  
-	     	        
-	                 <div class="form-group searches">
-				      <label for="title">{{ field.label_tag }}:</label>
-				       {% if field.name == "password" %}
-				           <input type="password" id="{{ field.name}}" name="{{ field.name}}" value="" class="form-control" placeholder="Password">
-				       {% endif %}
-				       {% if field.name != "password" %}
-				           <input type="text" id="{{ field.name}}" name="{{ field.name}}" value="" class="form-control" placeholder="Username ">
-				       {% endif %}
-				       
-				      
-				    </div>
-				     {% if field.help_text %}
-			          <small style="color: grey">{{ field.help_text }}</small>
-			        {% endif %}
-			        {% for error in field.errors %}
-			          <p style="color: red">{{ error }} {{ error_message }}</p>
-			        {% endfor %}
-			        
-			     
-	      
-	      {% endfor %}      
-			      
  
 
-		   
-
-	    <button type="submit" class="btn btn-warning">Login</button>
-	  </form>
-	   </div>
+			<div class="row align-items-center">
+						
+			    <div  class="col-md-3 col-md-offset-5">
+				   	 {% if message %}
+						    	  <div class="alert alert-danger fade in alert-dismissable">
+									  <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a>
+									  <strong>Login Failed.</strong> {{message }}
+									</div>
+						 {% endif %} 
+				   <div class="container-fluid">
+				
+							   <div class="wrapper">
+						    <form class="form-signin" action="/viewloginauthentication/" method="POST">     
+						    	  {% csrf_token %}      
+						      <h2 class="form-signin-heading">Please login</h2>
+						      {% for field in form %}
+						      <label for="title">{{ field.label_tag }}:</label>
+						       {% if field.name != "password" %}
+						      <input type="text" class="form-control" name="{{ field.name}}" placeholder="{{ field.name}}" required="" autofocus="" />
+						       {% else %}
+						      <input type="password" class="form-control" name="{{ field.name}}" placeholder="{{ field.name}}" required=""/>     
+						       {% endif %} 
+						      {% endfor %}
+						      <!--  
+						      <label class="checkbox">
+						        <input type="checkbox" value="remember-me" id="rememberMe" name="rememberMe"> Remember me
+						      </label>
+						      -->
+						      </br>
+						      <button class="btn btn-lg btn-warning btn-block" type="submit">Login</button>   
+						    </form>
+						  </div>
+						  
+		
+						
+						
+					 
+			  </div>
+			</div>
+		</div>
 	  
 
 {% endblock %}

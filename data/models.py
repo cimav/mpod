@@ -1,9 +1,22 @@
 from django.db import models
+from django.contrib.auth.models import User , Group
+import datetime,time
 from django import forms
 from django.utils.html import escape
+from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
+
+ 
+ 
+ 
+ 
+
+
+from django.db.models.signals import post_save
 
 #from views import datafiles_path
 import os
+from django.db.models.fields.files import FileField
 
 # Create your models here.
 
@@ -24,18 +37,18 @@ class Path(models.Model):
 
     class Meta:
         db_table = 'path'
+        app_label = 'Configuration'
+        verbose_name = _('Path Configuration')
+        verbose_name_plural = _('Paths')
+
         
-'''      
-pathslist=Path.objects.all()      
-pathexist = 0
-for datafiles_path in pathslist:
-    path=Path() 
-    path = datafiles_path
-    if os.path.isdir(path.datafiles_path): 
-        pathexist = 1
-        datafiles_path= path.datafiles_path
-        break'''
-            
+
+        
+class  StructureNewPropertyOnSesssion(object):
+    def __init__(self,):
+        self.dataPropety=None
+        self.propetyMatriz=None
+             
 
 class StructurePropertie(object):
         def __init__(self,):
@@ -56,9 +69,19 @@ class PublArticle(models.Model):
     last_page = models.IntegerField(max_length=6, null=True, blank=True)
     reference = models.CharField(max_length=14, blank=True)
     pages_number = models.IntegerField(max_length=3, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'data_publarticle'
+        app_label = 'Article'
+        verbose_name = _('Article Information')
+        verbose_name_plural = _('Articles')
+        
+ 
 
     def __unicode__(self):
         return str(self.title)+", "+str(self.journal)
+    
+    
     
     
 class PublArticleTemp(models.Model):
@@ -113,10 +136,17 @@ class DataFile(models.Model):
     phase_generic = models.CharField(max_length=255, null=True, blank=True)
     phase_name = models.CharField(max_length=255)
     chemical_formula = models.CharField(max_length=255)
-    publication = models.ForeignKey(PublArticle)
-    properties = models.ManyToManyField(Property, null=True, blank=True, db_table = 'data_datafile_property')
+    publication = models.ForeignKey(PublArticle,verbose_name="Article")
+    properties = models.ManyToManyField(Property, null=True, blank=True, db_table = 'data_datafile_property',verbose_name="Properties")
     
-    
+    class Meta:
+        db_table = 'data_datafile' 
+        app_label = 'Article'
+         
+        verbose_name = _('CIF File Information')
+        verbose_name_plural = _('CIF Files')
+        
+        
     def ret_link_to_file(self):
         pathslist=Path.objects.all()      
         pathexist = 0
@@ -128,22 +158,7 @@ class DataFile(models.Model):
                 datafiles_path= path.datafiles_path
                 break
             
-        return os.path.join(datafiles_path, self.filename)
-    
-    def article_id(self):
-        '''pathslist=Path.objects.all()      
-        pathexist = 0
-        for datafiles_path in pathslist:
-            path=Path() 
-            path = datafiles_path
-            if os.path.isdir(path.datafiles_path): 
-                pathexist = 1
-                datafiles_path= path.datafiles_path
-                break'''
-        
-        #link_to_article ='/admin/data/publarticle/' +self.publication.id
-        link_to_article=os.path.join('./admin/data/publarticle/' , str(self.publication.id))
-        return link_to_article
+
     
     
 
@@ -165,7 +180,7 @@ class DataFileTemp(models.Model):
     phase_name = models.CharField(max_length=255)
     chemical_formula = models.CharField(max_length=255)
     publication = models.ForeignKey(PublArticleTemp)
-    properties = models.ManyToManyField(PropertyTemp, null=True, blank=True, db_table = 'data_datafile_property_temp')
+    properties = models.ManyToManyField(PropertyTemp, null=True, blank=True, db_table = 'data_datafile_property_temp',verbose_name="Properties")
     
     
     def ret_link_to_file(self):
@@ -180,11 +195,14 @@ class DataFileTemp(models.Model):
         
 
 class DataFileProperty(models.Model):    
-    datafile =models.ForeignKey(DataFile)
-    property=models.ForeignKey(Property)
+    datafile =models.ForeignKey(DataFile,verbose_name="Data File")
+    property=models.ForeignKey(Property,verbose_name="Property")
     
     class Meta:
         db_table = 'data_datafile_property'
+        app_label = 'File Property'
+        verbose_name = _('File Property Information')
+        verbose_name_plural = _('Articles')
 
 class DataFilePropertyTemp(models.Model):    
     datafile =models.ForeignKey(DataFileTemp)
@@ -206,6 +224,9 @@ class PropertyValues(models.Model):
     
     class Meta:
         db_table = 'property_values' 
+        app_label = 'Article'
+        verbose_name = _('Article Information')
+        verbose_name_plural = _('Articles')
              
         
         
@@ -221,6 +242,9 @@ class PropertyValuesTemp(models.Model):
     
     class Meta:
         db_table = 'property_values_temp' 
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')
         
 
         
@@ -232,6 +256,15 @@ class ExperimentalParCond(models.Model):
     description = models.CharField(max_length=511)
     units = models.CharField(max_length=25)
     units_detail = models.CharField(max_length=60)
+    
+    class Meta:
+        db_table = 'data_experimentalparcond' 
+        app_label = 'Properties'
+        verbose_name = _('Experimental par condition')
+        verbose_name_plural = _('Experimental par conditions')
+    
+    
+    
 
     def __unicode__(self):
         return str(self.name) +", "+  str(self.units)
@@ -250,19 +283,20 @@ class ExperimentalParCondTemp(models.Model):
     class Meta:
         db_table = 'data_experimentalparcond_temp'  
     
-    
 
-    
-    
-
-    
-    
- 
 
 class CatalogProperty(models.Model): 
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=511)
+    name = models.CharField(max_length=255,verbose_name="Name")
+    description = models.CharField(max_length=511,verbose_name="Description")
     #publication = models.ForeignKey(PublArticle)
+   
+    class Meta:
+        db_table = 'data_catalogproperty'
+        app_label = 'Properties'
+        verbose_name = _('Category')
+        verbose_name_plural = _('Categories')
+        
+        
     def __unicode__(self):
         return str(self.name)+", "+str(self.description)
     
@@ -274,15 +308,21 @@ class CatalogCrystalSystem(models.Model):
     
     class Meta:
         db_table = 'catalog_crystal_system'
+        app_label = 'Properties'
+        verbose_name = _('Crystal System')
+        verbose_name_plural = _('Crystal Systems')
         
         
 class Type(models.Model): 
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=511)   
-    catalogproperty=  models.ForeignKey(CatalogProperty)
+    catalogproperty=  models.ForeignKey(CatalogProperty,verbose_name="Property")
     
     class Meta:
-        db_table = 'type'      
+        db_table = 'type'     
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem') 
         
 
 class CatalogPointGroup(models.Model): 
@@ -290,15 +330,21 @@ class CatalogPointGroup(models.Model):
     description = models.CharField(max_length=511)      
     class Meta:
         db_table = 'catalog_point_group'        
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')
         
         
 
 class CrystalSystemPointGroup(models.Model): 
-    crystalsystem= models.ForeignKey(CatalogCrystalSystem)   
-    catalogpointGroup =   models.ForeignKey(CatalogPointGroup)  
+    crystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
+    catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
         
     class Meta:
-        db_table = 'crystalsystem_point_group'         
+        db_table = 'crystalsystem_point_group'    
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')     
        
           
         
@@ -308,14 +354,20 @@ class CatalogAxis(models.Model):
     description = models.CharField(max_length=511)   
    
     class Meta:
-        db_table = 'catalog_axis'     
+        db_table = 'catalog_axis'   
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')  
         
        
 class CrystalSystemAxis(models.Model): 
-    crystalsystem= models.ForeignKey(CatalogCrystalSystem)   
-    catalogaxis= models.ForeignKey(CatalogAxis)       
+    crystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
+    catalogaxis= models.ForeignKey(CatalogAxis,verbose_name="Axis")       
     class Meta:
         db_table = 'crystalsystem_axis'  
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')
         
                 
 class PuntualGroupNames(models.Model): 
@@ -324,15 +376,20 @@ class PuntualGroupNames(models.Model):
    
     class Meta:
         db_table = 'puntual_group_names'    
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')
         
         
 class PuntualGroupGroups(models.Model): 
-    catalogpointgroup =   models.ForeignKey(CatalogPointGroup) 
-    puntualgroupnames = models.ForeignKey(PuntualGroupNames) 
+    catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group") 
+    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names") 
    
     class Meta:
         db_table = 'puntual_group_groups'            
-        
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')
          
         
           
@@ -342,10 +399,14 @@ class CatalogPropertyDetail(models.Model):
     type=  models.ForeignKey(Type)
     crystalsystem= models.ForeignKey(CatalogCrystalSystem)    
     catalogaxis= models.ForeignKey(CatalogAxis)  
-    catalogpointgroup =   models.ForeignKey(CatalogPointGroup)  
-    puntualgroupnames = models.ForeignKey(PuntualGroupNames)  
+    catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
+    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
     class Meta:
-        db_table = 'catalog_property_detail'          
+        db_table = 'catalog_property_detail'       
+        
+        app_label = 'Properties'
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')
         
         
 class MpodFile(models.Model): 
@@ -357,16 +418,225 @@ class MpodFile(models.Model):
     class Meta:
         db_table = 'mpodfile'          
         
- 
+
+
+class Configuration(models.Model):
+    email_use_tls = models.BooleanField(_(u'TLS'),default=True)
+    email_host = models.CharField(_(u'HOST'),max_length=1024)
+    email_host_user = models.CharField(_(u'USER'),max_length=255)
+    email_host_password = models.CharField(_(u'PASSWORD'),max_length=255)
+    email_port = models.PositiveIntegerField(_(u'PORT'),default=587)
+    email_domain = models.CharField(_(u'DOMAIN'),max_length=1024)
+      
     
+    class Meta:
+        db_table = 'mail_configuration'
+        app_label = 'Configuration'
+        verbose_name = _('SMTP Server Configuration')
+        verbose_name_plural = _('SMTP Server Configurations')
+        ordering = ('email_host',)
+        
+        
+    def __unicode__(self):
+        return str(self.email_host_user)
+        
+        
+class MessageMail(models.Model):
+    email_subject= models.CharField(_(u'SUBJECT'),max_length=255)
+    email_regards= models.CharField(_(u'REGARDS'),max_length=255)
+    email_message = models.TextField(_(u'BODY MESSAGE'),max_length=3072)
     
+    class Meta:
+        db_table = 'message_mail'
+        app_label = 'Configuration'
+        verbose_name = _('Message')
+        verbose_name_plural = _('Messages')
+        ordering = ('email_message',)
+        
+    def __unicode__(self):
+        return str(self.email_subject)
+
+        
+class MessageCategory(models.Model):
+    name = models.CharField(_(u'NAME'),max_length=100)
+    description = models.CharField(_(u'DESCRIPTION'),max_length=255)
+    
+
+    class Meta:
+        db_table = 'message_category'
+        app_label = 'Configuration'
+        verbose_name = _('Category')
+        verbose_name_plural = _('Categories')
+        
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.name)
+        
+        
+#poll = models.ForeignKey(Poll,on_delete=models.CASCADE,verbose_name="the related poll")
+class MessageCategoryDetail(models.Model):
+    message=models.ForeignKey(MessageMail,verbose_name="Message")  
+    messagecategory=models.ForeignKey(MessageCategory,verbose_name="Category")
+    group = models.ForeignKey(Group,verbose_name="Group") 
+    user = models.ForeignKey(User,verbose_name="User") 
+        
+    class Meta:
+        db_table = 'message_category_detail'
+        app_label = 'Configuration'
+        verbose_name = _('Message And Category')
+        verbose_name_plural = _('Message And Categories')
+         
+        
+    def get_category(self):
+         return str(self.messagecategory.name)
+     
+    def get_message(self):
+         return str(self.message)
+     
 
     
     
     
-##class DataFile_Property(models.Model):
-##    datafile = models.ForeignKey(DataFile)
-##    property = models.ForeignKey(Property)
-##    
-##    def __unicode__(self):
-##        return str(self.datafile)+", "+str(self.property)
+    
+class ConfigurationMessage(models.Model):
+        account=models.ForeignKey(Configuration)  
+        message=models.ForeignKey(MessageMail)  
+        is_active = models.BooleanField(_(u'Active'),default=False)
+           
+        class Meta:
+             db_table = 'configuration_message'
+             app_label = 'Configuration'
+             verbose_name = _('Message Send By Email  Account')
+             verbose_name_plural = _('Message  Send By Email Accounts')
+             
+        def get_email_host_user(self):
+             return str(self.account.email_host_user)
+         
+        def get_message(self):
+             return str(self.message.email_subject)
+         
+         
+         
+          
+class FileUser(models.Model):
+    filename = models.CharField(_(u'File Name'),max_length=100)
+    authuser=models.ForeignKey(User,verbose_name="User Name")  
+    #authuser=models.ForeignKey(to=User, related_name="pk", null=True, blank=True)
+    date = models.DateTimeField(_(u'Registration Date'),default=datetime.datetime.now(), blank=True)
+    reportvalidation =  models.TextField(_(u'Report Validation'))
+   
+     
+    class Meta:
+        db_table = 'file_user'
+        app_label = 'Properties'
+        #verbose_name = _('Uploaded file')
+        #verbose_name_plural = _('Uploaded files')
+    """     
+    def get_absolute_url(self):
+        #from django.urls import reverse
+        form_url  =reverse('update',kwargs={'pk':self.pk})
+        form_url =""
+        return form_url
+    """
+     
+    def user_name(self):
+        return   self.authuser.username
+
+        
+        
+        
+        
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, related_name='user',on_delete=models.CASCADE)
+    #photo = FileField(verbose_name=_("Profile Picture"),  upload_to=upload_to("main.UserProfile.photo", "profiles"), format="Image", max_length=255, null=True, blank=True)    
+
+    #photo = models.FileField(_("Profile Picture"), upload_to='profiles', max_length=255, null=True, blank=True)
+    
+    bio = models.TextField(default='', blank=True)
+    phone = models.CharField(max_length=20, blank=True, default='')
+    city = models.CharField(max_length=100, default='', blank=True)
+    country = models.CharField(max_length=100, default='', blank=True)
+    organization = models.CharField(max_length=100, default='', blank=True)
+
+    class Meta:
+        db_table = 'user_profile'
+
+
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+
+def create_profile(sender, **kwargs):
+    user = kwargs["instance"]
+    if kwargs["created"]:
+        user_profile = UserProfile(user=user)
+        user_profile.save()
+post_save.connect(create_profile, sender=User)
+
+
+
+
+
+
+    
+    
+class Category(models.Model):
+    name = models.CharField(_(u'Name'),max_length=100)
+    description = models.CharField(_(u'Description'),max_length=255)
+    
+    class Meta:
+        db_table = 'category'
+        
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.description)
+        
+        
+class Dictionary(models.Model):
+    tag = models.CharField(_(u'Tag'),max_length=255)
+    name = models.CharField(_(u'Name'),max_length=255)
+    description = models.CharField(_(u'Description'),max_length=511)
+    units = models.CharField(_(u'Units'),max_length=25)
+    units_detail = models.CharField(_(u'Units Detail'),max_length=60)
+    active= models.BooleanField(_(u'Active'),max_length=1)
+    definition= models.TextField()  
+    deploy= models.BooleanField(_(u'Deploy'),max_length=1)
+    type = models.CharField(_(u'Type'),max_length=45,choices=(('char','char'),('numb','numb')))
+    category = models.ForeignKey(Category,related_name="Category",verbose_name="Category")
+    
+    class Meta:
+        db_table = 'dictionary'
+        
+        
+        app_label = 'Dictionaries'
+        verbose_name = _('Properties')
+        verbose_name_plural = _('Dictionary')
+         
+        #verbose_name_plural = _('Uploaded files')
+        
+        
+class CatalogpropertyDictionary(models.Model):
+    catalogproperty = models.ForeignKey(CatalogProperty,related_name="CatalogProperty", verbose_name="Catalog Properties")
+    dictionary =models.ForeignKey(Dictionary,related_name="Dictionary",verbose_name="Dictionary")
+    
+    
+
+    class Meta:
+        db_table = 'catalogproperty_dictionary'
+        app_label = 'Properties'
+        verbose_name = _('Detail Property')
+        verbose_name_plural = _('Detail Properties')
+     
+
+    def __unicode__(self): # __str__ on Python 3
+        return str('')
+        
+        
+    def get_property(self):
+        return str(self.dataproperty.name)
+     
+    def get_catalogproperty(self):
+        return str(self.catalogproperty.description)
+    
+    
+
+

@@ -45,6 +45,7 @@ def handle_uploaded_files(f1, f2, time_st):
         if os.path.isdir(path.datafiles_path): 
             pathexist = 1
             datafiles_path= path.datafiles_path
+            break
     
     uploads_path = os.path.join(datafiles_path, "uploaded")        
     new_dir = os.path.join(uploads_path, time_st)
@@ -69,6 +70,7 @@ def handle_pdf_file(f):
         if os.path.isdir(path.datafiles_path): 
             pathexist = 1
             datafiles_path= path.datafiles_path
+            break
     
 
     uploads_path = os.path.join(datafiles_path, "uploaded")      
@@ -87,6 +89,7 @@ def handle_mpod_file(f):
         if os.path.isdir(path.datafiles_path): 
             pathexist = 1
             datafiles_path= path.datafiles_path
+            break
     
 
     print f.name
@@ -107,6 +110,7 @@ def send_upload_notif(f1, f2, time_st, e_mail_add, opt_mail_data):
         if os.path.isdir(path.datafiles_path): 
             pathexist = 1
             datafiles_path= path.datafiles_path
+            break
     
     
 
@@ -356,7 +360,8 @@ def data_item_html(dataitem_id):
         datafile_item = DataFile.objects.get(code__exact = dataitem_id)
     except:
         return None, None
-    
+
+    datafiles_path=''
     pathslist=Path.objects.all()      
     pathexist = 0
     for filepath in pathslist:

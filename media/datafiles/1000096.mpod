@@ -41,8 +41,8 @@ _phase_density 8102
 _prop_symmetry_point_group_name_H-M 'm m 2'
 _prop_measurement_poling '[011]c'
 _prop_frame '1=[0-11]c 2=[100]c 3=[011]c'
-_phase_transition_temperature_rhomb_tetra 393
-_phase_transition_temperature_curie 438
+_phase_rhomb_tetra_transition_temperature 393
+_phase_Curie_temperature 438
 _prop_elastic_stiffness_cijE 'cijE'
 _prop_elastic_stiffness_cijD 'cijD'
 _prop_elastic_compliance_sijE 'sijE'

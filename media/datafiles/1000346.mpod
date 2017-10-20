@@ -54,10 +54,10 @@ _citation_editor_name              'Newnham, Robert, E.'
 #_phase_debye_temperature 175
 #_phase_density 'rho'
 #_phase_density_temperature 298
-#_phase_transition_temperature_ortho_tetra 389
-#_phase_transition_temperature_rhomb_tetra ?
-#_phase_transition_temperature_curie 481
-#_phase_transition_temperature_curie_ferroelectric 481
+#_phase_ortho_tetra_transition_temperature 389
+#_phase_rhomb_tetra_transition_temperature ?
+#_phase_Curie_temperature 481
+#_phase_Curie_ferroelectric_temperature 481
 
 #_prop_measurement_poling '[011]'
 #_prop_measurement_method 'XRD'
@@ -129,12 +129,12 @@ _prop_thermal_conductivity_kappaij 'kappaij'
 #_prop_conditions_magnetic_field_B3
 #_prop_conditions_pressure 
 #_prop_conditions_temperature 298
-#_prop_conditions_temperature_range_begin 75
+#_prop_temperature_range_start 75
 #_prop_conditions_temperature_range_end 300
 #_prop_conditions_temperature_cycle 1
-#_prop_conditions_atmosphere_gaz O2
-#_prop_conditions_atmosphere_gaz_pressure 100000
-#_prop_conditions_atmosphere_gaz_flow 0.01
+#_prop_conditions_atmosphere_gas O2
+#_prop_conditions_atmosphere_gas_pressure 100000
+#_prop_conditions_atmosphere_gas_flow 0.01
 
 loop_
 _prop_data_label
@@ -144,7 +144,7 @@ _prop_data_value
 #_prop_conditions_temperature
 #_prop_conditions_wavelength
 #_prop_conditions_magnetic_field_B3
-#_prop_conditions_temperature_range_begin
+#_prop_temperature_range_start
 #_prop_conditions_temperature_range_end
 #_prop_conditions_frequency
 #alphaijT0 11 8.8

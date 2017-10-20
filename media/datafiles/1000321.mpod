@@ -49,9 +49,9 @@ _journal_year                    2012
 
 _phase_density 1801
 
-_phase_transition_temperature_ortho_tetra 389
+_phase_ortho_tetra_transition_temperature 389
 
-_phase_transition_temperature_curie_ferroelectric 481
+_phase_Curie_ferroelectric_temperature 481
 
 _prop_measurement_poling '[011]'
 

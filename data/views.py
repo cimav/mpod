@@ -7,6 +7,7 @@ from data.models import *
 from django.db import models
 from django.db.models import Q
 from django.db.models import Count
+import random
 from my_forms import *
 from requests.sessions import session
 from django.views.generic.simple import direct_to_template
@@ -15,15 +16,39 @@ from WebT4 import *
 from WebRankTensors import *
 from Magnetic import *
 from Properties import *
+from Propertiesv2 import *
+from mpodwrite import *
 import gc
 from forms import *
 
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import UserCreationForm
+   
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
+from tokens import account_activation_token
+from django.template.loader import render_to_string
+#from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+import base64 
+from django.utils.encoding import  force_text
+import six
+from django.core import mail
+from django.core.mail import get_connection, send_mail
+from django.core.mail.message import EmailMessage
+from django.core.mail.backends.smtp import EmailBackend
 
+from django.forms.models import inlineformset_factory
+from django.core.exceptions import PermissionDenied
 
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.urlresolvers import reverse
+from django.http import Http404
+import json
+
+ 
+
+#from django.core.urlresolvers import reverse
+#from django.core.administration import EmailMessage
+#from django.contrib.sites.models import *
 
 
 
@@ -35,27 +60,143 @@ from django.contrib.auth.decorators import login_required, permission_required
 #                                 ''' HOME '''
 ######################################################################################
 def home(request):
+    current_site = get_current_site(request)#127.0.0.1:8000
+    print current_site.domain
+    print  request.build_absolute_uri('/')#http://127.0.0.1:8000/
     return render_to_response('home.html', context_instance=RequestContext(request))
+
+
+
+######################################################################################
+#                                 ''' ADMIN '''
+######################################################################################
+@staff_member_required
+def dictionaryview(request):
+    current_site = get_current_site(request)#127.0.0.1:8000
+  
+    return render_to_response('dictionary.html', context_instance=RequestContext(request))
+
+
+#report = staff_member_required(report)
 
 ######################################################################################
 #                                 ''' USER '''
 ######################################################################################
 @csrf_exempt 
-def viewsignup(request):
+def signup(request):
     if request.method == 'POST':
-        form = MyRegistrationForm(request.POST)
+        form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
+            
+            #user.refresh_from_db()  # load the profile instance created by the signal
+            #user.profile.birth_date = form.cleaned_data.get('birth_date')
+            
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('/home')
-                          
-                     
+            #login(request, user)
+            #uid= base64.b64encode(force_bytes(str(user.pk))),
+            #token= account_activation_token.make_token(user)
+            urlactivate ="activate"
+            forwardslash="/"
+            #print current_site.domain
+            #linkactivate = os.path.join(urlactivate,forwardslash)
+            #print request.build_absolute_uri('/activate/')
+            
+            current_site = get_current_site(request)
+             
+            print current_site.domain
+            #smtpconfig = Configuration.objects.get(pk=1)
+            print  request.build_absolute_uri('/')
+                
+            messageCategoryDetail= None
+            messageMailSignup= None
+             
+            messageCategoryDetail=MessageCategoryDetail.objects.get(messagecategory=MessageCategory.objects.get(pk=1))
+            messageMailSignup= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+            
+                #messageMailSignup= MessageMail.objects.filter(site=Site.objects.filter(name=request.build_absolute_uri('/')))
+            configurationMessage = ConfigurationMessage.objects.get(message=messageMailSignup)
+            smtpconfig= configurationMessage.account
+            #print configurationMessage.message.email_subject
+            
+            my_use_tls = False
+            if smtpconfig.email_use_tls ==1:
+                my_use_tls = True
+            
+            #fail_silently= False
+            connection = get_connection(host=smtpconfig.email_host, 
+                                                                    port= int(smtpconfig.email_port ), 
+                                                                    username=smtpconfig.email_host_user, 
+                                                                    password=smtpconfig.email_host_password, 
+                                                                    use_tls=my_use_tls) 
+        
+             
+            message = render_to_string('account_activation_email.html', {
+                'regards':messageMailSignup.email_regards,
+                'email_message':  messageMailSignup.email_message,
+                'user': user,
+                'domain': current_site.domain,
+                'uid': base64.b64encode(force_bytes(str(user.pk))),
+                'token': account_activation_token.make_token(user),
+                'linkactivate': urlactivate,
+                'forwardslash':forwardslash
+            })
+            
+    
+            
+            #print request.build_absolute_uri() 
+            #print  request.build_absolute_uri('/')
+            
+            send_mail(
+                            messageMailSignup.email_subject,
+                            message,
+                            smtpconfig.email_host_user,
+                            [user.email],
+                            connection=connection
+                        )
+
+        
+            return redirect('/account_activation_sent')
+            #return redirect('home')
     else:
-        form = MyRegistrationForm()
+        form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
+
+
+    
+def force_bytes(value):
+    if isinstance(value, six.string_types):
+        return value.encode()
+    return value
+
+    
+def viewactivate(request, uidb64, token):
+    
+    try:
+        #uid = force_text(base64.urlsafe_b64decode(uidb64))
+        uid = base64.urlsafe_b64decode(str(uidb64)) 
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+       
+        
+        '''user = authenticate(username=user.username, password=user.password)
+        login(request, user)'''
+        return redirect('/home/')
+    
+    else:
+        return render(request, 'account_activation_invalid.html')
+    
+
+def account_activation_sent(request):
+    return render(request, 'account_activation_sent.html')  
+
 
 def viewlogout(request):
     logout(request)
@@ -72,10 +213,20 @@ def viewloginauthentication(request):
             
             user = authenticate(username=username, password=password)
             if user is not None and user.is_active:
-                 login(request, user)          
-                 return redirect('/home')
+                login(request, user)          
+ 
+                request.session['user']=user
+                 
+                hop_form_url =reverse(edit_user,kwargs={'pk':user.pk})
+                print hop_form_url 
+                hop_form_url  =reverse('update',kwargs={'pk':user.pk})
+                print hop_form_url 
+                 
+                return render_to_response('account/profile.html', {'form': form,'user':user}, context_instance=RequestContext(request))
             else:
-                return render_to_response('login.html', {'form': form}, context_instance=RequestContext(request))
+                message = " Please try again."
+                    
+                return render_to_response('login.html', {'form': form,'message':message}, context_instance=RequestContext(request))
         
                
     else:
@@ -84,12 +235,88 @@ def viewloginauthentication(request):
     return render_to_response('login.html', {'form': form}, context_instance=RequestContext(request))
         
       
+       
      
 
 
 def viewlogin(request):
+    
     form = LoginForm()
     return render(request, 'login.html', {'form': form})
+
+
+
+@login_required
+def edit_user(request, pk):
+    print "test"
+    user = User.objects.get(pk=pk)
+    user_form = UserProfileForm(instance=user)
+    """                                       inlineformset_factory(parent_model, model, form=ModelForm,
+                                                                      formset=BaseInlineFormSet, fk_name=None,
+                                                                      fields=None, exclude=None,
+                                                                      extra=3, can_order=False, can_delete=True, max_num=None,
+                                                                      formfield_callback=None):"""
+                                                                      
+    
+    ProfileInlineFormset = inlineformset_factory(User, UserProfile, fields=('bio', 'phone', 'city', 'country', 'organization'),form=ProfileForm,can_delete=False)
+    formset = ProfileInlineFormset(instance=user)
+
+    if request.user.is_authenticated() and request.user.id == user.id:
+        if request.method == "POST":
+            user_form = UserProfileForm(request.POST, request.FILES, instance=user)
+            formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
+
+            if user_form.is_valid():
+                created_user = user_form.save(commit=False)
+                formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
+             
+
+                if formset.is_valid():
+                    created_user.save()
+                    formset.save()
+                    return HttpResponseRedirect('/accounts/profile/')
+        current ="Update Profile"
+         
+        return render(request, "account/account_update.html", {
+            "noodle": pk,
+            "user_form": user_form,
+            "formset": formset,
+            "current": current,
+        })
+    else:
+        raise PermissionDenied
+    
+@login_required
+def viewprofile(request):   
+    #TODO: crear lista de links para el menu
+    navigation  = []
+
+    return render_to_response("account/profile.html", {"navigation" : navigation}, context_instance=RequestContext(request))
+
+
+@login_required
+def file_detail_view(request,pk):
+    try:
+        user=User.objects.get(pk=pk)      
+        files_user=FileUser.objects.filter(authuser=user)
+        
+        
+        
+        current ="My Files"
+        counterfiles = 0
+        if len(files_user) > 0:
+            counterfiles = len(files_user)
+            
+        print counterfiles
+        
+    except FileUser.DoesNotExist:
+        raise Http404("File does not exist")
+    
+
+    #book_id=get_object_or_404(Book, pk=pk)
+
+    return render_to_response("account/file_detail.html", {'files':files_user,"current": current,"counterfiles": counterfiles}, context_instance=RequestContext(request))
+    
             
 
 ######################################################################################
@@ -984,6 +1211,53 @@ def get_datafile(request, file_name):
     datafile_data = open(datafile_path, "rb").read()
     return HttpResponse(datafile_data, mimetype="text")
 
+
+def viewdatafilecreated2(request, pk):
+    print ""
+   
+    return   render_to_response("account/file_detail.html", context_instance=RequestContext(request))
+
+def viewdatafilecreated3(request, filename):
+    ext=filename.split(".")[1]
+    
+    pathslist=Path.objects.all()      
+    pathexist = 0
+    for cifstest in pathslist:
+        path=Path() 
+        path = cifstest
+        if os.path.isdir(path.cifs_dir_valids): 
+            pathexist = 1
+            datafiles_path= path.cifs_dir_valids
+            break
+    
+    datafile_path=os.path.join(datafiles_path,filename)
+    datafile_data = open(datafile_path, "rb").read()
+    #HttpResponse(datafile_data, mimetype="application/octet-stream")  download
+ 
+    
+     
+    return HttpResponse(datafile_data, mimetype="text/plain; charset=utf-8")
+  
+#example http://127.0.0.1:8000/datafilescreated/jnhwfomtxo.mpod
+def viewdatafilecreated(request, filename):
+    ext=filename.split(".")[1]
+    
+    pathslist=Path.objects.all()      
+    pathexist = 0
+    for cifstest in pathslist:
+        path=Path() 
+        path = cifstest
+        if os.path.isdir(path.cifs_dir_valids): 
+            pathexist = 1
+            datafiles_path= path.cifs_dir_valids
+            break
+    
+    datafile_path=os.path.join(datafiles_path,filename)
+    datafile_data = open(datafile_path, "rb").read()
+    #HttpResponse(datafile_data, mimetype="application/octet-stream")  download
+    return HttpResponse(datafile_data, mimetype="text")
+
+
 def get_stlfile(request, file_name):
     ext=file_name.split(".")[1]
     pathslist=Path.objects.all()      
@@ -1189,10 +1463,24 @@ def get_catalog_type():
 
     return  typeList
 
+
+
+
+
 @login_required(login_url="/login/")
-def newcase(request): 
-   
-    list_Property=get_catalog_propertyv2();
+def newcasev2(request): 
+    
+       
+    if 'inputList' not in request.session  or not request.session['inputList']:
+        pass
+    else:
+        del request.session['inputList']
+    
+    form= NewCaseFormv2()
+    propertyCategoryName=get_catalog_propertyv2();
+    if 'propertyCategoryNameListOnSession' not in request.session  or not request.session['propertyCategoryNameListOnSession']:
+        request.session['propertyCategoryNameListOnSession']=propertyCategoryName
+            
     catalogproperty_name="e"
     catalogproperty_id = 1
     questionAxis=''
@@ -1203,583 +1491,1085 @@ def newcase(request):
     questionAxis=''
     message=""
     axisselected_name=""
+    
+    
+    
+    catalogCrystalSystemList = [];
+    list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=propertyCategoryName[0])
+    for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
+        objCatalogCrystalSystem=CatalogCrystalSystem();
+        objCatalogCrystalSystem = register_catalogCrystalSystem
+        catalogCrystalSystemList.append(objCatalogCrystalSystem)   
+        del objCatalogCrystalSystem
+        
+    if 'catalogCrystalSystemListOnSession' not in request.session  or not request.session['catalogCrystalSystemListOnSession']:
+        request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
    
     typeList =  [];
-    list_Type = Type.objects.filter(catalogproperty=list_Property[0])
+   
+    list_Type = Type.objects.filter(catalogproperty=propertyCategoryName[0])
     for register_type in list_Type: 
         objType=Type();
         objType = register_type
         typeList.append(objType)
         del objType
+        
+    if 'typeListOnSession' not in request.session  or not request.session['typeListOnSession']:
+        request.session['typeListOnSession']=typeList
          
-    catalogCrystalSystemList = [];
-    list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=list_Property[0])
-    for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
-        objCatalogCrystalSystem=CatalogCrystalSystem();
-        objCatalogCrystalSystem = register_catalogCrystalSystem
-        catalogCrystalSystemList.append(objCatalogCrystalSystem)
-        del objCatalogCrystalSystem
- 
+    #initialization
     crystalsystem_name= "tc"
-    questiontype =""
+    #questiontype =""
     
+    #initialization
     typeselected = "c"   
-    if catalogproperty_name == "e":
-        questiontype = "s (compliance) o c (stiffness)?"
-         
+    questiontype = "s (compliance) o c (stiffness)?"    
+    questionAxis=''
+    axisList =[]
     
-    compliancessi = range(0, 0)
-    compliancessj = range(0, 0)
-    stiffnessci = range(0, 0)
-    stiffnesscj = range(0, 0)
-    resultdi = range(0, 0)
-    resultdj = range(0, 0)
- 
- 
-    results = N.zeros([6,6])
-    resultc = N.zeros([6,6])
-    resultd = N.zeros([3,6])
-    
-    printtableresult = 0
-    printingc=0
-    printings=0
-    printingd=0
-    
-    ShowBtnProcess=0
+    #initialization
     ShowBtnSend = 1
-    
-   
-
-    error = ""
+    ShowBtnProcess = 0
+    ShowBtnSave = 0
     
  
-    return render_to_response('newcase.html', {    "error":error,
-                                                                                       "results":results,     
-                                                                                         "resultc":resultc,     
-                                                                                         "resultd":resultd,    
-                                                                                         "printtableresult":printtableresult, 
-                                                                                        "printingc":printingc, 
-                                                                                        "printings":printings, 
-                                                                                        "printingd":printingd,  
-                                                                                        "ShowBtnSend":ShowBtnSend,
-                                                                                        "ShowBtnProcess":ShowBtnProcess,
-                                                                                         "compliancessi":compliancessi,    
-                                                                                         "compliancessj":compliancessj,    
-                                                                                         "stiffnessci":stiffnessci,    
-                                                                                         "stiffnesscj":stiffnesscj,                                
-                                                                                         "resultdi":resultdi,    
-                                                                                         "resultdj":resultdj,     
-                                                                                        "message":message,
-                                                                                        "catalogproperty_name": catalogproperty_name, "error":error,
-                                                                                         "questiontype":questiontype,
+    validationbyform = 0
+    
+    
+    lengthlist = 0
+    if not 'propertySessionList' in request.session or not request.session['propertySessionList' ]:  
+        pass
+    else:
+        #propertySessionList = request.session['propertySessionList' ]
+        #print propertySessionList
+        #lengthlist =len(propertySessionList) 
+        del request.session['propertySessionList']    
+ 
+        
+       
+    dictionaryList=[]
+    dictionaryQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=9), deploy = 1)
+    for dictionary in dictionaryQuerySet: 
+        objDictionary =Dictionary();
+        objDictionary = dictionary
+        dictionaryList.append(objDictionary)
+        del objDictionary
+        
+        
+    dictionaryPhaseList=[]
+    dictionaryPhaseQuerySet1= Dictionary.objects.filter(category = Category.objects.get(pk=4), deploy = 1)
+    dictionaryPhaseQuerySet2= Dictionary.objects.filter(category = Category.objects.get(pk=8), deploy = 1)
+    dictionaryPhaseQuerySet= (dictionaryPhaseQuerySet1 | dictionaryPhaseQuerySet2).distinct()
+    for dictionary in dictionaryPhaseQuerySet: 
+        objDictionary =Dictionary();
+        objDictionary = dictionary
+        dictionaryPhaseList.append(objDictionary)
+        del objDictionary 
+        
+    dictionaryPhaseCharacteristicList=[]
+    dictionaryPhaseCharacteristicQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=11), deploy = 1)
+    for dictionary in dictionaryPhaseCharacteristicQuerySet: 
+        objDictionary =Dictionary();
+        objDictionary = dictionary
+        dictionaryPhaseCharacteristicList.append(objDictionary)
+        del objDictionary     
+        
+        
+    dictionaryMeasurementList=[]
+    dictionaryMeasurementQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=12), deploy = 1)
+    for dictionary in dictionaryMeasurementQuerySet: 
+        objDictionary =Dictionary();
+        objDictionary = dictionary
+        dictionaryMeasurementList.append(objDictionary)
+        del objDictionary     
+ 
+    
+     
+    if 'dictionaryValues'  not  in request.session  or not request.session['dictionaryValues']:
+        pass
+    else:
+        del  request.session['dictionaryValues']
+        
+        
+    if 'newDictionaryList' not in request.session  or not request.session['newDictionaryList']:
+        pass
+    else:
+        del  request.session['newDictionaryList']   
+         
+
+        
+    if 'dictionaryList' not in request.session  or not request.session['dictionaryList']:
+        request.session['dictionaryList']=dictionaryList   
+        
+    if 'dictionaryPhaseList' not in request.session  or not request.session['dictionaryPhaseList']:
+        request.session['dictionaryPhaseList']=dictionaryPhaseList   
+        
+    #if 'dictionaryPhaseCharacteristicList' not in request.session  or not request.session['dictionaryCharacteristicPhaseList']:
+    #    request.session['dictionaryPhaseCharacteristicList']=dictionaryPhaseCharacteristicList   
+        
+    
+    current ="New Case"
+            
+    return render_to_response('newcasev2.html', {"form":form,
+                                                                                         "propertyCategoryName":propertyCategoryName,
+                                                                                         "catalogCrystalSystemList":catalogCrystalSystemList,
                                                                                          "typeList":typeList,
-                                                                                         "typeselected":typeselected,
                                                                                          "axisList":axisList,
-                                                                                         "axisselected_name":axisselected_name,
-                                                                                         "questionAxis":questionAxis, 
-                                                                                         "questionGp":questionGp, 
-                                                                                         "puntualGroupList":puntualGroupList,
-                                                                                         "inputList":inputList,
+                                                                                         "questionAxis":questionAxis,
                                                                                          "crystalsystem_name":crystalsystem_name,
-                                                                                         "catalogCrystalSystemList":catalogCrystalSystemList,                                                                                           
-                                                                                         "list_Property":list_Property}, context_instance=RequestContext(request))
+                                                                                         "questiontype":questiontype,
+                                                                                         "typeselected":typeselected,
+                                                                                         "ShowBtnSend":ShowBtnSend,
+                                                                                         "ShowBtnProcess":ShowBtnProcess,
+                                                                                         "ShowBtnSave":ShowBtnSave,
+                                                                                         "validationbyform":validationbyform,
+                                                                                         "current":current,
+                                                                                         "lengthlist":lengthlist,
+                                                                                         "dictionaryMeasurementList":dictionaryMeasurementList,
+                                                                                         "dictionaryList":dictionaryList,
+                                                                                         "dictionaryPhaseList":dictionaryPhaseList,
+                                                                                         "dictionaryPhaseCharacteristicList":dictionaryPhaseCharacteristicList,
+                                                                                         #"experimentalparcond_name_selected":experimentalparcond_name_selected,
+                                                                                         "list_Type":list_Type}, context_instance=RequestContext(request))
+    
+    
+    
+    
+@login_required
+@csrf_exempt 
+def onhold(request,todo,index): 
+    #todo = request.POST.get('todo', False)
+    propertySessionList=[]
+    response =None
+    current ="On Hold"
+    
+    if todo == 'show' and int(index) == -2 :
+        if not 'propertySessionList' in request.session or not request.session['propertySessionList']:
+            pass
+        elif  'propertySessionList' in request.session or  request.session['propertySessionList']:
+            propertySessionList = request.session['propertySessionList']
+            print "show "
+            
+            
+    if todo == 'remove' and int(index)  > 0:
+        if  'propertySessionList' in request.session or  request.session['propertySessionList']:
+            propertySessionList = request.session['propertySessionList']
+            try:
+                print "remove: " + index
+                #print propertySessionList[int(index)-1]
+                del propertySessionList[int(index)-1]       
+                request.session['propertySessionList']=propertySessionList              
+            except ValueError:
+                pass  
+            
+    if todo == 'removeall' and int(index)  == -1 :
+        if  'propertySessionList' in request.session or  request.session['propertySessionList']:
+                propertySessionList = request.session['propertySessionList']
+                try:
+                    print "removeall "
+                    del request.session['propertySessionList']     
+                    propertySessionList = []
+                except ValueError:
+                    pass  
+        
+        
+        
+                
+    if todo == 'save' and  int(index) == -2:
+        if not 'propertySessionList' in request.session or not request.session['propertySessionList']:
+            propertySessionList=[]
+        elif  'propertySessionList' in request.session or  request.session['propertySessionList']:
+                propertySessionList = request.session['propertySessionList']
+                try:
+                    name_str = lambda n: ''.join([random.choice(string.lowercase) for i in xrange(n)])
+                    #  length 10
+                    
+                    user =None
+                    if 'user' not in request.session  or not request.session['user']:
+                        pass
+                    else:
+                        user= request.session['user']
+                        
+                    usernamebase64= base64.b64encode(force_bytes(str(user.username)))
+                    newusernamebase64 = usernamebase64.replace("==", "")
+                    
+                    
+                    filename = newusernamebase64.lower() + name_str(15) 
+                                      
+                    
+                    mpodutil=MPODUtil()
+                    mpodutil.mpodwrite(filename,propertySessionList)
+                    mpodutil.addinfo()
+                    mpodutil.adddatavalue()
+                
+                    mpodutil.savefile()
+                    
+
+                    
+                    u= User()
+                    u=user
+                    fileuser = FileUser()
+                    fileuser.filename=mpodutil.cif_created
+                    fileuser.authuser=u 
+                    fileuser.reportvalidation = mpodutil.reportValidation
+                    fileuser.save()
+                    
+                    #uid= base64.b64encode(force_bytes(str(user.pk))),
+                    #token= account_activation_token.make_token(user)
+                    datafilescreated ="datafilescreated"
+                    forwardslash="/"
+                    #request.session['cif_created']=mpodutil.cif_created
+    
+                    #linkactivate = os.path.join(datafilescreated,forwardslash)
+                   
+                    
+                    current_site = get_current_site(request)
+                    
+                    
+                    messageCategoryDetail=MessageCategoryDetail.objects.get(messagecategory=MessageCategory.objects.get(pk=3))#3 for category staff notification
+                    messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+                    
+                        #messageMailSignup= MessageMail.objects.filter(site=Site.objects.filter(name=request.build_absolute_uri('/')))
+                    configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                    smtpconfig= configurationMessage.account
+                    #print configurationMessage.message.email_subject
+                    
+                    my_use_tls = False
+                    if smtpconfig.email_use_tls ==1:
+                        my_use_tls = True
+                    
+                    fail_silently= False
+                    listemail=[]
+                    listuser=User.objects.filter(groups=messageCategoryDetail.group)
+                    for u in listuser:
+                        print u.email   
+                        listemail.append(u.email)
+                    
+                    
+
+                    message = render_to_string('notification_to_staff_email.html', {
+                                                                            'regards':messageMail.email_regards,
+                                                                            'email_message':  messageMail.email_message,
+                                                                            'user': user,
+                                                                            'domain': current_site.domain,
+                                                                            'datafilescreated': datafilescreated,
+                                                                            'cif_created': mpodutil.cif_created,
+                                                                            'reportValidation':mpodutil.reportValidation,
+                                                                            'forwardslash':forwardslash
+                    })
+                
+                    print message
+                
+                    
+                                   
+                    backend = EmailBackend(   host=smtpconfig.email_host, 
+                                                                        port=int(smtpconfig.email_port ), 
+                                                                        username=smtpconfig.email_host_user, 
+                                                                        password=smtpconfig.email_host_password, 
+                                                                        use_tls=my_use_tls,
+                                                                        fail_silently=fail_silently)
+                                                
+                    email = EmailMessage( messageMail.email_subject,
+                                                                message,
+                                                                smtpconfig.email_host_user,
+                                                                listemail,
+                                                                connection=backend)
+                    
+                    email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
+                    email.send()
+                    
+                    
+                    
+                    messageCategoryDetail=MessageCategoryDetail.objects.get(messagecategory=MessageCategory.objects.get(pk=2))#2 for category User notification
+                    messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+                    
+                        #messageMailSignup= MessageMail.objects.filter(site=Site.objects.filter(name=request.build_absolute_uri('/')))
+                    configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                    smtpconfig= configurationMessage.account
+                    
+                    my_use_tls = False
+                    if smtpconfig.email_use_tls ==1:
+                        my_use_tls = True
+                    
+                    fail_silently= False
+                    
+                
+                    
+                    message = render_to_string('notification_to_user_email.html', {
+                                                                            'regards':messageMail.email_regards,
+                                                                            'email_message':  messageMail.email_message,
+                                                                            'user': user,
+                                                                            'domain': current_site.domain,
+                                                                            'datafilescreated': datafilescreated,
+                                                                            'cif_created': mpodutil.cif_created,
+                                                                            'forwardslash':forwardslash
+                    })
+                
+                    print message
+                
+                    
+                                   
+                    backend = EmailBackend(   host=smtpconfig.email_host, 
+                                                                        port=int(smtpconfig.email_port ), 
+                                                                        username=smtpconfig.email_host_user, 
+                                                                        password=smtpconfig.email_host_password, 
+                                                                        use_tls=my_use_tls,
+                                                                        fail_silently=fail_silently)
+                                                
+                    email = EmailMessage( messageMail.email_subject,
+                                                                message,
+                                                                smtpconfig.email_host_user,
+                                                                  [user.email],
+                                                                connection=backend)
+                    
+                    email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
+                    email.send()
+                    del request.session['propertySessionList']     
+                except ValueError:
+                    pass
+                
+    #response = render_to_response('account/onhold.html', {"propertySessionList":propertySessionList,
+                                             
+                                                                                                                #"current":current, }, context_instance=RequestContext(request)) 
+      
+    if todo == 'removeall' and  int(index) == -1: 
+        current ="New Case"           
+        propertySessionList = []
+        """response = render_to_response("newcasev2", {"propertySessionList":propertySessionList,
+                                                                                                                "current":current, }, context_instance=RequestContext(request)) 
+        """
+        response = redirect('/newcasev2')
+    
+    if todo == 'save' and  int(index) == -2:    
+        if len(propertySessionList)  > 0:
+            
+            current ="File created and sent"
+            response = render_to_response('account/successfile.html', {"propertySessionList":propertySessionList,
+                                                                                                                    "current":current, }, context_instance=RequestContext(request))        
+  
+            
+        #return newcase(request);#render_to_response('newcase.html', { "saved_compliancepropetyList":saved_compliancepropetyList}, context_instance=RequestContext(request))
+    return response
+
+     
+     
+
+   
+   
+@login_required
+@csrf_exempt 
+def addnewdictionaryproperty(request,todo,index): 
+
+    dicvalue = request.POST.get('valuenew', False)
+    
+    underscore = '_'
+    property = "_prop_" 
+    name = request.POST.get('namenew', False)
+    lins1 = map(lambda x: x.strip(),    name.strip().split(" "))
+    line =  "_prop_" 
+    x= len(lins1)  
+    print x
+    for i, li in enumerate(lins1):
+        if i < (x -1):
+            line =line + li + underscore
+        else:
+            line =line + li 
+        
+       
+     
+    print line
+    
+    in_list = False
+    newItem=Dictionary()
+    newItem.tag =line
+    newItem.name = request.POST.get('namenew', False)
+     
+    #newItem.description= ""
+    newItem.units = request.POST.get('unitsnew', False)
+    newItem.units_detail = request.POST.get('units_detailnew', False)
+    newItem.definition= request.POST.get('definitionnew', False)
+ 
+    if  todo == "addnew":    
+        if 'newDictionaryList' not in request.session  or not request.session['newDictionaryList']:
+            if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:  
+                newDictionaryList=[]
+                newDictionaryList.append(newItem)
+                dictionaryValues = {}    
+                dictionaryValues[newItem.tag.encode("ascii"),'char']=dicvalue.encode("ascii")
+                request.session['dictionaryValues' ] = dictionaryValues        
+                request.session['newDictionaryList']=newDictionaryList   
+            else:
+                newDictionaryList=[]
+                dictionaryValues=request.session['dictionaryValues' ] 
+                if newItem.tag.encode("ascii") in dictionaryValues:
+                    in_list = True
+                else:
+                    in_list = False
+                    dictionaryValues[newItem.tag.encode("ascii"),'char']=dicvalue.encode("ascii")
+                    request.session['dictionaryValues' ] = dictionaryValues
+                    newDictionaryList.append(newItem)
+                    request.session['newDictionaryList']=newDictionaryList   
+                
+                
+                
+        else:
+            newDictionaryList =  request.session['newDictionaryList']
+            dictionaryValues=request.session['dictionaryValues' ] 
+            if newItem.tag.encode("ascii") in dictionaryValues:
+                in_list = True
+            else:
+                in_list = False
+                dictionaryValues[newItem.tag.encode("ascii"),'char']=dicvalue.encode("ascii")
+                request.session['dictionaryValues' ] = dictionaryValues
+                newDictionaryList.append(newItem)
+                
+            print newDictionaryList
+            print dictionaryValues
+                
+                
+                
+                
+            
+    data = {
+        'name': newItem.name,
+        'units': newItem.units,
+        'units_detail': newItem.units_detail,
+        'dicvalue': dicvalue,
+        'in_list': in_list,
+ 
+    } 
+    
+    del newItem
+    
+    return HttpResponse(json.dumps(data), content_type="application/json")            
+
+def isnumber(param):
+    result = False
+    try:
+        val = float(param)
+        result = True
+        return result
+    except ValueError:
+        print("That's not an int!")
+        return result
 
 @login_required
 @csrf_exempt 
-def addcase(request): 
+def adddictionaryphase(request,pk): 
+    response = None
+    todo  = request.POST.get('todo', False)
+    dicvalue = request.POST.get('phasevalue', False)
+    in_list = False
+    error ="None"
+    if dicvalue == "":
+        dicvalue = "?"
 
-    list_Property=get_catalog_propertyv2();  
-    title = request.POST.get('title', '')
-    author = request.POST.get('author', '')
-    journal = request.POST.get('journal', '')
-    catalogproperty_name = request.POST.get('catalogproperty_name', False)
-    catalogproperty_id =int( request.POST.get('catalogproperty_id', False) )
-    crystalsystem_name= request.POST.get('crystalsystem_name', False)    
-    typeselected=''
-    typeselected = request.POST.get('type', False)  
-    if typeselected == False:
-        typeselected =''
+    
+    dictionary_pk =  request.POST.get('dictionary_pk', False) 
+    
+    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
+    #isnumb = False
+    if objDictionarySelected.type == "numb":
+        #isnumb= isnumber(dicvalue)
+        if not isnumber(dicvalue):
+            error ="The value must be numeric"
+            data = {
+                 'error':error,
+             }
+            return  HttpResponse(json.dumps(data), content_type="application/json")   
+    elif objDictionarySelected.type == "char":
+        pass
+        
+    
+    
+    
+
+    if pk == '-1' and todo == "change":
+        pass
+    elif  pk == '-1' and todo == "addphase":
+        if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
+            dictionaryValues = {}
+            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+            request.session['dictionaryValues' ] = dictionaryValues
+        else:
+            dictionaryValues=request.session['dictionaryValues' ] 
+            if objDictionarySelected.tag.encode("ascii") in dictionaryValues:
+                in_list = True
+            else:
+                in_list = False
+                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+                request.session['dictionaryValues' ] = dictionaryValues
+                
+
+        print dictionaryValues
+  
+    print  objDictionarySelected
+         
    
+
+    data = {
+        'name': objDictionarySelected.name,
+        'units': objDictionarySelected.units,
+        'units_detail': objDictionarySelected.units_detail,
+        'dicvalue': dicvalue,
+        'in_list': in_list,
+        'error':error,
+
+    }
     
-    axisselected_name =''
-    axisselected_name = request.POST.get('axisselected_name', False)   
-    if axisselected_name == False:
-        axisselected_name =''
     
-    puntualgroupselected_name =''
-    puntualgroupselected_name =  request.POST.get('puntualgroupselected_name', False)
-    if puntualgroupselected_name == False:
-        puntualgroupselected_name =''
+    #del newItem
+    
+    return HttpResponse(json.dumps(data), content_type="application/json")   
+
+    
+    
+
+@login_required
+@csrf_exempt 
+def adddictionaryphasecharacteristic(request,pk): 
+    response = None
+    todo  = request.POST.get('todo', False)
+    dicvalue = request.POST.get('phasecharacteristicvalue', False)
+    in_list = False
+    error ="None"
+    if dicvalue == "":
+        dicvalue = "?"
+
+    
+    dictionary_pk =  request.POST.get('dictionary_pk', False) 
+    
+    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
+    #isnumb = False
+    if objDictionarySelected.type == "numb":
+        #isnumb= isnumber(dicvalue)
+        if not isnumber(dicvalue):
+            error ="The value must be numeric"
+            data = {
+                 'error':error,
+             }
+            return  HttpResponse(json.dumps(data), content_type="application/json")   
+    elif objDictionarySelected.type == "char":
+        pass
         
     
-      
-    s11=  request.POST.get('s11', False)
-    s12=  request.POST.get('s12', False)    
-    s13=  request.POST.get('s13', False)  
-    s14=  request.POST.get('s14', False)  
-    s15=  request.POST.get('s15', False)  
-    s16=  request.POST.get('s16', False)      
- 
-    s21=  request.POST.get('s21', False)
-    s22=  request.POST.get('s22', False)    
-    s23=  request.POST.get('s23', False)  
-    s24=  request.POST.get('s24', False)  
-    s25=  request.POST.get('s25', False)  
-    s26=  request.POST.get('s26', False) 
-    
-    s31=  request.POST.get('s31', False)
-    s32=  request.POST.get('s32', False)    
-    s33=  request.POST.get('s33', False)  
-    s34=  request.POST.get('s34', False)  
-    s35=  request.POST.get('s35', False)  
-    s36=  request.POST.get('s36', False)  
     
     
-    s41=  request.POST.get('s41', False)
-    s42=  request.POST.get('s42', False)    
-    s43=  request.POST.get('s43', False)  
-    s44=  request.POST.get('s44', False)  
-    s45=  request.POST.get('s45', False)  
-    s46=  request.POST.get('s46', False)  
-    
-    
-    s51=  request.POST.get('s51', False)
-    s52=  request.POST.get('s52', False)    
-    s53=  request.POST.get('s53', False)  
-    s54=  request.POST.get('s54', False)  
-    s55=  request.POST.get('s55', False)  
-    s56=  request.POST.get('s56', False)  
-    
-    s61=  request.POST.get('s61', False)
-    s62=  request.POST.get('s62', False)    
-    s63=  request.POST.get('s63', False)  
-    s64=  request.POST.get('s64', False)  
-    s65=  request.POST.get('s65', False)  
-    s66=  request.POST.get('s66', False) 
-    
-    
-    
-        
-    
-    c11=  request.POST.get('c11', False)
-    c12=  request.POST.get('c12', False)    
-    c13=  request.POST.get('c13', False)  
-    c14=  request.POST.get('c14', False)  
-    c15=  request.POST.get('c15', False)  
-    c16=  request.POST.get('c16', False)  
-    
-    c21=  request.POST.get('c21', False)
-    c22=  request.POST.get('c22', False)    
-    c23=  request.POST.get('c23', False)  
-    c24=  request.POST.get('c24', False)  
-    c25=  request.POST.get('c25', False)  
-    c26=  request.POST.get('c26', False) 
-    
-    
-    c31=  request.POST.get('c31', False)
-    c32=  request.POST.get('c32', False)    
-    c33=  request.POST.get('c33', False)  
-    c34=  request.POST.get('c34', False)  
-    c35=  request.POST.get('c35', False)  
-    c36=  request.POST.get('c36', False) 
-    
-    c41=  request.POST.get('c41', False)
-    c42=  request.POST.get('c42', False)    
-    c43=  request.POST.get('c43', False)  
-    c44=  request.POST.get('c44', False)  
-    c45=  request.POST.get('c45', False)  
-    c46=  request.POST.get('c46', False) 
-    
-    
-    c51=  request.POST.get('c51', False)
-    c52=  request.POST.get('c52', False)    
-    c53=  request.POST.get('c53', False)  
-    c54=  request.POST.get('c54', False)  
-    c55=  request.POST.get('c55', False)  
-    c56=  request.POST.get('c56', False) 
-    
-    
-    c61=  request.POST.get('c61', False)
-    c62=  request.POST.get('c62', False)    
-    c63=  request.POST.get('c63', False)  
-    c64=  request.POST.get('c64', False)  
-    c65=  request.POST.get('c65', False)  
-    c66=  request.POST.get('c66', False) 
-    
-    
-    
-    d11=  request.POST.get('d11', False)
-    d12=  request.POST.get('d12', False)    
-    d13=  request.POST.get('d13', False)  
-    d14=  request.POST.get('d14', False)  
-    d15=  request.POST.get('d15', False)  
-    d16=  request.POST.get('d16', False)  
-    
-    d21=  request.POST.get('d21', False)
-    d22=  request.POST.get('d22', False)    
-    d23=  request.POST.get('d23', False)  
-    d24=  request.POST.get('d24', False)  
-    d25=  request.POST.get('d25', False)  
-    d26=  request.POST.get('d26', False) 
-    
-    
-    d31=  request.POST.get('d31', False)
-    d32=  request.POST.get('d32', False)    
-    d33=  request.POST.get('d33', False)  
-    d34=  request.POST.get('d34', False)  
-    d35=  request.POST.get('d35', False)  
-    d36=  request.POST.get('d36', False) 
-    
-    d41=  request.POST.get('d41', False)
-    d42=  request.POST.get('d42', False)    
-    d43=  request.POST.get('d43', False)  
-    d44=  request.POST.get('d44', False)  
-    d45=  request.POST.get('d45', False)  
-    d46=  request.POST.get('d46', False) 
-    
-    
-    d51=  request.POST.get('d51', False)
-    d52=  request.POST.get('d52', False)    
-    d53=  request.POST.get('d53', False)  
-    d54=  request.POST.get('d54', False)  
-    d55=  request.POST.get('d55', False)  
-    d56=  request.POST.get('d56', False) 
-    
-    
-    d61=  request.POST.get('d61', False)
-    d62=  request.POST.get('d62', False)    
-    d63=  request.POST.get('d63', False)  
-    d64=  request.POST.get('d64', False)  
-    d65=  request.POST.get('d65', False)  
-    d66=  request.POST.get('d66', False) 
-        
-        
-        
-        
-        
-        
-    message=""
-    error = ""
-    questiontype =""
-    questionAxis = ''        
-    questionGp = ''    
-     
-    inputList = None
-    
-    eventonchange = request.POST.get('eventonchange', False)  
-    proccesing = request.POST.get('proccesing', False)  
-    
-    typeList =  [];
-    catalogCrystalSystemList = [];
-    crystalSystemPuntualGroupList =[];
-    crystalSystemAxisList  =[];
-    axisList=[]
-    puntualGroupList =[];
-    
-    propertySelected=CatalogProperty.objects.filter(name__exact=catalogproperty_name)
-    for register_property in propertySelected: 
-        objProperty=CatalogProperty();
-        objProperty = register_property
-        catalogproperty_name = objProperty.name
-        catalogproperty_id =  objProperty.id
-       
-       
-    list_Type = Type.objects.filter(catalogproperty=objProperty)
-    for register_type in list_Type: 
-        objType=Type();
-        objType = register_type
-        if objType.id != 0:
-            typeList.append(objType)
-     
+
+    if pk == '-1' and todo == "phasecharacteristicchange":
+        pass
+    elif  pk == '-1' and todo == "addphasecharacteristic":
+        if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
+            dictionaryValues = {}
+            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+            request.session['dictionaryValues' ] = dictionaryValues
+        else:
+            dictionaryValues=request.session['dictionaryValues' ] 
+            if objDictionarySelected.tag.encode("ascii") in dictionaryValues:
+                in_list = True
+            else:
+                in_list = False
+                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+                request.session['dictionaryValues' ] = dictionaryValues
+                
+
+        print dictionaryValues
+  
+    print  objDictionarySelected
+         
    
-   
-    list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=objProperty)
-    for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
-        objCatalogCrystalSystem=CatalogCrystalSystem();
-        objCatalogCrystalSystem = register_catalogCrystalSystem
-        catalogCrystalSystemList.append(objCatalogCrystalSystem)
+
+    data = {
+        'name': objDictionarySelected.name,
+        'units': objDictionarySelected.units,
+        'units_detail': objDictionarySelected.units_detail,
+        'dicvalue': dicvalue,
+        'in_list': in_list,
+        'error':error,
+
+    }
+    
+    
+    #del newItem
+    
+    return HttpResponse(json.dumps(data), content_type="application/json")   
     
           
-               
-                 
-     
-     
- 
-    if catalogproperty_name=='p':
-        typeselected ='n'
-      
-      
-    catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=crystalsystem_name,catalogproperty=propertySelected) 
-    newProperties = Properties(catalogproperty_name,crystalsystem_name)    
-    newProperties.s11=s11
-    newProperties.s12=s12
-    newProperties.s13=s13
-    newProperties.s14=s14
-    newProperties.s15=s15
-    newProperties.s16=s16   
-    
-    newProperties.s21=s21
-    newProperties.s22=s22
-    newProperties.s23=s23
-    newProperties.s24=s24
-    newProperties.s25=s25
-    newProperties.s26=s26
+          
+          
+          
+          
+@login_required
+@csrf_exempt 
+def adddictionarymeasurement(request,pk): 
+    response = None
+    todo  = request.POST.get('todo', False)
+    dicvalue = request.POST.get('measurementvalue', False)
+    in_list = False
+    error ="None"
+    if dicvalue == "":
+        dicvalue = "?"
 
-    newProperties.s31=s31
-    newProperties.s32=s32
-    newProperties.s33=s33
-    newProperties.s34=s34
-    newProperties.s35=s35
-    newProperties.s36=s36
     
-    newProperties.s41=s41
-    newProperties.s42=s42
-    newProperties.s43=s43
-    newProperties.s44=s44
-    newProperties.s45=s45
-    newProperties.s46=s46
+    dictionary_pk =  request.POST.get('dictionary_pk', False) 
     
-    newProperties.s51=s51
-    newProperties.s52=s52
-    newProperties.s53=s53
-    newProperties.s54=s54
-    newProperties.s55=s55
-    newProperties.s56=s56
-    
-    newProperties.s61=s61
-    newProperties.s62=s62
-    newProperties.s63=s63
-    newProperties.s64=s64
-    newProperties.s65=s65
-    newProperties.s66=s66
-    
-    
-    newProperties.c11=c11
-    newProperties.c12=c12
-    newProperties.c13=c13
-    newProperties.c14=c14
-    newProperties.c15=c15
-    newProperties.c16=c16   
-    
-    newProperties.c21=c21
-    newProperties.c22=c22
-    newProperties.c23=c23
-    newProperties.c24=c24
-    newProperties.c25=c25
-    newProperties.c26=c26
-
-    newProperties.c31=c31
-    newProperties.c32=c32
-    newProperties.c33=c33
-    newProperties.c34=c34
-    newProperties.c35=c35
-    newProperties.c36=c36
-    
-    newProperties.c41=c41
-    newProperties.c42=c42
-    newProperties.c43=c43
-    newProperties.c44=c44
-    newProperties.c45=c45
-    newProperties.c46=c46
-    
-    newProperties.c51=c51
-    newProperties.c52=c52
-    newProperties.c53=c53
-    newProperties.c54=c54
-    newProperties.c55=c55
-    newProperties.c56=c56
-    
-    newProperties.c61=c61
-    newProperties.c62=c62
-    newProperties.c63=c63
-    newProperties.c64=c64
-    newProperties.c65=c65
-    newProperties.c66=c66
-    
-    
-    
-    newProperties.d11=d11
-    newProperties.d12=d12
-    newProperties.d13=d13
-    newProperties.d14=d14
-    newProperties.d15=d15
-    newProperties.d16=d16   
-    
-    newProperties.d21=d21
-    newProperties.d22=d22
-    newProperties.d23=d23
-    newProperties.d24=d24
-    newProperties.d25=d25
-    newProperties.d26=d26
-
-    newProperties.d31=d31
-    newProperties.d32=d32
-    newProperties.d33=d33
-    newProperties.d34=d34
-    newProperties.d35=d35
-    newProperties.d36=d36
-    
-    newProperties.d41=d41
-    newProperties.d42=d42
-    newProperties.d43=d43
-    newProperties.d44=d44
-    newProperties.d45=d45
-    newProperties.d46=d46
-    
-    newProperties.d51=d51
-    newProperties.d52=d52
-    newProperties.d53=d53
-    newProperties.d54=d54
-    newProperties.d55=d55
-    newProperties.d56=d56
-    
-    newProperties.d61=d61
-    newProperties.d62=d62
-    newProperties.d63=d63
-    newProperties.d64=d64
-    newProperties.d65=d65
-    newProperties.d66=d66
-    
-    if proccesing  != '0' :
-      newProperties.process = 1
-    
-    
-    newProperties.NewProperties(typeselected,puntualgroupselected_name,axisselected_name)
-    
-    objProperty=CatalogProperty.objects.filter(name__exact=catalogproperty_name) 
-
+    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
+    #isnumb = False
+    if objDictionarySelected.type == "numb":
+        #isnumb= isnumber(dicvalue)
+        if not isnumber(dicvalue):
+            error ="The value must be numeric"
+            data = {
+                 'error':error,
+             }
+            return  HttpResponse(json.dumps(data), content_type="application/json")   
+    elif objDictionarySelected.type == "char":
+        pass
         
-    objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=typeselected)    
-                 
-    catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=crystalsystem_name,catalogproperty=objProperty)    
-     
-    #if newProperties.questionGp != '' :  
-    questionGp =  newProperties.questionGp
-   
-    propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=catalogCrystalSystemSelected).values('catalogpointgroup').annotate(total=Count('catalogpointgroup'))
-    for d in propertyDetail:  
-      if d['catalogpointgroup'] != 0:       
-        print d['catalogpointgroup']  
-        objCatalogPointGroup=CatalogPointGroup.objects.filter(id__exact=d['catalogpointgroup'])         
-        for obj in  objCatalogPointGroup:
-            cpg=CatalogPointGroup()
-            cpg=obj        
-            if puntualgroupselected_name == '':
-               puntualgroupselected_name=cpg.name
-           
-            puntualGroupList.append(cpg)
-   
-   
-    propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=catalogCrystalSystemSelected).values('puntualgroupnames').annotate(total=Count('puntualgroupnames'))
-    for d in propertyDetail:
-      if d['puntualgroupnames'] != 0:   
-       print d['puntualgroupnames']              
-       objPuntualgroupnames=PuntualGroupNames.objects.filter(id__exact=d['puntualgroupnames']) 
-       objPuntualGroupGroups = PuntualGroupGroups.objects.filter(puntualgroupnames=objPuntualgroupnames)    
-       for obj in objPuntualGroupGroups:
-          pgg=PuntualGroupGroups()
-          pgg=obj
-          print pgg.catalogpointgroup.name
-          if puntualgroupselected_name == '':
-             puntualgroupselected_name=pgg.catalogpointgroup.name
-             
-          puntualGroupList.append(pgg.catalogpointgroup)
-       
-
-    if newProperties.questionAxis != '' :  
-        questionAxis =  newProperties.questionAxis 
-        propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=catalogCrystalSystemSelected).values('catalogaxis').annotate(total=Count('catalogaxis'))
-        for d in propertyDetail:  
-          if d['catalogaxis'] != 0:       
-            print d['catalogaxis']  
-            objCatalogAxis=CatalogAxis.objects.filter(id=d['catalogaxis'] )
-            for obj in objCatalogAxis:
-              ca=CatalogAxis()
-              ca=obj
-              print ca.name
-              axisList.append(ca)
-              
-              
-    
-    message=newProperties.message 
-    ShowBtnSend=newProperties.ShowBtnSend
-    ShowBtnProcess=newProperties.ShowBtnProcess
-    error = newProperties.error  
-    results=newProperties.results
-    resultc=newProperties.resultc
-    resultd=newProperties.resultd
-    compliancessi = range(0, newProperties.si)
-    compliancessj = range(0, newProperties.sj)
-    stiffnessci = range(0, newProperties.ci)
-    stiffnesscj = range(0, newProperties.cj)
-    resultdi = range(0, newProperties.di)
-    resultdj = range(0, newProperties.dj)
-    
-    printtableresult = 1
-    printingc=newProperties.printingc
-    printings=newProperties.printings
-    printingd=newProperties.printingd
-    
     
     
     
 
+    if pk == '-1' and todo == "measurementchange":
+        pass
+    elif  pk == '-1' and todo == "addmeasurement":
+        if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
+            dictionaryValues = {}
+            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+            request.session['dictionaryValues' ] = dictionaryValues
+        else:
+            dictionaryValues=request.session['dictionaryValues' ] 
+            if objDictionarySelected.tag.encode("ascii") in dictionaryValues:
+                in_list = True
+            else:
+                in_list = False
+                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+                request.session['dictionaryValues' ] = dictionaryValues
+                
 
-    inputList=newProperties.catalogPropertyDetail
-    
-    del  newProperties
-
-
-    gc.collect()
-           
-
+        print dictionaryValues
+  
+    print  objDictionarySelected
          
+   
+
+    data = {
+        'name': objDictionarySelected.name,
+        'units': objDictionarySelected.units,
+        'units_detail': objDictionarySelected.units_detail,
+        'dicvalue': dicvalue,
+        'in_list': in_list,
+        'error':error,
+
+    }
+    
+    
+    #del newItem
+    
+    return HttpResponse(json.dumps(data), content_type="application/json")           
+          
+          
+          
+          
+          
+          
+          
+          
+            
+@login_required
+@csrf_exempt 
+def adddictionaryproperty(request,pk):
+    #response= None
+    todo  = request.POST.get('todo', False)
+    dicvalue = request.POST.get('dicvalue', False)
+    in_list = False
+    error ="None"
+    if dicvalue == "":
+        dicvalue = "?"
 
     
-    if catalogproperty_name == "e":
-         questiontype = "s (compliance) o c (stiffness)?"
+    dictionary_pk =  request.POST.get('dictionary_pk', False) 
+    print dictionary_pk
+    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
+    print objDictionarySelected.type
+    
+    if objDictionarySelected.type == "numb":
+        #isnumb= isnumber(dicvalue)
+        if not isnumber(dicvalue):
+            error ="The value must be numeric"
+            data = {
+                 'error':error,
+             }
+            return  HttpResponse(json.dumps(data), content_type="application/json")   
+    elif objDictionarySelected.type == "char":
+        pass
+    
+    
+
+    if pk == '-1' and todo == "change":
+        print "selected"  
+        print  objDictionarySelected
+        pass
+    elif  pk == '-1' and todo == "add":
+        if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
+            dictionaryValues = {}
+            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+            request.session['dictionaryValues' ] = dictionaryValues
+        else:
+            dictionaryValues=request.session['dictionaryValues' ] 
+            if objDictionarySelected.tag.encode("ascii") in dictionaryValues:
+                in_list = True
+            else:
+                in_list = False
+                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+                request.session['dictionaryValues' ] = dictionaryValues
+                
+
+        print dictionaryValues
+  
+    print  objDictionarySelected.name
+         
+   
+
+    data = {
+        'name': objDictionarySelected.name,
+        'units': objDictionarySelected.units,
+        'units_detail': objDictionarySelected.units_detail,
+        'dicvalue': dicvalue,
+        'in_list': in_list,
+        'error':error,
+ 
+    }
+   
+
+
+    return HttpResponse(json.dumps(data), content_type="application/json")  
+    
+    
+    
+@login_required
+@csrf_exempt 
+def addcasev2(request): 
+    
+    todo = request.POST.get('todo', False)
+    experimentalparcond_name_selected = request.POST.get('experimentalparcond_name', False)
+   
+    #print experimentalparcond_name_selected
+
+    if todo == 'submit':
+        current ="Add Case"
+        isvalid =False
+        form=None  
+        inputList = []   
+        if 'inputList' not in request.session  or not request.session['inputList']:
+            pass
+        else:
+            selectChange = request.POST.get('selectChange', False)  
+            #print selectChange
+            if selectChange == "0":
+                inputList=request.session['inputList']
+            else:
+                del request.session['inputList']
+                
+ 
+            
+        #list initialisation 
+        propertyCategoryName=[]   
+        catalogCrystalSystemList=[]   
+        typeList=[]  
         
-    
-    
-    
-    
-    
-    #error = propertie.error
+        catalogproperty_name = request.POST.get('catalogproperty_name', False)            
+        crystalsystem_name= request.POST.get('crystalsystem_name', False) 
+        
+        typeselected=''
+        typeselected = request.POST.get('type', False)  
+        if typeselected == False:
+            typeselected =''
+            
+            
+            
+             
+        
+        #initialisation
+        questiontype =''
+        if catalogproperty_name == "e":
+            questiontype = "s (compliance) o c (stiffness)?"
+            
+            
+        axisselected_name =''
+        axisselected_name = request.POST.get('axisselected_name', False)   
+        if axisselected_name == False:
+            axisselected_name =''
+        
+        puntualgroupselected_name =''
+        puntualgroupselected_name =  request.POST.get('puntualgroupselected_name', False)
+        if puntualgroupselected_name == False:
+            puntualgroupselected_name =''
+        
+        
+        if 'propertyCategoryNameListOnSession' not in request.session  or not request.session['propertyCategoryNameListOnSession']:
+            propertyCategoryName=CatalogProperty.objects.all()
+            request.session['propertyCategoryNameListOnSession'] =propertyCategoryName
+        else:
+            propertyCategoryName =request.session['propertyCategoryNameListOnSession']
+          
+          
+        list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=CatalogProperty.objects.get(name__exact=catalogproperty_name))
+        for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
+            objCatalogCrystalSystem=CatalogCrystalSystem();
+            objCatalogCrystalSystem = register_catalogCrystalSystem
+            catalogCrystalSystemList.append(objCatalogCrystalSystem)
+
+        del request.session['catalogCrystalSystemListOnSession']
+
+        request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
+          
+        
+        if 'typeListOnSession' not in request.session  or not request.session['typeListOnSession']:
+            pass
+        else:
+            if catalogproperty_name == "e":
+                typeList=request.session['typeListOnSession']
+                
+                
+        dictionaryList=[]
+        dictionaryQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=9), deploy = 1)
+        for dictionary in dictionaryQuerySet: 
+            objDictionary =Dictionary();
+            objDictionary = dictionary
+            dictionaryList.append(objDictionary)
+            del objDictionary
+            
+        request.session['dictionaryList'] =dictionaryList
+        
+        
+        dictionaryPhaseList=[]
+        
+        dictionaryPhaseQuerySet1= Dictionary.objects.filter(category = Category.objects.get(pk=4), deploy = 1)
+        dictionaryPhaseQuerySet2= Dictionary.objects.filter(category = Category.objects.get(pk=8), deploy = 1)
+        dictionaryPhaseQuerySet= (dictionaryPhaseQuerySet1 | dictionaryPhaseQuerySet2).distinct()
+        for dictionary in dictionaryPhaseQuerySet: 
+            objDictionary =Dictionary();
+            objDictionary = dictionary
+            dictionaryPhaseList.append(objDictionary)
+            del objDictionary  
+            
+        request.session['dictionaryPhaseList'] =dictionaryPhaseList
+        
+        dictionaryPhaseCharacteristicList=[]
+        dictionaryPhaseCharacteristicQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=11), deploy = 1)
+        for dictionary in dictionaryPhaseCharacteristicQuerySet: 
+            objDictionary =Dictionary();
+            objDictionary = dictionary
+            dictionaryPhaseCharacteristicList.append(objDictionary)
+            del objDictionary    
+            
+            
+        dictionaryMeasurementList=[]
+        dictionaryMeasurementQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=12), deploy = 1)
+        for dictionary in dictionaryMeasurementQuerySet: 
+            objDictionary =Dictionary();
+            objDictionary = dictionary
+            dictionaryMeasurementList.append(objDictionary)
+            del objDictionary     
+
+        
+        ShowBtnSend=0
+
+        form =ValidateAddCaseFormv2(request.POST,inputList=inputList)
+         
+        validationbyform = 0
+        propertiesv2=None
+        
+        #inicializacion
+        lengthlist = 0
+        propertySessionList =[]
+        if not 'propertySessionList' in request.session or not request.session['propertySessionList' ]:  
+            pass
+        else:
+            propertySessionList = request.session['propertySessionList' ]
+            print propertySessionList
+            lengthlist =len(propertySessionList) 
+
+
+        propertaddedmessage =""
+        sucess = 0
+        added = 0
+        inputListReadOnly = [] 
+        inputListValues = {}
+      
+             
+        if form.is_valid():
+            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected,rq=request,inputList=inputList)
+            propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
+
+            sucess=propertiesv2.sucess  
+
+            
+            if  sucess  == 0:
+                inputList=propertiesv2.catalogPropertyDetail
+                request.session['inputList']=inputList
+                inputListReadOnly=propertiesv2.catalogPropertyDetailReadOnly
+ 
+                print "continue"
+            else:
+                
+                propertiesv2.releaseRequet()
+                propertiesv2.title = request.POST.get('title', False)
+                propertiesv2.authors = request.POST.get('author', False)
+                propertiesv2.journal = request.POST.get('journal', False)
+                propertiesv2.year = request.POST.get('year', False)
+                propertiesv2.volume = request.POST.get('volume', False)
+                propertiesv2.page_first = request.POST.get('page_first', False)
+                propertiesv2.page_last = request.POST.get('page_last', False)
+ 
+     
+                if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
+                    pass 
+                else:
+                    dictionaryValues =request.session['dictionaryValues' ] 
+                    propertiesv2.dictionaryValues=dictionaryValues   
+                    
+                 
+         
+                
+                print "add to list"
+                added =addToSession(request,propertiesv2,'propertySessionList')
+                propertySessionList= request.session['propertySessionList'];
+                
+ 
+                if added == 0:
+                    propertaddedmessage = "Property previously added"
+                else:
+                    lengthlist =len(propertySessionList) 
+
+                validationbyform = 0
+                #ShowBtnSend=0
+                print "valid"
+                
+                
+            if lengthlist == 0 and sucess==0 and len(inputListReadOnly) > 0:
+                ShowBtnSend=0
+            elif lengthlist == 0 and sucess==0 and len(inputListReadOnly) == 0:
+                ShowBtnSend=1
+            elif lengthlist == 1 and sucess==1 and len(inputListReadOnly) == 0:
+                ShowBtnSend=2
+                
+                
+            """
+            print "sucess: " + str(sucess )   
+            print "lengthlist: " + str(lengthlist)
+            print "inputListReadOnly: " + str( len(inputListReadOnly) ) 
+           """
+            
+        else:
+
+            ShowBtnSend=1
+            validationbyform = 1
+            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected)
+            propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
+
+            if  len(inputList) > 0:                
+                for cpd in inputList:
+                    value =request.POST.get(cpd.name, False)
+                    if value != False:
+                        if value != "" :
+                            inputListValues[cpd.name] = value
+
+                print inputListValues
+                inputListReadOnly = propertiesv2.catalogPropertyDetailReadOnly
+            else:
+                print  inputList
+                print "invalid"
+ 
+            
+      
+        return render_to_response('newcasev2.html', {   "form":form,
+                                                                                             "propertyCategoryName":propertyCategoryName,
+                                                                                             "catalogproperty_name":catalogproperty_name,
+                                                                                             "catalogCrystalSystemList":catalogCrystalSystemList,
+                                                                                             "puntualGroupList":propertiesv2.puntualGroupList,
+                                                                                             "questionGp":propertiesv2.questionGp,
+                                                                                             "axisList":propertiesv2.axisList, 
+                                                                                             "questionAxis":propertiesv2.questionAxis, 
+                                                                                             'message':propertiesv2.message,
+                                                                                            "read_write_inputs":propertiesv2.read_write_inputs,
+                                                                                             "inputListReadOnly":inputListReadOnly,
+                                                                                             "jquery" :propertiesv2.jquery,
+                                                                                             "inputListValues":inputListValues,
+                                                                                             "puntualgroupselected_name":puntualgroupselected_name,
+                                                                                             "axisselected_name":axisselected_name,
+                                                                                             "typeList":typeList,
+                                                                                             "inputList":inputList,
+                                                                                             "crystalsystem_name":crystalsystem_name,
+                                                                                             "questiontype":questiontype,
+                                                                                             "typeselected":typeselected,
+                                                                                             "ShowBtnSend":ShowBtnSend,
+                                                                                             "validationbyform":validationbyform,
+                                                                                             "current":current,
+                                                                                             "lengthlist":lengthlist,                                                                                               
+                                                                                             "dictionaryList":dictionaryList,      
+                                                                                             "dictionaryPhaseList":dictionaryPhaseList,   
+                                                                                             "dictionaryPhaseCharacteristicList":dictionaryPhaseCharacteristicList,   
+                                                                                             "dictionaryMeasurementList":dictionaryMeasurementList,                                                                               
+                                                                                             "propertaddedmessage":propertaddedmessage,
+                                                                                             "experimentalparcond_name_selected":experimentalparcond_name_selected,
+                                                                                             'propertySessionList':propertySessionList
+                                                                                       }, context_instance=RequestContext(request))
+      
+def addToSession(request,customobject,nameObjectOnSession):
+    result = 0
+    def containsproperty(listObject, obj):
+        result = False
+        for x in listObject:
+            print x.catalogproperty_name + " == " + obj.catalogproperty_name
+            if x.catalogproperty_name ==obj.catalogproperty_name :
+                print x.crystalsystem_name + " == " + obj.crystalsystem_name
+                if x.crystalsystem_name == obj.crystalsystem_name:
+                    print x.type + " == " + obj.type
+                    if x.type == obj.type:
+                        result= True
+                        break
+                    
+        return result          
+        
+    sessionList=[]
+     
+    if not nameObjectOnSession in request.session or not request.session[nameObjectOnSession ]:  
+            print "lista no esta en session" 
+            sessionList.append(customobject)
+            request.session[nameObjectOnSession ] =sessionList  
+            #print request.session['nameObjectOnSession']
+            result = 1
+            
+    else:
+        print "lista si esta en session" 
+        sessionList = request.session[nameObjectOnSession ]
+        print  len(sessionList)
+        #np=newProperties
+        is_in_list=containsproperty(sessionList, customobject)  
+        if is_in_list == False:
+            sessionList .append(customobject)
+            request.session[nameObjectOnSession]= sessionList
+            print "objeto agregado a la lista" 
+            #print request.session[nameObjectOnSession]
+            result = 1
+        else:
+            print "objeto no agregado a la lista" 
+            #print request.session[nameObjectOnSession]
+           
+    return result
+            
+        
+
     
 
-    return render_to_response('newcase.html', {   "catalogproperty_name": catalogproperty_name,
-                                                                                         "questiontype":questiontype,
-                                                                                         "questionAxis":questionAxis, 
-                                                                                         "axisselected_name":axisselected_name,
-                                                                                         "questionGp":questionGp,
-                                                                                         "ShowBtnProcess":ShowBtnProcess,
-                                                                                         "ShowBtnSend":ShowBtnSend,
-                                                                                         "error":error,
-                                                                                         "axisList":axisList, 
-                                                                                         "puntualGroupList":puntualGroupList, 
-                                                                                         "typeList":typeList,
-                                                                                         "typeselected":typeselected,
-                                                                                         "crystalsystem_name":crystalsystem_name,
-                                                                                         "catalogCrystalSystemList":catalogCrystalSystemList,     
-                                                                                         "inputList":inputList,      
-                                                                                         "puntualgroupselected_name":puntualgroupselected_name,
-                                                                                         "message":message,                                                                                            
-                                                                                         "results":results,     
-                                                                                         "resultc":resultc,     
-                                                                                         "resultd":resultd,      
-                                                                                         "printtableresult":printtableresult,  
-                                                                                        "printingc":printingc, 
-                                                                                        "printings":printings, 
-                                                                                        "printingd":printingd, 
-                                                                                         "compliancessi":compliancessi,    
-                                                                                         "compliancessj":compliancessj,    
-                                                                                         "stiffnessci":stiffnessci,    
-                                                                                         "stiffnesscj":stiffnesscj,                                
-                                                                                         "resultdi":resultdi,    
-                                                                                         "resultdj":resultdj,                                                                                         
-                                                                                         "list_Property":list_Property}, context_instance=RequestContext(request))
-
-
+                
+                  
+             
+               
+     
+    
 
 ######################################################################################
 #                              ''' DOCUMENTATION '''

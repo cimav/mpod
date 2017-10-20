@@ -58,7 +58,7 @@ _prop_data_label
 _prop_data_tensorial_index
 _prop_data_value
 _prop_measurement_method
-_prop_conditions_temperature_range_begin
+_prop_temperature_range_start
 alphaij 11 7.04 TMA 303.15
 alphaij 22 15.32 TMA 303.15
 alphaij 33 14.35 TMA 303.15

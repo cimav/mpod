@@ -8,62 +8,79 @@
 {% endblock %}
 
 {% block contenido %}
+
+
+  
+  
+  
   <div class="content">
       <h3>New Property</h3>
       <br/>
       <h4></h4>
 	  <h4></h4>
 	  <p>Please enter the required data below.</p>
-	  <form role="form" action="/addcase/" method="POST">
+	  <form role="form" action="/addcase/#no-back" method="POST">
 	  <input type='hidden' id="eventonchange" name="eventonchange" value="0" />
 	  <input type='hidden' id="proccesing" name="proccesing" value="0" />
+	  <input type='hidden' id="todo" name="todo" value="" />
+	  <input type='hidden' id="indexToDelete" name="indexToDelete" value="0" />
+	  
 	    <div class="form-group searches">
 	      <label for="title">Title:</label>
-	      <input type="text" name="title" value="" class="form-control" placeholder="Example: Elasticity of single-crystalline graphite: inelastic X-ray scattering study">
+	      <input type="text" name="title" value="{{title}}" class="form-control" placeholder="Example: Elasticity of single-crystalline graphite: inelastic X-ray scattering study">
+	      
+	        {% for error in form.title.errors %}
+	          <p style="color: red">{{ error }}</p>
+	        {% endfor %}
 	    </div>
 	    <div class="form-group searches">
 	      <label for="author">Authors: </label>
-	      <input type="text" name="author" value="" class="form-control" placeholder="Example: Bosak, A.">
+	      <input type="text" name="author" value="{{author}}" class="form-control" placeholder="Example: Authors 1, Authors 2">
+	    
+	      	<small style="color: grey">{{message_text }}</small>
+	      	
+	        {% for error in form.author.errors %}
+	          <p style="color: red">{{ error }}</p>
+	        {% endfor %}
 	    </div>
 	    <div class="form-group searches">
 	      <label for="journal">Journal:</label>
-	      <input type="text" name="journal" value="" class="form-control" placeholder="Example: Physical Review B">
+	      <input type="text" name="journal" value="{{journal}}" class="form-control" placeholder="Example: Physical Review B">
+ 
+	        {% for error in form.journal.errors %}
+	          <p style="color: red">{{ error }}</p>
+	        {% endfor %}
 	    </div>
+	   <div class="form-group searches">
+	      <label for="journal">Volume:</label>
+	      <input type="text" name="volume" value="{{volume}}" class="form-control" placeholder="Example: 1">
+	    </div>
+	   <div class="form-group searches">
+	      <label for="journal">Year:</label>
+	      <input type="text" name="year" value="{{year}}" class="form-control" placeholder="Example: 2017">
+	    </div>
+ 
 	    
-	     {% if list_Property %}  
+	     {% if propertyCategoryName %}  
 	    <div class="form-group searches">
 	      <label for="journal">Property:</label>
 	      <br/>
-	       <select  id="catalogproperty_name"  name="catalogproperty_name" onchange="changeFunc();" >
-	     
-	       {% for obj in list_Property %}       
+	       <select  id="catalogproperty_name"  name="catalogproperty_name" onchange="onchangeFunc();" >
+	       {% for obj in propertyCategoryName %}       
 	        {% if catalogproperty_name == obj.name %} 
 			       <option  selected="selected" value="{{obj.name}}"  >{{obj.description}} </option>
 			 {% else %}
 			       <option value="{{obj.name}}"   >{{obj.description}}</option>
 			{% endif %}
 	        {% endfor %}
-       
          </select>	
-     
-          
-
-         
 	    </div>
 	     {% endif %} 
-	    
-	    
-	    
-	    
 
-	    
-	    
 	   {% if catalogCrystalSystemList %}  
 	  <div class="form-group searches">
 	      <label for="journal">Crystal system</label>
-	      
-	      <select id="crystalsystem_name" name="crystalsystem_name" onchange="changeFunc()" >       
-	      
+	      <select id="crystalsystem_name" name="crystalsystem_name" onchange="onchangeFunc()" >       
 	       {% for ccs in catalogCrystalSystemList %}       
 	        {% if crystalsystem_name == ccs.name %} 
 			       <option  selected="selected" value="{{ccs.name }}"  >{{ccs.description }}</option>
@@ -71,26 +88,19 @@
 			      <option value="{{ccs.name}}"   >{{ccs.description }} </option>
 			{% endif %}    
 	        {% endfor %}
-             
 	      </select>
-	  
 	    </div>
 	     {% endif %}    
 	    
-	    
-	    <div class="form-group searches">
-	      <label for="journal">
-	       {% if questiontype %} 
-               {{questiontype }}  
-          {% endif %}        
-	      </label>
+	    {% if questiontype %} 
+	    <div class="form-group searches"  >
+	      <label for="journal">{{questiontype}}</label>
 	    </div>
-	
+	    {% endif %}    
+
 	{% if typeList %}  
 	<div class="form-group searches"> 
-	   
-	    	<select id="type" name="type" onchange="changeFunc()" >       
-	     
+	    	<select id="type" name="type" onchange="onchangeFunc()" >       
 	       {% for type in typeList %}       
 	        {% if typeselected == type.name %} 
 			       <option  selected="selected" value="{{type.name }}"  > {{type.description }} </option>
@@ -98,28 +108,25 @@
 			      <option value="{{type.name}}"   > {{type.description }} </option>
 			{% endif %}    
 	        {% endfor %}
-           
 	      </select>
-	    
 	    </div>
 	    {% endif %} 
 	    
-	   	  	<div class="form-group searches">
-	      <label for="journal">
-	       {% if questionGp %} 
-               {{questionGp }}  
-          {% endif %}        
-	      </label>
-	    </div>   
+	    
+		  <div class="form-group searches">
+		  <label for="journal">
+		   {% if questionGp %} 
+		          {{questionGp }}  
+		     {% endif %}        
+		  </label>
+		</div>   
 	      
 	    
 	   
 	    
 	   {% if puntualGroupList %}  
 	<div class="form-group searches"> 
-	   
-	    	<select id="puntualgroupselected_name" name="puntualgroupselected_name" onchange="changeFunc()" >       
-	     
+	    	<select id="puntualgroupselected_name" name="puntualgroupselected_name" onchange="onchangeFunc()" >       
 	       {% for gp in puntualGroupList %}       
 	        {% if puntualgroupselected_name == gp.name %} 
 			       <option  selected="selected" value="{{gp.name }}"  > ({{gp.name }}) </option>
@@ -127,9 +134,7 @@
 			      <option value="{{gp.name}}"   > ({{gp.name }}) </option>
 			{% endif %}    
 	        {% endfor %}
-           
 	      </select>
-	    
 	    </div>
 	 {% endif %}  
 	
@@ -143,25 +148,18 @@
 	   
 	     {% if axisList %}  
 	    <div class="form-group searches"> 
-	   
-	    	<select id="axisselected_name" name="axisselected_name"  onchange="changeFunc()" >       
-	     
-	       {% for axis in axisList %}       
-	        {% if axisselected_name == axis.name %} 
-			       <option  selected="selected" value="{{axis.name }}"  > {{axis.name }} </option>
-			 {% else %}
-			      <option value="{{axis.name}}"   > {{axis.name }} </option>
-			{% endif %}    
-	        {% endfor %}
-           
+	    	<select id="axisselected_name" name="axisselected_name"  onchange="onchangeFunc()" >       
+		       {% for axis in axisList %}       
+		        {% if axisselected_name == axis.name %} 
+				       <option  selected="selected" value="{{axis.name }}"  > {{axis.name }} </option>
+				 {% else %}
+				      <option value="{{axis.name}}"   > {{axis.name }} </option>
+				{% endif %}    
+		        {% endfor %}
 	      </select>
-	    
 	    </div>
 	    {% endif %}  
-	    
-	    
-	    
-	  
+
 	  <div class="form-group searches">
 	      <label for="journal">
 	       {% if message %} 
@@ -169,118 +167,162 @@
            {% endif %}         
 	      </label>
 	    </div>   
-	    
-	    
-
-	    
-	    
-   {% if inputList %}  
-	<div class="form-group searches"> 
-	    {% for ipt  in inputList %}   
-		    {% if   ipt.name != "---"%} 
-	         	<label for="journal">{{ipt.name }}</label>
-		      <input type="text" id="{{ipt.name }}" name="{{ipt.name }}" value="" class="form-control" placeholder="{{ipt.name }} value">
-		      {% endif %}    
-	      {% endfor %}
-	    </div>
-	  {% endif %}  
-	  
 
 	  
-	 {% if printings  != 0 %}  
-	 <h6>Properties' values</h6>
-	  		<div class="table-responsive">
-			<table class="table table-striped table-condensed table-hover sm_table">
-				<tbody>
-				      {% for r  in results %}  
-				      <tr>      
-				              {% for e in r %} 
-				               
-				                  	
-				                      <td>{{e}}  </td>
-				                 
-				                
-				              {% endfor %}     
-				       </tr>         
-				        {% endfor %}
-           </tbody>
-		</table>
+    
+     {% for field  in form %}
+        <div class="form-group searches">
+          {% if   field.name != "---"%} 
+              {% if field.name != "title" and  field.name != "author"  and  field.name != "journal" %} 
+			      <label for="{{field.name}}">{{field.name}}</label>
+			       
+			      <input type="text" id="{{field.name}}" name="{{field.name}}" value="" class="form-control" placeholder="{{field.name}}value">
+		 
+			        {% for error in field.errors %}
+			          <p style="color: red">{{ error }}</p>
+			        {% endfor %}
+	           {% endif %}    
+	     {% endif %}    
 	    </div>
-    {% endif %}  
- 
-                                                                                  
-
-      	 {% if printingc  != 0 %}  
-      	 <h6>Properties' values</h6>
-	   	 <div class="table-responsive">
-			<table class="table table-striped table-condensed table-hover sm_table">
-				<tbody>
-				      {% for r  in resultc %}  
-				      <tr>      
-				              {% for e in r %} 
-				              <label for="journal">
-				                  	
-				                      <td>{{e}}  </td>
-				                  </label>
-				              {% endfor %}     
-				       </tr>         
-				        {% endfor %}
-           </tbody>
-		</table>
-	    </div>
-	  {% endif %}  
-       
-	   {% if printingd  != 0 %}  
-	   <h6>Properties' values</h6>
-	  	  <div class="table-responsive">
-			<table class="table table-striped table-condensed table-hover sm_table">
-				<tbody>
-				      {% for r  in resultd %}  
-				      <tr>      
-				              {% for e in r %} 
-				              <label for="journal">
-				                  	
-				                      <td>{{e}}  </td>
-				                  </label>
-				              {% endfor %}     
-				       </tr>         
-				        {% endfor %}
-           </tbody>
-		</table>
-	    </div>
-	  	{% endif %}    
-
-	  
-	  
-
+     
+     {% endfor %}
+     
 	    
-	    {% if error %}  
-	    <div class="form-group searches">
-	      <label for="journal">
-	       
-               {{error }}  
+	  
+	  {% if structureNewPropertyOnSesssionList %}  
+	  <h6>Properties' values |  <a href="#" onclick="removeFunc('0','StructureNewPropertyOnSesssionList'); "> Remove All</a></h6>
+	               {% for p  in structureNewPropertyOnSesssionList%} 
+    			             <table  id="table{{forloop.counter}}" >
+							          <thead>
+									  <tr>
+									     <th>{{ p.propertydescrition }} > {{ p.scdescrition }}  
+									     {% if p.type  != "n"%} 
+									     > {{ p.typedescrition }}
+									     {% endif %}  
+
+									     {% if p.puntualgroup  != ""%} 
+									     > Crystal System Point Group: {{ p.puntualgroup }}
+									     {% endif %}  
+
+									     {% if p.axis  != ""%} 
+									     > Crystal System Axis: {{ p.axis }}
+									     {% endif %}  
+									     </th>
+									     <th  align="right">| <a href="#" onclick="removeFunc('{{forloop.counter}}','ElementFromStructureNewPropertyOnSesssionList'); "> Remove</a> 
+									     </th>
+									  </tr>
+									 </thead>
+									   <tbody> 
+									         <tr>        
+									           <td colspan="6" align="cener">Title: {{ p.title}}</td>
+									        </tr>
+									        <tr>        
+									           <td colspan="6" align="cener">Authors: {{ p.authors}} </td>
+									        </tr>
+									        	<tr>        
+									           <td colspan="6" align="cener"> Journal: {{ p.journal}}</td>
+									        </tr>
+									        <tr>        
+									           <td colspan="6" align="cener">Volume: {{ p.volume}}</td>
+									        </tr>
+									        <tr>        
+									           <td colspan="6" align="cener">Year: {{ p.year}} </td>
+									       
+									   </tbody> 
+							</table> 
+									 
+							<table  id="table{{forloop.counter}}" class="table table-striped table-condensed table-hover sm_table">
+									<tbody> 
+									      {% if p.printings != 0 %}  
+										       {% for r in p.results %} 
+										       <tr>   
+										         {% for c in r %} 
+										                 <td>{{c}} </td>
+										          {% endfor %} 
+										       {% endfor %}   
+										       </tr>  
+										    {% endif %}     
+										    
+										    {% if p.printingc != 0 %}  
+										       {% for r in p.resultc %} 
+										       <tr>   
+										         {% for c in r %} 
+										                 <td>{{c}} </td>
+										          {% endfor %} 
+										       {% endfor %}   
+										       </tr>  
+										    {% endif %}    
+										    
+										   {% if p.printingd != 0 %}  
+										       {% for r in p.resultd %} 
+										       <tr>   
+										         {% for c in r %} 
+										                 <td>{{c}} </td>
+										          {% endfor %} 
+										       {% endfor %}   
+										       </tr>  
+										    {% endif %}    
+						            </tbody>
+							</table>
+		    	   {% endfor %}
+              {% endif %}  
+                                                                                      
+
            
-	      </label>
-	    </div>
-	     {% endif %}      
+           
+         
+									    
 
- <script type="text/javascript">
+	     <script type="text/javascript">
+		
+		  function removeFunc(index,element) {
+			if(element=='ElementFromStructureNewPropertyOnSesssionList'){
+					 document.getElementById("todo").value ='remove'+element
+					 document.getElementById("indexToDelete").value =index
+					 document.forms[0].submit();
+					 }
+			 else if(element=='StructureNewPropertyOnSesssionList') {
+				    document.getElementById("todo").value ='remove'+element
+				    document.forms[0].submit();
+				    }
+			}
+			 
+			 
+		   function saveFunc() {
+			 document.getElementById("todo").value ='save'				
+			 
+			 document.forms[0].submit();
+			 }
+		   
+		   var history_api = typeof history.pushState !== 'undefined'
 
-   function changeFunc() {
-    document.getElementById("eventonchange").value=1;
-   //alert(document.getElementById("eventonchange").value)
-    document.forms[0].submit();
-   }
-   
-   function process() {
-	    document.getElementById("proccesing").value=1;
-	   //alert(document.getElementById("eventonchange").value)
-	
-	    document.forms[0].submit();
-	   }
-   
-  </script>
-	    
+			
+			if ( location.hash == '#no-back' ) {
+			 
+			  if ( history_api ) history.pushState(null, '', '#stay')
+			  else location.hash = '#stay'
+
+			  window.onhashchange = function() {
+			    
+			    if ( location.hash == '#no-back' ) {
+			      alert("You shall not pass!")
+			      if ( history_api ) history.pushState(null, '', '#stay')
+			      else location.hash = '#stay'
+			    }
+			  }
+			}
+
+		   function onchangeFunc() {
+		    document.getElementById("eventonchange").value=1;
+		    document.forms[0].submit();
+		    }
+		   
+		   function process() {
+		    document.getElementById("proccesing").value=1;
+		    document.forms[0].submit();
+		    }
+		   
+		  </script>
 	     
 	    {% if ShowBtnSend  != 0 %}  
 	    <button type="submit" class="btn btn-warning">Send</button>
@@ -289,9 +331,26 @@
 		  {% if ShowBtnProcess  != 0 %}  
 		    <button type="submit" class="btn btn-warning" onclick="process();">Process</button>
 		  {% endif %}     
+		  
+		   
+		  {% if printingc  != 0 or printings  != 0  or printingd  != 0  %}  
+		     <button type="submit" class="btn btn-warning" onclick="saveFunc();">Save</button>
+		  {% endif %}     
+		  
 	  </form>
     
 	 
       <br/><br/>
   </div>
+  
+ {% csrf_token %}
+ 
+ 
+ 
+  
+	 
+	  
+		    
+	 
+
 {% endblock %}

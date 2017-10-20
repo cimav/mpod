@@ -21,12 +21,12 @@ if __name__ == '__main__':
             cifs_dir= paths.stl_dir
             break
     
-    '''validator = CifMpodValidator(str(paths.cifs_dir),str(paths.core_dic_filepath),str(paths.mpod_dic_filepath),str(paths.cifs_dir_output))
+    validator = CifMpodValidator(str(paths.cifs_dir),str(paths.core_dic_filepath),str(paths.mpod_dic_filepath),str(paths.cifs_dir_output))
     validator.getValidation()
     objectValidateds=validator.resultListVaild
     
     for objectValidated in objectValidateds:
-        print objectValidated'''
+        print objectValidated
     '''
     for code in validator.codeListValid:
         #print code              
@@ -38,9 +38,10 @@ if __name__ == '__main__':
         #print code              
         move(str(paths.cifs_dir)+code+".mpod", str(paths.cifs_dir_invalids)+code+".mpod")
         #copyfile(str(paths.cifs_dir)+code+".mpod", str(paths.cifs_dir_invalids+code+".mpod"))
-     '''  
+        '''
+    
         
-    pathslist=Path.objects.all()      
+    '''pathslist=Path.objects.all()      
     pathexist = 0
     cifs_dir=''    
     for cifdir in pathslist:
@@ -54,7 +55,7 @@ if __name__ == '__main__':
     estr = Extractor(str(paths.cifs_dir),str(paths.core_dic_filepath),str(paths.mpod_dic_filepath),str(paths.cifs_dir_output));
     estr.extractConditions(False)
     estr.extractPublarticleAndDataFile_Data(False)
-    estr.extractProperties(False)
+    estr.extractProperties(False)'''
     
     
     

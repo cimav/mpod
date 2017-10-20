@@ -7,9 +7,25 @@ from data.models import *
 from django.db.models import Count
 
 class Properties():
+    # define class variable shared by all instances
+    # tricks = []             # should not be used as a class variable because just a single list would be shared by all Dog instances:
   def __init__(self, p,sisc):
+      # define instance variable unique to each instance
       self.property = p
+      self.propertydescrition=''
       self.sc = sisc
+      self.scdescrition=''
+      self.type = ''
+      self.typedescrition = ''
+      self.title= ''
+      self.authors= ''
+      self.journal= ''
+      self.volume= ''
+      self.year= ''
+      
+      self.puntualgroup= ''
+      self.axis= ''
+      
       self.error = ""
       self.ShowBtnSend = 0
       self.ShowBtnProcess  = 0
@@ -21,12 +37,12 @@ class Properties():
       self.axisList = []
       self.process=0
 
-      self.si=6
+      '''self.si=6
       self.sj=6
       self.ci=6
       self.cj=6
       self.di=3
-      self.dj=6
+      self.dj=6'''
           
       
       self.results = N.zeros([6,6])
@@ -36,6 +52,8 @@ class Properties():
       self.printings = 0
       self.printingc = 0
       self.printingd = 0
+      
+        
       
       
       self.s11= 0
@@ -171,7 +189,9 @@ class Properties():
       self.d64= 0
       self.d65= 0
       self.d66= 0
-      
+  
+     
+  
       
   def __del__(self):
           print "delete object"
@@ -181,24 +201,22 @@ class Properties():
               value =float (value)  
               return True        
         except  Exception, e:
-               self.error=key + ": No tiene un valor valido"          
+               self.error=key + ": Invalid value"          
                return False
          
       
   def NewProperties(self,typeCS,groupp,axis):
-    #j=0
-   # while (j==0):
+   
     s = N.zeros([6,6])
     c = N.zeros([6,6])
     d = N.zeros([3,6])
-    #self.propiedad = p  
-    #self.sc = sisc      
+
     if self.property == 'e':
-        tipo = typeCS #Deseas s (compliance) o c (stiffness)?
+        self.type = typeCS #Deseas s (compliance) o c (stiffness)?
         if self.sc == 'iso':
             if self.process == 0:          
                 objProperty=CatalogProperty.objects.filter(name=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=tipo)                 
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=self.type)                 
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name=self.sc,catalogproperty=objProperty)                            
                 propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=catalogCrystalSystemSelected).order_by('name')
                 for obj in propertyDetail:
@@ -212,7 +230,7 @@ class Properties():
                 self.ShowBtnProcess = 1                   
                 return
                 
-            if tipo == 's':                   
+            if self.type == 's':                   
                 if self.validate('s11',self.s11) != True:
                     return
                 if self.validate('s12',self.s12) != True:
@@ -224,8 +242,9 @@ class Properties():
                 
                 self.results=s
                 self.printings = 1
+              
                 #print (s)
-            elif tipo == 'c':  
+            elif self.type == 'c':  
                 if self.validate('c11',self.c11) != True:
                     return
                 if self.validate('c12',self.c12) != True:
@@ -244,7 +263,7 @@ class Properties():
             self.message= 'All the point groups of this crystal system have the same matrix'
             if self.process == 0:          
                 objProperty=CatalogProperty.objects.filter(name=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=tipo)                 
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=self.type)                 
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name=self.sc,catalogproperty=objProperty)                            
                 propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=catalogCrystalSystemSelected).order_by('name')
                 for obj in propertyDetail:
@@ -258,7 +277,7 @@ class Properties():
                 #self.ShowBtnSend = 1                        
                 return 
                 
-            if tipo == 's':     
+            if self.type == 's':     
                 if self.validate('s11',self.s11) != True:
                     return
                 if self.validate('s12',self.s12) != True:
@@ -272,7 +291,7 @@ class Properties():
                 print (s)
                 self.results=s
                 self.printings = 1
-            elif tipo == 'c':        
+            elif self.type == 'c':        
                 if self.validate('c11',self.c11) != True:
                     return
                 if self.validate('c12',self.c12) != True:
@@ -291,7 +310,7 @@ class Properties():
             self.message= 'All the point groups of this crystal system have the same matrix'
             if self.process == 0:          
                 objProperty=CatalogProperty.objects.filter(name=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=tipo)                 
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=self.type)                 
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name=self.sc,catalogproperty=objProperty)                            
                 propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=catalogCrystalSystemSelected).order_by('name')
                 for obj in propertyDetail:
@@ -305,7 +324,7 @@ class Properties():
                 #self.ShowBtnSend = 1                             
                 return 
                 
-            if tipo == 's':            
+            if self.type == 's':            
                 if self.validate('s11',self.s11) != True:
                     return
                 if self.validate('s12',self.s12) != True:
@@ -328,7 +347,7 @@ class Properties():
                 print (s)
                 self.results=s
                 self.printings = 1
-            elif tipo == 'c':
+            elif self.type == 'c':
                 if self.validate('c11',self.c11) != True:
                     return
                 if self.validate('c12',self.c12) != True:
@@ -356,7 +375,7 @@ class Properties():
             self.message= 'All the point groups of this crystal system have the same matrix'
             if self.process == 0:          
                 objProperty=CatalogProperty.objects.filter(name=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=tipo)                 
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=self.type)                 
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name=self.sc,catalogproperty=objProperty)                            
                 propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=catalogCrystalSystemSelected).order_by('name')
                 for obj in propertyDetail:
@@ -369,7 +388,7 @@ class Properties():
                 self.ShowBtnProcess = 1        
                 #self.ShowBtnSend = 1                        
                 return 
-            if tipo == 's':
+            if self.type == 's':
                 if self.validate('s11',self.s11) != True:
                     return
                 if self.validate('s12',self.s12) != True:
@@ -401,7 +420,7 @@ class Properties():
                 #print (s)
                 self.results=s
                 self.printings = 1
-            elif tipo == 'c':
+            elif self.type == 'c':
                 if self.validate('c11',self.c11) != True:
                     return
                 if self.validate('c12',self.c12) != True:
@@ -439,7 +458,7 @@ class Properties():
             self.message= 'All the point groups of this crystal system have the same matrix'
             if self.process == 0:          
                 objProperty=CatalogProperty.objects.filter(name=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=tipo)                 
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name=self.type)                 
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name=self.sc,catalogproperty=objProperty)                            
                 propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=catalogCrystalSystemSelected).order_by('name')
                 for obj in propertyDetail:
@@ -453,7 +472,7 @@ class Properties():
                 #self.ShowBtnSend = 1                        
                 return 
                 
-            if tipo == 's':
+            if self.type == 's':
                 if self.validate('s11',self.s11) != True:
                     return
                 if self.validate('s12',self.s12) != True:
@@ -520,7 +539,7 @@ class Properties():
                 print (s)
                 self.results=s
                 self.printings = 1
-            elif tipo == 'c':
+            elif self.type == 'c':
                 if self.validate('c11',self.c11) != True:
                     return
                 if self.validate('c12',self.c12) != True:
@@ -599,7 +618,7 @@ class Properties():
             self.questionGp = 'Point Group?'  
             if self.process == 0:
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)     
             
@@ -634,7 +653,7 @@ class Properties():
                    return 
         
             if gp in ('4mm', '-42m', '422', '4/mmm'):
-                if tipo == 's':
+                if self.type == 's':
                     if self.validate('s11',self.s11) != True:
                         return
                     if self.validate('s12',self.s12) != True:
@@ -658,7 +677,7 @@ class Properties():
                     print (s)
                     self.results=s
                     self.printings = 1
-                elif tipo == 'c':  
+                elif self.type == 'c':  
                     if self.validate('c11',self.c11) != True:
                         return
                     if self.validate('c12',self.c12) != True:
@@ -684,7 +703,7 @@ class Properties():
                 else:
                     self.error ='Type not present'
             elif gp in ('4', '-4', '4/m'):
-                if tipo == 's':
+                if self.type == 's':
                     
                     if self.validate('s11',self.s11) != True:
                         return
@@ -711,7 +730,7 @@ class Properties():
                     print (s)
                     self.results=s
                     self.printings = 1
-                elif tipo == 'c':
+                elif self.type == 'c':
                     if self.validate('c11',self.c11) != True:
                         return
                     if self.validate('c12',self.c12) != True:
@@ -728,7 +747,7 @@ class Properties():
                         return 
                     c[0,0] = c[1,1] = float (self.c11)
                     c[0,1] = c[1,0] = float (self.c12)
-                    c[0,2] = s[1,2] = c[2,0] = c[2,1] = float (self.c13)
+                    c[0,2] = c[1,2] = c[2,0] = c[2,1] = float (self.c13)
                     c[0,5] = c[5,0] = float (self.c16)
                     c[1,5] = c[5,1] = -c[0,5]
                     c[2,2] = float (self.c33)
@@ -750,7 +769,7 @@ class Properties():
             if self.process == 0:
                 self.questionAxis = 'Where is the special axis?'
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 #catalogpuntualgroupSelected = CatalogPuntualGroup.objects.filter(name__exact=gp)   
                 axisSelected=CatalogAxis.objects.filter(name__exact=axis)
@@ -770,7 +789,7 @@ class Properties():
         
             self.message= 'All the point groups of this crystal system have the same matrix'
             if eje == 'x2':
-                if tipo == 's':
+                if self.type == 's':
                     if self.validate('s11',self.s11) != True:
                         return
                     if self.validate('s12',self.s12) != True:
@@ -815,7 +834,7 @@ class Properties():
                     print (s)
                     self.results=s
                     self.printings = 1
-                elif tipo == 'c':
+                elif self.type == 'c':
                     if self.validate('c11',self.c11) != True:
                         return
                     if self.validate('c12',self.c12) != True:
@@ -862,7 +881,7 @@ class Properties():
                 else:
                     self.error ='Type not present'
             elif eje == 'x3':
-                if tipo == 's':
+                if self.type == 's':
                     if self.validate('s11',self.s11) != True:
                         return
                     if self.validate('s12',self.s12) != True:
@@ -906,7 +925,7 @@ class Properties():
                     
                     self.results=s
                     self.printings = 1
-                elif tipo == 'c':
+                elif self.type == 'c':
                     if self.validate('c11',self.c11) != True:
                         return
                     if self.validate('c12',self.c12) != True:
@@ -961,9 +980,9 @@ class Properties():
                self.ShowBtnSend = 1                        
                return
             if self.process == 0:
-                self.questionGp = 'Which punctual group? (3, -3, 32, 3m, -3m)?' 
+                self.questionGp = 'Point Group:?' 
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)     
             
@@ -1003,7 +1022,7 @@ class Properties():
            
             
             if gp in ('32', '-3m', '3m'):
-                if tipo == 's':
+                if self.type == 's':
                     if self.validate('s11',self.s11) != True:
                         return
                     if self.validate('s12',self.s12) != True:
@@ -1029,7 +1048,7 @@ class Properties():
                     print (s)
                     self.results=s
                     self.printings = 1
-                elif tipo == 'c':
+                elif self.type == 'c':
                     if self.validate('c11',self.c11) != True:
                         return
                     if self.validate('c12',self.c12) != True:
@@ -1057,7 +1076,7 @@ class Properties():
                 else:
                     self.error ='Type not present'
             elif gp in ('3', '-3'):
-                if tipo == 's':
+                if self.type == 's':
                     if self.validate('s11',self.s11) != True:
                         return
                     if self.validate('s12',self.s12) != True:
@@ -1089,7 +1108,7 @@ class Properties():
                     print (s)
                     self.results=s
                     self.printings = 1
-                elif tipo == 'c':
+                elif self.type == 'c':
                     if self.validate('c11',self.c11) != True:
                         return
                     if self.validate('c12',self.c12) != True:
@@ -1120,10 +1139,14 @@ class Properties():
                     self.printingc = 1
                 else:
                     self.error ='Type not present'
+                    self.ShowBtnSend = 1
             else:
                 self.error ='Non-existent point group'
+                self.ShowBtnSend = 1
         else:
-            self.error ='Crystal system does not exist'
+            self.ShowBtnSend = 1
+            #self.error ='Crystal system '+self.scdescrition+'  does not exist for ' + self.propertydescrition 
+            
     elif self.property == 'p':
         if self.sc == 'tc':
             gp = groupp  #Cual grupo puntual? (1, -1)
@@ -1140,10 +1163,10 @@ class Properties():
  
                 
             if self.process == 0:
-                tipo = typeCS
+                self.type = typeCS
                 self.questionGp = 'Point Group:'
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)     
             
@@ -1259,12 +1282,12 @@ class Properties():
  
            
            
-            tipo = typeCS
+            self.type = typeCS
             self.questionAxis = 'Where is the special axis?' 
             self.questionGp = 'Point Group:'
             if self.process == 0:
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)   
                 axisSelected=CatalogAxis.objects.filter(name__exact=axis)
@@ -1436,10 +1459,10 @@ class Properties():
  
                 
             if self.process == 0:
-                tipo = typeCS
+                self.type = typeCS
                 self.questionGp = 'Point Group:'  
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)     
             
@@ -1528,11 +1551,11 @@ class Properties():
                 self.ShowBtnProcess = 0   
                 return
         
-            tipo = typeCS
+            self.type = typeCS
             self.questionGp = 'Point Group:'  
             if self.process == 0:
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)     
             
@@ -1655,11 +1678,11 @@ class Properties():
                 return
    
                 
-            tipo = typeCS
+            self.type = typeCS
             self.questionGp = 'Point Group:' 
             if self.process == 0:
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)     
             
@@ -1715,11 +1738,11 @@ class Properties():
                 return 
           
         
-            tipo = typeCS
+            self.type = typeCS
             self.questionGp = 'Point Group:'    
             if self.process == 0:
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)     
                 
@@ -1890,17 +1913,17 @@ class Properties():
                  return
              
         
-            tipo = typeCS
+            self.type = typeCS
             self.questionGp = 'Point Group:'  
             if self.process == 0:   
                 objProperty=CatalogProperty.objects.filter(name__exact=self.property) 
-                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=tipo)        
+                objTypeSelected = Type.objects.filter(catalogproperty=objProperty,name__exact=self.type)        
                 catalogCrystalSystemSelected= CatalogCrystalSystem.objects.filter(name__exact=self.sc,catalogproperty=objProperty)    
                 catalogpointgroupSelected = CatalogPointGroup.objects.filter(name__exact=gp)     
             
             
                 if gp == '-6m2':
-                    if  axis == '' or axis not in 'x2, x3':
+                    if  axis == '' or axis not in 'x1, x2':
                       self.questionAxis = 'Where is the special axis?'    
                       self.ShowBtnSend = 1
                       self.ShowBtnProcess = 0            
@@ -2035,11 +2058,17 @@ class Properties():
                 else:
                     #print ('Ubicacion del eje especial inexistente')
                     self.error ='Location of non-existent special axis'
+                    self.ShowBtnSend = 1
 
         else:
-            self.error ='Crystal system does not exist'
+            self.ShowBtnSend = 1
+            
+            
+             
+            #self.error ='Crystal system ('+self.scdescrition+')  does not exist for ' + self.propertydescrition 
     else:
         self.error ='Nonexistent property'
+        self.ShowBtnSend = 1
     
  
      
