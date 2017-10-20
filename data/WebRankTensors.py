@@ -1,7 +1,7 @@
 '''
 Created on Dec 1, 2014
 
-@author: admin
+@author: admin ruy2311
 '''
 
 from time import gmtime, strftime
