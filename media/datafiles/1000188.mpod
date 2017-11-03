@@ -51,7 +51,7 @@ _prop_data_label
 _prop_data_tensorial_index
 _prop_data_value
 _prop_conditions_temperature
-_prop_conditions_temperature_range_begin
+_prop_conditions_temperature_range_start
 _prop_conditions_temperature_range_end
 cij 11 281.9 293 ? ?
 cij 12 105.1 293 ? ?

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+
+  
+      <div class="container-fluid">
+      {% include "account/menu.html" %}
+     
+      
+          <div class="qlt-confirmation">
+  	<div class="panel panel-default">
+      <div class="panel-body">
+        <center>
+        <img src="{{STATIC_URL}}img/open_mail_letter-512.png" style="width:30px; height: 30px;">
+          <p class="desc">Thank you for registring  a new case!<br>We've sent a file  link to your email.<br>Please visit your <img style="width: 40px; height: 40px" src="{{STATIC_URL}}img/080840-glossy-black-icon-business-mailbox.png">.</p>
+        </center>
+        
+        <p class="notice">Note:<br>Your file<b> is in revision</b>, waiting to be approved and published. This is part of our publication policy.</p>
+      </div>
+	</div>
+</div>
+          
+           
+
+
+
+        </div>
+      </div>
+  
+  
+  
+
+	 
+
+{% endblock %}

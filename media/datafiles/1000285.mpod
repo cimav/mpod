@@ -40,7 +40,7 @@ _journal_page_last               794
 _journal_year                    1952
 _phase_density 18110
 _prop_thermal_expansion_alphaij 'alphaij'
-_prop_conditions_temperature_range_begin 293(10)
+_prop_conditions_temperature_range_start 293(10)
 _prop_conditions_temperature_range_end 993(10)
 _phase_debye_temperature 270
 

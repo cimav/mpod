@@ -27,23 +27,13 @@ class CifMpodValidator():
       self.fds=os.listdir(self.cifs_dir)
       self.fds2=filter(lambda x: x[-5:]==".mpod",  self.fds)
       self.filets=sorted(filter(lambda x: os.path.isfile(os.path.join(self.cifs_dir,  x)), self.fds2))
+      print self.fds2
+
 
    
-   
-   ''' 
-    >>> squares = []
-    >>> for x in range(10):
-    ...     squares.append(x**2)
-    ...
-    >>> squares
-    [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
-    '''
-   
-   
    def getValidation(self):
-       #fds=os.listdir(self.cifs_dir)
-       #fds2=filter(lambda x: x[-5:]==".mpod",  fds)
-       #filets=sorted(filter(lambda x: os.path.isfile(os.path.join(self.cifs_dir,  x)), fds2))
+
+
        core_dic = CifFile.CifDic(self.core_dic_filepath)
        mpod_dic = CifFile.CifDic(self.mpod_dic_filepath)
        
@@ -53,9 +43,13 @@ class CifMpodValidator():
             val_report = CifFile.validate(filepath,  diclist=[self.core_dic_filepath, self.mpod_dic_filepath])
             result = CifFile.validate_report(val_report)
             #self.resultFiles.append(result);
+            
             rf = result.find('VALID')
             k=df.keys()
-            print df.keys()
+            
+            print result
+            print k
+            
             if rf>-1:
                self.codeListValid.append(k[0])               
                self.resultListVaild.append(result)

@@ -1,6 +1,8 @@
 # Django settings for mpod project.
 import os
+ 
 RUTA_PROYECTO = os.path.dirname(os.path.realpath(__file__))
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -9,9 +11,14 @@ ADMINS = (
     ('mpod_admin', 'mpod@cimav.edu.mx'),
 )
 
-ADMIN_MEDIA_PREFIX = '/static/'
-
 MANAGERS = ADMINS
+
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+
+)
+
 
 DATABASES = {
     'default': {
@@ -103,6 +110,7 @@ SECRET_KEY = '(i*i5=8or1+7z86%6@e%p*=@7*oqhc-#)4^776cl^!_n*5^l@f'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
+    
 #     'django.template.loaders.eggs.Loader',
 )
 
@@ -133,28 +141,25 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    
     os.path.join(RUTA_PROYECTO,'plantillas'),
+    os.path.join(RUTA_PROYECTO,'plantillas/admin/properties/templates'),
+    os.path.join(RUTA_PROYECTO,'plantillas/admin/dictionaries/templates'),
 )
 
 INSTALLED_APPS = (        
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'data',
     'django_extensions',
-    # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
-
-
-
-
-
-
+    
        
 
 )
@@ -187,3 +192,11 @@ LOGGING = {
         },
     }
 }
+
+
+#EMAIL_BACKEND = 'django.core.administration.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+

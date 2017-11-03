@@ -9,6 +9,7 @@ cifs_dir='/home/pepponi/work/physdata/mpod/data_files'
 
 def format_name(prop_tag):
     pr = prop_tag.strip('_')
+     
     return " ".join(pr.split('_'))
 
 def read_file_1(mpod_filepath):
@@ -180,6 +181,7 @@ def format_data_blocks(file_data_blocks, props_ids):
      lnl_props_ids_dict, tenso_props_units_dict, lnl_props_units_dict] = props_ids
     formatted_blocks = []
     for db in file_data_blocks:
+        """
         print
         print "dbdbdb"
         print
@@ -187,6 +189,8 @@ def format_data_blocks(file_data_blocks, props_ids):
         print
         print props_ids
         print
+        """
+        print "format_data_blocks"
         block = []
         block_head = []
         if db[0][0]:
@@ -196,7 +200,13 @@ def format_data_blocks(file_data_blocks, props_ids):
                 propf_uni = lnl_props_units_dict["_prop_"+k]
                 if propf_uni != "n.a." and propf_uni != "1":
                     propf_unit = "[" + propf_uni + "]"
-                block_head.append([format_name(k), propf_id, propf_unit, v.strip("'")])
+                
+                if k not in "symmetry_point_group_name_H-M":
+                    block_head.append([format_name(k), propf_id, propf_unit, v.strip("'")])
+                
+                    
+                #block_head.append([format_name(k), propf_id, propf_unit, v.strip("'")])
+                    
         if db[0][1]:
             if len(db[1])==3:
                 for sec_n, sec_v in db[1][2].iteritems():
@@ -378,19 +388,24 @@ def all_props_list(file_data_blocks):
     tlps = []
     nlps = []
     lps = []
+    itemdictionary = {}
     for db in file_data_blocks:
         non_looped_props, loop_structs = db
         for k,v in non_looped_props[0].iteritems():
             nlps.append("_prop_"+k)
         for k,v in non_looped_props[1].iteritems():
             tlps.append("_prop_"+v)
+        for k,v in non_looped_props[2].iteritems():
+            if  k.startswith("_symmetry"):
+                itemdictionary[k] = v
+                
         if type(loop_structs[0]) == type(""):
             if not loop_structs[0].startswith("_"):
                 lps.append(loop_structs[0])
         if type(loop_structs[0]) == type([]):
             for ls in loop_structs[0]:
                 lps.append("_prop_"+ls)
-    return tlps, nlps, lps
+    return tlps, nlps, lps, itemdictionary
 
 
 

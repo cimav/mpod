@@ -236,8 +236,8 @@ data_phase_density_temperature
 ;              temperature of determination of material's density given by the authors
 ;
 
-data_phase_transition_temperature_melting
-    _name                      '_phase_transition_temperature_melting'
+data_phase_melting_temperature
+    _name                      '_phase_melting_temperature'
     _category                    phase
     _type                        numb
     _type_conditions             esd
@@ -248,8 +248,8 @@ data_phase_transition_temperature_melting
 ;              Tm = melting phase transition temperature (in K)
 ;
 
-data_phase_transition_temperature_rhomb_tetra
-    _name                      '_phase_transition_temperature_rhomb_tetra'
+data_phase_rhomb_tetra_transition_temperature
+    _name                      '_phase_rhomb_tetra_transition_temperature'
     _category                    phase
     _type                        numb
     _type_conditions             esd
@@ -260,8 +260,8 @@ data_phase_transition_temperature_rhomb_tetra
 ;              RT = rhombohedral-tetragonal phase transition temperature (in K)
 ;
 
-data_phase_transition_temperature_rhomb_ortho
-    _name                      '_phase_transition_temperature_rhomb_ortho'
+data_phase_rhomb_ortho_transition_temperature
+    _name                      '_phase_rhomb_ortho_transition_temperature'
     _category                    phase
     _type                        numb
     _type_conditions             esd
@@ -272,8 +272,8 @@ data_phase_transition_temperature_rhomb_ortho
 ;              RT = rhombohedral-orthogonal phase transition temperature (in K)
 ;
 
-data_phase_transition_temperature_ortho_tetra
-    _name                      '_phase_transition_temperature_ortho_tetra'
+data_phase_ortho_tetra_transition_temperature
+    _name                      '_phase_ortho_tetra_transition_temperature'
     _category                    phase
     _type                        numb
     _type_conditions             esd
@@ -284,8 +284,8 @@ data_phase_transition_temperature_ortho_tetra
 ;              RT = orthogonal-tetragonal phase transition temperature (in K)
 ;
 
-data_phase_transition_temperature_curie
-    _name                      '_phase_transition_temperature_curie'
+data_phase_Curie_temperature
+    _name                      '_phase_Curie_temperature'
     _category                    phase
     _type                        numb
     _type_conditions             esd
@@ -296,8 +296,8 @@ data_phase_transition_temperature_curie
 ;              TC = Curie temperature (in K)
 ;
 
-data_phase_transition_temperature_curie_ferroelectric
-    _name                      '_phase_transition_temperature_curie_ferroelectric'
+data_phase_Curie_ferroelectric_temperature
+    _name                      '_phase_Curie_ferroelectric_temperature'
     _category                    phase
     _type                        numb
     _type_conditions             esd
@@ -447,8 +447,8 @@ data_prop_[]
 ##               the experimental conditions during the measurements
 ##;
 
-data_prop_conditions_temperature
-    _name                      '_prop_conditions_temperature'
+data_prop_temperature
+    _name                      '_prop_temperature'
     _category                    prop
     _type                        numb
     _type_conditions             esd
@@ -461,8 +461,8 @@ data_prop_conditions_temperature
 Physical conditions are not always indicated when a property is measured. Sometimes only "room temperature" is mentioned in the corresponding literature, which may range from 20 to 25 °C.
 ;
 
-data_prop_conditions_temperature_range_begin
-    _name                      '_prop_conditions_temperature_range_begin'
+data_prop_conditions_temperature_range_start
+    _name                      '_prop_conditions_temperature_range_start'
     _category                    prop
     _type                        numb
     _type_conditions             esd
@@ -472,7 +472,7 @@ data_prop_conditions_temperature_range_begin
 
     _definition
 ;              First value of the temperature range for which the properties are given.
-Defined in couple with data_prop_conditions_temperature_range_end. When temperature dependencies are measured, the first value does not have to be the lower, but first and last values define also the increasing or decreasing temperatures.
+Defined in couple with data_prop_temperature_range_end. When temperature dependencies are measured, the first value does not have to be the lower, but first and last values define also the increasing or decreasing temperatures.
 Temperature units are K
 ;
 
@@ -487,11 +487,11 @@ data_prop_conditions_temperature_range_end
 
     _definition
 ;              Last value of the temperature range for which the properties are given.
-Defined in couple with data_prop_conditions_temperature_range_begin. When temperature dependencies are measured, the first value does not have to be the lower, but first and last values define also the increase or decrease of temperature.
+Defined in couple with data_prop_temperature_range_begin. When temperature dependencies are measured, the first value does not have to be the lower, but first and last values define also the increase or decrease of temperature.
 ;
 
-data_prop_conditions_temperature_cycle
-    _name                      '_prop_conditions_temperature_cycle'
+data_prop_conditions_temperature
+    _name                      '_prop_conditions_temperature'
     _category                    prop
     _type                        numb
     _list                        both
@@ -499,7 +499,7 @@ data_prop_conditions_temperature_cycle
     _units_detail              'pure number'
 
     _definition
-;              when measuring temperature dependency of properties the temperature may be cycled several times to determine possible histeresys. data_prop_conditions_temperature_range_ (begin/end) defines the range of the cycle (and the direction). Here the cycle is given (1, 2, 3, ... )
+;              when measuring temperature dependency of properties the temperature may be cycled several times to determine possible histeresys. data_prop_temperature_range_ (begin/end) defines the range of the cycle (and the direction). Here the cycle is given (1, 2, 3, ... )
 ;
 
 data_prop_conditions_pressure

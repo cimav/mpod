@@ -13,15 +13,22 @@ from django.db.models import Q
 from django.db.models import Count
 from data.models import *
 from parse_files_2 import *
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Extractor (object):
-    def __init__(self,cifs_dir,core_dic_filepath,mpod_dic_filepath,cifs_dir_output):
+    def __init__(self,cifs_dir,core_dic_filepath,mpod_dic_filepath,cifs_dir_output,filelist):
         self.cifs_dir=cifs_dir
         self.core_dic_filepath=core_dic_filepath
         self.mpod_dic_filepath=mpod_dic_filepath
-         
-        self.fds=os.listdir(self.cifs_dir)
+        self.experimentalParCondList=[]
+        
+        
+        if len(filelist) > 0:
+            self.fds= filelist
+        else:
+            self.fds=os.listdir(self.cifs_dir)
+            
         self.fds2=filter(lambda x: x[-5:]==".mpod",  self.fds)
         self.filets=sorted(filter(lambda x: os.path.isfile(os.path.join(cifs_dir,  x)), self.fds2))
       
@@ -50,7 +57,14 @@ class Extractor (object):
     def get_data_code_lin(self, lin):
         l=lin.strip()
         if l[0:5]=='data_':
-            return int(l[5:])
+            try:
+                return int(l[5:])
+            except ValueError:
+                print("get last code from database")
+                "Get last value of Code from database, and increment"
+                top = DataFile.objects.order_by('-code')[0]
+                code = top.code + 1
+                return code
         else:
             return 0
 
@@ -65,7 +79,7 @@ class Extractor (object):
                 rf2 = texto[st:].find('\n')
                 val=texto[st:st+rf2].strip().strip("'")
             else:
-                val = "None"
+                val = ""
             vals.append(val)
         return vals
 
@@ -164,24 +178,25 @@ class Extractor (object):
                         props_agg.append(prstr)
                 else:
                     if prstr not in props:
-                        structurePropertie=StructurePropertie()
-                        structurePropertie._prop_name=prstr
+                        structureProperty=FileProperty()
+                        structureProperty._prop_name=prstr
                         prtagstr=lcs[1].strip()
                         propstag.append( prtagstr)
-                        propsStructure.append(structurePropertie)
+                        propsStructure.append(structureProperty)
                         props.append(prstr)
                       
                                      
         for j,tag in enumerate(propstag):
             for i, lin in enumerate(lins):
-               t=tag.strip().strip("'").strip()
-               if lin.find(t)>-1:
+                t=tag.strip().strip("'").strip()
+                if lin.find(t)>-1:
                     lcs=lin.split() 
                     if not lcs[0].startswith("_prop"):
-                      propsStructure[j]._prop_data_label.append(lcs[0])
-                      propsStructure[j]._prop_data_tensorial_index.append(lcs[1])
-                      propsStructure[j]._prop_data_value.append(lcs[2])
-                      propsStructure[j]._prop_measurement_method.append(lcs[3])
+                        propsStructure[j]._prop_data_label.append(lcs[0])
+                        propsStructure[j]._prop_data_tensorial_index.append(lcs[1])
+                        propsStructure[j]._prop_data_value.append(lcs[2])
+                        #propsStructure[j]._prop_measurement_method.append(lcs[3])
+                        
           
                 #for tag in propstag:
                 #propsval.append(object)
@@ -263,55 +278,41 @@ class Extractor (object):
     
     def extractConditions(self,approved):
         tg="_prop"
-        props = []
-        data_props={}
+        #props = []
+        #data_props={}
         conds = []
-        data_conds={}
+        #data_conds={}
+        inds=[]
         for i, fil in enumerate(self.filets):
             filepath=os.path.join(self.cifs_dir, fil)
             texto = self.read_file_1(filepath)
-            code = self.get_data_code(texto)
-            this_props, this_props_agg,propsStructure = self.get_props(texto)
+            #code = self.get_data_code(texto)
+            #this_props, this_props_agg,propsStructure = self.get_props(texto)
             this_conds = self.get_conds(texto)
             for cn in this_conds:
                 if not cn in conds:
                     conds.append(cn)
-        conds = sorted(conds)
-        
-        for i, fil in enumerate(self.filets):
-            filepath=os.path.join(self.cifs_dir, fil)
-            texto = self.read_file_1(filepath)
-            code = self.get_data_code(texto)
-            this_props, this_props_agg,propsStructure = self.get_props(texto)
-            this_conds = self.get_conds(texto)
-            inds=[]
-            for cn in this_conds:
+                    
                 cond_ind=conds.index(cn)+1
                 inds.append(cond_ind)
-            
-        data_conds[code]=inds        
-        #print conds, data_conds
-        
-        experimentalParCondList=[]
+                
+            conds = sorted(conds)
+            #data_conds[code]=inds   
 
-        
-        for cn in conds:
-            the_vals = [tg+cn,cn]
-            
-             
-            
-            if approved == False:                
-              experimentalParCond= ExperimentalParCondTemp()
-            else:
-              experimentalParCond=ExperimentalParCond()
-            
-            experimentalParCond.tag=tg+cn
-            experimentalParCond.description=cn
-            experimentalParCondList.append(experimentalParCond)
-            
+        #experimentalParCondList=[]
         aa = self.props_info_in_dic(conds)
-
         for cond in conds:
+            if approved == False:                
+                experimentalParCond= ExperimentalParCondTemp()
+            else:
+                experimentalParCond=ExperimentalParCond()
+                
+            
+            print tg+cond
+            print cond
+            experimentalParCond.tag=tg+cond
+            experimentalParCond.description=cond
+
             tp = cond
             na = aa[tp]['_name'][6:]
             try:
@@ -322,52 +323,60 @@ class Extractor (object):
                 ud = aa[tp]['_units_detail']
             except:
                 ud = 'n.a.'
-            
-            
-            for obj in experimentalParCondList:
+            try:    
+                if approved == False:      
+                    try:
+                        experimentalParCondExist=ExperimentalParCondTemp.objects.get(tag__exact=experimentalParCond.tag)
+                    except ObjectDoesNotExist as error:
+                        print "Error({0}): {1}".format(99, error.message)   
+                        experimentalParCondExist = None
+                        
                 
-                try:
                     
-                    if approved == False:
-                        experimentalParCond= ExperimentalParCondTemp()
+                    if not experimentalParCondExist:
+                        print 'propiedad nueva'
+                        experimentalParCond.name=' '.join(na.split('_')) 
+                        experimentalParCond.units=un
+                        experimentalParCond.units_detail=ud
+                        experimentalParCond.active=0
+                        experimentalParCond.save()    
+                        self.experimentalParCondList.append(experimentalParCond)
                     else:
-                        experimentalParCond= ExperimentalParCond()
+                        print 'propiedad existe' 
+                        #experimentalParCondExist.update(name=' '.join(na.split('_')),units=un,units_detail=ud) 
+                        self.experimentalParCondList.append(experimentalParCondExist)
+               
                     
-                    experimentalParCond= obj
-                    if experimentalParCond.tag ==tg+cond:         
-                        if approved == False:               
-                            experimentalParCondExist=ExperimentalParCondTemp.objects.filter(tag__exact=experimentalParCond.tag)
-                            if not experimentalParCondExist:
-                                print 'propiedad nueva'
-                                experimentalParCond.name=' '.join(na.split('_')) 
-                                experimentalParCond.units=un
-                                experimentalParCond.units_detail=ud
-                                experimentalParCond.active=0
-                                 
-                                experimentalParCond.save()    
-                            else:
-                                print 'propiedad existe desea modificar' 
-                                experimentalParCondExist.update(name=' '.join(na.split('_')),units=un,units_detail=ud,active=0) 
-                                
-                                  
-                        else:       
-                                experimentalParCondExist=ExperimentalParCond.objects.filter(tag__exact=experimentalParCond.tag)    
-                                if not experimentalParCondExist:
-                                    print 'propiedad nueva'
-                                    experimentalParCond.name=' '.join(na.split('_')) 
-                                    experimentalParCond.units=un
-                                    experimentalParCond.units_detail=ud
-                                    experimentalParCond.active=1
-                                    experimentalParCond.save()   
-                                else: 
-                                    print 'propiedad existe desea modificar' 
-                                    experimentalParCondExist.update(name=' '.join(na.split('_')),units=un,units_detail=ud,active=1) 
-                                      
-
-                except  Exception, e:
-                       print "Error({0}): {1}".format(e.errno, e.strerror)       
+                else:
+                    try:
+                        experimentalParCondExist=ExperimentalParCond.objects.get(tag__exact=experimentalParCond.tag)
+                    except ObjectDoesNotExist as error:
+                        print "Error({0}): {1}".format(99, error.message)   
+                        experimentalParCondExist = None
+                 
+                    if not experimentalParCondExist:
+                        print 'propiedad nueva'
+                        experimentalParCond.name=' '.join(na.split('_')) 
+                        experimentalParCond.units=un
+                        experimentalParCond.units_detail=ud
+                        experimentalParCond.active=0
+                         
+                        experimentalParCond.save()    
+                        self.experimentalParCondList.append(experimentalParCond)
+                    else:
+                        print 'propiedad existe' 
+                        #experimentalParCondExist.update(name=' '.join(na.split('_')),units=un,units_detail=ud) 
+                        self.experimentalParCondList.append(experimentalParCondExist)
                 
-        return experimentalParCondList
+                        
+                
+                        
+                    
+
+            except  Exception, e:
+                print "Error({0}): {1}".format(e.errno, e.strerror)       
+                
+         
         
         
     def extractProperties(self,approved):
@@ -375,177 +384,90 @@ class Extractor (object):
         dataFilePropertyList=[]
         
        
-        
-        tg="_prop"
-        props = []
-        data_props={}
-        for i, fil in enumerate(self.filets):
-            filepath=os.path.join(self.cifs_dir, fil)
-            texto = self.read_file_1(filepath)
-            code = self.get_data_code(texto)          
-            this_props,props_agg,propsStructure = self.get_props(texto)
-            for pr in this_props:
-                if not pr in props:
-                    props.append(pr)
-            #props = sorted(props)   
-          
-           
-      
-
-                
-            dataFilePropertyold=False
-            
-            for i_pr, pr in enumerate(propsStructure):     
-                if approved == False:
-                    propertieExist=PropertyTemp.objects.filter(tag__exact=tg+pr._prop_name)
-                    if not propertieExist:    
-                        if approved == False:
-                            propertie=PropertyTemp()
-                        else:
-                            propertie=Property()
-                               
-                        propertie.tag=tg+pr._prop_name
-                        propertie.description=pr._prop_name         
-                        propertie.save()
-                    
-                        dataFileProperty=DataFilePropertyTemp() 
-                        dataFileTemp=DataFileTemp.objects.get(code=code)
-                        dataFileProperty.datafile=dataFileTemp
-                        dataFileProperty.property=propertie
-                        dataFileProperty.save()
-                        
-                        
-                        '''print pr._prop_data_label
-                        print pr._prop_data_tensorial_index
-                        print pr._prop_data_value
-                        print pr._prop_measurement_method'''
-                
-                        for x,label in enumerate(pr._prop_data_label):
-                            propertyValuesTemp = PropertyValuesTemp()               
-                            propertyValuesTemp.datafileproperty = dataFileProperty
-                            propertyValuesTemp.prop_data_label= pr._prop_data_label[x]
-                            propertyValuesTemp.prop_data_tensorial_index= pr._prop_data_tensorial_index[x]
-                            propertyValuesTemp.prop_data_value= pr._prop_data_value[x]
-                            propertyValuesTemp.prop_measurement_method= pr._prop_measurement_method[x]
-                            propertyValuesTemp.save()
-                        
-                    else:
-                        propertieExist.update(description=pr._prop_name )          
-                        dataFileTemp=DataFileTemp.objects.get(code=code)
-                         
-                        if  dataFilePropertyold == False:
-                            
-                            dataFilePropertyExist=DataFilePropertyTemp.objects.filter(datafile=dataFileTemp)
-                            for dfpe in dataFilePropertyExist:
-                                propertyValuesTemp = PropertyValuesTemp.objects.filter(datafileproperty=dfpe)  
-                                propertyValuesTemp.delete() 
-                                
-                            dataFilePropertyExist.delete()
-                            '''for dfp in dataFileProperty:                     
-                                  dfp.delete()'''
-                            dataFilePropertyold=True
-                          
-                 
-                        dataFileProperty=DataFilePropertyTemp() 
-                        
-                        dataFileProperty.datafile=dataFileTemp
-                        propertie = propertieExist[0]
-                        dataFileProperty.property=propertie
-                        dataFileProperty.save()
-                        
-                        for x,label in enumerate(pr._prop_data_label):
-                            propertyValuesTemp = PropertyValuesTemp()               
-                            propertyValuesTemp.datafileproperty = dataFileProperty
-                            propertyValuesTemp.prop_data_label= pr._prop_data_label[x]
-                            propertyValuesTemp.prop_data_tensorial_index= pr._prop_data_tensorial_index[x]
-                            propertyValuesTemp.prop_data_value= pr._prop_data_value[x]
-                            propertyValuesTemp.prop_measurement_method= pr._prop_measurement_method[x]
-                            propertyValuesTemp.save()
+        try: 
+            tg="_prop"
+            props = []
+            data_props={}
+            for i, fil in enumerate(self.filets):
+                filepath=os.path.join(self.cifs_dir, fil)
+                texto = self.read_file_1(filepath)
+                code = self.get_data_code(texto)          
+                this_props,props_agg,propsStructure = self.get_props(texto)
+                for pr in this_props:
+                    if not pr in props:
+                        props.append(pr)
+                #props = sorted(props)   
     
-                        
-                else:                
-                    propertieExist=Property.objects.filter(tag__exact=tg+pr)
-                    if not propertieExist:                    
-                        if approved == False:
-                            propertie=PropertyTemp()
-                        else:
-                            propertie=Property()
-                            
-                        propertie.tag=tg+pr
-                        propertie.description=pr            
-                        propertie.save()
-                    
-                        dataFileProperty=DataFileProperty() 
-                        dataFile=DataFile.objects.get(code=code)
-                        dataFileProperty.datafile=dataFile
-                        dataFileProperty.property=propertie
-                        dataFileProperty.save()
-                        
-                        for x,label in enumerate(pr._prop_data_label):
-                          propertyValues = PropertyValues()               
-                          propertyValues.datafileproperty = dataFileProperty
-                          propertyValues.prop_data_label= pr._prop_data_label[x]
-                          propertyValues.prop_data_tensorial_index= pr._prop_data_tensorial_index[x]
-                          propertyValues.prop_data_value= pr._prop_data_value[x]
-                          propertyValues.prop_measurement_method= pr._prop_measurement_method[x]
-                          propertyValues.save()
-                          
-                          
-                    else:
-                        propertieExist.update(description=pr )          
-                        dataFile=DataFile.objects.get(code=code)
-                         
-                        if  dataFilePropertyold == False:
-                            dataFilePropertyExist=DataFileProperty.objects.filter(datafile=dataFile)
-                            for dfpe in dataFilePropertyExist:
-                                propertyValues = PropertyValuesTemp.objects.filter(datafileproperty=dfpe)  
-                                propertyValues.delete() 
-                       
-                            dataFilePropertyExist.delete()
-                            '''for dfp in dataFileProperty:                     
-                                  dfp.delete()'''
-                            dataFilePropertyold=True
-                          
-                 
-                        dataFileProperty=DataFileProperty() 
-                        
-                        dataFileProperty.datafile=dataFile
-                        propertie = propertieExist[0]
-                        dataFileProperty.property=propertie
-                        dataFileProperty.save()
-                        
-                        for x,label in enumerate(pr._prop_data_label):
-                          propertyValues = PropertyValues()               
-                          propertyValues.datafileproperty = dataFileProperty
-                          propertyValues.prop_data_label= pr._prop_data_label[x]
-                          propertyValues.prop_data_tensorial_index= pr._prop_data_tensorial_index[x]
-                          propertyValues.prop_data_value= pr._prop_data_value[x]
-                          propertyValues.prop_measurement_method= pr._prop_measurement_method[x]
-                          propertyValues.save()
+                #dataFilePropertyold=False
+                aa = self.props_info_in_dic(props)
+    
+                for i_pr, pr in enumerate(propsStructure):     
+    
+                    try:
+                        propertyExist=PropertyTemp.objects.get(tag__exact=tg+pr._prop_name)
+                    except ObjectDoesNotExist as error:
+                        print "Error({0}): {1}".format(99, error.message)   
+                        propertyExist = None
+
+                    na = aa[pr._prop_name ]['_name']
+                    un = aa[pr._prop_name ]['_units']
+                    ud = aa[pr._prop_name ]['_units_detail']
 
                 
-        aa = self.props_info_in_dic(props)
-        tgs = ['_name', '_units', '_units_detail']
-     
-        for prop  in enumerate(props):
-            tp = prop[1]
-            print aa[tp]
-            na = aa[tp]['_name']
-            un = aa[tp]['_units']
-            ud = aa[tp]['_units_detail']
+                    dataFileProperty=DataFilePropertyTemp()
+                    if not propertyExist:        
+                        objProperty=PropertyTemp()
+                        objProperty.tag=tg+pr._prop_name
+                        objProperty.description=pr._prop_name     
+                        formatedname = ' '.join(na.split('_')) 
+                        print formatedname
+                        objProperty.name = formatedname
+                        
+                        objProperty.units =un
+                        objProperty.units_detail = ud
+                        objProperty.save()
+                        
+                        dataFileProperty.property=objProperty
+                    else:                     
+                        dataFileProperty.property=propertyExist
+                        
+           
+                    try:
+                        dataFileTemp=DataFileTemp.objects.get(filename__exact=fil) 
+                        dataFileProperty.datafile=dataFileTemp
+                        dataFileProperty.save()
+                    except ObjectDoesNotExist as error:
+                        print "Error({0}): {1}".format(99, error.message)   
+    
+            """
+            aa = self.props_info_in_dic(props)
+            tgs = ['_name', '_units', '_units_detail']
+         
+            for prop  in enumerate(props):
+                tp = prop[1]
+                print aa[tp]
+                na = aa[tp]['_name']
+                un = aa[tp]['_units']
+                ud = aa[tp]['_units_detail']
+                
+                try:
+                    objPropertyExist=PropertyTemp.objects.get(tag__exact=tg+tp)
+                    objPropertyExist.update(units =un, units_detail =ud)
+                except ObjectDoesNotExist as error:
+                    print "Error({0}): {1}".format(99, error.message)  
+                """ 
+                    
             
-            if approved == False:
-                propertie=PropertyTemp.objects.filter(tag__exact=tg+tp)
-                propertie.update(name =' '.join(na.split('_')) ,units =un, units_detail =ud)
-            else:
-                propertie=Property.objects.filter(tag__exact=tg+tp)
-                propertie.update(name =' '.join(na.split('_')) ,units =un, units_detail =ud)
+        except  Exception, e:
+                print "Error({0}): {1}".format(e.errno, e.strerror) 
+  
+ 
             
 
             
             
     def extractPublarticleAndDataFile_Data(self,approved): 
-        gen_tags = ['_cod_database_code', '_phase_generic', '_phase_name', '_chemical_formula_sum']
+        gen_tags = ['_cod_database_code', '_phase_generic', '_phase_name', '_chemical_formula']
         publi_tags = ['_journal_name_full', '_journal_year', '_journal_volume',
                                   '_journal_issue', '_journal_page_first', '_journal_page_last',
                                   '_journal_article_reference', '_journal_pages_number' ]
@@ -581,103 +503,71 @@ class Extractor (object):
                 for a in authors:
                     coma=''
                     if aut != '':
-                       coma=', '   
+                        coma=', '   
                     else:
                         coma=' ' 
                     
                     aut=aut + coma + a
-                            
-                #id, title, authors
-                if approved == False:   
-                    publArticleExist=PublArticleTemp.objects.filter(title__exact=title)  
-                    if not publArticleExist:  
-                        publicArticle.title=title
-                        publicArticle.authors=aut 
-                    else:
-                       publArticleExist.update(authors=aut) 
-                    
-                             
-                else:
-                    publArticleExist=PublArticle.objects.filter(title__exact=title)  
-                    if not publArticleExist:  
-                        publicArticle.title=title
-                        publicArticle.authors=aut 
-                    else:
-                       publArticleExist.update(authors=aut)  
-
-                    
-  
                         
-                    
+                publicArticle.title=title
+                publicArticle.authors=aut         
 
-                formatss = "%d, %s, %s, %s, %d, %s, %s, %d, %d, %s, %d"
+                    
+                formatss = "%d, %s, %s, %s, %d, %s, %d, %d, %d, %s, %d"
                 formats = map(lambda x: x.strip(), formatss.split(","))
                 func=None
-                
-
-
+     
                 publi_vals=[publi_vals[0]]+[title]+[authors]+publi_vals[1:]
                 for i,v in enumerate(publi_vals):
                     #if not v=="None":
-                        f=formats[i]
-                        if f=='%d':
-                            func=int
-                        if f=='%s':
-                            func=lambda x: ""+str(x)+""
-                        if f=='%f':
-                            func=float
-                        try:                    
-                            if (i == 4 or  i == 6 or i == 7 or i == 8 or i == 10) and (v == 'None' or  v == '?'):    
-                                if v == 'None':
-                                  vv=0
-                                elif v == '?':
-                                  vv=0
-                            else:
-                               vv=func(v)
-
-                            if not publArticleExist:          
-                                if i == 3:
-                                 publicArticle.journal=vv                             
-                                elif  i == 4:
-                                 publicArticle.year=vv
-                                elif  i == 5:
-                                 publicArticle.volume=vv
-                                elif  i == 6:
-                                 publicArticle.issue=vv
-                                elif  i == 7:
-                                 publicArticle.first_page=vv
-                                elif  i == 8:
-                                 publicArticle.last_page=vv
-                                elif  i == 9:
-                                 publicArticle.reference=vv
-                                elif  i == 10:
-                                 publicArticle.pages_number=vv
-                            else:
-                                if i == 3:                                   
-                                 publArticleExist.update(journal=vv)                          
-                                elif  i == 4:                                 
-                                 publArticleExist.update(year=vv)   
-                                elif  i == 5:                                 
-                                 publArticleExist.update(volume=vv)   
-                                elif  i == 6:                                 
-                                 publArticleExist.update(issue=vv)   
-                                elif  i == 7:                                 
-                                 publArticleExist.update(first_page=vv)   
-                                elif  i == 8:                                 
-                                 publArticleExist.update(last_page=vv)  
-                                elif  i == 9:                                 
-                                 publArticleExist.update(reference=vv)  
-                                elif  i == 10:                                 
-                                 publArticleExist.update(pages_number=vv)  
+                    f=formats[i]
+                    if f=='%d':
+                        func=int
+                    if f=='%s':
+                        func=lambda x: ""+str(x)+""
+                    if f=='%f':
+                        func=float
+                    try:                    
+                        if i == 9:
+                            vv = '?'
+                            if  i == 9:
+                                publicArticle.reference=vv
+                        elif (i == 6 or i == 10):    
+                            vv=0
+                            if  i == 6:
+                                publicArticle.issue=vv
+                            elif  i == 10:
+                                publicArticle.pages_number=vv
                                 
+                        else:
+                            vv=func(v)
+                            if i == 3:
+                                publicArticle.journal=vv                             
+                            elif  i == 4:
+                                publicArticle.year=vv
+                            elif  i == 5:
+                                publicArticle.volume=vv
+                            elif  i == 6:
+                                publicArticle.issue=vv
+                            elif  i == 7:
+                                publicArticle.first_page=vv
+                            elif  i == 8:
+                                publicArticle.last_page=vv
+                            
+                            
+
+                         
+                    except  Exception as e:
+                        print "Error: {1}".format( e.message, e.args) 
                         
-                        
-                             
-                        except:
-                            pass
-                 
+                """ 
                 if not publArticleExist:
                         publicArticle.save()
+                """
+                publicArticle.save()
+                
+                        
+                        
                 #checar articulo no exista si existe actualizar
                
                 ind = ii
@@ -688,8 +578,7 @@ class Extractor (object):
                 code = self.get_data_code(texto)
                 gen_vals=[code, fil]
                 publi_vals=[ii]
-                gen_info_lin = ""
-                publi_info_lin = ""
+
                 gen_vals = gen_vals + self.get_info_1(texto, gen_tags)
                 
                 if approved == False:
@@ -697,27 +586,15 @@ class Extractor (object):
                 else: 
                     datafile=DataFile()
                     
-                if approved == False: 
-                    datafileExist=DataFileTemp.objects.filter(code__exact=code) 
-                    if not datafileExist:
-                        datafile.code=code 
-                    else:      
-                        datafileExist.update(code=code)                  
-                else:
-                    datafileExist=DataFile.objects.filter(code__exact=code)  
-                    if not datafileExist:
-                        datafile.code=code 
-                    else:      
-                        datafileExist.update(code=code)     
+ 
                     
-                    
-
+                datafile.code=code 
+  
+    
+                #list: [1000378L, 'zaydsfjtrglkmmhup.mpod', '?', '', '', '', 1]
                 formatss = "%d, %s, %d, %s, %s, %s, %d"
                 formats = map(lambda x: x.strip(), formatss.split(","))
                 func=None
-                tks = []
-                tvs = []
-                fs =[]
                 info_vals=gen_vals+[ind]
                 for i,v in enumerate(info_vals):
                     #if not v=="None":
@@ -728,53 +605,44 @@ class Extractor (object):
                         func=lambda x: ""+str(x)+""
                     if f=='%f':
                         func=float
+   
                     try:
-                        if (i == 0 or i == 2 or i == 6)  and (v == 'None' or  v == '?'):    
-                           if v == 'None':
-                              vv=0
-                           elif v == '?':
-                              vv=0                  
-                        else:
-                           vv=func(v)
-          
-                        if not datafileExist:   
+                        if ( i == 2)  and (v == '?'):    
+                            vv=0
+                            if i == 2:
+                                datafile.cod_code=vv 
+                        else:                  
+                            vv=func(v)    
                             if i == 1:
-                             datafile.filename=vv
-                            elif i == 2:
-                             datafile.cod_code=vv 
+                                datafile.filename=vv
                             elif i == 3:
-                             datafile.phase_generic=vv 
+                                datafile.phase_generic=vv 
                             elif i == 4:
-                             datafile.phase_name=vv 
+                                datafile.phase_name=vv 
                             elif i == 5:
-                             datafile.chemical_formula=vv 
-                            elif i == 6:
-                                if not publArticleExist:                                     
-                                  datafile.publication= publicArticle [0] 
-                                else:
-                                  datafile.publication= publArticleExist[0]  
-                                    
-                        else:
-                            if i == 1:                             
-                             datafileExist.update(filename=vv)     
-                            elif i == 2:
-                             datafileExist.update(cod_code=vv)     
-                            elif i == 3:
-                             datafileExist.update(phase_generic=vv)     
-                            elif i == 4:
-                             datafileExist.update(phase_name=vv)     
-                            elif i == 5:
-                             datafileExist.update(chemical_formula=vv)      
-                            elif i == 6:
-                             datafileExist.update(publication=publArticleExist[0])       
-                                    
-                                                       
-                            
+                                datafile.chemical_formula=vv 
+                            elif i == 6:                                                                  
+                                datafile.publication= publicArticle
+
                     except  Exception as e:
-                       print "Error: {1}".format( e.message, e.args)       
+                        print "Error: {1}".format( e.message, e.args)       
                         
-                if not datafileExist:  
+                try:
+                       
                     datafile.save()
+                    
+    
+                    for obj in self.experimentalParCondList:
+                        print type(obj) # <class 'project.app.models.Car'>
+                        print str(isinstance(obj, ExperimentalParCondTemp))
+                        experimentalfilecontempDatafiletemp = ExperimentalfilecontempDatafiletemp()
+                        experimentalfilecontempDatafiletemp.experimentalfilecontemp = obj
+                        experimentalfilecontempDatafiletemp.datafiletemp = datafile
+                     
+                        experimentalfilecontempDatafiletemp.save()
+                    
+                except  Exception as e:
+                        print "Error: {1}".format( e.message, e.args)       
 
                 
            

@@ -1,0 +1,31 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+
+
+ 
+ {% block after_field_sets %}
+<!-- 
+<fieldset class="module aligned">  
+<div class="form-row">  
+      <label>Dictionary</label>
+      <textarea style="height: 136px; width: 161px; margin: 2px;" rows="10">{{ dictionary.tag }}</textarea></div></fieldset>
+<div class="submit-row">  
+
+ <a class="btn btn-sm btn-primary"  href=" {% url admin:Dictionaries_dictionary_review id=object_id %}">
+    <input class="default" type="button" value="Review"  />
+ 
+ </a>
+ 
+  <a class="btn btn-sm btn-primary"  href=" {% url admin:Dictionaries_dictionary_category id=object_id categorypk=1 %}">
+    <input class="default" type="button" value="Reload"  />
+ 
+ </a>
+ 
+</div>  
+ -->
+
+  
+ {% endblock %}
+
+ 

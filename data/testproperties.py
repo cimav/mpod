@@ -15,7 +15,7 @@ if __name__ == '__main__':
         propiedad =str (input('Que propiedad deseas?\ne (elasticidad), p (piezoelectricidad)\n'))
         
         sc = str (input ('Que sistema cristalino deseas?\n tc (Triclinico), m (Monoclinico), o (Ortorrombico), c (Cubico), te (Tetragonal), tg (Trigonal O Romboedrico), h (Hexagonal), iso (Isotropico)\n'))
-        if propiedad == 'ne':
+        if propiedad == 'e':
             tipo = str (input ('Deseas s (compliance) o c (stiffness)?\n'))
             if sc == 'iso':
                 if tipo == 's':
@@ -175,7 +175,7 @@ if __name__ == '__main__':
                     elif tipo == 'c':
                         c[0,0] = c[1,1] = float (input ('c11 = '))
                         c[0,1] = c[1,0] = float (input ('c12 = '))
-                        c[0,2] = s[1,2] = c[2,0] = c[2,1] = float (input ('c13 = '))
+                        c[0,2] = c[1,2] = c[2,0] = c[2,1] = float (input ('c13 = '))
                         c[0,5] = c[5,0] = float (input ('c16 = '))
                         c[1,5] = c[5,1] = -c[0,5]
                         c[2,2] = float (input ('c33 = '))
@@ -450,7 +450,7 @@ if __name__ == '__main__':
                     print (d)
                 elif gp == '-42m':
                     d[0,3] = d[1,4] = float (input ('d14 = '))
-                    d[2,5] = d36 = float (input ('d36 = '))
+                    d[2,5] = float (input ('d36 = '))
                     print (d)
                 else:
                     print ('Grupo puntual inexistente')

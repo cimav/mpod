@@ -48,7 +48,7 @@ _prop_measurement_method 'XRD'
 _prop_frame '1=[100],2=[010],3=[001]'
 #_prop_thermal_expansion_temperature_range_begin 100
 #_prop_thermal_expansion_temperature_range_end 500
-#_prop_conditions_temperature_range_begin 303
+#_prop_conditions_temperature_range_start 303
 #_prop_conditions_temperature_range_end 373
 _prop_thermal_expansion_alphaijT0 'alphaijT0'
 _prop_thermal_expansion_alphaijT 'alphaijT'

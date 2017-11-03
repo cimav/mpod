@@ -1,0 +1,22 @@
+<div class="table-responsive col-lg-4 col-md-4 col-sm-6 col-xs-12 tables">
+  <table class="table table-striped table-condensed table-hover">
+      {% if caption %}
+        <caption> {{caption|safe}} </caption>
+      {% endif %}
+    <tbody>
+      {% for riga in labels_data %}
+        <tr>
+          <td>{{riga.0}}</td>
+          
+          {% if riga.0 == 'category' %} 
+             <td>{{category.description}}</td>
+            {% else %}
+               <td>{{riga.1}}</td>
+          {% endif %}
+          
+          
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

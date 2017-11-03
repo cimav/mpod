@@ -1,0 +1,11 @@
+{% autoescape off %}
+{{regards}} {{ user.username }},
+
+{{email_message}}
+ 
+
+
+http://{{ domain }}{% url activate uidb64=uid token=token %}
+
+{% endautoescape %}
+ 

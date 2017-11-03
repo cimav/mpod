@@ -37,7 +37,7 @@ _journal_page_last               244
 _journal_year                    1955
 _phase_density ?
 _prop_measurement_method 'SCXD'
-_prop_conditions_temperature_range_begin 303
+_prop_conditions_temperature_range_start 303
 _prop_conditions_temperature_range_end 373
 _prop_thermal_expansion_alphaij 'alphaij'
 loop_

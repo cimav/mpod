@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} Search by References {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+ 
+
+
+
+
+
+      <div class="container-fluid">
+      {% include "account/menu.html" %}
+        
+					      <div class="row">
+						        <div class="col-sm-10">
+						          <div class="panel panel-default">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Profile  Information</h3>
+						            </div>
+						            <div class="panel-body">
+	 
+										 
+										 
+										     
+										     
+						        
+			
+ 							            
+								  <form  method="POST" class="padding" enctype="multipart/form-data">
+								   {% csrf_token %} 
+								   
+								    
+								
+								
+								   <div class="container">
+								       {% for field in user_form %}
+								    
+								     <div class="form-group row">
+								      <label for="{{fied.name}}" class="col-sm-2 col-form-label">{{ field.label|capfirst }}</label>
+								      <div class="col-sm-10">
+								      
+								      {{field}}
+								      </div>
+								    </div>
+								    
+								    {% endfor %}
+								  
+								  
+				
+								   
+								   
+								 {% for form in formset.forms %}
+				
+								 {% for field in form.visible_fields %}
+								 
+								  {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                  {% endfor %}
+										
+								   <div class="form-group row">
+								      <label for="{{fied.name}}" class="col-sm-2 col-form-label">{{ field.label|capfirst }}</label>
+								      <div class="col-sm-10">
+								      
+								      {{field}}
+								     
+								      </div>
+								    </div>
+									{% endfor %}
+								
+								{% endfor %}
+								
+								    <div class="form-group row">
+								      <div class="col-sm-10">
+								        
+								            <a href="#" onclick="window.history.back(); return false;" title="Cancel" class="btn-floating waves-effect waves-light red"><i class="material-icons">history</i></a>
+																					           
+											<button type="submit" class="btn btn-primary"  onclick="todoFunc('submit');" >Done</button>
+																					        
+								      </div>
+								    </div>
+								  </form>
+ 
+          </div>
+	</div>
+	</div>
+	</div>
+      
+
+
+{% endblock %}

@@ -1,0 +1,84 @@
+      
+        {% block sidebar %}
+        
+        
+        
+  
+  <div class="row">
+    <div  class="col-sm-3 col-md-2 sidebar">
+
+     <nav>
+      <div id="MainMenu">
+        <div class="list-group">
+
+          
+           <a href="#" class="list-group-item list-group-item-info active" data-toggle="collapse" data-parent="#MainMenu">
+				            <span class="glyphicon glyphicon-home"></span> Home <span class="badge"></span>
+		   </a>
+
+             <a href="#demo1" class="list-group-item list-group-item" data-toggle="collapse" data-parent="#MainMenu">
+				            <span class="glyphicon glyphicon-user"></span> User <span class="badge"></span>
+		     </a>
+		   <div class="collapse " id="demo1">
+           <a href="#SubMenu1" class="list-group-item list-group-item " data-toggle="collapse" data-parent="#SubMenu1">
+				            <span class="glyphicon glyphicon-list-alt"></span>  Profile <span class="badge"></span>
+				            <i class="fa fa-caret-down"></i>
+		   </a>
+            <div class="collapse list-group-submenu" id="SubMenu1">
+              <a href="{% url update pk=user.pk %}" class="list-group-item clearfix" data-parent="#SubMenu1">
+              <span class="glyphicon glyphicon glyphicon-edit pull-right"></span>  Update Profile
+              </a>
+
+       
+              </div>
+            </div>
+     
+          
+          
+             <a href="#demo2" class="list-group-item list-group-item" data-toggle="collapse" data-parent="#MainMenu">
+				            <span class="glyphicon glyphicon-th-list"></span> Files <span class="badge">{{counterfiles}}</span>
+		     </a>
+		   <div class="collapse " id="demo2">
+		        <a href="{% url newcasev2 %}" class="list-group-item clearfix" data-parent="#SubMenu2">
+              <span class="glyphicon glyphicon-th pull-right"></span>  Add Case
+              </a>
+              
+              <!--  
+              <a href="{% url onhold todo='show' index=-2%}" class="list-group-item clearfix" data-parent="#SubMenu2">
+              <span class="glyphicon glyphicon-floppy-save pull-right"></span>  On hold
+              </a>
+              -->
+              
+              <a href="{% url file-detail pk=user.pk %}" class="list-group-item clearfix" data-parent="#SubMenu2">
+              <span class="glyphicon glyphicon-floppy-saved pull-right"></span>  My Files
+              </a>
+              
+            
+            </div>
+            
+
+ 
+          
+         
+         
+         
+       </div>
+      </div>
+      </nav>
+     
+      
+    </div>
+      
+ 
+     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">MPOD | {{current}}</h1>
+      
+  
+      
+ 
+ 
+        {% endblock %}
+      
+
+
+

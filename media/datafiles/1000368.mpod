@@ -39,8 +39,8 @@ _journal_article_reference       ?
 _journal_pages_number             4
 _journal_year                    2010
 _phase_density 8090
-_phase_transition_temperature_rhomb_tetra 379
-_phase_transition_temperature_curie 398
+_phase_rhomb_tetra_transition_temperature 379
+_phase_Curie_temperature 398
 _prop_measurement_poling '[011]c'
 _prop_symmetry_point_group_name_H-M mm2
 _prop_frame '1=[0-11]c 2=[100]c 3=[011]c'

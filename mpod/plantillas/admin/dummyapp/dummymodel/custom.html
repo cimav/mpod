@@ -1,0 +1,61 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static admin_modify %}
+{% load url from future %}
+{% load admin_urls %}
+
+{% block extrahead %}{{ block.super }}
+{% url 'admin:jsi18n' as jsi18nurl %}
+<script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
+{{ media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+
+{% block coltype %}{% if ordered_objects %}colMS{% else %}colM{% endif %}{% endblock %}
+
+{% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} change-form{% endblock %}
+
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="">{{ app_label|capfirst|escape }}</a>
+
+&rsaquo; {{ original }}
+ 
+</div>
+{% endblock %}
+
+
+{% block content %}<div id="content-main">
+  Body module
+
+{% block object-tools %}
+
+			  <ul class="object-tools">
+			    {% block object-tools-items %}
+			    <li><a href="history/" class="historylink">{% trans "History" %}</a></li>
+			    {% if has_absolute_url %}<li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
+			    {% endblock %}
+			  </ul>
+
+
+{% endblock %}
+</br>
+{{app_label}}
+
+</br>
+{{some_var}}
+
+ 
+ </br>
+ <a href="{% url 'admin:DummyApp_DummyModel_save' id=1%}">{{ app_label|capfirst|escape }}</a>
+</div>
+{% endblock %}
+ 
+
+
+ 
+ 
+ 
+ 

@@ -1,0 +1,78 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+
+
+{% load custom_tags %}
+ 
+{% block after_field_sets %}
+
+
+          {% if object_id == 0 %}{% display_comments object_id %}{% endif %}
+   
+  
+ {% if contentmaintitle%}
+  <h1>{{custom_admin_formsets.contentmaintitlepublicationtext}}</h1>
+ {% endif %}
+  
+   <div id="content-main" >
+  
+
+		   
+		   <fieldset class="module aligned collapse">
+		   		   {% if formrow%}
+				   <h2>{{custom_admin_formsets.formrowpublicationtext}}</h2>
+				  {% endif %}
+				  
+		       {% for key,value in custom_admin_formfields.items %}
+		                {% if  key.2 == 'publication' %}
+				                   {% for k,v in value.items%}
+				                             {% if  k.1 == 'id' %}
+				                                 <input type='hidden'   value='{{v}}'   id="{{key.2}}_{{k.1}}" name="{{key.2}}_{{k.1}}"  />
+				                              {% else %}
+				                         		  <div class="form-row field-{{key.2}}_{{k.1}}">
+											                <div>
+											                        <label for="{{key.2}}_{{k.1}}" class="required"> {{k.0|capfirst|escape}}:</label>
+											                            <input name="{{key.2}}_{{k.1}}" value="{{v}}" class="vTextField" maxlength="100" id="{{key.2}}_{{k.1}}" type="text">
+											                </div>
+											        </div>
+											  {%endif%}
+				                    {% endfor %}
+		                {%endif%}
+               {% endfor %}
+               </fieldset>
+ 
+      </div>
+      
+      
+      {% if contentmaintitle%}
+  <h1>{{custom_admin_formsets.contentmaintitledatafiletext}}</h1>
+ {% endif %}
+  
+   <div id="content-main" >
+               <fieldset class="module aligned collapse">
+		   		   {% if formrow%}
+				   <h2>{{custom_admin_formsets.formrowdatafiletext}}</h2>
+				  {% endif %}
+				  
+		       {% for key,value in custom_admin_formfields.items %}
+		                {% if  key.2 == 'datafile' %}
+					                 {% if key.1 == 'id' %}
+							                                 <input type='hidden'   value='{{v}}'   id="{{key.2}}_{{key.1}}" name="{{key.2}}_{{key.1}}"  />
+							             {% else %}
+			                      
+		                     			      <div class="form-row field-{{key.2}}_{{key.1}}">
+									                <div>
+									                        <label for="{{key.2}}_{{key.1}}" class="required"> {{key.0|capfirst|escape}}:</label>
+									                            <input name="{{key.2}}_{{key.1}}" value="{{value}}" class="vTextField" maxlength="100" id="{{key.2}}_{{key.1}}" type="text">
+									                </div>
+									        </div>
+									      {% endif %}
+									     
+		                {%endif%}
+               {% endfor %}
+               </fieldset>
+      </div>
+        
+        
+  {% endblock %}

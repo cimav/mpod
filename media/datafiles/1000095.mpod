@@ -41,9 +41,9 @@ _phase_density 8185
 _prop_symmetry_point_group_name_H-M 'm m 2'
 _prop_measurement_poling '[011]c'
 _prop_frame '1=[0-11]c 2=[100]c 3=[011]c'
-_phase_transition_temperature_rhomb_ortho 465
-_phase_transition_temperature_ortho_tetra 391
-_phase_transition_temperature_curie 465
+_phase_rhomb_ortho_transition_temperature 465
+_phase_ortho_tetra_transition_temperature 391
+_phase_Curie_temperature 465
 _prop_elastic_stiffness_cijE 'cijE'
 _prop_elastic_stiffness_cijD 'cijD'
 _prop_elastic_compliance_sijE 'sijE'

@@ -45,6 +45,7 @@ def handle_uploaded_files(f1, f2, time_st):
         if os.path.isdir(path.datafiles_path): 
             pathexist = 1
             datafiles_path= path.datafiles_path
+            break
     
     uploads_path = os.path.join(datafiles_path, "uploaded")        
     new_dir = os.path.join(uploads_path, time_st)
@@ -69,6 +70,7 @@ def handle_pdf_file(f):
         if os.path.isdir(path.datafiles_path): 
             pathexist = 1
             datafiles_path= path.datafiles_path
+            break
     
 
     uploads_path = os.path.join(datafiles_path, "uploaded")      
@@ -87,6 +89,7 @@ def handle_mpod_file(f):
         if os.path.isdir(path.datafiles_path): 
             pathexist = 1
             datafiles_path= path.datafiles_path
+            break
     
 
     print f.name
@@ -107,6 +110,7 @@ def send_upload_notif(f1, f2, time_st, e_mail_add, opt_mail_data):
         if os.path.isdir(path.datafiles_path): 
             pathexist = 1
             datafiles_path= path.datafiles_path
+            break
     
     
 
@@ -290,17 +294,39 @@ def view_obj_as_2cols_table(modello, oggetto=None, cap=None, esc=True, header=No
     """
     prints the model header and or instance as a 2 cols table
     """
+    print modello
+    print type(oggetto) # <class 'project.app.models.Car'>
+    print str(isinstance(oggetto, Dictionary))
+    c = None                    
     labels_data = get_labels_and_data_1obj(modello, oggetto, cap, esc)
-    t = get_template('data/data_1obj_table.html')
-    c=Context({
-    'header': header,
-    'labels_data': labels_data,
-    'caption': cap,
-    })
+    
+    if isinstance(oggetto, Dictionary):
+        t = get_template('data/data_2obj_table.html')
+        for field in labels_data:
+            if field[0] == "category":
+                print field[1]
+                category = Category.objects.get(pk=field[1])
+                
+        c=Context({
+        'header': header,
+        'labels_data': labels_data,
+        "category":category,
+        'caption': cap,
+        })
+        
+            
+    else:
+        t = get_template('data/data_1obj_table.html')
+        c=Context({
+        'header': header,
+        'labels_data': labels_data,
+        'caption': cap,
+        })
+        
     html_out=t.render(c)
     return html_out
 
-def html_linked_dataitem(dataitem=None):
+def html_linked_dataitem(dataitem=None,item=None):
     """
     prints the model header and or instance as a 2 cols table
     """
@@ -325,6 +351,16 @@ def html_linked_dataitem(dataitem=None):
             if ii==6:
                 link_item = "/articles/"+str(val)
         data_links_list.append([format_name(f.name), val, link_item])
+        
+    
+    if item:
+        for k,v in item.iteritems():
+            link_item = "/dictionarydefinition/"+str( k[1])
+            data_links_list.append([k[0].replace("_"," "), v, link_item])
+            print data_links_list
+            
+            
+    
     t = get_template('data/data_linked_dataitem.html')
     c=Context({
     'header': "Datafile info",
@@ -356,7 +392,8 @@ def data_item_html(dataitem_id):
         datafile_item = DataFile.objects.get(code__exact = dataitem_id)
     except:
         return None, None
-    
+
+    datafiles_path=''
     pathslist=Path.objects.all()      
     pathexist = 0
     for filepath in pathslist:
@@ -370,10 +407,11 @@ def data_item_html(dataitem_id):
     mpod_filepath = os.path.join(datafiles_path, dataitem_id+".mpod")
     file_data_blocks = parse_mpod_file(mpod_filepath)
     print 'file_data_blocks', file_data_blocks
-    tenso_props, nl_props, l_props = all_props_list(file_data_blocks)
+    tenso_props, nl_props, l_props,dictitems = all_props_list(file_data_blocks)
     print 'tenso_props', tenso_props
     print 'nl_props', nl_props
     print 'l_props', l_props
+    print 'dictitems', dictitems
     
     
     tenso_props_dims_dict = {}
@@ -397,8 +435,25 @@ def data_item_html(dataitem_id):
     props_ids = [tenso_props_dims_dict, tenso_props_ids_dict, lnl_props_ids_dict,
      tenso_props_units_dict, lnl_props_units_dict ]
     formatted_data_blocks = format_data_blocks(file_data_blocks, props_ids)
+    """
+    itemdictionary = []
+    for db in file_data_blocks:
+        non_looped_props, loop_structs = db
+        print "non_looped_props"
+        for k,v in non_looped_props[2].iteritems():
+            if  k.startswith("_symmetry"):
+                print k
+    """
+    dictionaryitems = {}
+    for k,v in dictitems.iteritems():
+        dictionary = Dictionary.objects.get(tag__exact= k)
+        print 'dictionary'
+        dictionaryitems[k,dictionary.pk] = v
+        print dictionaryitems
+
+      
     t_tables = get_template('data/view_dataitem_tensors_new.html')
-    html_datafile = html_linked_dataitem(datafile_item)
+    html_datafile = html_linked_dataitem(datafile_item,dictionaryitems)
     c_tables=Context({
     'header': "Property values",
     'formatted_data_blocks' : formatted_data_blocks,

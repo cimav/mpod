@@ -17,7 +17,7 @@
     <link href="{{STATIC_URL}}css/sticky-footer.css" rel="stylesheet"> <!-- Pie de página abajo -->
     <link href="{{STATIC_URL}}css/general.css" rel="stylesheet">
     <link href="{{STATIC_URL}}css/carousel.css" rel="stylesheet"> <!-- Home's carousel -->
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700' rel='stylesheet' type='text/css'> <!-- Menu font -->
+    <link href='{{STATIC_URL}}css/css.css' rel='stylesheet' type='text/css'> <!-- Menu font -->
     <link href="{{STATIC_URL}}css/dashboard.css" rel="stylesheet"> <!-- Credits -->
     <link href="{{STATIC_URL}}css/navbar.css" rel="stylesheet"> <!-- Submenu black and yellow -->
     {% block style_css %}{% endblock %}
@@ -25,7 +25,7 @@
     <!-- JS -->
     <!--<script src='{{STATIC_URL}}js/jquery-1.7.2.min.js'></script>-->
     <!--<script src='{{STATIC_URL}}js/demo.js'></script>-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="{{STATIC_URL}}js/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="{{STATIC_URL}}js/bootstrap.min.js"></script>
     <script src="{{STATIC_URL}}js/general.js"></script>
@@ -98,17 +98,31 @@
                   <li><a href="/terms">TERMS</a></li>
                 </ul>
                 </li>
-                <!-- 
+                
                  <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">USERS<span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
-                  <li><a href="/signup">SIGN UP - MPOD</a></li>
+                  <li><a href="/signup">REGISTER - MPOD</a></li>
                   <li><a href="/login">LOGIN- MPOD</a></li>
-                   <li><a href="/logout">LOGOUT - MPOD</a></li>
-                  <li><a href="/newcase">NEW PROPERTY - MPOD</a></li>
+                   
+                  
                 </ul>
                 </li>
-                -->
+                
+             
+                 {% if user.username != ""%}  
+                <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{user.username}} <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">            
+                   <li><a href="/logout">LOGOUT - MPOD</a></li>
+                   <li><a href="/accounts/profile">My Profile</a></li>
+                   
+                </ul>
+                </li>
+                 {% endif %}
+                
+               
+                
                 <!-- DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT DROPDOWN ABOUT-->
               </ul>
           </div>

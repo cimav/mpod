@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% comment %} Aqui van comentarios {% endcomment %}
+
+{% block titulo %} Search by References {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+
+
+ <div class="container"  >
+	  <div class="qlt-confirmation">
+	  	<div class="panel panel-default">
+	      <div class="panel-body">
+	        <center>
+	        <img src="{{STATIC_URL}}img/open_mail_letter-512.png" style="width:30px; height: 30px;">
+	          <p class="desc">Thank you for signing up!<br>We've sent a confirmation link on your email.<br>Please visit your <img style="width: 40px; height: 40px" src="http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/glossy-black-icons-business/080840-glossy-black-icon-business-mailbox.png">.</p>
+	        </center>
+	        
+	        <p class="notice">Note:<br>By clicking on our <b> validation link </ b>, you will enable the activation of your account. This is part of our security policy.</p>
+	      </div>
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %}

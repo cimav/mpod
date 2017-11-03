@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% comment %} coments here {% endcomment %}
+
+{% block titulo %} Dictionary definition {% endblock %}
+
+{% block encabezado %}
+{% endblock %}
+
+{% block contenido %}
+	<div class="content">
+		<h3>Dictionary definition</h3>
+		<br/>
+		{% if property_table %}
+			{{property_table|escape}}
+		{% else %}
+			Sorry! Dictionary definition/Definition not found.
+		{% endif %}
+		<br/><br/>
+	</div>
+{% endblock %}
