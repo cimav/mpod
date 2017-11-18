@@ -31,11 +31,6 @@ urlpatterns = patterns('',
     url(r'^accounts/adddictionaryphase/(?P<pk>-?\d+)$',adddictionaryphase, name='adddictionaryphase'), 
     url(r'^accounts/adddictionaryphasecharacteristic/(?P<pk>-?\d+)$',adddictionaryphasecharacteristic , name='adddictionaryphasecharacteristic'), 
     url(r'^accounts/adddictionarymeasurement/(?P<pk>-?\d+)$',adddictionarymeasurement , name='adddictionarymeasurement'), 
-    
-    
-    
-    
-    
 
       # USER
     #url(r'^signup/$', 'data.views.viewsignup'),

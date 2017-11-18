@@ -110,52 +110,54 @@ def signup(request):
             #smtpconfig = Configuration.objects.get(pk=1)
             print  request.build_absolute_uri('/')
                 
-            messageCategoryDetail= None
-            messageMailSignup= None
+ 
              
-            messageCategoryDetail=MessageCategoryDetail.objects.get(messagecategory=MessageCategory.objects.get(pk=1))
-            messageMailSignup= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
-            
-                #messageMailSignup= MessageMail.objects.filter(site=Site.objects.filter(name=request.build_absolute_uri('/')))
-            configurationMessage = ConfigurationMessage.objects.get(message=messageMailSignup)
-            smtpconfig= configurationMessage.account
-            #print configurationMessage.message.email_subject
-            
-            my_use_tls = False
-            if smtpconfig.email_use_tls ==1:
-                my_use_tls = True
-            
-            #fail_silently= False
-            connection = get_connection(host=smtpconfig.email_host, 
-                                                                    port= int(smtpconfig.email_port ), 
-                                                                    username=smtpconfig.email_host_user, 
-                                                                    password=smtpconfig.email_host_password, 
-                                                                    use_tls=my_use_tls) 
-        
-             
-            message = render_to_string('account_activation_email.html', {
-                'regards':messageMailSignup.email_regards,
-                'email_message':  messageMailSignup.email_message,
-                'user': user,
-                'domain': current_site.domain,
-                'uid': base64.b64encode(force_bytes(str(user.pk))),
-                'token': account_activation_token.make_token(user),
-                'linkactivate': urlactivate,
-                'forwardslash':forwardslash
-            })
-            
-    
-            
-            #print request.build_absolute_uri() 
-            #print  request.build_absolute_uri('/')
-            
-            send_mail(
-                            messageMailSignup.email_subject,
-                            message,
-                            smtpconfig.email_host_user,
-                            [user.email],
-                            connection=connection
-                        )
+            messageCategoryDetail1=MessageCategoryDetail.objects.get(messagecategory=MessageCategory.objects.get(pk=1))#category activation
+            #messageMail= MessageMail.objects.get(pk=messageCategoryDetail1.message.pk)
+            messageMailQuerySet2= MessageMail.objects.filter(pk=messageCategoryDetail1.message.pk)
+                    
+            for message   in messageMailQuerySet2:
+                messageMail= MessageMail()
+                messageMail = message
+                
+                if messageMail.pk == 1:
+                    configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                    smtpconfig= configurationMessage.account
+                    
+                    
+                    my_use_tls = False
+                    if smtpconfig.email_use_tls ==1:
+                        my_use_tls = True
+                    
+                    #fail_silently= False
+                    connection = get_connection(host=smtpconfig.email_host, 
+                                                                            port= int(smtpconfig.email_port ), 
+                                                                            username=smtpconfig.email_host_user, 
+                                                                            password=smtpconfig.email_host_password, 
+                                                                            use_tls=my_use_tls) 
+                
+                     
+                    message = render_to_string('account_activation_email.html', {
+                        'regards':messageMail.email_regards,
+                        'email_message':  messageMail.email_message,
+                        'user': user,
+                        'domain': current_site.domain,
+                        'uid': base64.b64encode(force_bytes(str(user.pk))),
+                        'token': account_activation_token.make_token(user),
+                        'linkactivate': urlactivate,
+                        'forwardslash':forwardslash
+                    })
+                    
+                    print message
+ 
+                    send_mail(
+                                    messageMail.email_subject,
+                                    message,
+                                    smtpconfig.email_host_user,
+                                    [user.email],
+                                    connection=connection
+                                )
+                    
 
         
             return redirect('/account_activation_sent')
@@ -1739,104 +1741,115 @@ def onhold(request,todo,index):
                     current_site = get_current_site(request)
                     
                     
-                    messageCategoryDetail=MessageCategoryDetail.objects.get(messagecategory=MessageCategory.objects.get(pk=3))#3 for category staff notification
-                    messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+                    messageCategoryDetailQuerySet1=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=3))#3 for category staff notification
+                    #messageMailQuerySet1= MessageMail.objects.filter(pk=messageCategoryDetail1.message.pk)
                     
-                        #messageMailSignup= MessageMail.objects.filter(site=Site.objects.filter(name=request.build_absolute_uri('/')))
-                    configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
-                    smtpconfig= configurationMessage.account
-                    #print configurationMessage.message.email_subject
-                    
-                    my_use_tls = False
-                    if smtpconfig.email_use_tls ==1:
-                        my_use_tls = True
-                    
-                    fail_silently= False
-                    listemail=[]
-                    listuser=User.objects.filter(groups=messageCategoryDetail.group)
-                    for u in listuser:
-                        print u.email   
-                        listemail.append(u.email)
-                    
-                    
-
-                    message = render_to_string('notification_to_staff_email.html', {
-                                                                            'regards':messageMail.email_regards,
-                                                                            'email_message':  messageMail.email_message,
-                                                                            'user': user,
-                                                                            'domain': current_site.domain,
-                                                                            'datafilescreated': datafilescreated,
-                                                                            'cif_created': mpodutil.cif_created,
-                                                                            'reportValidation':mpodutil.reportValidation,
-                                                                            'forwardslash':forwardslash
-                    })
-                
-                    print message
-                
-                    
-                                   
-                    backend = EmailBackend(   host=smtpconfig.email_host, 
-                                                                        port=int(smtpconfig.email_port ), 
-                                                                        username=smtpconfig.email_host_user, 
-                                                                        password=smtpconfig.email_host_password, 
-                                                                        use_tls=my_use_tls,
-                                                                        fail_silently=fail_silently)
-                                                
-                    email = EmailMessage( messageMail.email_subject,
-                                                                message,
-                                                                smtpconfig.email_host_user,
-                                                                listemail,
-                                                                connection=backend)
-                    
-                    email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
-                    email.send()
-                    
-                    
-                    
-                    messageCategoryDetail=MessageCategoryDetail.objects.get(messagecategory=MessageCategory.objects.get(pk=2))#2 for category User notification
-                    messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
-                    
-                        #messageMailSignup= MessageMail.objects.filter(site=Site.objects.filter(name=request.build_absolute_uri('/')))
-                    configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
-                    smtpconfig= configurationMessage.account
-                    
-                    my_use_tls = False
-                    if smtpconfig.email_use_tls ==1:
-                        my_use_tls = True
-                    
-                    fail_silently= False
-                    
-                
-                    
-                    message = render_to_string('notification_to_user_email.html', {
-                                                                            'regards':messageMail.email_regards,
-                                                                            'email_message':  messageMail.email_message,
-                                                                            'user': user,
-                                                                            'domain': current_site.domain,
-                                                                            'datafilescreated': datafilescreated,
-                                                                            'cif_created': mpodutil.cif_created,
-                                                                            'forwardslash':forwardslash
-                    })
-                
-                    print message
-                
-                    
-                                   
-                    backend = EmailBackend(   host=smtpconfig.email_host, 
-                                                                        port=int(smtpconfig.email_port ), 
-                                                                        username=smtpconfig.email_host_user, 
-                                                                        password=smtpconfig.email_host_password, 
-                                                                        use_tls=my_use_tls,
-                                                                        fail_silently=fail_silently)
-                                                
-                    email = EmailMessage( messageMail.email_subject,
-                                                                message,
-                                                                smtpconfig.email_host_user,
-                                                                  [user.email],
-                                                                connection=backend)
-                    
-                    email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
-                    email.send()
+                    for mcd in messageCategoryDetailQuerySet1:
+                        messageCategoryDetail = MessageCategoryDetail()
+                        messageCategoryDetail = mcd
+                        messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+                        
+                        if messageMail.pk == 5:
+                            configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                            smtpconfig= configurationMessage.account
+             
+                            my_use_tls = False
+                            if smtpconfig.email_use_tls ==1:
+                                my_use_tls = True
+                            
+                            fail_silently= False
+                            listemail=[]
+                            listuser=User.objects.filter(groups=messageCategoryDetail.group)
+                            for u in listuser:
+                                #print u.email   
+                                listemail.append(u.email)
+                            
+                            
+        
+                            message = render_to_string('notification_to_staff_email.html', {
+                                                                                    'regards':messageMail.email_regards,
+                                                                                    'email_message':  messageMail.email_message,
+                                                                                    'user': user,
+                                                                                    'domain': current_site.domain,
+                                                                                    'datafilescreated': datafilescreated,
+                                                                                    'cif_created': mpodutil.cif_created,
+                                                                                    'reportValidation':mpodutil.reportValidation,
+                                                                                    'forwardslash':forwardslash
+                            })
+                        
+                            print message
+                        
+                            
+                                           
+                            backend = EmailBackend(   host=smtpconfig.email_host, 
+                                                                                port=int(smtpconfig.email_port ), 
+                                                                                username=smtpconfig.email_host_user, 
+                                                                                password=smtpconfig.email_host_password, 
+                                                                                use_tls=my_use_tls,
+                                                                                fail_silently=fail_silently)
+                                                        
+                            email = EmailMessage( messageMail.email_subject,
+                                                                        message,
+                                                                        smtpconfig.email_host_user,
+                                                                        listemail,
+                                                                        connection=backend)
+                            
+                            email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
+                            email.send()
+                            
+                            
+                            
+                    messageCategoryDetailQuerySet2=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=2))#2 for category User notification
+                    #messageMail= MessageMail.objects.get(pk=messageCategoryDetailQuerySet2.message.pk)
+ 
+                    for mcd in messageCategoryDetailQuerySet2:
+                        messageCategoryDetail = MessageCategoryDetail()
+                        messageCategoryDetail = mcd
+                        messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+                       
+                        if messageMail.pk == 6:
+                            configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                            smtpconfig= configurationMessage.account
+                            
+                            my_use_tls = False
+                            if smtpconfig.email_use_tls ==1:
+                                my_use_tls = True
+                            
+                            fail_silently= False
+                            
+                        
+                            
+                            message = render_to_string('notification_to_user_email.html', {
+                                                                                    'regards':messageMail.email_regards,
+                                                                                    'email_message':  messageMail.email_message,
+                                                                                    'user': user,
+                                                                                    'domain': current_site.domain,
+                                                                                    'datafilescreated': datafilescreated,
+                                                                                    'cif_created': mpodutil.cif_created,
+                                                                                    'forwardslash':forwardslash
+                            })
+                        
+                            print message
+                        
+                            
+                                           
+                            backend = EmailBackend(   host=smtpconfig.email_host, 
+                                                                                port=int(smtpconfig.email_port ), 
+                                                                                username=smtpconfig.email_host_user, 
+                                                                                password=smtpconfig.email_host_password, 
+                                                                                use_tls=my_use_tls,
+                                                                                fail_silently=fail_silently)
+                                                        
+                            email = EmailMessage( messageMail.email_subject,
+                                                                        message,
+                                                                        smtpconfig.email_host_user,
+                                                                          [user.email],
+                                                                        connection=backend)
+                            
+                            email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
+                            email.send()
+                            
+                            
                     del request.session['propertySessionList']     
                 except ValueError:
                     pass

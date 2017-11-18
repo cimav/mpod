@@ -43,6 +43,16 @@ from django import template
 from django.db import router, transaction
 
 
+from django.template.loader import render_to_string
+from django.core import mail
+from django.core.mail import get_connection, send_mail
+from django.core.mail.message import EmailMessage
+from django.core.mail.backends.smtp import EmailBackend
+from data.models import MessageCategoryDetail
+
+from django.db.models import get_app, get_models
+
+
 """
 class UserAdmin(admin.ModelAdmin):
 
@@ -346,7 +356,7 @@ class FileUserAdmin(admin.ModelAdmin):
             obj.delete()
 
         def delete_view(self, request, object_id, extra_context=None):
-         
+            
             opts = self.model._meta
             app_label = opts.app_label
              
@@ -360,15 +370,18 @@ class FileUserAdmin(admin.ModelAdmin):
   
             if obj is None:
                 raise Http404('%s object with primary key %r does not exist.' % (force_unicode(opts.verbose_name), escape(object_id)))
-          
-            #deleted_objects = [mark_safe(u'%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), quote(object_id), escape(obj))), []]
-            #perms_needed = set()
+ 
+            if obj.published == False:
+                raise Http404('can not carry out the operation because the object %s  is unpublished' % (force_unicode(opts.verbose_name)))
+            
+                       
             
             using = router.db_for_write(self.model)  
  
  
             (deleted_objects, perms_needed, protected) = get_deleted_objects([obj], opts, request.user, self.admin_site, using)
             
+       
 
             #if request.POST is set, the user already confirmed deletion
             if not request.POST:
@@ -377,10 +390,79 @@ class FileUserAdmin(admin.ModelAdmin):
                 print 'request.POST'
                 if perms_needed:
                     raise PermissionDenied
+                
+                dataFileTemp=DataFileTemp.objects.get(filename__exact=obj.filename)
+                #experimentalfilecontempDatafiletempQuerySet = ExperimentalfilecontempDatafiletemp.objects.filter(datafiletemp=dataFileTemp)
+                '''
+                for efct in experimentalfilecontempDatafiletempQuerySet:
+                    try:
+                        experimentalParCond = ExperimentalParCond.objects.get(tag__exact=efct.experimentalfilecontemp.tag)
+                    except ObjectDoesNotExist as error:
+                        pass
+                '''
+                publication= None
+                try: 
+                    dataFile=DataFile.objects.get(code__exact = dataFileTemp.code )    
+                    publication = dataFile.publication
+                except ObjectDoesNotExist as error:
+                    dataFile = None                 
+                    
+                if dataFile is None:
+                    raise Http404('%s object no published yet.' % (force_unicode(dataFileTemp.filename)))
+  
+               
+
+                
+                dataFilePropertyQuerySet = None
+                try: 
+                    dataFilePropertyQuerySet=DataFileProperty.objects.filter(datafile = dataFile )    
+                except ObjectDoesNotExist as error:
+                    dataFilePropertyQuerySet = None        
+                    
+                if dataFilePropertyQuerySet is None:
+                    raise Http404('%s object no published yet.' % (force_unicode(dataFile.code)))
+
+                for dfp in dataFilePropertyQuerySet:
+                    dataFilePropertyObj = DataFileProperty()
+                    dataFilePropertyObj = dfp
+                    
+                    print "dataFilePropertyObj.delete()"
+                    print dataFilePropertyObj.datafile.filename
+                    dataFilePropertyObj.delete()
+ 
+                pathslist=Path.objects.all()   
+                path=Path() 
+                for cifdir in pathslist:
+                    path = cifdir
+                    if os.path.isdir(path.cifs_dir):
+                        break
+                                    
+                ciffilein =os.path.join(path.cifs_dir_valids, obj.filename)
+                ciffileout = os.path.join(path.cifs_dir,dataFile.filename)
+                print "archivo a borrar"
+                print ciffileout
+                try:
+                    if os.path.isfile(ciffileout):
+                        os.remove(ciffileout)
+                    
+                except Exception as e:
+                    raise Http404('%s object no published yet.' % (force_unicode(e)))
+                    #print(e)
+         
+ 
+                print "dataFile.delete()  "
+                print dataFile.filename
+                print "publication.delete()"
+                print publication.title
+                
+                dataFile.delete() 
+                publication.delete()
+      
                 obj_display = str(obj)
                 #self.delete_model(request, obj)
-                #or
-                #obj.delete()
+                obj.published = False
+                obj.save()  
+ 
                   
                 self.log_deletion(request, obj, obj_display)
                 self.message_user(request, ('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})
@@ -525,7 +607,9 @@ class FileUserAdmin(admin.ModelAdmin):
                             dataFileProperty.datafile = dataFile
                             dataFileProperty.save()
    
+                            
                             obj.save()  
+                          
                             
                             pathslist=Path.objects.all()      
                             pathexist = 0
@@ -539,6 +623,7 @@ class FileUserAdmin(admin.ModelAdmin):
                             
                             ciffilein =os.path.join(path.cifs_dir_valids, obj.filename)
                             ciffileout = os.path.join(path.cifs_dir,dataFile.filename)
+                            print dataFile.filename
             
                             #line.replace("data_" + obj.filename, "data_" +dataFile.code ), end='')
                             datacode = "data_"+ obj.filename.replace('.mpod', ' ')
@@ -555,6 +640,54 @@ class FileUserAdmin(admin.ModelAdmin):
                                         outfile.write(line)
                                     else:                                        
                                         outfile.write(line)
+                            
+                            
+                            messageCategoryDetailQuerySet1=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=2))#2 for user notification
+                       
+                            for mcd in messageCategoryDetailQuerySet1:
+                                messageCategoryDetail = MessageCategoryDetail()
+                                messageCategoryDetail = mcd
+                                messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+                                
+                                if messageMail.pk == 7:
+                                    configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                                    smtpconfig= configurationMessage.account
+                                    
+                                    my_use_tls = False
+                                    if smtpconfig.email_use_tls ==1:
+                                        my_use_tls = True
+                                    
+                                    connection = get_connection(host=smtpconfig.email_host, 
+                                                                            port= int(smtpconfig.email_port ), 
+                                                                            username=smtpconfig.email_host_user, 
+                                                                            password=smtpconfig.email_host_password, 
+                                                                            use_tls=my_use_tls) 
+                
+                     
+                                    current_site = get_current_site(request)
+                                    dataitem ="dataitem"
+                                    forwardslash="/"
+                                    message = render_to_string('notification_to_user_file_published.html', {
+                                                                                    'regards':messageMail.email_regards,
+                                                                                    'email_message':  messageMail.email_message,
+                                                                                    'user': obj.authuser,
+                                                                                    'domain': current_site.domain,
+                                                                                    'code':  dataFile.code,
+                                                                                    'dataitem': dataitem,
+                                                                                    'forwardslash': forwardslash,
+                                                                                    
+                                                                                    })
+                                    
+                                    print message
+                 
+                                    send_mail(
+                                                    messageMail.email_subject,
+                                                    message,
+                                                    smtpconfig.email_host_user,
+                                                    [obj.authuser.email],
+                                                    connection=connection
+                                                )
+                            
     
                         except ObjectDoesNotExist as error:
                                     #print "Error({0}): {1}".format(99, error.message)  
@@ -885,14 +1018,31 @@ class DummyModelAdmin(admin.ModelAdmin):
     
 
         def changelist_view(self, request, extra_context=None):
-            print 'changelist_view ImageAdmin'
+            print 'changelist_view DummyModel'
             extra_context = extra_context or {}
             extra_context['some_var'] = 'This is what I want to show'
             extra_context['title'] = 'Title module'
             extra_context['original'] ='Item to proccess'
-            
-                       
             extra_context['app_label'] = "Custom app_label"
+            
+            
+            for model in get_models():
+                
+                model.objects.all()
+                new_object = model() # Create an instance of that model
+                #model.objects.filter(...) # Query the objects of that model
+                print "meta"
+                print new_object._meta
+                print "db_table: " + model._meta.db_table  
+                
+                print "\n"
+                print "*--------------------------------------- " + model.__name__ + "---------------------------------------* "
+                for x in model._meta.fields:
+                    print x.name
+            
+               
+       
+            
             
             
             #return super(ImageAdmin, self).changelist_view(request, extra_context=extra_context)
