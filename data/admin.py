@@ -1066,6 +1066,14 @@ class DummyModelAdmin(admin.ModelAdmin):
             return response
  
 admin.site.register([DummyModel], DummyModelAdmin)
+
+
+
+class CatalogPropertyAdmin(admin.ModelAdmin):
+    pass
+    
+admin.site.register(CatalogProperty, CatalogPropertyAdmin)
+
     
 
 

@@ -276,7 +276,7 @@ class ExperimentalParCondTemp(models.Model):
 class CatalogProperty(models.Model): 
     name = models.CharField(max_length=255,verbose_name="Name")
     description = models.CharField(max_length=511,verbose_name="Description")
-    #publication = models.ForeignKey(PublArticle)
+    active = models.BooleanField(_(u'Active'),default=False)
    
     class Meta:
         db_table = 'data_catalogproperty'

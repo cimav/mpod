@@ -1447,7 +1447,7 @@ def get_catalog_property():
 
 def get_catalog_propertyv2():
     catalogPropertyList = [];
-    list_obj = CatalogProperty.objects.all()
+    list_obj = CatalogProperty.objects.filter(active= True)
     for obj in list_obj:
         cp = CatalogProperty()
         cp = obj; 
@@ -2334,7 +2334,7 @@ def addcasev2(request):
         
         
         if 'propertyCategoryNameListOnSession' not in request.session  or not request.session['propertyCategoryNameListOnSession']:
-            propertyCategoryName=CatalogProperty.objects.all()
+            propertyCategoryName=CatalogProperty.objects.filter(active= True)
             request.session['propertyCategoryNameListOnSession'] =propertyCategoryName
         else:
             propertyCategoryName =request.session['propertyCategoryNameListOnSession']
