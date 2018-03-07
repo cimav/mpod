@@ -215,30 +215,30 @@ class MPODUtil():
                     self.__line ="'" + li + "'\n"
                     self.addline(self.__line)   
                      
-                    if self.__section_title == False:
-                        self.__section_title = True
-                        
-                        self.__line =  "_publ_section_title"  +"\n"
-                        self.addline(self.__line)   
-                        self.__line =  ";"  +"\n"
-                        self.addline(self.__line)   
-                        self.__line =  p.title  +"\n"
-                        self.addline(self.__line)   
-                        self.__line =  ";"  +"\n"
-                        self.addline(self.__line)   
-                        
-                        self.__line = '_journal_name_full ' + "'"+p.journal +"'"+" \n"
-                        self.addline(self.__line)   
-                        self.__line = '_journal_volume  ' + "'"+p.volume +"'"+" \n"
-                        self.addline(self.__line)   
-                        self.__line = '_journal_page_first  ' + "'"+p.page_first +"'"+" \n"
-                        self.addline(self.__line)  
-                        self.__line = '_journal_page_last  ' + "'"+p.page_last +"'"+" \n"
-                        self.addline(self.__line)    
+                if self.__section_title == False:
+                    self.__section_title = True
+                    
+                    self.__line =  "_publ_section_title"  +"\n"
+                    self.addline(self.__line)   
+                    self.__line =  ";"  +"\n"
+                    self.addline(self.__line)   
+                    self.__line =  p.title  +"\n"
+                    self.addline(self.__line)   
+                    self.__line =  ";"  +"\n"
+                    self.addline(self.__line)   
+                    
+                    self.__line = '_journal_name_full ' + "'"+p.journal +"'"+" \n"
+                    self.addline(self.__line)   
+                    self.__line = '_journal_volume  ' + "'"+p.volume +"'"+" \n"
+                    self.addline(self.__line)   
+                    self.__line = '_journal_page_first  ' + "'"+p.page_first +"'"+" \n"
+                    self.addline(self.__line)  
+                    self.__line = '_journal_page_last  ' + "'"+p.page_last +"'"+" \n"
+                    self.addline(self.__line)    
                         
                           
-                        self.__line = '_journal_year  ' + "'"+p.year +"'"+" \n"
-                        self.addline(self.__line)                  
+                    self.__line = '_journal_year  ' + "'"+p.year +"'"+" \n"
+                    self.addline(self.__line)                  
                 
                 self.__loop_article_info=True 
             

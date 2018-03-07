@@ -47,8 +47,8 @@ class CifMpodValidator():
             rf = result.find('VALID')
             k=df.keys()
             
-            print result
-            print k
+            #print result
+            #print k
             
             if rf>-1:
                self.codeListValid.append(k[0])               
