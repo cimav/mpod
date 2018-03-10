@@ -148,25 +148,46 @@ class Propertiesv2(object):
                                                 {
                                                      
                                                      $('#s11').change(function() {
+                                               
                                                          value = 2 *($('#s11').val()- $('#s12').val());
-                                                          $('#s44').val(value) ;
-                                                          $('#s55').val(value) ;
-                                                          $('#s66').val(value) ;
+                                                         
+                                                         var n = $('#s11').val().indexOf("e");
+                                                          if(n == -1)
+                                                             n = $('#s11').val().indexOf("E");
+                                                   
+                                                          if(n != -1)
+                                                               var res1 = $('#s11').val().substring(0, n);
+                                                               
+                                                        index =  res1.indexOf(".");
+                                                         toscientistnotation = Number.parseFloat(value).toExponential(res1.substring(n+1, index + 1).length );
+                                                          
+                                                         
+                                                          if(Number($(this).val()).toPrecision() != 'NaN')
+                                                          {
+                                                              $('#s44').val(toscientistnotation) ;
+                                                              $('#s55').val(toscientistnotation) ;
+                                                              $('#s66').val(toscientistnotation) ;
+                                                         }
+                                                        else 
+                                                        {
+                                                            $('#s44').val(Error ) ;
+                                                            $('#s55').val(Error ) ;
+                                                            $('#s66').val(Error ) ;
+                                                        }
                                                      });
                                  
                                                      $('#divwarningpropertyvalues').hide();
                                                     $('#s11').keyup(function ()
                                                     {
-                                                        if($.isNumeric($(this).val())) {
-                                                        $('#divwarningpropertyvalues').hide();
-                                                        $('#s22').val($(this).val() ) ;
-                                                        $('#s33').val($(this).val() ) ;
-    
-                                                        }else
+                                                        if(Number($(this).val()).toPrecision() != 'NaN')
                                                         {
-                                                           $('#divwarningpropertyvalues').show();
-                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                           $(this).val('');
+                                                            $('#s22').val($(this).val()) ;
+                                                            $('#s33').val($(this).val()) ;
+                                                        }
+                                                        else 
+                                                        {
+                                                            $('#s22').val(Error ) ;
+                                                            $('#s33').val(Error ) ;
                                                         }
                                                      });
                     
