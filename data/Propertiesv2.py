@@ -40,7 +40,22 @@ class Propertiesv2(object):
             self.axisList =[]
             self.listofemptyInputs =[]
             
-            self.jquery =''
+            self.jquery= """
+                                    function isScientificNotation(value)
+                                   {
+                                        var n = value.indexOf("e");
+                                        if(n == -1)
+                                        {
+                                            n = value.indexOf("E");
+                                            if(n == -1)
+                                                return 0; 
+                                            else
+                                                return 1;
+                                        }
+                                         return 1; 
+                                   }
+                                   
+                            """
             self.__inputList = None
             
             #self.inputList =[]
@@ -141,83 +156,83 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append("s21");
                         self.listofemptyInputs.append("s31");
                         self.listofemptyInputs.append("s32");
-                        
-                         
-                        self.jquery=  """$(document).ready(
-                                                function() 
-                                                {
-                                                     
-                                                     $('#s11').change(function() {
-                                               
-                                                         value = 2 *($('#s11').val()- $('#s12').val());
-                                                         
-                                                         var n = $('#s11').val().indexOf("e");
-                                                          if(n == -1)
-                                                             n = $('#s11').val().indexOf("E");
-                                                   
-                                                          if(n != -1)
-                                                               var res1 = $('#s11').val().substring(0, n);
-                                                               
-                                                        index =  res1.indexOf(".");
-                                                         toscientistnotation = Number.parseFloat(value).toExponential(res1.substring(n+1, index + 1).length );
-                                                          
-                                                         
-                                                          if(Number($(this).val()).toPrecision() != 'NaN')
-                                                          {
-                                                              $('#s44').val(toscientistnotation) ;
-                                                              $('#s55').val(toscientistnotation) ;
-                                                              $('#s66').val(toscientistnotation) ;
-                                                         }
-                                                        else 
-                                                        {
-                                                            $('#s44').val(Error ) ;
-                                                            $('#s55').val(Error ) ;
-                                                            $('#s66').val(Error ) ;
-                                                        }
-                                                     });
-                                 
-                                                     $('#divwarningpropertyvalues').hide();
-                                                    $('#s11').keyup(function ()
-                                                    {
-                                                        if(Number($(this).val()).toPrecision() != 'NaN')
-                                                        {
-                                                            $('#s22').val($(this).val()) ;
-                                                            $('#s33').val($(this).val()) ;
-                                                        }
-                                                        else 
-                                                        {
-                                                            $('#s22').val(Error ) ;
-                                                            $('#s33').val(Error ) ;
-                                                        }
-                                                     });
-                    
-                                                     $('#s12').keyup(function ()
-                                                    {
-                                                       if($.isNumeric($(this).val())) {
-                                                        $('#divwarningpropertyvalues').hide();
-                                                        $('#s12').val($(this).val() ) ;
-                                                        $('#s13').val($(this).val() ) ;
-                                                        $('#s23').val($(this).val() ) ;
-                                                        $('#s21').val($(this).val() ) ;
-                                                        $('#s31').val($(this).val() ) ;
-                                                        $('#s32').val($(this).val() ) ;
-                                                                                   
-                                                         value = 2 *($('#s11').val()- $(this).val());
-                                                        $('#s44').val(value) ;
-                                                        $('#s55').val(value) ;
-                                                        $('#s66').val(value) ;
-                                                            
-                                                        }
-                                                        else
-                                                        {
-                                                              $('#divwarningpropertyvalues').show();
-                                                              $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                              $(this).val('');
-                                                        }
-    
-                                                     });
+                       
+ 
+                                  
+                        self.jquery= self.jquery +  """$(document).ready(
+                                                                                    function() 
+                                                                                    {
+                                                                                         
+                                                                                         $('#s11').change(function() {   
+                                                                                             v = 2 *($('#s11').val()- $('#s12').val());
+                                                                                                                                             
+                                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                                value = Number.parseFloat(v).toExponential();
+                                                                                            else
+                                                                                               value = v
+                            
+                                                                                              if(Number($(this).val()).toPrecision() != 'NaN')
+                                                                                              {
+                                                                                                  $('#s44').val(value) ;
+                                                                                                  $('#s55').val(value) ;
+                                                                                                  $('#s66').val(value) ;
+                                                                                             }
+                                                                                            else 
+                                                                                            {
+                                                                                                $('#s44').val(Error ) ;
+                                                                                                $('#s55').val(Error ) ;
+                                                                                                $('#s66').val(Error ) ;
+                                                                                            }
+                                                                                         });
+                                                                     
+                                                                                         $('#divwarningpropertyvalues').hide();
+                                                                                        $('#s11').keyup(function ()
+                                                                                        {
+                                                                                            if(Number($(this).val()).toPrecision() != 'NaN')
+                                                                                            {
+                                                                                                $('#s22').val($(this).val()) ;
+                                                                                                $('#s33').val($(this).val()) ;
+                                                                                            }
+                                                                                            else 
+                                                                                            {
+                                                                                                $('#s22').val(Error ) ;
+                                                                                                $('#s33').val(Error ) ;
+                                                                                            }
+                                                                                         });
+                                                        
+                                                                                         $('#s12').keyup(function ()
+                                                                                        {
+                                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                                $('#divwarningpropertyvalues').hide();
+                                                                                                $('#s12').val($(this).val() ) ;
+                                                                                                $('#s13').val($(this).val() ) ;
+                                                                                                $('#s23').val($(this).val() ) ;
+                                                                                                $('#s21').val($(this).val() ) ;
+                                                                                                $('#s31').val($(this).val() ) ;
+                                                                                                $('#s32').val($(this).val() ) ;
+                                                                                                                           
+                                                                                                 v = 2 *($('#s11').val()- $(this).val());
+                                                                         
+                                                                                                 if ( isScientificNotation($(this).val()) == 1 )
+                                                                                                    value = Number.parseFloat(v).toExponential();
+                                                                                                else
+                                                                                                   value = v
+                                                                                                   
+                                                                                                $('#s44').val(value) ;
+                                                                                                $('#s55').val(value) ;
+                                                                                                $('#s66').val(value) ;
+                                                                                                
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                $('#s44').val(Error) ;
+                                                                                                $('#s55').val(Error) ;
+                                                                                                $('#s66').val(Error) ;
+                                                                                            }
+                                        
+                                                                                         });
                                                   
-                                                     """
+                                                                             """
                     elif self.type == 'c': 
                         self.listofemptyInputs.append("c44");
                         self.listofemptyInputs.append("c55");
@@ -233,67 +248,72 @@ class Propertiesv2(object):
                         
                                                 
                                 
-                        self.jquery=  """$(document).ready(
-                                                function() 
-                                                {
-                                                   $('#c11').change(function() {
-                                                         value = ($('#c11').val()- $('#c12').val())/2;
-                                                          $('#c44').val(value) ;
-                                                          $('#c55').val(value) ;
-                                                          $('#c66').val(value) ;
-                                                     });
-    
-                                                     $('#divwarningpropertyvalues').hide();
-                                                    $('#c11').keyup(function ()
-                                                    {
-                                                        if($.isNumeric($(this).val())) {
-                                                        $('#divwarningpropertyvalues').hide();
-                                                        $('#c22').val($(this).val() ) ;
-                                                        $('#c33').val($(this).val() ) ;
-    
-                                                        }else
-                                                        {
-                                                           $('#divwarningpropertyvalues').show();
-                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                           $(this).val('');
-                                                        }
-                                                     });
-                    
-                                                     $('#c12').keyup(function ()
-                                                    {
-                                                       if($.isNumeric($(this).val())) {
-                                                        $('#divwarningpropertyvalues').hide();
-                                                        $('#c12').val($(this).val() ) ;
-                                                        $('#c13').val($(this).val() ) ;
-                                                        $('#c23').val($(this).val() ) ;
-                                                        $('#c21').val($(this).val() ) ;
-                                                        $('#c31').val($(this).val() ) ;
-                                                        $('#c32').val($(this).val() ) ;
-                                                                                   
-                                                         value = ($('#c11').val()- $(this).val())/2;
-                                                        $('#c44').val(value) ;
-                                                        $('#c55').val(value) ;
-                                                        $('#c66').val(value) ;
-                                                            
-                                                        }
-                                                        else
-                                                        {
-                                                              $('#divwarningpropertyvalues').show();
-                                                              $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                              $(this).val('');
-                                                        }
-                                             });
+                        self.jquery= self.jquery +  """$(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                               $('#c11').change(function() {
+                                                                                     v = ($('#c11').val()- $('#c12').val())/2;
+                                                                                                 
+                                                                                     if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v
+                                                                  
+                                                                                      $('#c44').val(value) ;
+                                                                                      $('#c55').val(value) ;
+                                                                                      $('#c66').val(value) ;
+                                                                                 });
+                                
+                                                                                 $('#divwarningpropertyvalues').hide();
+                                                                                $('#c11').keyup(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                        $('#divwarningpropertyvalues').hide();
+                                                                                        $('#c22').val($(this).val() ) ;
+                                                                                        $('#c33').val($(this).val() ) ;
+                                
+                                                                                    }else
+                                                                                    {
+                                                                                         $('#c22').val(Error) ;
+                                                                                        $('#c33').val(Error) ;
+                                                                                    }
+                                                                                 });
+                                                
+                                                                                 $('#c12').keyup(function ()
+                                                                                {
+                                                                                   if(Number($(this).val()).toPrecision() != 'NaN')  {
+                                                                                            $('#divwarningpropertyvalues').hide();
+                                                                                            $('#c12').val($(this).val() ) ;
+                                                                                            $('#c13').val($(this).val() ) ;
+                                                                                            $('#c23').val($(this).val() ) ;
+                                                                                            $('#c21').val($(this).val() ) ;
+                                                                                            $('#c31').val($(this).val() ) ;
+                                                                                            $('#c32').val($(this).val() ) ;
+                                                                                                                       
+                                                                                             v = ($('#c11').val()- $(this).val())/2;
+                                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                                value = Number.parseFloat(v).toExponential();
+                                                                                            else
+                                                                                               value = v
+                                                                                       
+                                                                                            $('#c44').val(value) ;
+                                                                                            $('#c55').val(value) ;
+                                                                                            $('#c66').val(value) ;
+                                                                                        
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        $('#c44').val(Error) ;
+                                                                                        $('#c55').val(Error) ;
+                                                                                        $('#c66').val(Error) ;
+                                                                                    }
+                                                                         });
                                              
                                                      """
     
                     self.jquery= self.jquery+"\n"   
     
-                    """for key in sorted(self.read_write_inputs.keys()):
-                            if  self.read_write_inputs[key] == 'r':
-                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n" 
-                    """
-                                      
-                                      
+      
                     for key in sorted(self.read_write_inputs.keys()):
                             if  self.read_write_inputs[key] == 'r':
                                 if  self.contains(self.listofemptyInputs,key):
@@ -358,48 +378,64 @@ class Propertiesv2(object):
                     self.listofemptyInputs.append(self.type+"55");
                     self.listofemptyInputs.append(self.type+"66");
                         
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                         """
+                    self.jquery= self.jquery + """
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                 """
                     self.jquery= self.jquery + """                    
                                                                      $('#""" +self.type+ """11').keyup(function() {
-                                                                 """   
-                                                                 
-                                                                 
-                                                                 
-                    self.jquery= self.jquery +"""               
-                                                                                  $('#""" +self.type+ """22').val($(this).val() ) ;
-                                                                                  $('#""" +self.type+ """33').val($(this).val() ) ;
-                                                                             });
+                                                                             if(Number($(this).val()).toPrecision() != 'NaN') 
+                                                                                {
+                                                                                    $('#""" +self.type+ """22').val($(this).val() ) ;
+                                                                                    $('#""" +self.type+ """33').val($(this).val() ) ;
+                                                                                }
+                                                                            else
+                                                                               {
+                                                                                    $('#""" +self.type+ """22').val('') ;
+                                                                                    $('#""" +self.type+ """33').val('') ;
+                                                                               }
+                                                                        });
                                                                              
-                                                                 """   
-                                                                 
-                    self.jquery= self.jquery + """                    
                                                                      $('#""" +self.type+ """12').keyup(function() {
-                                                                         $('#""" +self.type+ """13').val($(this).val() );
-                                                                        $('#""" +self.type+ """23').val($(this).val() );
-                                                                        $('#""" +self.type+ """21').val($(this).val() );
-                                                                        $('#""" +self.type+ """31').val($(this).val() );
-                                                                        $('#""" +self.type+ """32').val($(this).val() );
-                                                                      });"""
+                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') 
+                                                                            {
+                                                                                $('#""" +self.type+ """13').val($(this).val() );
+                                                                                $('#""" +self.type+ """23').val($(this).val() );
+                                                                                $('#""" +self.type+ """21').val($(this).val() );
+                                                                                $('#""" +self.type+ """31').val($(this).val() );
+                                                                                $('#""" +self.type+ """32').val($(this).val() );
+                                                                            }
+                                                                        else
+                                                                            {
+                                                                               $('#""" +self.type+ """13').val('');
+                                                                                $('#""" +self.type+ """23').val('');
+                                                                                $('#""" +self.type+ """21').val('');
+                                                                                $('#""" +self.type+ """31').val('');
+                                                                                $('#""" +self.type+ """32').val('');
+                                                                            }
+                                                                      });
                                                                       
-                    self.jquery= self.jquery + """                    
+                                      
                                                                      $('#""" +self.type+ """44').keyup(function() {
-                                                                         $('#""" +self.type+ """55').val($(this).val());
-                                                                        $('#""" +self.type+ """66').val($(this).val());                                                                      
+                                                                         if(Number($(this).val()).toPrecision() != 'NaN') 
+                                                                            {
+                                                                                $('#""" +self.type+ """55').val($(this).val());
+                                                                                $('#""" +self.type+ """66').val($(this).val());              
+                                                                             }
+                                                                        else
+                                                                            {
+                                                                                $('#""" +self.type+ """55').val('');
+                                                                                $('#""" +self.type+ """66').val('');  
+                                                                            }     
+                                                                                                                                        
                                                                       });"""                                                  
                                                                       
                     self.jquery= self.jquery+"\n" 
                     
-                    """
-                    for key in sorted(self.read_write_inputs.keys()):
-                            if  self.read_write_inputs[key] == 'r':
-                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n" 
-                    """
+   
                     for key in sorted(self.read_write_inputs.keys()):
                         if  self.read_write_inputs[key] == 'r':
                             if  self.contains(self.listofemptyInputs,key):
@@ -475,26 +511,38 @@ class Propertiesv2(object):
  
 
                     
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                         """
+                    self.jquery=self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                 """
                     self.jquery= self.jquery + """                    
                                                                      $('#""" +self.type+ """11').change(function() {
+                                                                      
                                                                  """   
                     if self.type == 's':
-                        self.jquery= self.jquery + """ value = 2 *  ($(this).val()- $('#""" +self.type+ """12').val());"""
+                        self.jquery= self.jquery + """ v = 2 *  ($(this).val()- $('#""" +self.type+ """12').val());"""
                     elif self.type == 'c':
-  
-                         
-                        self.jquery= self.jquery + """ value =  ($(this).val()- $('#""" +self.type+ """12').val())/2;"""
+                        self.jquery= self.jquery + """ v =  ($(this).val()- $('#""" +self.type+ """12').val())/2;"""
                         
-                    self.jquery= self.jquery +"""                  
-                                                                                  $('#""" +self.type+ """66').val(value ) ;
-                                                                             });
+                        
+                    self.jquery= self.jquery +"""   
+                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                            value = Number.parseFloat(v).toExponential();
+                                                                         else
+                                                                            value = v       
+                                 
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN')
+                                                                          {
+                                                                               $('#""" +self.type+ """66').val(value) 
+                                                                          }
+                                                                        else
+                                                                         {                                 
+                                                                              $('#""" +self.type+ """66').val('') ;
+                                                                          }
+                                                                        });
                                                                              
                                                                  """
                                                  
@@ -502,14 +550,12 @@ class Propertiesv2(object):
                     self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """11').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                 $('#divwarningpropertyvalues').hide();
                                                                                 $('#""" +self.type+ """22').val($(this).val() ) ;
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """22').val('') ;
                                                                                 }
                                                                              });
                                                                         """
@@ -517,52 +563,57 @@ class Propertiesv2(object):
                     self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """12').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
+                                                                                
                                                                                 $('#divwarningpropertyvalues').hide();
                                                                                 $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                   """
                     if self.type == 's':
-                        self.jquery= self.jquery + """ value = 2 *  ($(""" +self.type+ """11).val()- $(this).val());"""
+                        self.jquery= self.jquery + """ v = 2 *  ($(""" +self.type+ """11).val()- $(this).val());"""
                     elif self.type == 'c':
-                        self.jquery= self.jquery + """ value =  ($(""" +self.type+ """11).val()- $(this).val())/2;"""
+                        self.jquery= self.jquery + """ v =  ($(""" +self.type+ """11).val()- $(this).val())/2;"""
                                                                     
                     self.jquery= self.jquery +     """
-                                                                                $('#""" +self.type+ """66').val(value ) ;
                                                                                 
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
+                                                                                if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    value = Number.parseFloat(v).toExponential();
+                                                                                else
+                                                                                    value = v       
+                                                                            
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    $('#""" +self.type+ """66').val(value ) ;
+                                                                                    }
+                                                                                else
+                                                                                  {
+                                                                                       $('#""" +self.type+ """66').val('') ;
+                                                                                  }
                                                                              });
                                                                         """
                     
                     self.jquery= self.jquery + """
                                                                      $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
-                                                                            $('#""" +self.type+ """23').val($(this).val() ) ;
-                                                                            $('#""" +self.type+ """31').val($(this).val() ) ;
-                                                                            $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                $('#divwarningpropertyvalues').hide();
+                                                                                $('#""" +self.type+ """23').val($(this).val() ) ;
+                                                                                $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                                $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """23').val('') ;
+                                                                                $('#""" +self.type+ """31').val('') ;
+                                                                                $('#""" +self.type+ """32').val('') ;
                                                                             }
                                                                          });
                                                                     """
-                    self.jquery= self.jquery + """
-                                                                     $('#""" +self.type+ """33').keyup(function ()
+                    self.jquery= self.jquery + """ 
+                                                                         $('#""" +self.type+ """33').focusout(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                $('#divwarningpropertyvalues').hide();
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
+                                                                               //$('#divwarningpropertyvalues').show();
+                                                                               //$( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
                                                                                $(this).val('');
                                                                             }
                                                                          });
@@ -570,14 +621,12 @@ class Propertiesv2(object):
                     self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """44').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                 $('#divwarningpropertyvalues').hide();
                                                                                 $('#""" +self.type+ """55').val($(this).val() ) ;
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """55').val('') ;
                                                                                 }
                                                                              });
                                                                         """
@@ -667,57 +716,49 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append(self.type+"31");
                         self.listofemptyInputs.append(self.type+"32");
                         
-                        self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                         """
                                              
                                              
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """12').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                             
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                    $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """21').val('') ;
                                                                                 }
                                                                              });
                                                                         """
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """13').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                $('#""" +self.type+ """31').val($(this).val() ) ;
-                                                                             
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                   $('#divwarningpropertyvalues').hide();
+                                                                                   $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """31').val('') ;
                                                                                 }
                                                                              });
                                                                         """
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """23').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                    $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """32').val('') ;
                                                                                 }
                                                                              });
                                                                         """     
@@ -878,73 +919,62 @@ class Propertiesv2(object):
                     self.jquery= self.jquery + """
                                                              $('#""" +self.type+ """12').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                 
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """21').val('') ;
                                                                     }
                                                                  });
                                                                  
                                                                 $('#""" +self.type+ """13').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """31').val('') ;
                                                                     }
                                                                  });
                                                                  
                                                                  $('#""" +self.type+ """14').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """41').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """41').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """41').val('') ;
                                                                     }
                                                                  });
                                                                  
                                                                  
                                                                 $('#""" +self.type+ """15').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """51').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """51').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """51').val('') ;
                                                                     }
                                                                  });
                                                                  
                                                                  
                                                                 $('#""" +self.type+ """16').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """61').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """61').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """61').val('') ;
                                                                     }
                                                                  });
                                                                  
@@ -952,140 +982,117 @@ class Propertiesv2(object):
                                                                                           
                                                                 $('#""" +self.type+ """23').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """32').val($(this).val() ) ;
-                                                                 
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """32').val('') ;
                                                                     }
                                                                  });
                                                                  
                                                                 $('#""" +self.type+ """24').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """42').val($(this).val() ) ;
-                                                                 
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """42').val($(this).val() ) ;
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """42').val('') ;
                                                                     }
                                                                  });  
                                                                  
                                                                 $('#""" +self.type+ """25').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """52').val($(this).val() ) ;
-                                                                 
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """52').val($(this).val() ) ;
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """52').val('') ;
                                                                     }
                                                                  }); 
                                                                  
                                                                 $('#""" +self.type+ """26').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """62').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """62').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """62').val('') ;
                                                                     }
                                                                  }); 
                                                                  
                                                                  $('#""" +self.type+ """34').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """43').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """43').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """43').val('') ;
                                                                     }
                                                                  }); 
                                                                 $('#""" +self.type+ """35').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """53').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """53').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """53').val('') ;
                                                                     }
                                                                  }); 
                                                                  
                                                                 $('#""" +self.type+ """36').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """63').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """63').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """63').val('') ;
                                                                     }
                                                                  }); 
                                                                  
                                                                $('#""" +self.type+ """45').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """54').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """54').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """54').val('') ;
                                                                     }
                                                                  }); 
                                                                  
                                                                 $('#""" +self.type+ """46').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """64').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """64').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """64').val('') ;
                                                                     }
                                                                  }); 
                                                                  
                                                                 $('#""" +self.type+ """56').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """65').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $('#""" +self.type+ """65').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """65').val('') ;
                                                                     }
                                                                  }); 
                                                             """                         
@@ -1195,13 +1202,13 @@ class Propertiesv2(object):
                     self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)     
                     self.setCatalogPropertyDetail() 
                     self.preparedataforjQuery(self.type )
-                    self.jquery="""
-                                        // inicio de codigo jQuery
-                                        $('#divwarningpropertyvalues').hide();
-                                        $(document).ready(
-                                            function() 
-                                            {
-                                         """
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
                      
                     if self.puntualgroupselected_name in ('4mm', '-42m', '422', '4/mmm'):
                         self.listofemptyInputs.append(self.type+"22");
@@ -1213,62 +1220,55 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                  $('#""" +self.type+ """11').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """22').val($(this).val() ) ;
+                                                                        $('#""" +self.type+ """22').val($(this).val() );
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """22').val('');
                                                                         }
                                                                      });
                                                                      
                                                                      
                                                                      $('#""" +self.type+ """12').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """21').val('');
                                                                         }
                                                                      });
                                                                      
                                                                      
                                                                    $('#""" +self.type+ """13').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """23').val($(this).val() ) ;
-                                                                        $('#""" +self.type+ """31').val($(this).val() ) ;
-                                                                        $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            $('#""" +self.type+ """23').val($(this).val() ) ;
+                                                                            $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                            $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                            $('#""" +self.type+ """23').val('') ;
+                                                                            $('#""" +self.type+ """31').val('') ;
+                                                                            $('#""" +self.type+ """32').val('') ;
                                                                         }
                                                                      });
                                                                      
                                                                      
                                                                      $('#""" +self.type+ """44').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """55').val($(this).val() ) ;
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            $('#""" +self.type+ """55').val($(this).val());
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """55').val('');
                                                                         }
                                                                      });
                                                                      
@@ -1288,46 +1288,39 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                  $('#""" +self.type+ """11').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """22').val($(this).val() ) ;
-                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            $('#""" +self.type+ """22').val($(this).val());
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """22').val('');
                                                                         }
                                                                      });
                                                                      
                                                                      $('#""" +self.type+ """12').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            $('#""" +self.type+ """21').val($(this).val());
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                            $('#""" +self.type+ """21').val('');
                                                                         }
                                                                      });
                                                                      
                                                                      
                                                                    $('#""" +self.type+ """13').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """23').val($(this).val() ) ;
-                                                                        $('#""" +self.type+ """31').val($(this).val() ) ;
-                                                                        $('#""" +self.type+ """32').val($(this).val() ) ;
-                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            $('#""" +self.type+ """23').val($(this).val());
+                                                                            $('#""" +self.type+ """31').val($(this).val());
+                                                                            $('#""" +self.type+ """32').val($(this).val());
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                            $('#""" +self.type+ """23').val('');
+                                                                            $('#""" +self.type+ """31').val('');
+                                                                            $('#""" +self.type+ """32').val('');
                                                                         }
                                                                      });
                                                                      
@@ -1336,35 +1329,36 @@ class Propertiesv2(object):
                                                                      
                                                                     $('#""" +self.type+ """16').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        value = $(this).val()
-                                                                        $('#""" +self.type+ """61').val(value ) ;
-                                                                        
-                                                                        
-                                                                        $('#""" +self.type+ """62').val(-value ) ;
-                                                                         $('#""" +self.type+ """26').val(-value) ;
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            v = $(this).val()
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else
+                                                                                value = v 
+  
+                                                                            $('#""" +self.type+ """61').val(value);
+                                                                            $('#""" +self.type+ """62').val(-value);
+                                                                            $('#""" +self.type+ """26').val(-value);
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                            $('#""" +self.type+ """61').val('');
+                                                                            $('#""" +self.type+ """62').val('');
+                                                                            $('#""" +self.type+ """26').val('');
                                                                         }
                                                                      });
                                                                      
                                                                      
                                                                     $('#""" +self.type+ """44').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """55').val($(this).val() ) ;
+                                                                        $('#""" +self.type+ """55').val($(this).val());
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """55').val('');
                                                                         }
                                                                      });
                                                                      
@@ -1541,13 +1535,13 @@ class Propertiesv2(object):
                     self.setCatalogPropertyDetail() 
                     self.preparedataforjQuery(self.type )
                     
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery= self.jquery + """
+                                                                // inicio de codigo jQuery
+                                                                $('#divwarningpropertyvalues').hide();
+                                                                $(document).ready(
+                                                                    function() 
+                                                                    {
+                                                                 """
                     if self.axisselected_name  == 'x2':
                         self.listofemptyInputs.append(self.type+"21");
                         self.listofemptyInputs.append(self.type+"31");
@@ -1557,101 +1551,97 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append(self.type+"53");
                         self.listofemptyInputs.append(self.type+"64");
                         self.jquery= self.jquery + """
+                                                                      $('#""" +self.type+ """11').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                $('#divwarningpropertyvalues').hide();
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                            }
+                                                                         });
+                                                                         
                                                                      $('#""" +self.type+ """12').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('');
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """15').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """51').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """51').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """23').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """32').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                         $('#""" +self.type+ """25').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """52').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """52').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """35').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """53').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """53').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """46').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """64').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """64').val('') ;
                                                                             }
                                                                          });
                                                                          
@@ -1665,101 +1655,97 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append(self.type+"63");
                         self.listofemptyInputs.append(self.type+"54");
                         self.jquery= self.jquery + """
+                                                                        $('#""" +self.type+ """11').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                $('#divwarningpropertyvalues').hide();
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                            }
+                                                                         });
+                                                                         
                                                                      $('#""" +self.type+ """12').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """16').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """61').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """61').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """23').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """32').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                         $('#""" +self.type+ """26').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """62').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """62').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """36').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """63').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """63').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """45').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """54').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """54').val('') ;
                                                                             }
                                                                          });
                                                                          
@@ -1882,13 +1868,13 @@ class Propertiesv2(object):
                     
                     self.preparedataforjQuery(self.type )
                     
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery=self.jquery +  """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
                     if self.puntualgroupselected_name in ('32', '-3m', '3m'):
                         self.listofemptyInputs.append(self.type+"22");
                         self.listofemptyInputs.append(self.type+"21");
@@ -1905,57 +1891,54 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                       
                                                                      $('#""" +self.type+ """11').keyup(function ()
-                                                                        {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                        { 
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
-                                                                            $('#""" +self.type+ """22').val($(this).val() ) ;
-                                                                         
+                                                                            $('#""" +self.type+ """22').val($(this).val()) ;   
+                                                                                                                                                    
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """22').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          
                                                                          $('#""" +self.type+ """11').change(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """21').val($('#""" +self.type+ """12').val() ) ;
-                                                                            
-                                                                            
+    
                                                                        """
                                             
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
-                                                                            value =2* ($(this).val()-$('#""" +self.type+ """12').val());
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =2* ($(this).val()-$('#""" +self.type+ """12').val());
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
-                                                                            value =($(this).val()-$('#""" +self.type+ """12').val()) / 2;
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =($(this).val()-$('#""" +self.type+ """12').val()) / 2; 
                                                                             """
                                                                                                                        
                                                                             
                         self.jquery= self.jquery +  """
+                                                                                if ( isScientificNotation($(this).val()) == 1 )
+                                                                                     value = Number.parseFloat(v).toExponential();
+                                                                                else
+                                                                                    value = v  
+                                                                                    
+                                                                                $('#""" +self.type+ """66').val(value) ;
+                                                                                
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('') ;
+                                                                               $('#""" +self.type+ """66').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
@@ -1963,49 +1946,47 @@ class Propertiesv2(object):
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """31').val('') ;
+                                                                                $('#""" +self.type+ """32').val('') ;
+                                                                                $('#""" +self.type+ """23').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """12').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                            
-                                                                            
+ 
                                                                        """
                                             
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
-                                                                            value =2* ($('#""" +self.type+ """11').val()-$(this).val());
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =2* ($('#""" +self.type+ """11').val()-$(this).val());
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
-                                                                            value =($('#""" +self.type+ """11').val()-$(this).val()) / 2;
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =($('#""" +self.type+ """11').val()-$(this).val()) / 2;
                                                                             """
                                                                                                                        
                                                                             
                         self.jquery= self.jquery +  """
+                                                                                if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    value = Number.parseFloat(v).toExponential();
+                                                                                else
+                                                                                   value = v  
+                                                                                   
+                                                                                 $('#""" +self.type+ """66').val(value) ;
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('') ;
+                                                                               $('#""" +self.type+ """66').val('');
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
@@ -2013,62 +1994,78 @@ class Propertiesv2(object):
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               $('#""" +self.type+ """23').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                        $('#""" +self.type+ """14').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """41').val($(this).val() ) ;
                                                                             
-                                                                            value = $(this).val(); 
-                                                                            $('#""" +self.type+ """24').val(-value ) ;
-                                                                            $('#""" +self.type+ """42').val(-value  ) ;
+                                                                            
+                                                                            v = $(this).val(); 
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(-v).toExponential();
+                                                                            else
+                                                                                  value = -v 
+                                                                                  
+                                                                         
+                                                                            $('#""" +self.type+ """24').val(value ) ;
+                                                                            $('#""" +self.type+ """42').val(value  ) ;
+
                                                                             """
                                                                             
                         if self.type =="s":                                                  
                             self.jquery= self.jquery + """  
-                                                                            $('#""" +self.type+ """56').val(2*value  ) ;
-                                                                            $('#""" +self.type+ """65').val(2*value  ) ;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(2*$(this).val() ).toExponential();
+                                                                            else                                                                          
+                                                                                value = 2*$(this).val();
+                                                                            
+                                                                            $('#""" +self.type+ """56').val(value) ;
+                                                                            $('#""" +self.type+ """65').val(value) ;
+                                                                                
                                                                             """
                         elif self.type =="c":    
                             self.jquery= self.jquery + """  
-                                                                             $('#""" +self.type+ """56').val($(this).val() ) ;
-                                                                              $('#""" +self.type+ """65').val($(this).val() ) ;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat($(this).val() ).toExponential();
+                                                                            else                                                                          
+                                                                                value = $(this).val();
+                                                                                
+                                                                              $('#""" +self.type+ """56').val(value ) ;
+                                                                              $('#""" +self.type+ """65').val(value ) ;
                                                                             """
                                                                             
                         self.jquery= self.jquery +  """
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """41').val('') ;
+                                                                               $('#""" +self.type+ """24').val('') ;
+                                                                               $('#""" +self.type+ """42').val('') ;
+                                                                              $('#""" +self.type+ """56').val('') ;
+                                                                              $('#""" +self.type+ """65').val('') ;
+                                                                        
                                                                             }
                                                                          });
                                                                          """
-                                                                         
-                                                                         
-                                                                         
-                                                                                   
-                                                                        
+  
                                                                         
                         self.jquery= self.jquery +"""
                                                                          
                                                                        $('#""" +self.type+ """44').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """55').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """55').val('' ) ;
                                                                             }
                                                                          });
                                                                          
@@ -2104,55 +2101,64 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                      $('#""" +self.type+ """11').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """22').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """22').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """11').change(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """21').val($('#""" +self.type+ """12').val()) ;
-                                                                            
-                                                                            
+
                                                                        """
                                             
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
-                                                                            value =2* ($(this).val()-$('#""" +self.type+ """12').val());
+                                                                            v =2* ($(this).val()-$('#""" +self.type+ """12').val());
                                                                             
-                                                                            $('#""" +self.type+ """66').val(value) ;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v ).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                                
                                                                             
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
-                                                                            value =($(this).val()-$('#""" +self.type+ """12')) / 2;
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =($(this).val()-$('#""" +self.type+ """12')) / 2;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+
                                                                             """
                                                                                                                        
                                                                             
                         self.jquery= self.jquery +  """
+                                                                             
+                                                                            if(Number(value).toPrecision() != 'NaN')
+                                                                                $('#""" +self.type+ """66').val(value) ;                                                                     
+                                                                            else                                                                          
+                                                                                $('#""" +self.type+ """66').val('') ;
+                                                                        
+                                                                                
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('' ) ;
+                                                                               $('#""" +self.type+ """66').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
@@ -2160,9 +2166,9 @@ class Propertiesv2(object):
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               $('#""" +self.type+ """23').val('') ;
                                                                             }
                                                                          });
                                                                          
@@ -2170,41 +2176,49 @@ class Propertiesv2(object):
                                                                          
                                                                           $('#""" +self.type+ """12').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
-                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                            
-                                                                            
+                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;     
                                                                        """
                                             
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
-                                                                            value =2* ($('#""" +self.type+ """11').val()-$(this).val());
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
+                                                                            v =2* ($('#""" +self.type+ """11').val()-$(this).val());
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                             
                                                                             
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
-                                                                            value =($('#""" +self.type+ """11').val()-$(this).val()) / 2;
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
+                                                                            v =($('#""" +self.type+ """11').val()-$(this).val()) / 2;
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                           
                                                                             
                                                                             """
                                                                                                                        
                                                                             
                         self.jquery= self.jquery +  """
+                                                                            if(Number(value).toPrecision() != 'NaN')
+                                                                                $('#""" +self.type+ """66').val(value) ;                                                                     
+                                                                            else                                                                          
+                                                                                $('#""" +self.type+ """66').val('') ;
+                                                                                  
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """21').val('') ;   
+                                                                                $('#""" +self.type+ """66').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
@@ -2212,40 +2226,65 @@ class Propertiesv2(object):
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               $('#""" +self.type+ """23').val('') ;
                                                                             }
                                                                          });
                                                                          
                                                                        $('#""" +self.type+ """14').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """41').val($(this).val() ) ;
                                                                             
-                                                                            value = $(this).val() 
-                                                                            $('#""" +self.type+ """24').val(-value ) ;
-                                                                            $('#""" +self.type+ """42').val(-value  ) ;
+                                                                            v = -$(this).val() 
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;       
+                                                                                
+                                                                            $('#""" +self.type+ """24').val(value ) ;
+                                                                            $('#""" +self.type+ """42').val(value ) ;
                                                                             """
                                                                             
                         if self.type =="s":                                                  
                             self.jquery= self.jquery + """  
-                                                                            $('#""" +self.type+ """56').val(2*value  ) ;
-                                                                            $('#""" +self.type+ """65').val(2*value  ) ;
+                                                                            v = 2*value;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                        
                                                                             """
                         elif self.type =="c":    
                             self.jquery= self.jquery + """  
-                                                                             $('#""" +self.type+ """56').val($(this).val() ) ;
-                                                                              $('#""" +self.type+ """65').val($(this).val() ) ;
+                                                                            v = $(this).val();
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;                                                                                
+                                                                             
                                                                             """
                                                                             
                         self.jquery= self.jquery +  """
+                                                                                if(Number(value).toPrecision() != 'NaN')
+                                                                                {
+                                                                                    $('#""" +self.type+ """56').val(value) ;
+                                                                                    $('#""" +self.type+ """65').val(value) ;   
+                                                                                 }                                                                 
+                                                                                else                     
+                                                                                {                                                     
+                                                                                    $('#""" +self.type+ """56').val('') ;
+                                                                                    $('#""" +self.type+ """65').val('') ;
+                                                                                }
+                                                                        
+                                                                                
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """41').val('') ;
+                                                                               $('#""" +self.type+ """56').val('') ;
+                                                                               $('#""" +self.type+ """65').val('') ;
                                                                             }
                                                                          });
                                                                          """
@@ -2253,32 +2292,61 @@ class Propertiesv2(object):
                         self.jquery= self.jquery +"""
                                                                          $('#""" +self.type+ """25').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """52').val($(this).val() ) ;
                                                                             
-                                                                            value = $(this).val() 
-                                                                            $('#""" +self.type+ """15').val(-value ) ;
-                                                                            $('#""" +self.type+ """51').val(-value  ) ;
+                                                                            v = -$(this).val() 
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                                
+                                                                            $('#""" +self.type+ """15').val(value ) ;
+                                                                            $('#""" +self.type+ """51').val(value  ) ;
                                                                             """
                                                                             
                         if self.type =="s":                                                  
                             self.jquery= self.jquery + """  
-                                                                            $('#""" +self.type+ """46').val(2*value  ) ;
-                                                                            $('#""" +self.type+ """64').val(2*value  ) ;
+                                                                            v =2*value;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                                
+                                                                            
                                                                             """
                         elif self.type =="c":    
                             self.jquery= self.jquery + """  
-                                                                             $('#""" +self.type+ """46').val($(this).val() ) ;
-                                                                              $('#""" +self.type+ """64').val($(this).val() ) ;
+                                                                            v = $(this).val();
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                                
+             
                                                                             """
                                                                             
                         self.jquery= self.jquery +  """
+                                                                                if(Number(value).toPrecision() != 'NaN')
+                                                                                {alert(value);
+                                                                                    $('#""" +self.type+ """46').val(value) ;
+                                                                                    $('#""" +self.type+ """64').val(value) ;   
+                                                                                 }                                                                 
+                                                                                else                     
+                                                                                {                                                     
+                                                                                    $('#""" +self.type+ """46').val('') ;
+                                                                                    $('#""" +self.type+ """64').val('') ;
+                                                                                }
+                                                                                
+                                                                             
+                                                                            
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """15').val('') ;
+                                                                               $('#""" +self.type+ """51').val('') ;
+                                                                               $('#""" +self.type+ """46').val('') ;
+                                                                               $('#""" +self.type+ """64').val('' ) ;
                                                                             }
                                                                          });
                                                                          """
@@ -2291,15 +2359,13 @@ class Propertiesv2(object):
                         self.jquery= self.jquery +"""
                                                                        $('#""" +self.type+ """44').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """55').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """55').val('') ;
                                                                             }
                                                                          });
                 
