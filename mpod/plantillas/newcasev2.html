@@ -348,34 +348,47 @@
 			  })
 			})
            
+			
+			
+			
+			 
+			
         </script>
         <style>
-        textarea {
-   resize: none;
-}
-.modal-backdrop {
-    z-index: 1040 !important;
-}
-.modal-dialog {
-    margin: 2px auto;
-    z-index: 1100 !important;
-     width: 760px;
-}
-
-
-.row{
-    margin-top:40px;
-    padding: 0 10px;
-}
-
-.clickable{
-    cursor: pointer;   
-}
-
-.panel-heading span {
-	margin-top: -20px;
-	font-size: 15px;
-}
+			        textarea {
+			   resize: none;
+			}
+			.modal-backdrop {
+			    z-index: 1040 !important;
+			}
+			.modal-dialog {
+			    margin: 2px auto;
+			    z-index: 1100 !important;
+			     width: 760px;
+			}
+			
+			
+			.row{
+			    margin-top:40px;
+			    padding: 0 10px;
+			}
+			
+			.clickable{
+			    cursor: pointer;   
+			}
+			
+			.panel-heading span {
+				margin-top: -20px;
+				font-size: 15px;
+			}
+			
+			
+		 
+			
+		.popover{
+    		max-width:1000px;
+    		 
+		}
 
 </style>
 
@@ -1070,7 +1083,7 @@
 										                  		            	 
 												                  		            	 
 																				<label for="journal">{{col}}</label>		
-																				<input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" >
+																				<input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" autocomplete="off"  data-toggle="popover" data-trigger="focus" data-placement="top" data-content="" >
 																			{% endif %} 
 														      			 </td>	
 																   {% endfor %}
@@ -1080,6 +1093,7 @@
 														      
 														      </table>
 														    </div>
+	 
 														  {% endif %}  
 														  
 														  
