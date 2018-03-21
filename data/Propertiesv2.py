@@ -40,7 +40,42 @@ class Propertiesv2(object):
             self.axisList =[]
             self.listofemptyInputs =[]
             
-            self.jquery =''
+            self.jquery= """
+                                    function isScientificNotation(value)
+                                   {
+                                        var n = value.indexOf("e");
+                                        if(n == -1)
+                                        {
+                                            n = value.indexOf("E");
+                                            if(n == -1)
+                                                return 0; 
+                                            else
+                                                return 1;
+                                        }
+                                         return 1; 
+                                   }
+                                   
+                                   function inputpop(obj)
+                                   {
+                                         if(obj.val().length > 3)
+                                        {
+                                            obj.attr('data-content', obj.val());                                                                             
+                                            obj.popover('show');
+                                        }
+                                        else
+                                        {
+                                           obj.popover('hide');
+                                           obj.attr('data-content', '');    
+                                        }
+                                 }
+                                 
+                                 function inputpopclear(obj)
+                                 {
+                                    obj.popover('hide');
+                                    obj.attr('data-content', '');    
+                                 }
+                                   
+                            """
             self.__inputList = None
             
             #self.inputList =[]
@@ -141,62 +176,99 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append("s21");
                         self.listofemptyInputs.append("s31");
                         self.listofemptyInputs.append("s32");
-                        
-                         
-                        self.jquery=  """$(document).ready(
-                                                function() 
-                                                {
-                                                     
-                                                     $('#s11').change(function() {
-                                                         value = 2 *($('#s11').val()- $('#s12').val());
-                                                          $('#s44').val(value) ;
-                                                          $('#s55').val(value) ;
-                                                          $('#s66').val(value) ;
-                                                     });
-                                 
-                                                     $('#divwarningpropertyvalues').hide();
-                                                    $('#s11').keyup(function ()
-                                                    {
-                                                        if($.isNumeric($(this).val())) {
-                                                        $('#divwarningpropertyvalues').hide();
-                                                        $('#s22').val($(this).val() ) ;
-                                                        $('#s33').val($(this).val() ) ;
-    
-                                                        }else
-                                                        {
-                                                           $('#divwarningpropertyvalues').show();
-                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                           $(this).val('');
-                                                        }
-                                                     });
-                    
-                                                     $('#s12').keyup(function ()
-                                                    {
-                                                       if($.isNumeric($(this).val())) {
-                                                        $('#divwarningpropertyvalues').hide();
-                                                        $('#s12').val($(this).val() ) ;
-                                                        $('#s13').val($(this).val() ) ;
-                                                        $('#s23').val($(this).val() ) ;
-                                                        $('#s21').val($(this).val() ) ;
-                                                        $('#s31').val($(this).val() ) ;
-                                                        $('#s32').val($(this).val() ) ;
-                                                                                   
-                                                         value = 2 *($('#s11').val()- $(this).val());
-                                                        $('#s44').val(value) ;
-                                                        $('#s55').val(value) ;
-                                                        $('#s66').val(value) ;
-                                                            
-                                                        }
-                                                        else
-                                                        {
-                                                              $('#divwarningpropertyvalues').show();
-                                                              $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                              $(this).val('');
-                                                        }
-    
-                                                     });
+                       
+ 
+                                  
+                        self.jquery= self.jquery +  """$(document).ready(
+                                                                                    function() 
+                                                                                    {
+                                                                                
+                                                                                         $('#s11').change(function() {   
+         
+                                                                                             if(Number($(this).val()).toPrecision() != 'NaN')
+                                                                                            {
+                                                                                                 v = 2 *($('#s11').val()- $('#s12').val());
+                                                                                                                                                 
+                                                                                                 if ( isScientificNotation($(this).val()) == 1 )
+                                                                                                    value = Number.parseFloat(v).toExponential();
+                                                                                                else
+                                                                                                   value = v
+                            
+                                                                                              
+                                                                                                  $('#s44').val(value) ;
+                                                                                                  $('#s55').val(value) ;
+                                                                                                  $('#s66').val(value) ;
+                                                                                             }
+                                                                                            else 
+                                                                                            {
+                                                                                                $('#s44').val('' ) ;
+                                                                                                $('#s55').val('' ) ;
+                                                                                                $('#s66').val('' ) ;
+                                                                                                
+                                                                                            }
+                                                                                            
+                                                                                         });
+                                                                     
+                                                                                         $('#divwarningpropertyvalues').hide();
+                                                                                         
+                                                                                        $('#s11').keyup(function ()
+                                                                                        {                                                            
+
+                                                                                            if(Number($(this).val()).toPrecision() != 'NaN')
+                                                                                            {
+                                                                                                inputpop($(this));
+                                                                                                $('#s22').val($(this).val()) ;
+                                                                                                $('#s33').val($(this).val()) ;
+                                                                                            }
+                                                                                            else 
+                                                                                            {
+                                                                                                $('#s22').val('') ;
+                                                                                                $('#s33').val('') ;
+                                                                                                 
+                                                                                                inputpopclear($(this));
+                                                                                            }
+                                                                                         });
+                                                        
+                                                                                         $('#s12').keyup(function ()
+                                                                                        {                        
+                                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {                                                                                                  
+                                                                                                inputpop($(this));                                                                                                 
+                                                                                                $('#s13').val($(this).val() ) ;
+                                                                                                $('#s23').val($(this).val() ) ;
+                                                                                                $('#s21').val($(this).val() ) ;
+                                                                                                $('#s31').val($(this).val() ) ;
+                                                                                                $('#s32').val($(this).val() ) ;
+                                                                                                                           
+                                                                                                 v = 2 *($('#s11').val()- $(this).val());
+                                                                         
+                                                                                                 if ( isScientificNotation($(this).val()) == 1 )
+                                                                                                    value = Number.parseFloat(v).toExponential();
+                                                                                                else
+                                                                                                   value = v
+                                                                                                   
+                                                                                                $('#s44').val(value) ;
+                                                                                                $('#s55').val(value) ;
+                                                                                                $('#s66').val(value) ;
+                                                                                           
+                                                                                                
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                 
+                                                                                                $('#s13').val('') ;
+                                                                                                $('#s23').val('') ;
+                                                                                                $('#s21').val('') ;
+                                                                                                $('#s31').val('') ;
+                                                                                                $('#s32').val('') ;;
+                                                                                                $('#s44').val('') ;
+                                                                                                $('#s55').val('') ;
+                                                                                                $('#s66').val('') ;
+                                                                                                inputpopclear($(this)); 
+                                                                                            }
+                                        
+                                                                                         });
                                                   
-                                                     """
+                                                                             """
                     elif self.type == 'c': 
                         self.listofemptyInputs.append("c44");
                         self.listofemptyInputs.append("c55");
@@ -212,67 +284,88 @@ class Propertiesv2(object):
                         
                                                 
                                 
-                        self.jquery=  """$(document).ready(
-                                                function() 
-                                                {
-                                                   $('#c11').change(function() {
-                                                         value = ($('#c11').val()- $('#c12').val())/2;
-                                                          $('#c44').val(value) ;
-                                                          $('#c55').val(value) ;
-                                                          $('#c66').val(value) ;
-                                                     });
-    
-                                                     $('#divwarningpropertyvalues').hide();
-                                                    $('#c11').keyup(function ()
-                                                    {
-                                                        if($.isNumeric($(this).val())) {
-                                                        $('#divwarningpropertyvalues').hide();
-                                                        $('#c22').val($(this).val() ) ;
-                                                        $('#c33').val($(this).val() ) ;
-    
-                                                        }else
-                                                        {
-                                                           $('#divwarningpropertyvalues').show();
-                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                           $(this).val('');
-                                                        }
-                                                     });
-                    
-                                                     $('#c12').keyup(function ()
-                                                    {
-                                                       if($.isNumeric($(this).val())) {
-                                                        $('#divwarningpropertyvalues').hide();
-                                                        $('#c12').val($(this).val() ) ;
-                                                        $('#c13').val($(this).val() ) ;
-                                                        $('#c23').val($(this).val() ) ;
-                                                        $('#c21').val($(this).val() ) ;
-                                                        $('#c31').val($(this).val() ) ;
-                                                        $('#c32').val($(this).val() ) ;
+                        self.jquery= self.jquery +  """$(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                               $('#c11').change(function() {
                                                                                    
-                                                         value = ($('#c11').val()- $(this).val())/2;
-                                                        $('#c44').val(value) ;
-                                                        $('#c55').val(value) ;
-                                                        $('#c66').val(value) ;
-                                                            
-                                                        }
-                                                        else
-                                                        {
-                                                              $('#divwarningpropertyvalues').show();
-                                                              $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                              $(this).val('');
-                                                        }
-                                             });
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                         v = ($('#c11').val()- $('#c12').val())/2;
+                                                                                                     
+                                                                                         if ( isScientificNotation($(this).val()) == 1 )
+                                                                                            value = Number.parseFloat(v).toExponential();
+                                                                                        else
+                                                                                           value = v
+                                                                      
+                                                                                          $('#c44').val(value) ;
+                                                                                          $('#c55').val(value) ;
+                                                                                          $('#c66').val(value) ;
+                                                                                      }
+                                                                                      else
+                                                                                      {
+                                                                                         $('#c44').val('') ;
+                                                                                         $('#c55').val('') ;
+                                                                                         $('#c66').val('') ;
+                                                                                      }
+                                                                                 });
+                                
+                                                                                  
+                                                                                $('#c11').keyup(function ()
+                                                                                {
+                                                                                    inputpop($(this));
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                        $('#divwarningpropertyvalues').hide();
+                                                                                        $('#c22').val($(this).val() ) ;
+                                                                                        $('#c33').val($(this).val() ) ;
+                                
+                                                                                    }else
+                                                                                    {
+                                                                                        $('#c22').val('') ;
+                                                                                        $('#c33').val('') ;
+                                                                                        inputpopclear($(this));
+                                                                                    }
+                                                                                 });
+                                                
+                                                                                 $('#c12').keyup(function ()
+                                                                                {
+                                                                                   if(Number($(this).val()).toPrecision() != 'NaN')  {     
+                                                                                        inputpop($(this));                                                                                   
+                                                                                        $('#c13').val($(this).val() ) ;
+                                                                                        $('#c23').val($(this).val() ) ;
+                                                                                        $('#c21').val($(this).val() ) ;
+                                                                                        $('#c31').val($(this).val() ) ;
+                                                                                        $('#c32').val($(this).val() ) ;
+                                                                                                                   
+                                                                                         v = ($('#c11').val()- $(this).val())/2;
+                                                                                         if ( isScientificNotation($(this).val()) == 1 )
+                                                                                            value = Number.parseFloat(v).toExponential();
+                                                                                        else
+                                                                                           value = v
+                                                                                   
+                                                                                        $('#c44').val(value) ;
+                                                                                        $('#c55').val(value) ;
+                                                                                        $('#c66').val(value) ;
+                                                                                        
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        $('#c13').val('' ) ;
+                                                                                        $('#c23').val('') ;
+                                                                                        $('#c21').val('') ;
+                                                                                        $('#c31').val('') ;
+                                                                                        $('#c32').val('') 
+                                                                                        $('#c44').val('') ;
+                                                                                        $('#c55').val('') ;
+                                                                                        $('#c66').val('') ;
+                                                                                        inputpopclear($(this));
+                                                                                    }
+                                                                         });
                                              
                                                      """
     
                     self.jquery= self.jquery+"\n"   
     
-                    """for key in sorted(self.read_write_inputs.keys()):
-                            if  self.read_write_inputs[key] == 'r':
-                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n" 
-                    """
-                                      
-                                      
+      
                     for key in sorted(self.read_write_inputs.keys()):
                             if  self.read_write_inputs[key] == 'r':
                                 if  self.contains(self.listofemptyInputs,key):
@@ -337,48 +430,74 @@ class Propertiesv2(object):
                     self.listofemptyInputs.append(self.type+"55");
                     self.listofemptyInputs.append(self.type+"66");
                         
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                         """
+                    self.jquery= self.jquery + """
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                 """
                     self.jquery= self.jquery + """                    
+                                                                     
+                                                                     
                                                                      $('#""" +self.type+ """11').keyup(function() {
-                                                                 """   
-                                                                 
-                                                                 
-                                                                 
-                    self.jquery= self.jquery +"""               
-                                                                                  $('#""" +self.type+ """22').val($(this).val() ) ;
-                                                                                  $('#""" +self.type+ """33').val($(this).val() ) ;
-                                                                             });
                                                                              
-                                                                 """   
-                                                                 
-                    self.jquery= self.jquery + """                    
+                                                                             if(Number($(this).val()).toPrecision() != 'NaN') 
+                                                                                {
+                                                                                    inputpop($(this));
+                                                                                    $('#""" +self.type+ """22').val($(this).val() ) ;
+                                                                                    $('#""" +self.type+ """33').val($(this).val() ) ;
+                                                                                }
+                                                                            else
+                                                                               {
+                                                                                    $('#""" +self.type+ """22').val('') ;
+                                                                                    $('#""" +self.type+ """33').val('') ;
+                                                                                     inputpopclear($(this));
+                                                                               }
+                                                                        });
+                                                                             
                                                                      $('#""" +self.type+ """12').keyup(function() {
-                                                                         $('#""" +self.type+ """13').val($(this).val() );
-                                                                        $('#""" +self.type+ """23').val($(this).val() );
-                                                                        $('#""" +self.type+ """21').val($(this).val() );
-                                                                        $('#""" +self.type+ """31').val($(this).val() );
-                                                                        $('#""" +self.type+ """32').val($(this).val() );
-                                                                      });"""
+                                                                        
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') 
+                                                                            {
+                                                                                 inputpop($(this));
+                                                                                $('#""" +self.type+ """13').val($(this).val() );
+                                                                                $('#""" +self.type+ """23').val($(this).val() );
+                                                                                $('#""" +self.type+ """21').val($(this).val() );
+                                                                                $('#""" +self.type+ """31').val($(this).val() );
+                                                                                $('#""" +self.type+ """32').val($(this).val() );
+                                                                            }
+                                                                        else
+                                                                            {
+                                                                               $('#""" +self.type+ """13').val('');
+                                                                                $('#""" +self.type+ """23').val('');
+                                                                                $('#""" +self.type+ """21').val('');
+                                                                                $('#""" +self.type+ """31').val('');
+                                                                                $('#""" +self.type+ """32').val('');
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                      });
                                                                       
-                    self.jquery= self.jquery + """                    
+                                      
                                                                      $('#""" +self.type+ """44').keyup(function() {
-                                                                         $('#""" +self.type+ """55').val($(this).val());
-                                                                        $('#""" +self.type+ """66').val($(this).val());                                                                      
+                                                                         
+                                                                         if(Number($(this).val()).toPrecision() != 'NaN') 
+                                                                            {
+                                                                                inputpop($(this));   
+                                                                                $('#""" +self.type+ """55').val($(this).val());
+                                                                                $('#""" +self.type+ """66').val($(this).val());              
+                                                                             }
+                                                                        else
+                                                                            {
+                                                                                $('#""" +self.type+ """55').val('');
+                                                                                $('#""" +self.type+ """66').val('');  
+                                                                                inputpopclear($(this));
+                                                                            }     
+                                                                                                                                        
                                                                       });"""                                                  
                                                                       
                     self.jquery= self.jquery+"\n" 
                     
-                    """
-                    for key in sorted(self.read_write_inputs.keys()):
-                            if  self.read_write_inputs[key] == 'r':
-                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n" 
-                    """
+   
                     for key in sorted(self.read_write_inputs.keys()):
                         if  self.read_write_inputs[key] == 'r':
                             if  self.contains(self.listofemptyInputs,key):
@@ -454,26 +573,38 @@ class Propertiesv2(object):
  
 
                     
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                         """
+                    self.jquery=self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                 """
                     self.jquery= self.jquery + """                    
                                                                      $('#""" +self.type+ """11').change(function() {
+                                                                      
                                                                  """   
                     if self.type == 's':
-                        self.jquery= self.jquery + """ value = 2 *  ($(this).val()- $('#""" +self.type+ """12').val());"""
+                        self.jquery= self.jquery + """ v = 2 *  ($(this).val()- $('#""" +self.type+ """12').val());"""
                     elif self.type == 'c':
-  
-                         
-                        self.jquery= self.jquery + """ value =  ($(this).val()- $('#""" +self.type+ """12').val())/2;"""
+                        self.jquery= self.jquery + """ v =  ($(this).val()- $('#""" +self.type+ """12').val())/2;"""
                         
-                    self.jquery= self.jquery +"""                  
-                                                                                  $('#""" +self.type+ """66').val(value ) ;
-                                                                             });
+                        
+                    self.jquery= self.jquery +"""   
+                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                            value = Number.parseFloat(v).toExponential();
+                                                                         else
+                                                                            value = v       
+                                 
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN')
+                                                                          {
+                                                                               $('#""" +self.type+ """66').val(value) 
+                                                                          }
+                                                                        else
+                                                                         {                                 
+                                                                              $('#""" +self.type+ """66').val('') ;
+                                                                          }
+                                                                        });
                                                                              
                                                                  """
                                                  
@@ -481,14 +612,14 @@ class Propertiesv2(object):
                     self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """11').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
+                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                inputpop($(this));
                                                                                 $('#""" +self.type+ """22').val($(this).val() ) ;
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """22').val('') ;
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                         """
@@ -496,67 +627,82 @@ class Propertiesv2(object):
                     self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """12').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
+                                                                               if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                               
+                                                                                inputpop($(this));
+                                                                                 
                                                                                 $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                   """
                     if self.type == 's':
-                        self.jquery= self.jquery + """ value = 2 *  ($(""" +self.type+ """11).val()- $(this).val());"""
+                        self.jquery= self.jquery + """ v = 2 *  ($(""" +self.type+ """11).val()- $(this).val());"""
                     elif self.type == 'c':
-                        self.jquery= self.jquery + """ value =  ($(""" +self.type+ """11).val()- $(this).val())/2;"""
+                        self.jquery= self.jquery + """ v =  ($(""" +self.type+ """11).val()- $(this).val())/2;"""
                                                                     
                     self.jquery= self.jquery +     """
-                                                                                $('#""" +self.type+ """66').val(value ) ;
                                                                                 
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                        value = v       
+                                                                            
+                                                                                
+                                                                                    $('#""" +self.type+ """66').val(value ) ;
+                                                                                    }
+                                                                                else
+                                                                                  {
+                                                                                       $('#""" +self.type+ """66').val('') ;
+                                                                                       inputpopclear($(this));
+                                                                                  }
                                                                              });
                                                                         """
                     
                     self.jquery= self.jquery + """
                                                                      $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
-                                                                            $('#""" +self.type+ """23').val($(this).val() ) ;
-                                                                            $('#""" +self.type+ """31').val($(this).val() ) ;
-                                                                            $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                            
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));                                                                                
+                                                                                $('#""" +self.type+ """23').val($(this).val() ) ;
+                                                                                $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                                $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """23').val('') ;
+                                                                                $('#""" +self.type+ """31').val('') ;
+                                                                                $('#""" +self.type+ """32').val('') ;
+                                                                                 inputpopclear($(this));
                                                                             }
                                                                          });
                                                                     """
-                    self.jquery= self.jquery + """
-                                                                     $('#""" +self.type+ """33').keyup(function ()
-                                                                        {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                    self.jquery= self.jquery + """ 
+                                                                         $('#""" +self.type+ """33').focusout(function ()
+                                                                        {                                                                             
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                $('#divwarningpropertyvalues').hide();
                                                                             }else
-                                                                            {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
+                                                                            {                                                                               
                                                                                $(this).val('');
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
+                                                                         
+                                                                         $('#""" +self.type+ """33').keyup(function ()
+                                                                            {
+                                                                                inputpop($(this));                                                                         
+                                                                            });
                                                                     """
                     self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """44').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
+                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                inputpop($(this));
                                                                                 $('#divwarningpropertyvalues').hide();
                                                                                 $('#""" +self.type+ """55').val($(this).val() ) ;
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """55').val('') ;
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                         """
@@ -646,58 +792,156 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append(self.type+"31");
                         self.listofemptyInputs.append(self.type+"32");
                         
-                        self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                         """
                                              
+                        self.jquery= self.jquery + """ $('#""" +self.type+ """11').focusout(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        $('#divwarningpropertyvalues').hide();
+                                                                                    }else
+                                                                                    {
+                                                                                       $(this).val('');
+                                                                                       inputpopclear($(this));
+                                                                                    }
+                                                                                 });
+                                                                                 
+                                                                                 $('#""" +self.type+ """11').keyup(function ()
+                                                                                {
+                                                                                    inputpop($(this));                                                                                   
+                                                                                 });
+                                                                    """
                                              
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """12').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                             
+                                                                                 
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                    $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """21').val('') ;
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                         """
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """13').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                $('#""" +self.type+ """31').val($(this).val() ) ;
-                                                                             
+                                                                            
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                   inputpop($(this));
+                                                                                   $('#divwarningpropertyvalues').hide();
+                                                                                   $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """31').val('') ;
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                         """
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """23').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                    $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """32').val('') ;
+                                                                                   inputpopclear($(this));
                                                                                 }
+                                                                             });
+                                                                             
+                                                                
+                                                                             $('#""" +self.type+ """22').focusout(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                }else
+                                                                                {
+                                                                                   $(this).val('');
+                                                                                   inputpopclear($(this));
+                                                                                }
+                                                                             });      
+                                                                              
+                                                                            $('#""" +self.type+ """33').focusout(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                }else
+                                                                                {
+                                                                                   $(this).val('');
+                                                                                   inputpopclear($(this));
+                                                                                }
+                                                                             });   
+                                                                             
+                                                                            $('#""" +self.type+ """44').focusout(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                }else
+                                                                                {
+                                                                                   $(this).val('');
+                                                                                   inputpopclear($(this));
+                                                                                }
+                                                                             });   
+                                                                             
+                                                                            $('#""" +self.type+ """55').focusout(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                }else
+                                                                                {
+                                                                                   $(this).val('');
+                                                                                   inputpopclear($(this));
+                                                                                }
+                                                                             });   
+                                                                             
+                                                                            $('#""" +self.type+ """66').focusout(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    $('#divwarningpropertyvalues').hide();
+                                                                                }else
+                                                                                {
+                                                                                   $(this).val('');
+                                                                                   inputpopclear($(this));
+                                                                                }
+                                                                             });   
+                                                                             
+                                                                             $('#""" +self.type+ """22').keyup(function ()
+                                                                            {
+                                                                                inputpop($(this));                                                                                   
+                                                                             });   
+                                                                                                                                
+                                                                             $('#""" +self.type+ """33').keyup(function ()
+                                                                            {
+                                                                                inputpop($(this));                                                                                   
+                                                                             });
+                                                                             
+                                                                             $('#""" +self.type+ """44').keyup(function ()
+                                                                            {
+                                                                                inputpop($(this));                                                                                   
+                                                                             });
+                                                                             
+                                                                             $('#""" +self.type+ """55').keyup(function ()
+                                                                            {
+                                                                                inputpop($(this));                                                                                   
+                                                                             });
+                                                                             
+                                                                             $('#""" +self.type+ """66').keyup(function ()
+                                                                            {
+                                                                                inputpop($(this));                                                                                   
                                                                              });
                                                                         """     
                         self.jquery= self.jquery+"\n"     
@@ -847,7 +1091,7 @@ class Propertiesv2(object):
                     self.listofemptyInputs.append(self.type+"64");
                     self.listofemptyInputs.append(self.type+"65");
                     
-                    self.jquery="""
+                    self.jquery= self.jquery +  """
                                         // inicio de codigo jQuery
                                         $('#divwarningpropertyvalues').hide();
                                         $(document).ready(
@@ -855,75 +1099,85 @@ class Propertiesv2(object):
                                             {
                                          """
                     self.jquery= self.jquery + """
+                                                         $('#""" +self.type+ """11').focusout(function ()
+                                                            {
+                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                    inputpop($(this));
+                                                                }else
+                                                                {
+                                                                   $(this).val('');
+                                                                   inputpopclear($(this));
+                                                                }
+                                                             });
+                                                             
+                                                             $('#""" +self.type+ """11').keyup(function ()
+                                                            {
+                                                                inputpop($(this));                                                                                   
+                                                             });
+                                                                         
                                                              $('#""" +self.type+ """12').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                 
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """21').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
                                                                 $('#""" +self.type+ """13').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """31').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
                                                                  $('#""" +self.type+ """14').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """41').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                         inputpop($(this));
+                                                                        $('#""" +self.type+ """41').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """41').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
                                                                  
                                                                 $('#""" +self.type+ """15').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """51').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """51').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """51').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
                                                                  
                                                                 $('#""" +self.type+ """16').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """61').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """61').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """61').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
@@ -931,142 +1185,214 @@ class Propertiesv2(object):
                                                                                           
                                                                 $('#""" +self.type+ """23').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """32').val($(this).val() ) ;
-                                                                 
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """32').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
                                                                 $('#""" +self.type+ """24').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """42').val($(this).val() ) ;
-                                                                 
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """42').val($(this).val() ) ;
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """42').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  });  
                                                                  
                                                                 $('#""" +self.type+ """25').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """52').val($(this).val() ) ;
-                                                                 
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """52').val($(this).val() ) ;
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """52').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
                                                                 $('#""" +self.type+ """26').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """62').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """62').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """62').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
                                                                  $('#""" +self.type+ """34').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """43').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """43').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """43').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                 $('#""" +self.type+ """35').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """53').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """53').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """53').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
                                                                 $('#""" +self.type+ """36').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """63').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """63').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """63').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
                                                                $('#""" +self.type+ """45').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """54').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """54').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """54').val('');
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
                                                                 $('#""" +self.type+ """46').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """64').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """64').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """64').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
                                                                 $('#""" +self.type+ """56').keyup(function ()
                                                                 {
-                                                                    if($.isNumeric($(this).val())) {
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $('#""" +self.type+ """65').val($(this).val() ) ;
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """65').val($(this).val() ) ;
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#divwarningpropertyvalues').show();
-                                                                       $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                       $(this).val('');
+                                                                       $('#""" +self.type+ """65').val('') ;
+                                                                       inputpopclear($(this));
                                                                     }
                                                                  }); 
+                                                                 
+                                                                 $('#""" +self.type+ """22').focusout(function ()
+                                                                {
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                    }else
+                                                                    {
+                                                                       $(this).val('');
+                                                                       inputpopclear($(this));
+                                                                    }
+                                                                 });
+                                                                 
+                                                                
+                                                                 
+                                                                 
+                                                                 
+                                                                 $('#""" +self.type+ """33').focusout(function ()
+                                                                {
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                    }else
+                                                                    {
+                                                                       $(this).val('');
+                                                                       inputpopclear($(this));
+                                                                    }
+                                                                 });
+                                                                 
+                                                                 $('#""" +self.type+ """44').focusout(function ()
+                                                                {
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                    }else
+                                                                    {
+                                                                       $(this).val('');
+                                                                       inputpopclear($(this));
+                                                                    }
+                                                                 });
+                                                                 
+                                                                 $('#""" +self.type+ """55').focusout(function ()
+                                                                {
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                    }else
+                                                                    {
+                                                                       $(this).val('');
+                                                                       inputpopclear($(this));
+                                                                    }
+                                                                 });
+                                                                 
+                                                                 $('#""" +self.type+ """66').focusout(function ()
+                                                                {
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                    }else
+                                                                    {
+                                                                       $(this).val('');
+                                                                       inputpopclear($(this));
+                                                                    }
+                                                                 });
+                                                                 
+                                                                $('#""" +self.type+ """22').keyup(function ()
+                                                                {
+                                                                    inputpop($(this));                                                                                   
+                                                                 });
+                                                                 
+                                                                 $('#""" +self.type+ """33').keyup(function ()
+                                                                {
+                                                                    inputpop($(this));                                                                                   
+                                                                 });
+                                                                 
+                                                                $('#""" +self.type+ """44').keyup(function ()
+                                                                {
+                                                                    inputpop($(this));                                                                                   
+                                                                 });
+                                                                 
+                                                                 $('#""" +self.type+ """55').keyup(function ()
+                                                                {
+                                                                    inputpop($(this));                                                                                   
+                                                                 });
+                                                                 
+                                                                 $('#""" +self.type+ """66').keyup(function ()
+                                                                {
+                                                                    inputpop($(this));                                                                                   
+                                                                 });
+                                                                 
                                                             """                         
                                              
                     self.jquery= self.jquery+"\n"  
@@ -1174,13 +1500,13 @@ class Propertiesv2(object):
                     self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)     
                     self.setCatalogPropertyDetail() 
                     self.preparedataforjQuery(self.type )
-                    self.jquery="""
-                                        // inicio de codigo jQuery
-                                        $('#divwarningpropertyvalues').hide();
-                                        $(document).ready(
-                                            function() 
-                                            {
-                                         """
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
                      
                     if self.puntualgroupselected_name in ('4mm', '-42m', '422', '4/mmm'):
                         self.listofemptyInputs.append(self.type+"22");
@@ -1190,66 +1516,96 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append(self.type+"32");
                         self.listofemptyInputs.append(self.type+"55");
                         self.jquery= self.jquery + """
+                        
                                                                  $('#""" +self.type+ """11').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """22').val($(this).val() ) ;
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """22').val($(this).val() );
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """22').val('');
+                                                                           inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
                                                                      
                                                                      $('#""" +self.type+ """12').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """21').val('');
+                                                                           inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
                                                                      
                                                                    $('#""" +self.type+ """13').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """23').val($(this).val() ) ;
-                                                                        $('#""" +self.type+ """31').val($(this).val() ) ;
-                                                                        $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            $('#""" +self.type+ """23').val($(this).val() ) ;
+                                                                            $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                            $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                            $('#""" +self.type+ """23').val('') ;
+                                                                            $('#""" +self.type+ """31').val('') ;
+                                                                            $('#""" +self.type+ """32').val('') ;
+                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
-                                                                     
+                                                                     $('#""" +self.type+ """33').focusout(function ()
+                                                                    {
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                            inputpop($(this));
+                                                                        }else
+                                                                        {
+                                                                           $(this).val('');
+                                                                           inputpopclear($(this));
+                                                                        }
+                                                                     });
+                                                                                 
+                                                                     $('#""" +self.type+ """66').focusout(function ()
+                                                                    {
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                            inputpop($(this));
+                                                                        }else
+                                                                        {
+                                                                           $(this).val('');
+                                                                           inputpopclear($(this));
+                                                                        }
+                                                                 });
                                                                      $('#""" +self.type+ """44').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """55').val($(this).val() ) ;
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            $('#""" +self.type+ """55').val($(this).val());
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """55').val('');
+                                                                           inputpopclear($(this));
                                                                         }
                                                                      });
+                                                                     
+                                                                    $('#""" +self.type+ """33').keyup(function ()
+                                                                    {
+                                                                        inputpop($(this));
+                                                                    });
+                                                                    
+                                                                     
+                                                                    
+                                                                     $('#""" +self.type+ """66').keyup(function ()
+                                                                    {
+                                                                        inputpop($(this));
+                                                                    });
                                                                      
                                                                      
                                                                      """                    
@@ -1267,46 +1623,42 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                  $('#""" +self.type+ """11').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """22').val($(this).val() ) ;
-                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            $('#""" +self.type+ """22').val($(this).val());
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """22').val('');
+                                                                           inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
                                                                      $('#""" +self.type+ """12').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            $('#""" +self.type+ """21').val($(this).val());
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                            $('#""" +self.type+ """21').val('');
+                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
                                                                      
                                                                    $('#""" +self.type+ """13').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """23').val($(this).val() ) ;
-                                                                        $('#""" +self.type+ """31').val($(this).val() ) ;
-                                                                        $('#""" +self.type+ """32').val($(this).val() ) ;
-                                                                     
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            $('#""" +self.type+ """23').val($(this).val());
+                                                                            $('#""" +self.type+ """31').val($(this).val());
+                                                                            $('#""" +self.type+ """32').val($(this).val());
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                            $('#""" +self.type+ """23').val('');
+                                                                            $('#""" +self.type+ """31').val('');
+                                                                            $('#""" +self.type+ """32').val('');
+                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
@@ -1315,37 +1667,77 @@ class Propertiesv2(object):
                                                                      
                                                                     $('#""" +self.type+ """16').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        value = $(this).val()
-                                                                        $('#""" +self.type+ """61').val(value ) ;
-                                                                        
-                                                                        
-                                                                        $('#""" +self.type+ """62').val(-value ) ;
-                                                                         $('#""" +self.type+ """26').val(-value) ;
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                            inputpop($(this));
+                                                                            v = $(this).val()
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else
+                                                                                value = v 
+  
+                                                                            $('#""" +self.type+ """61').val(value);
+                                                                            $('#""" +self.type+ """62').val(-value);
+                                                                            $('#""" +self.type+ """26').val(-value);
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                            $('#""" +self.type+ """61').val('');
+                                                                            $('#""" +self.type+ """62').val('');
+                                                                            $('#""" +self.type+ """26').val('');
+                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
+                                                                     
+                                                                     $('#""" +self.type+ """33').focusout(function ()
+                                                                    {
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                            inputpop($(this));
+                                                                        }else
+                                                                        {
+                                                                           $(this).val('');
+                                                                           inputpopclear($(this));
+                                                                        }
+                                                                     });
+                                                                     
+                                                                     
                                                                      
                                                                      
                                                                     $('#""" +self.type+ """44').keyup(function ()
                                                                     {
-                                                                        if($.isNumeric($(this).val())) {
-                                                                        $('#divwarningpropertyvalues').hide();
-                                                                        $('#""" +self.type+ """55').val($(this).val() ) ;
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        $('#""" +self.type+ """55').val($(this).val());
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#divwarningpropertyvalues').show();
-                                                                           $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                           $(this).val('');
+                                                                           $('#""" +self.type+ """55').val('');
+                                                                           inputpopclear($(this));
                                                                         }
                                                                      });
+                                                                     
+                                                                     $('#""" +self.type+ """66').focusout(function ()
+                                                                    {
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                            inputpop($(this));
+                                                                        }else
+                                                                        {
+                                                                           $(this).val('');
+                                                                           inputpopclear($(this));
+                                                                        }
+                                                                     });
+                                                                     
+                                                                    $('#""" +self.type+ """33').keyup(function ()
+                                                                    {
+                                                                        inputpop($(this));
+                                                                    });
+                                                                    
+                                                                     $('#""" +self.type+ """66').keyup(function ()
+                                                                    {
+                                                                        inputpop($(this));
+                                                                    });
+                                                                     
+                                                                     
+                                                                     
                                                                      
                                                                      """
                    
@@ -1520,13 +1912,13 @@ class Propertiesv2(object):
                     self.setCatalogPropertyDetail() 
                     self.preparedataforjQuery(self.type )
                     
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery= self.jquery + """
+                                                                // inicio de codigo jQuery
+                                                                $('#divwarningpropertyvalues').hide();
+                                                                $(document).ready(
+                                                                    function() 
+                                                                    {
+                                                                 """
                     if self.axisselected_name  == 'x2':
                         self.listofemptyInputs.append(self.type+"21");
                         self.listofemptyInputs.append(self.type+"31");
@@ -1536,103 +1928,195 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append(self.type+"53");
                         self.listofemptyInputs.append(self.type+"64");
                         self.jquery= self.jquery + """
+                                                                      $('#""" +self.type+ """11').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
                                                                      $('#""" +self.type+ """12').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('');
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """15').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """51').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
+                                                                                $('#""" +self.type+ """51').val('') ;
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """22').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
                                                                                $(this).val('');
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """23').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                         $('#""" +self.type+ """25').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """52').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
+                                                                               $('#""" +self.type+ """52').val('') ;
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
                                                                                $(this).val('');
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """35').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));;
                                                                             $('#""" +self.type+ """53').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
+                                                                               $('#""" +self.type+ """53').val('') ;
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """44').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
                                                                                $(this).val('');
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """46').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """64').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """64').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
+                                                                         
+                                                                         $('#""" +self.type+ """55').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                                 
+                                                                         $('#""" +self.type+ """66').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         
+                                                                         $('#""" +self.type+ """11').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """22').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """44').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """55').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """66').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                       
                                                                          
                                                                          """
                     elif self.axisselected_name  == 'x3':
@@ -1644,102 +2128,187 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append(self.type+"63");
                         self.listofemptyInputs.append(self.type+"54");
                         self.jquery= self.jquery + """
+                                                                        $('#""" +self.type+ """11').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
                                                                      $('#""" +self.type+ """12').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """21').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """16').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """61').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """61').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """23').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                             inputpop($(this));
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                         $('#""" +self.type+ """26').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """62').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """62').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """36').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """63').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """63').val('') ;
+                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """45').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """54').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """54').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """22').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         $('#""" +self.type+ """33').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         $('#""" +self.type+ """44').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         $('#""" +self.type+ """55').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         $('#""" +self.type+ """66').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """11').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """22').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """33').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """44').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """55').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """66').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
                                                                          });
                                                                          
                                                                          """
@@ -1861,13 +2430,13 @@ class Propertiesv2(object):
                     
                     self.preparedataforjQuery(self.type )
                     
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery=self.jquery +  """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
                     if self.puntualgroupselected_name in ('32', '-3m', '3m'):
                         self.listofemptyInputs.append(self.type+"22");
                         self.listofemptyInputs.append(self.type+"21");
@@ -1884,171 +2453,211 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                       
                                                                      $('#""" +self.type+ """11').keyup(function ()
-                                                                        {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
-                                                                            $('#""" +self.type+ """22').val($(this).val() ) ;
-                                                                         
+                                                                        { 
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            
+                                                                            $('#""" +self.type+ """22').val($(this).val()) ;   
+                                                                                                                                                    
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """22').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          
                                                                          $('#""" +self.type+ """11').change(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                             
                                                                             $('#""" +self.type+ """21').val($('#""" +self.type+ """12').val() ) ;
-                                                                            
-                                                                            
+    
                                                                        """
                                             
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
-                                                                            value =2* ($(this).val()-$('#""" +self.type+ """12').val());
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =2* ($(this).val()-$('#""" +self.type+ """12').val());
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
-                                                                            value =($(this).val()-$('#""" +self.type+ """12').val()) / 2;
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =($(this).val()-$('#""" +self.type+ """12').val()) / 2; 
                                                                             """
                                                                                                                        
                                                                             
                         self.jquery= self.jquery +  """
+                                                                                if ( isScientificNotation($(this).val()) == 1 )
+                                                                                     value = Number.parseFloat(v).toExponential();
+                                                                                else
+                                                                                    value = v  
+                                                                                    
+                                                                                $('#""" +self.type+ """66').val(value) ;
+                                                                                
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('') ;
+                                                                               $('#""" +self.type+ """66').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """23').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """31').val('') ;
+                                                                                $('#""" +self.type+ """32').val('') ;
+                                                                                $('#""" +self.type+ """23').val('') ;
+                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """12').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                            
-                                                                            
+ 
                                                                        """
                                             
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
-                                                                            value =2* ($('#""" +self.type+ """11').val()-$(this).val());
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =2* ($('#""" +self.type+ """11').val()-$(this).val());
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
-                                                                            value =($('#""" +self.type+ """11').val()-$(this).val()) / 2;
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =($('#""" +self.type+ """11').val()-$(this).val()) / 2;
                                                                             """
                                                                                                                        
                                                                             
                         self.jquery= self.jquery +  """
+                                                                                if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    value = Number.parseFloat(v).toExponential();
+                                                                                else
+                                                                                   value = v  
+                                                                                   
+                                                                                 $('#""" +self.type+ """66').val(value) ;
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('') ;
+                                                                               $('#""" +self.type+ """66').val('');
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """23').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               $('#""" +self.type+ """23').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                        $('#""" +self.type+ """14').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """41').val($(this).val() ) ;
                                                                             
-                                                                            value = $(this).val(); 
-                                                                            $('#""" +self.type+ """24').val(-value ) ;
-                                                                            $('#""" +self.type+ """42').val(-value  ) ;
+                                                                            
+                                                                            v = $(this).val(); 
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(-v).toExponential();
+                                                                            else
+                                                                                  value = -v 
+                                                                                  
+                                                                         
+                                                                            $('#""" +self.type+ """24').val(value ) ;
+                                                                            $('#""" +self.type+ """42').val(value  ) ;
+
                                                                             """
                                                                             
                         if self.type =="s":                                                  
                             self.jquery= self.jquery + """  
-                                                                            $('#""" +self.type+ """56').val(2*value  ) ;
-                                                                            $('#""" +self.type+ """65').val(2*value  ) ;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(2*$(this).val() ).toExponential();
+                                                                            else                                                                          
+                                                                                value = 2*$(this).val();
+                                                                            
+                                                                            $('#""" +self.type+ """56').val(value) ;
+                                                                            $('#""" +self.type+ """65').val(value) ;
+                                                                                
                                                                             """
                         elif self.type =="c":    
                             self.jquery= self.jquery + """  
-                                                                             $('#""" +self.type+ """56').val($(this).val() ) ;
-                                                                              $('#""" +self.type+ """65').val($(this).val() ) ;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat($(this).val() ).toExponential();
+                                                                            else                                                                          
+                                                                                value = $(this).val();
+                                                                                
+                                                                              $('#""" +self.type+ """56').val(value ) ;
+                                                                              $('#""" +self.type+ """65').val(value ) ;
                                                                             """
                                                                             
                         self.jquery= self.jquery +  """
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """41').val('') ;
+                                                                               $('#""" +self.type+ """24').val('') ;
+                                                                               $('#""" +self.type+ """42').val('') ;
+                                                                              $('#""" +self.type+ """56').val('') ;
+                                                                              $('#""" +self.type+ """65').val('') ;
+                                                                              inputpopclear($(this));
+                                                                        
                                                                             }
                                                                          });
                                                                          """
-                                                                         
-                                                                         
-                                                                         
-                                                                                   
-                                                                        
+  
                                                                         
                         self.jquery= self.jquery +"""
                                                                          
                                                                        $('#""" +self.type+ """44').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """55').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """55').val('' ) ;
+                                                                               inputpopclear($(this));
                                                                             }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                $('#divwarningpropertyvalues').hide();
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         
+                                                                         $('#""" +self.type+ """11').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
                                                                          });
                                                                          
                                                                          
@@ -2083,65 +2692,77 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                      $('#""" +self.type+ """11').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """22').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """22').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                          $('#""" +self.type+ """11').change(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             $('#divwarningpropertyvalues').hide();
                                                                             $('#""" +self.type+ """21').val($('#""" +self.type+ """12').val()) ;
-                                                                            
-                                                                            
+
                                                                        """
                                             
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
-                                                                            value =2* ($(this).val()-$('#""" +self.type+ """12').val());
+                                                                            v =2* ($(this).val()-$('#""" +self.type+ """12').val());
                                                                             
-                                                                            $('#""" +self.type+ """66').val(value) ;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v ).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                                
                                                                             
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
-                                                                            value =($(this).val()-$('#""" +self.type+ """12')) / 2;
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
-                                                                            
+                                                                            v =($(this).val()-$('#""" +self.type+ """12')) / 2;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+
                                                                             """
                                                                                                                        
                                                                             
                         self.jquery= self.jquery +  """
+                                                                             
+                                                                            if(Number(value).toPrecision() != 'NaN')
+                                                                                $('#""" +self.type+ """66').val(value) ;                                                                     
+                                                                            else                                                                          
+                                                                                $('#""" +self.type+ """66').val('') ;
+                                                                        
+                                                                                
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """21').val('' ) ;
+                                                                               $('#""" +self.type+ """66').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """23').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               $('#""" +self.type+ """23').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
@@ -2149,82 +2770,119 @@ class Propertiesv2(object):
                                                                          
                                                                           $('#""" +self.type+ """12').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
-                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;
-                                                                            
-                                                                            
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;     
                                                                        """
                                             
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
-                                                                            value =2* ($('#""" +self.type+ """11').val()-$(this).val());
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
+                                                                            v =2* ($('#""" +self.type+ """11').val()-$(this).val());
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                             
                                                                             
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
-                                                                            value =($('#""" +self.type+ """11').val()-$(this).val()) / 2;
-                                                                            
-                                                                            $('#""" +self.type+ """66').val(value) ;
+                                                                            v =($('#""" +self.type+ """11').val()-$(this).val()) / 2;
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                           
                                                                             
                                                                             """
                                                                                                                        
                                                                             
                         self.jquery= self.jquery +  """
+                                                                            if(Number(value).toPrecision() != 'NaN')
+                                                                                $('#""" +self.type+ """66').val(value) ;                                                                     
+                                                                            else                                                                          
+                                                                                $('#""" +self.type+ """66').val('') ;
+                                                                                  
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                                $('#""" +self.type+ """21').val('') ;   
+                                                                                $('#""" +self.type+ """66').val('') ;
+                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                           $('#""" +self.type+ """13').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """23').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               $('#""" +self.type+ """23').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
                                                                        $('#""" +self.type+ """14').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """41').val($(this).val() ) ;
                                                                             
-                                                                            value = $(this).val() 
-                                                                            $('#""" +self.type+ """24').val(-value ) ;
-                                                                            $('#""" +self.type+ """42').val(-value  ) ;
+                                                                            v = -$(this).val() 
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;       
+                                                                                
+                                                                            $('#""" +self.type+ """24').val(value ) ;
+                                                                            $('#""" +self.type+ """42').val(value ) ;
                                                                             """
                                                                             
                         if self.type =="s":                                                  
                             self.jquery= self.jquery + """  
-                                                                            $('#""" +self.type+ """56').val(2*value  ) ;
-                                                                            $('#""" +self.type+ """65').val(2*value  ) ;
+                                                                            v = 2*value;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                        
                                                                             """
                         elif self.type =="c":    
                             self.jquery= self.jquery + """  
-                                                                             $('#""" +self.type+ """56').val($(this).val() ) ;
-                                                                              $('#""" +self.type+ """65').val($(this).val() ) ;
+                                                                            v = $(this).val();
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;                                                                                
+                                                                             
                                                                             """
                                                                             
                         self.jquery= self.jquery +  """
+                                                                                if(Number(value).toPrecision() != 'NaN')
+                                                                                {
+                                                                                    $('#""" +self.type+ """56').val(value) ;
+                                                                                    $('#""" +self.type+ """65').val(value) ;   
+                                                                                 }                                                                 
+                                                                                else                     
+                                                                                {                                                     
+                                                                                    $('#""" +self.type+ """56').val('') ;
+                                                                                    $('#""" +self.type+ """65').val('') ;
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                        
+                                                                                
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """41').val('') ;
+                                                                               $('#""" +self.type+ """56').val('') ;
+                                                                               $('#""" +self.type+ """65').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          """
@@ -2232,32 +2890,63 @@ class Propertiesv2(object):
                         self.jquery= self.jquery +"""
                                                                          $('#""" +self.type+ """25').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """52').val($(this).val() ) ;
                                                                             
-                                                                            value = $(this).val() 
-                                                                            $('#""" +self.type+ """15').val(-value ) ;
-                                                                            $('#""" +self.type+ """51').val(-value  ) ;
+                                                                            v = -$(this).val() 
+                                                                             if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                                
+                                                                            $('#""" +self.type+ """15').val(value ) ;
+                                                                            $('#""" +self.type+ """51').val(value  ) ;
                                                                             """
                                                                             
                         if self.type =="s":                                                  
                             self.jquery= self.jquery + """  
-                                                                            $('#""" +self.type+ """46').val(2*value  ) ;
-                                                                            $('#""" +self.type+ """64').val(2*value  ) ;
+                                                                            v =2*value;
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                                
+                                                                            
                                                                             """
                         elif self.type =="c":    
                             self.jquery= self.jquery + """  
-                                                                             $('#""" +self.type+ """46').val($(this).val() ) ;
-                                                                              $('#""" +self.type+ """64').val($(this).val() ) ;
+                                                                            v = $(this).val();
+                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                value = Number.parseFloat(v).toExponential();
+                                                                            else                                                                          
+                                                                                value = v;
+                                                                                
+             
                                                                             """
                                                                             
                         self.jquery= self.jquery +  """
+                                                                                if(Number(value).toPrecision() != 'NaN')
+                                                                                {  
+                                                                                    $('#""" +self.type+ """46').val(value) ;
+                                                                                    $('#""" +self.type+ """64').val(value) ;   
+                                                                                 }                                                                 
+                                                                                else                     
+                                                                                {                                                     
+                                                                                    $('#""" +self.type+ """46').val('') ;
+                                                                                    $('#""" +self.type+ """64').val('') ;
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                                
+                                                                             
+                                                                            
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """15').val('') ;
+                                                                               $('#""" +self.type+ """51').val('') ;
+                                                                               $('#""" +self.type+ """46').val('') ;
+                                                                               $('#""" +self.type+ """64').val('' ) ;
+                                                                               inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          """
@@ -2270,16 +2959,36 @@ class Propertiesv2(object):
                         self.jquery= self.jquery +"""
                                                                        $('#""" +self.type+ """44').keyup(function ()
                                                                         {
-                                                                            if($.isNumeric($(this).val())) {
-                                                                            $('#divwarningpropertyvalues').hide();
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
                                                                             $('#""" +self.type+ """55').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#divwarningpropertyvalues').show();
-                                                                               $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                               $(this).val('');
+                                                                               $('#""" +self.type+ """55').val('') ;
+                                                                               inputpopclear($(this));
                                                                             }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                 inputpop($(this));   
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """11').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
                                                                          });
                 
                                                                          """ 
@@ -2376,29 +3085,33 @@ class Propertiesv2(object):
                     #print self.type 
                     self.preparedataforjQuery(self.type )
                     self.setCatalogPropertyDetail()
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery=self.jquery + """
+                                                                // inicio de codigo jQuery
+                                                                $('#divwarningpropertyvalues').hide();
+                                                                $(document).ready(
+                                                                    function() 
+                                                                    {
+                                                                 """
                     
                     for p in self.catalogPropertyDetail :
                         self.jquery= self.jquery + """
-                                                                         $('#""" +p.name+ """').keyup(function ()
+                                                                         $('#""" +p.name+ """').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                
-                                                                             
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
-                                                                             });"""
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +p.name+ """').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         """
                 
                
                         self.jquery= self.jquery+"\n" 
@@ -2534,29 +3247,33 @@ class Propertiesv2(object):
                     
                     self.preparedataforjQuery(self.type )
                     self.setCatalogPropertyDetail()
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery= self.jquery +  """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
                     
                     for p in self.catalogPropertyDetail :
                         self.jquery= self.jquery + """
-                                                                         $('#""" +p.name+ """').keyup(function ()
+                                                                        $('#""" +p.name+ """').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                
-                                                                             
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
-                                                                             });"""
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                        $('#""" +p.name+ """').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         """
                 
                
                         self.jquery= self.jquery+"\n" 
@@ -2566,13 +3283,7 @@ class Propertiesv2(object):
                         if  self.read_write_inputs[key] == 'r':
                             self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n" 
                     
-                    
-                                        
 
-                
-                            
-                    
-                                
  
                     self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"
                         
@@ -2625,29 +3336,33 @@ class Propertiesv2(object):
                     self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name) 
                     self.preparedataforjQuery(self.type )
                     self.setCatalogPropertyDetail()
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
                     
                     for p in self.catalogPropertyDetail :
-                        self.jquery= self.jquery + """
-                                                                         $('#""" +p.name+ """').keyup(function ()
+                        self.jquery= self.jquery + """                                                                       
+                                                                        $('#""" +p.name+ """').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));                                                                          
+                                                                            }else
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                
-                                                                             
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
-                                                                             });"""
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                        $('#""" +p.name+ """').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
+                                                                         """
                 
                
                         self.jquery= self.jquery+"\n" 
@@ -2735,13 +3450,13 @@ class Propertiesv2(object):
                     self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name) 
                     self.preparedataforjQuery(self.type )
                     self.setCatalogPropertyDetail() 
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                         """
                     
                     if self.puntualgroupselected_name == '4':    
                         self.listofemptyInputs.append(self.type+"24");
@@ -2750,17 +3465,23 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """25').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));  
+                                                                                     ;
+                                                                                    v = -$(this).val()
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v 
+      
+                                                                                    $('#""" +self.type+ """25').val(value);
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
@@ -2768,39 +3489,61 @@ class Propertiesv2(object):
                                                                              
                                                                             $('#""" +self.type+ """15').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """24').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val()
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v 
+                                                                                       
+                                                                                    $('#""" +self.type+ """24').val(value);
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                             $('#""" +self.type+ """31').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """32').val(value);
-                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val()
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v 
+                                                                                       
+                                                                                    $('#""" +self.type+ """32').val(value);
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
-                                                                             
-                                                                             
+                                                                        $('#""" +self.type+ """33').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this)); 
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                                 
                                                                              """
                     
                     elif self.puntualgroupselected_name == '-4':
@@ -2810,17 +3553,22 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """25').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN')  {
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v;
+                                                                                       
+                                                                                    $('#""" +self.type+ """25').val(value);
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
@@ -2828,37 +3576,63 @@ class Propertiesv2(object):
                                                                              
                                                                             $('#""" +self.type+ """15').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """24').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                   inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v;
+                                                                                       
+                                                                                    $('#""" +self.type+ """24').val(value);
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                             $('#""" +self.type+ """31').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """32').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN')  {
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v;
+                                                                                       
+                                                                                    $('#""" +self.type+ """32').val(value);
                                                                                 
                                                                              
                                                                                 }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                {                                                                                    
+                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
+                                                                             
+                                                                             $('#""" +self.type+ """36').focusout(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));   
+                                                                                    }else
+                                                                                    {
+                                                                                       $(this).val('');
+                                                                                       inputpopclear($(this));
+                                                                                    }
+                                                                                 });
                                                          
+                                                                                $('#""" +self.type+ """36').keyup(function ()
+                                                                                {                                                                            
+                                                                                    inputpop($(this));                                                                          
+                                                                                 });
                                                                              
                                                                              
                                                                              
@@ -2869,17 +3643,22 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """25').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    
+                                                                                     if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v;
+                                                                                       
+                                                                                    $('#""" +self.type+ """25').val(value);
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              """
@@ -2890,36 +3669,65 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """15').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """24').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = $(this).val();                   
+                                                                                                                                                 
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v;
+                                                                                       
+                                                                                    $('#""" +self.type+ """24').val(value);
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                              $('#""" +self.type+ """31').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """32').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN')  {
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = $(this).val();                                                                                
+                                                                                     if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v;
+                                                                                    
+                                                                                    $('#""" +self.type+ """32').val(value);
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
+                                                                             
+                                                                        $('#""" +self.type+ """33').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                                                                                                   
+                                                                         $('#""" +self.type+ """33').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
                                                                              """
                         
                     elif self.puntualgroupselected_name == '-42m':
@@ -2928,18 +3736,40 @@ class Propertiesv2(object):
                                                                          $('#""" +self.type+ """14').keyup(function ()
                                                                             {
                                                                                 if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
+                                                                                inputpop($(this));
+                                                                                
+                                                                                v = $(this).val();                                                                                
+                                                                                if ( isScientificNotation($(this).val()) == 1 )
+                                                                                   value = Number.parseFloat(v).toExponential();
+                                                                                else
+                                                                                   value = v;
+                                                                                   
                                                                                 $('#""" +self.type+ """25').val(value);
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
+                                                                             
+                                                                       $('#""" +self.type+ """36').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """36').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
+                                                                         
                                                                              """
                     
                     
@@ -2997,29 +3827,36 @@ class Propertiesv2(object):
                     self.setCatalogPropertyDetail() 
                     self.listofemptyInputs.append(self.type+"25");
                     self.listofemptyInputs.append(self.type+"36");
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery=self.jquery +  """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
                     self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val()
-                                                                                $('#""" +self.type+ """25').val(value);
-                                                                                $('#""" +self.type+ """36').val(value);
+                                                                             
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                     if ( isScientificNotation($(this).val()) == 1 )
+                                                                                       value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                       value = v;
+                                                                                       
+                                                                                    $('#""" +self.type+ """25').val(value);
+                                                                                    $('#""" +self.type+ """36').val(value);
                                                                                 
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   $('#""" +self.type+ """36').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              """
@@ -3146,13 +3983,13 @@ class Propertiesv2(object):
                     self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
                     self.preparedataforjQuery(self.type )
                     self.setCatalogPropertyDetail() 
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery=self.jquery +  """
+                                                                // inicio de codigo jQuery
+                                                                $('#divwarningpropertyvalues').hide();
+                                                                $(document).ready(
+                                                                    function() 
+                                                                    {
+                                                                 """
                                              
                                              
                     if self.puntualgroupselected_name == '3':  
@@ -3166,80 +4003,134 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """11').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """12').val(-value);
-                                                                                $('#""" +self.type+ """26').val(-2*(value));
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = -$(this).val();
+                                                                                       
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();                                                                              
+                                                                                          $('#""" +self.type+ """26').val( Number.parseFloat(  2*(value)  ).toExponential() );
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v                                                                                   
+                                                                                          $('#""" +self.type+ """26').val(2*(value));
+                                                                                        }
+                                                                                        
+                                                                                        $('#""" +self.type+ """12').val(value);
+  
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """12').val('');                                                                                   
+                                                                                   $('#""" +self.type+ """26').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                             $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """25').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v 
+      
+                                                                                    $('#""" +self.type+ """25').val(value);
                                                                                  
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                             $('#""" +self.type+ """15').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """24').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    value = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v 
+                                                                                      
+                                                                                    $('#""" +self.type+ """24').val(value);
                                                                                  
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                             $('#""" +self.type+ """22').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """21').val(-value);
-                                                                                $('#""" +self.type+ """16').val(-2*(value));
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    value = -$(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                      $('#""" +self.type+ """16').val( Number.parseFloat(2*(value) ).toExponential() );
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                      $('#""" +self.type+ """16').val(2*(value));
+                                                                                    }
+                                                                                      
+                                                                                    $('#""" +self.type+ """21').val(value);
+
                                                                                  
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                    $('#""" +self.type+ """21').val('');
+                                                                                    $('#""" +self.type+ """16').val('');        
+                                                                                    inputpopclear($(this));                                                                            
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                             $('#""" +self.type+ """31').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """32').val(value);
+                                                                               if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                   
+                                                                                    v = $(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v 
+                                                                                      
+                                                                                    $('#""" +self.type+ """32').val(value);
                                                                                  
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
                                                                                 }
+                                                                                else
+                                                                                {
+                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   inputpopclear($(this));
+                                                                                }
+                                                                                
+                                                                             });
+                                                                             
+                                                                             $('#""" +self.type+ """33').focusout(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        $('#divwarningpropertyvalues').hide();
+                                                                                    }else
+                                                                                    {
+                                                                                       $(this).val('');
+                                                                                    }
+                                                                                 });
+                                                                             
+                                                                             $('#""" +self.type+ """33').keyup(function ()
+                                                                            {                                                                            
+                                                                                inputpop($(this));                                                                          
                                                                              });
                                                                              
                                                                              """
@@ -3250,36 +4141,55 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """11').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """12').val(-value);
-                                                                                $('#""" +self.type+ """26').val(-2*(value));
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = -$(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                      $('#""" +self.type+ """26').val(Number.parseFloat( 2*(value) ).toExponential() );
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                      $('#""" +self.type+ """26').val(2*(value));
+                                                                                    }
+                                                                                      
+                                                                                    $('#""" +self.type+ """12').val(value);
+                                                                                 
     
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """12').val('');
+                                                                                   $('#""" +self.type+ """26').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                             $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                               
-                                                                                $('#""" +self.type+ """25').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v 
+                                                                                   
+                                                                                    $('#""" +self.type+ """25').val(value);
     
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
+                                                                             
+                                                                             
                                                                              """
                     elif self.puntualgroupselected_name == '3m':
                         if self.axisselected_name == 'x1':
@@ -3291,67 +4201,122 @@ class Propertiesv2(object):
                             self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """25').val(-value);
+                                                                               if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    s = -$(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v
+      
+                                                                                    $('#""" +self.type+ """25').val(value);
             
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                             $('#""" +self.type+ """15').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """24').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v
+      
+                                                                                    $('#""" +self.type+ """24').val(value);
             
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                             $('#""" +self.type+ """22').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """21').val(-value);
-                                                                                $('#""" +self.type+ """16').val(-2*(value));
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                      $('#""" +self.type+ """16').val(Number.parseFloat( 2*(value) ).toExponential() );
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                      $('#""" +self.type+ """16').val(2*(value));
+                                                                                    }
+    
+                                                                                    
+                                                                                    $('#""" +self.type+ """21').val(value);
+                                                                                 
             
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """21').val('');
+                                                                                   $('#""" +self.type+ """21').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                             $('#""" +self.type+ """31').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """32').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = -$(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v 
+                                                                                      
+                                                                                    $('#""" +self.type+ """32').val(value);
                    
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
+                                                                            $('#""" +self.type+ """33').focusout(function ()
+                                                                           {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                $('#divwarningpropertyvalues').hide();
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });  
+                                                                             
+                                                                        $('#""" +self.type+ """33').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this)); 
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
                                                                              
                                                                              """
                         elif self.axisselected_name == 'x2':
@@ -3363,71 +4328,111 @@ class Propertiesv2(object):
                             self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """11').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """12').val(-value);
-                                                                                $('#""" +self.type+ """26').val(-2*(value));
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = -$(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                      $('#""" +self.type+ """26').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v 
+                                                                                      $('#""" +self.type+ """26').val(2*(value));
+                                                                                    }
+      
+                                                                                    $('#""" +self.type+ """12').val(value);
+                                                                                    
                                                                                 
                                                                                 
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """12').val('');
+                                                                                   $('#""" +self.type+ """26').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                             $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                
-                                                                                $('#""" +self.type+ """25').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v 
+                                                                                    
+                                                                                    $('#""" +self.type+ """25').val(value);
    
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                             $('#""" +self.type+ """15').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                
-                                                                                $('#""" +self.type+ """24').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v 
+                                                                                    
+                                                                                    $('#""" +self.type+ """24').val(value);
    
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              
                                                                              $('#""" +self.type+ """31').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                
-                                                                                $('#""" +self.type+ """32').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v
+                                                                                    
+                                                                                    $('#""" +self.type+ """32').val(value);
    
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
+                                                                       
+                                                                         
+                                                                         $('#""" +self.type+ """33').focusout(function ()
+                                                                        {
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this)); 
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """33').keyup(function ()
+                                                                        {                                                                            
+                                                                            inputpop($(this));                                                                          
+                                                                         });
                                                                              
                                                                              
                                                                              """
@@ -3543,13 +4548,13 @@ class Propertiesv2(object):
                     self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
                     self.preparedataforjQuery(self.type )
                     self.setCatalogPropertyDetail() 
-                    self.jquery="""
-                                            // inicio de codigo jQuery
-                                            $('#divwarningpropertyvalues').hide();
-                                            $(document).ready(
-                                                function() 
-                                                {
-                                             """
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
                     
                     if self.puntualgroupselected_name == '6':
                         self.listofemptyInputs.append(self.type+"25");
@@ -3558,49 +4563,80 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """25').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v; 
+      
+                                                                                    $('#""" +self.type+ """25').val(value);
                                             
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                             $('#""" +self.type+ """15').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """24').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v;
+                                                                                      
+                                                                                    $('#""" +self.type+ """24').val(value);
                        
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                              $('#""" +self.type+ """31').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """32').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = $(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v;
+                                                                                      
+                                                                                    $('#""" +self.type+ """32').val(value);
         
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
+                                                                             });
+                                                                             
+                                                                            $('#""" +self.type+ """33').focusout(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                }else
+                                                                                {
+                                                                                   $(this).val('');
+                                                                                   inputpopclear($(this));
+                                                                                }
+                                                                             });  
+                                                                             
+                                                                             $('#""" +self.type+ """33').keyup(function ()
+                                                                            {                                                                            
+                                                                                inputpop($(this));                                                                          
                                                                              });
 
                                                                              """
@@ -3611,32 +4647,57 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """15').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """24').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    
+                                                                                    v = $(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v;
+                                                                                      
+                                                                                    $('#""" +self.type+ """24').val(value);
                                             
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
                                                                             $('#""" +self.type+ """31').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """32').val(value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                     if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v;
+                                                                                      
+                                                                                    $('#""" +self.type+ """32').val(value);
             
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
+                                                                             });
+                                                                             
+                                                                            $('#""" +self.type+ """33').focusout(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                }else
+                                                                                {
+                                                                                   $(this).val('');
+                                                                                   inputpopclear($(this));
+                                                                                }
+                                                                             });  
+                                                                             
+                                                                             $('#""" +self.type+ """33').keyup(function ()
+                                                                            {                                                                            
+                                                                                inputpop($(this));                                                                          
                                                                              });
                    
                                                                              """
@@ -3646,16 +4707,20 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """14').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """25').val(-value);
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    else
+                                                                                      value = v;
+                                                                                      
+                                                                                    $('#""" +self.type+ """25').val(value);
                                             
                                                                                 }else
                                                                                 {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
+                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
@@ -3671,36 +4736,58 @@ class Propertiesv2(object):
                         self.jquery= self.jquery + """
                                                                          $('#""" +self.type+ """11').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """12').val(-value);
-                                                                                 $('#""" +self.type+ """26').val(-2*(value));
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                      $('#""" +self.type+ """26').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                      
+                                                                                    $('#""" +self.type+ """12').val(value);
+                                                                                 
+                                                                                 
                                             
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
-                                                                             });
-                                                                             
-                                                                            $('#""" +self.type+ """22').keyup(function ()
+                                                                            }else
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """21').val(-value);
-                                                                                $('#""" +self.type+ """16').val(-2*(value));
+                                                                               $('#""" +self.type+ """12').val('');
+                                                                                $('#""" +self.type+ """26').val('')
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                             
+                                                                        $('#""" +self.type+ """22').keyup(function ()
+                                                                        {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    value = -$(this).val();
+                                                                                     if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                      $('#""" +self.type+ """16').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                    
+                                                                                    $('#""" +self.type+ """21').val(value);
+                                                                                 
             
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
-                                                                             });
-                   
+                                                                            }else
+                                                                            {
+                                                                               $('#""" +self.type+ """21').val('');
+                                                                                $('#""" +self.type+ """16').val('');
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+               
                                                                              """
                     
                     elif self.puntualgroupselected_name == '-6m2':
@@ -3710,19 +4797,30 @@ class Propertiesv2(object):
                             self.jquery= self.jquery + """
                                                                           $('#""" +self.type+ """22').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """21').val(-value);
-                                                                                 $('#""" +self.type+ """16').val(-2*(value));
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                      $('#""" +self.type+ """16').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                     
+                                                                                    
+                                                                                    $('#""" +self.type+ """21').val(value);
+                                                                                
                                             
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
-                                                                             });
+                                                                            }else
+                                                                            {
+                                                                               $('#""" +self.type+ """21').val('');
+                                                                               $('#""" +self.type+ """16').val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
                                                                              """
                         elif self.axisselected_name == 'x2':
                             self.listofemptyInputs.append(self.type+"12");
@@ -3730,19 +4828,29 @@ class Propertiesv2(object):
                             self.jquery= self.jquery + """
                                                                           $('#""" +self.type+ """11').keyup(function ()
                                                                             {
-                                                                                if($.isNumeric($(this).val())) {
-                                                                                $('#divwarningpropertyvalues').hide();
-                                                                                value = $(this).val();
-                                                                                $('#""" +self.type+ """12').val(-value);
-                                                                                 $('#""" +self.type+ """26').val(-2*(value));
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = -$(this).val();
+                                                                                     if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                      $('#""" +self.type+ """26').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                    
+                                                                                    $('#""" +self.type+ """12').val(value);
+                                                                                 
                                             
-                                                                                }else
-                                                                                {
-                                                                                   $('#divwarningpropertyvalues').show();
-                                                                                   $( "#divwarningpropertyvalues" ).text( "Incorrect Value" );
-                                                                                   $(this).val('');
-                                                                                }
-                                                                             });
+                                                                            }else
+                                                                            {
+                                                                                $('#""" +self.type+ """12').val('');
+                                                                                $('#""" +self.type+ """26').val('');
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
                                                                              """
                 
                     self.jquery= self.jquery+"\n" 

@@ -250,7 +250,7 @@ def viewlogin(request):
 
 @login_required
 def edit_user(request, pk):
-    print "test"
+    print "edit_user"
     user = User.objects.get(pk=pk)
     user_form = UserProfileForm(instance=user)
     """                                       inlineformset_factory(parent_model, model, form=ModelForm,
@@ -259,26 +259,35 @@ def edit_user(request, pk):
                                                                       extra=3, can_order=False, can_delete=True, max_num=None,
                                                                       formfield_callback=None):"""
                                                                       
-    
     ProfileInlineFormset = inlineformset_factory(User, UserProfile, fields=('bio', 'phone', 'city', 'country', 'organization'),form=ProfileForm,can_delete=False)
     formset = ProfileInlineFormset(instance=user)
-
+    
+    
     if request.user.is_authenticated() and request.user.id == user.id:
         if request.method == "POST":
             user_form = UserProfileForm(request.POST, request.FILES, instance=user)
-            formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
+             
+            try:
+                formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
+            except ValidationError:
+                formset = None
 
             if user_form.is_valid():
                 created_user = user_form.save(commit=False)
-                formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
-             
+                try:
+                    formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
+                except ValidationError:
+                    formset = None
 
-                if formset.is_valid():
+                if formset and formset.is_valid():
                     created_user.save()
                     formset.save()
                     return HttpResponseRedirect('/accounts/profile/')
+        
+        
         current ="Update Profile"
-         
+        
+
         return render(request, "account/account_update.html", {
             "noodle": pk,
             "user_form": user_form,
@@ -1829,7 +1838,7 @@ def onhold(request,todo,index):
                                                                                     'forwardslash':forwardslash
                             })
                         
-                            print message
+                            
                         
                             
                                            
@@ -2571,7 +2580,7 @@ def addToSession(request,customobject,nameObjectOnSession):
     else:
         print "lista si esta en session" 
         sessionList = request.session[nameObjectOnSession ]
-        print  len(sessionList)
+        #print  len(sessionList)
         #np=newProperties
         is_in_list=containsproperty(sessionList, customobject)  
         if is_in_list == False:
