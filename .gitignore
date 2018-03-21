@@ -1,3 +1,6 @@
 #py binary
 *.pyc
 media/stlfiles/*
+*.stl
+*.stl
+*.mpod
