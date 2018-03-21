@@ -149,7 +149,7 @@ class RankTensors():
  
     
     if createdata == 1:
-      if "magnetoelectric" in filename:
+      if "magnetoelectric" in filename or 'thermalexpansion' in filename:
          SC = []
          SC= E
          b = 0
