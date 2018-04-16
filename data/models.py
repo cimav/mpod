@@ -193,8 +193,8 @@ class DataFileProperty(models.Model):
         verbose_name_plural = _('Articles')
 
 class DataFilePropertyTemp(models.Model):    
-    datafile =models.ForeignKey(DataFileTemp)
-    property=models.ForeignKey(PropertyTemp)
+    datafiletemp =models.ForeignKey(DataFileTemp)
+    propertytemp=models.ForeignKey(PropertyTemp)
     
     class Meta:
         db_table = 'data_datafile_property_temp'    
@@ -605,7 +605,16 @@ class Dictionary(models.Model):
          
         #verbose_name_plural = _('Uploaded files')
         
+class PropTags(models.Model):
+    tag = models.CharField(_(u'tag'),max_length=100)
+    active= models.BooleanField(_(u'Active'),max_length=1,default=True)
+    
+    class Meta:
+        db_table = 'prop_tags'
         
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.tag)
+    
 class CatalogpropertyDictionary(models.Model):
     catalogproperty = models.ForeignKey(CatalogProperty,related_name="CatalogProperty", verbose_name="Catalog Properties")
     dictionary =models.ForeignKey(Dictionary,related_name="Dictionary",verbose_name="Dictionary")

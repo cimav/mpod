@@ -51,6 +51,7 @@ from django.core.mail.backends.smtp import EmailBackend
 from data.models import MessageCategoryDetail
 
 from django.db.models import get_app, get_models
+from django.contrib.admin.actions import delete_selected as delete_selected_
 
 
 """
@@ -352,8 +353,89 @@ class FileUserAdmin(admin.ModelAdmin):
             return result
         
         
+        actions = ['delete_selected']
+        def delete_selected(self, request, queryset):
+            if request.POST.get('post'):
+                counter = 0
+                for obj in queryset:
+                    if obj.published != True:
+                        objDataFileTemp=DataFileTemp.objects.get(filename__exact=obj.filename)
+                        pat=PublArticleTemp.objects.get(id=objDataFileTemp.publication.id)
+                        #objDataFileTemp.delete()
+                        #pat.delete() 
+                        dataFilePropertyTempDataSet=DataFilePropertyTemp.objects.filter(datafiletemp=objDataFileTemp)
+                        for dfptds in dataFilePropertyTempDataSet:
+                            print dfptds.propertytemp.tag
+                            dfpt=DataFilePropertyTemp()
+                            dfpt=dfptds
+                            dfpt.delete()
+           
+                        objDataFileTemp.delete()
+                        pat.delete() 
+                        
+                        
+                        #pat.delete() 
+                        experimentalfilecontempDatafiletempDataSet=ExperimentalfilecontempDatafiletemp.objects.filter(datafiletemp=objDataFileTemp)
+                        
+                        for efctdf in experimentalfilecontempDatafiletempDataSet:
+                            print efctdf.experimentalfilecontemp.tag
+                            efctdf.delete()
+                        
+                        
+                        pathslist=Path.objects.all()   
+                        path=Path() 
+                        for cifdir in pathslist:
+                            path = cifdir
+                            if os.path.isdir(path.cifs_dir):
+                                break
+                                            
+                        ciffilein =os.path.join(path.cifs_dir_valids, obj.filename)
+                        ciffileout = os.path.join(path.cifs_dir,objDataFileTemp.filename)
+                        print "archivo a borrar"
+                        print ciffileout
+                        try:
+                            if os.path.isfile(ciffilein):
+                                os.remove(ciffilein)                    
+                        except Exception as e:
+                            raise Http404('%s object no published yet.' % (force_unicode(e)))
+                
+                        obj.delete()  
+                        counter = counter + 1
+                        self.message_user(request, "%s file(s) successfully deleted.." % counter  )
+                        
+                    else:
+                        #pass
+                        self.message_user(request, ""  )
+                        #messages.debug(request, '%s SQL statements were executed.' % count)
+                        #messages.info(request, 'Three credits remain in your account.')
+                        #messages.success(request, 'Profile details updated.')
+                        messages.warning(request, 'The file currently unpublished.')
+                        messages.error(request, 'The file was not deleted.')
+                    
+                    
+                    
+                    
+            else:
+                return delete_selected_(self, request, queryset)
+        
+        delete_selected.short_description = "Delete selected files unpublished"
+        
+        
         def delete_model(self, request, obj):
             obj.delete()
+            
+        def get_actions(self, request):
+            actions = super(FileUserAdmin, self).get_actions(request)
+            try:
+               
+                #print actions
+                if 'delete_selected' in actions:
+                    #del actions['delete_selected']
+                    #del actions['delete_selected'] #disable
+                    pass
+            except KeyError:
+                pass
+            return actions
 
         def delete_view(self, request, object_id, extra_context=None):
             
@@ -392,31 +474,23 @@ class FileUserAdmin(admin.ModelAdmin):
                     raise PermissionDenied
                 
                 dataFileTemp=DataFileTemp.objects.get(filename__exact=obj.filename)
-                #experimentalfilecontempDatafiletempQuerySet = ExperimentalfilecontempDatafiletemp.objects.filter(datafiletemp=dataFileTemp)
-                '''
-                for efct in experimentalfilecontempDatafiletempQuerySet:
-                    try:
-                        experimentalParCond = ExperimentalParCond.objects.get(tag__exact=efct.experimentalfilecontemp.tag)
-                    except ObjectDoesNotExist as error:
-                        pass
-                '''
+
                 publication= None
                 try: 
                     dataFile=DataFile.objects.get(code__exact = dataFileTemp.code )    
                     publication = dataFile.publication
                 except ObjectDoesNotExist as error:
+                    print "Message({0}): {1}".format(99, error.message) 
                     dataFile = None                 
                     
                 if dataFile is None:
                     raise Http404('%s object no published yet.' % (force_unicode(dataFileTemp.filename)))
   
-               
-
-                
                 dataFilePropertyQuerySet = None
                 try: 
                     dataFilePropertyQuerySet=DataFileProperty.objects.filter(datafile = dataFile )    
                 except ObjectDoesNotExist as error:
+                    print "Message({0}): {1}".format(99, error.message) 
                     dataFilePropertyQuerySet = None        
                     
                 if dataFilePropertyQuerySet is None:
@@ -443,18 +517,11 @@ class FileUserAdmin(admin.ModelAdmin):
                 print ciffileout
                 try:
                     if os.path.isfile(ciffileout):
-                        os.remove(ciffileout)
-                    
+                        os.remove(ciffileout)                    
                 except Exception as e:
                     raise Http404('%s object no published yet.' % (force_unicode(e)))
-                    #print(e)
-         
- 
-                print "dataFile.delete()  "
-                print dataFile.filename
-                print "publication.delete()"
-                print publication.title
-                
+
+
                 dataFile.delete() 
                 publication.delete()
       
@@ -476,9 +543,6 @@ class FileUserAdmin(admin.ModelAdmin):
                 
             
             object_name = force_unicode(opts.verbose_name)
-            print "perms_needed" 
-            print perms_needed
-            print protected
             if perms_needed or protected:
                 title = "Cannot delete %(name)s" % {"name": object_name}
             else:
@@ -503,14 +567,9 @@ class FileUserAdmin(admin.ModelAdmin):
               "admin/delete_confirmation.html"
               ], context, context_instance=template.RequestContext(request))
             
-            
             #todo lo anterior + self.delete_model(request, obj)
             #super(FileUserAdmin, self).delete_view(request, obj, extra_context)
  
- 
-    
-    
-        
         def save_model(self, request, obj, form, change):
             try:
 
@@ -586,21 +645,21 @@ class FileUserAdmin(admin.ModelAdmin):
                      
                             
                                                         
-                            dataFilePropertyTemp = DataFilePropertyTemp.objects.get(datafile = dataFileTemp)
+                            dataFilePropertyTemp = DataFilePropertyTemp.objects.get(datafiletemp = dataFileTemp)
                             dataFileProperty=DataFileProperty()
                             property=Property()
                             
                             try:
-                                property = Property.objects.get(tag__exact=dataFilePropertyTemp.property.tag)
+                                property = Property.objects.get(tag__exact=dataFilePropertyTemp.propertytemp.tag)
                             except ObjectDoesNotExist as error:
                                 #print "Error({0}): {1}".format(99, error.message) 
                                  
-                                property.tag = dataFilePropertyTemp.property.tag
-                                property.name =  dataFilePropertyTemp.property.name
-                                property.description =  dataFilePropertyTemp.property.description
-                                property.tensor_dimensions =  dataFilePropertyTemp.property.tensor_dimensions
-                                property.units =  dataFilePropertyTemp.property.units
-                                property.units_detail =  dataFilePropertyTemp.property.units_detail
+                                property.tag = dataFilePropertyTemp.propertytemp.tag
+                                property.name =  dataFilePropertyTemp.propertytemp.name
+                                property.description =  dataFilePropertyTemp.propertytemp.description
+                                property.tensor_dimensions =  dataFilePropertyTemp.propertytemp.tensor_dimensions
+                                property.units =  dataFilePropertyTemp.propertytemp.units
+                                property.units_detail =  dataFilePropertyTemp.propertytemp.units_detail
                                 property.save()
     
                             dataFileProperty.property=property

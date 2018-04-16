@@ -11,13 +11,7 @@
           <script>
        
             function call_ajax(url,todo) {
-            	      
-            	      
-            	           	  
-            	      //alert(url);
-            	       //alert(todo);
-            	       //return;
- 
+        
             	      datasend = "";
             	      dictionary_pk  ="";
             	      if  (todo=="add" || todo=="change" )
@@ -90,6 +84,7 @@
            	    	  }
             	      else if (todo == "addphasecharacteristic" || todo=="phasecharacteristicchange" )
            	    	  {
+            	    	   
             	    	  value =  $('#phasecharacteristicvalue').val();
             	    	  dictionary_pk  =  $('#phasecharacteristic_name').val();
             	    	  //alert(dictionary_pk);
@@ -114,7 +109,7 @@
            	    	  }
 
             	            
-            	            	      
+            	           	      
             	      
             	  
 		              $.ajax({
@@ -123,7 +118,7 @@
 		                data: datasend,
 		                dataType: 'json',
 		                success: function (data) {
-		                	
+		                	     
 			                	 if (todo == 'add')
 			                		 {
 				                		 if (data.error == "None")
@@ -150,12 +145,24 @@
 			                		  }
 			                	 else if (todo == 'change')
 			                		 {
-			                		
-			                		    var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
-				                        //alert("units_detail: "+ data.units_detail);
-				                   
-				                        //$('#units_detail').val(data.units_detail);
-				                        $('#units_detail').text(data.units_detail);
+				                  		 if (data.error == "")
+				            		    	{
+						                		
+						                		$('#units_detail').text(data.units_detail);
+						                		
+						                		$('#errordictionaryproperty').text('');
+						               	    	$('#errordictionaryproperty').hide();
+						                	
+				            		    	}
+				                		 else
+			                		      {
+				                			 $('#units_detail').text(data.units_detail);
+			                		    	$('#errordictionaryproperty').text(data.error);
+				               	    		$('#errordictionaryproperty').show();
+	
+			                		      }
+			                		    
+				                        
 			                		 }
 			                	 else if (todo == 'addnew')
 			                		 {
@@ -173,15 +180,15 @@
 			             		        $("#divdictionarynew" ).hide('');
 			              	    	    $('#valuenew').attr("placeholder", "395 ,AWP, etc.");
 			            	    	    $('#namenew').attr("placeholder", "Example: conditions temperature");
-			            	    	    $('#unitsnew').attr("placeholder", "K");
-			            	    	    $('#units_detailnew').attr("placeholder", "kelvin");
+			            	    	    $('#unitsnew').attr("placeholder", "K,T,Pa, etc.");
+			            	    	    $('#units_detailnew').attr("placeholder", "kelvin, tesla, pascal, etc.");
 			            	    	    $('#definitionnew').attr("placeholder", "Text of definition");
 	
 			                		 }
 			                	 else if (todo == "addphase")
 			                		 {
 			                		       
-			                		    if (data.error == "None")
+			                		    if (data.error == "")
 			                		    	{
 			    				                if (data.in_list) {
 						                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
@@ -202,10 +209,26 @@
 			                		      }
 			                		 
 			                		 }
+			                	 else if (todo == "phasechange")
+		                		 {
+			                		 if (data.error == "")
+		                		    	{
+			                			   $('#errorphase').text('');
+		               	    		       $('#errorphase').hide();
+		               	    		       $('#units_detailphase').text(data.units_detail);
+		                		    	}
+		                		    else
+		                		      {
+		                		    	$('#units_detailphase').text(data.units_detail);
+		                		    	$('#errorphase').text(data.error);
+			               	    		$('#errorphase').show();
+
+		                		      }
+		                		 }
 			                	 else if (todo == "addphasecharacteristic")
 		                		 {
-		                		       
-		                		    if (data.error == "None")
+			                		  
+		                		    if (data.error == "")
 		                		    	{
 		    				                if (data.in_list) {
 					                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
@@ -216,15 +239,35 @@
 					                			 alert("added" );
 				               	    		     $('#errorphasecharacteristic').text('');
 				               	    		     $('#errorphasecharacteristic').hide();
+				               	    		     
 					                		 }
 		                		    	}
 		                		    else
 		                		      {
+		                		    	
 		                		    	$('#errorphasecharacteristic').text(data.error);
 			               	    		$('#errorphasecharacteristic').show();
 
 		                		      }
 		                		 }
+			                else if ( todo=="phasecharacteristicchange" )
+			           	    	  {
+			                	      
+			                		 if (data.error == "")
+		                		    	{
+			                			   $('#errorphasecharacteristic').text('');
+		               	    		       $('#errorphasecharacteristic').hide();
+		               	    		       $('#units_detailpcchange').text(data.units_detail);
+		                		    	}
+		                		    else
+		                		      {
+		                		    	$('#units_detailpcchange').text(data.units_detail);
+		                		    	$('#errorphasecharacteristic').text(data.error);
+			               	    		$('#errorphasecharacteristic').show();
+
+		                		      }
+			                		 
+			           	    	  }
 			                else if (todo == "addmeasurement")
 		                		 {
 		                		       
@@ -248,14 +291,7 @@
 
 		                		      }
 		                		 }
-			                	 
-			                	 
-			                	 
-			                	 
-			                	 
-			                	 
-			                	 
-			                	 
+			                	  
 		                
 		                }
 		              });
@@ -599,7 +635,7 @@
 																						      <input type="text" id="phasevalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"   >	
 																						     </td>
 																				               <td>
-																						        
+																						          <label id="units_detailphase" for="units_detail">{{obj.units_detail}} </label>
 																						     </td>
 																			
 																		   </tr>
@@ -668,7 +704,7 @@
 																						      <input type="text" id="phasecharacteristicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"   >	
 																						     </td>
 																				               <td>
-																						        
+																						          <label id="units_detailpcchange" for="units_detail">{{obj.units_detail}} </label>
 																						     </td>
 																			
 																		   </tr>
@@ -709,11 +745,11 @@
 																     </td>
 																     	<td>
 														               <label for="unitsnew">Units:</label>
-																      <input type="text" id="unitsnew" value="" class="form-control" placeholder="K" style="width: 90px;"   >	
+																      <input type="text" id="unitsnew" value="" class="form-control" placeholder="K, T, Pa, etc." style="width: 100px;"   >	
 																     </td>
 														               <td>
 														               <label for="units_detailnew">Unit detail:</label>
-																      <input type="text" id="units_detailnew" value="" class="form-control" placeholder="kelvin"  style="width: 90px;"   >	
+																      <input type="text" id="units_detailnew" value="" class="form-control" placeholder="kelvin, tesla, pascal, etc."  style="width: 100px;"   >	
 																     </td>
 					
 												   </tr>

@@ -44,7 +44,7 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 import json
 
- 
+
 
 #from django.core.urlresolvers import reverse
 #from django.core.administration import EmailMessage
@@ -1721,12 +1721,40 @@ def onhold(request,todo,index):
                     filename = newusernamebase64.lower() + name_str(15) 
                                       
                     
+                    if 'newDictionaryList' not in request.session  or not request.session['newDictionaryList']:
+                        pass
+                    else:
+                        newDictionaryList =  request.session['newDictionaryList']
+                        for d in newDictionaryList:
+                            print d.tag
+                            try:
+                                dictionary=Dictionary.objects.get(tag__exact=d.tag)                                                          
+                            except ObjectDoesNotExist as error:
+                                print "Message({0}): {1}".format(99, error.message)  
+                                d.save()  
+                                try:                               
+                                    
+                                    lcs=d.tag.split()
+                                    prstr=lcs[0].strip()[5:]
+                                    parts=prstr.split('_')                                
+                                    proptag=PropTags.objects.get(tag__exact=parts[1])
+                                except ObjectDoesNotExist as error:
+                                    print "Message({0}): {1}".format(99, error.message)  
+                                    pt=PropTags()
+                                    pt.tag= parts[1]
+                                    pt.save()
+                            
+                            
                     mpodutil=MPODUtil()
                     mpodutil.mpodwrite(filename,propertySessionList)
                     mpodutil.addinfo()
-                    mpodutil.adddatavalue()
-                
+                    mpodutil.adddatavalue()                
                     mpodutil.savefile()
+                    
+ 
+                             
+                        
+                    
                     
 
                     
@@ -1737,6 +1765,8 @@ def onhold(request,todo,index):
                     fileuser.authuser=u 
                     fileuser.reportvalidation = mpodutil.reportValidation
                     fileuser.save()
+                    
+                    
                     
                     #uid= base64.b64encode(force_bytes(str(user.pk))),
                     #token= account_activation_token.make_token(user)
@@ -1863,16 +1893,12 @@ def onhold(request,todo,index):
                 except ValueError:
                     pass
                 
-    #response = render_to_response('account/onhold.html', {"propertySessionList":propertySessionList,
-                                             
-                                                                                                                #"current":current, }, context_instance=RequestContext(request)) 
+    
       
     if todo == 'removeall' and  int(index) == -1: 
         current ="New Case"           
         propertySessionList = []
-        """response = render_to_response("newcasev2", {"propertySessionList":propertySessionList,
-                                                                                                                "current":current, }, context_instance=RequestContext(request)) 
-        """
+  
         response = redirect('/newcasev2')
     
     if todo == 'save' and  int(index) == -2:    
@@ -1887,9 +1913,7 @@ def onhold(request,todo,index):
     return response
 
      
-     
-
-   
+ 
    
 @login_required
 @csrf_exempt 
@@ -1899,30 +1923,37 @@ def addnewdictionaryproperty(request,todo,index):
     
     underscore = '_'
     property = "_prop_" 
+   
+  
     name = request.POST.get('namenew', False)
     lins1 = map(lambda x: x.strip(),    name.strip().split(" "))
-    line =  "_prop_" 
+    line =  "_prop_"   
     x= len(lins1)  
     print x
     for i, li in enumerate(lins1):
         if i < (x -1):
             line =line + li + underscore
         else:
-            line =line + li 
-        
-       
-     
-    print line
+            line =line +  li 
+
+
     
     in_list = False
     newItem=Dictionary()
     newItem.tag =line
     newItem.name = request.POST.get('namenew', False)
      
-    #newItem.description= ""
+    newItem.description= request.POST.get('namenew', False)
+    newItem.category= Category.objects.get(pk=9) 
+    
     newItem.units = request.POST.get('unitsnew', False)
     newItem.units_detail = request.POST.get('units_detailnew', False)
     newItem.definition= request.POST.get('definitionnew', False)
+    
+    if not isnumber(dicvalue):
+        newItem.type='char'
+    else:
+        newItem.type='numb'
  
     if  todo == "addnew":    
         if 'newDictionaryList' not in request.session  or not request.session['newDictionaryList']:
@@ -1930,7 +1961,7 @@ def addnewdictionaryproperty(request,todo,index):
                 newDictionaryList=[]
                 newDictionaryList.append(newItem)
                 dictionaryValues = {}    
-                dictionaryValues[newItem.tag.encode("ascii"),'char']=dicvalue.encode("ascii")
+                dictionaryValues[newItem.tag.encode("ascii"),newItem.type]=dicvalue.encode("ascii")
                 request.session['dictionaryValues' ] = dictionaryValues        
                 request.session['newDictionaryList']=newDictionaryList   
             else:
@@ -1940,7 +1971,7 @@ def addnewdictionaryproperty(request,todo,index):
                     in_list = True
                 else:
                     in_list = False
-                    dictionaryValues[newItem.tag.encode("ascii"),'char']=dicvalue.encode("ascii")
+                    dictionaryValues[newItem.tag.encode("ascii"),newItem.type]=dicvalue.encode("ascii")
                     request.session['dictionaryValues' ] = dictionaryValues
                     newDictionaryList.append(newItem)
                     request.session['newDictionaryList']=newDictionaryList   
@@ -1954,17 +1985,14 @@ def addnewdictionaryproperty(request,todo,index):
                 in_list = True
             else:
                 in_list = False
-                dictionaryValues[newItem.tag.encode("ascii"),'char']=dicvalue.encode("ascii")
+                dictionaryValues[newItem.tag.encode("ascii"),newItem.type]=dicvalue.encode("ascii")
                 request.session['dictionaryValues' ] = dictionaryValues
                 newDictionaryList.append(newItem)
+                #request.session['newDictionaryList'] = newDictionaryList
                 
             print newDictionaryList
             print dictionaryValues
-                
-                
-                
-                
-            
+
     data = {
         'name': newItem.name,
         'units': newItem.units,
@@ -1995,29 +2023,28 @@ def adddictionaryphase(request,pk):
     todo  = request.POST.get('todo', False)
     dicvalue = request.POST.get('phasevalue', False)
     in_list = False
-    error ="None"
-    if dicvalue == "":
-        dicvalue = "?"
-
-    
+    error =""
     dictionary_pk =  request.POST.get('dictionary_pk', False) 
-    
     objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
-    #isnumb = False
-    if objDictionarySelected.type == "numb":
-        #isnumb= isnumber(dicvalue)
-        if not isnumber(dicvalue):
-            error ="The value must be numeric"
-            data = {
-                 'error':error,
-             }
-            return  HttpResponse(json.dumps(data), content_type="application/json")   
-    elif objDictionarySelected.type == "char":
-        pass
-        
-    
-    
-    
+    if dicvalue != "":
+        if objDictionarySelected.type == "numb":
+            if not isnumber(dicvalue):
+                error ="The value must be numeric" 
+            elif objDictionarySelected.type == "char":
+                pass
+    else:
+        error ="the field can not be empty"
+
+    if error!= "":
+        data = {
+                    'name': objDictionarySelected.name,
+                    'units': objDictionarySelected.units,
+                    'units_detail': objDictionarySelected.units_detail,
+                    'dicvalue': dicvalue,
+                    'in_list': in_list,
+                    'error':error,
+                }
+        return  HttpResponse(json.dumps(data), content_type="application/json")   
 
     if pk == '-1' and todo == "change":
         pass
@@ -2035,13 +2062,6 @@ def adddictionaryphase(request,pk):
                 dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
                 request.session['dictionaryValues' ] = dictionaryValues
                 
-
-        print dictionaryValues
-  
-    print  objDictionarySelected
-         
-   
-
     data = {
         'name': objDictionarySelected.name,
         'units': objDictionarySelected.units,
@@ -2052,13 +2072,8 @@ def adddictionaryphase(request,pk):
 
     }
     
-    
-    #del newItem
-    
     return HttpResponse(json.dumps(data), content_type="application/json")   
 
-    
-    
 
 @login_required
 @csrf_exempt 
@@ -2067,29 +2082,30 @@ def adddictionaryphasecharacteristic(request,pk):
     todo  = request.POST.get('todo', False)
     dicvalue = request.POST.get('phasecharacteristicvalue', False)
     in_list = False
-    error ="None"
-    if dicvalue == "":
-        dicvalue = "?"
-
-    
-    dictionary_pk =  request.POST.get('dictionary_pk', False) 
-    
+    error =""
+    dictionary_pk =  request.POST.get('dictionary_pk', False)     
     objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
-    #isnumb = False
-    if objDictionarySelected.type == "numb":
-        #isnumb= isnumber(dicvalue)
-        if not isnumber(dicvalue):
-            error ="The value must be numeric"
-            data = {
-                 'error':error,
-             }
-            return  HttpResponse(json.dumps(data), content_type="application/json")   
-    elif objDictionarySelected.type == "char":
-        pass
-        
+    if dicvalue != "":        
+        if objDictionarySelected.type == "numb":
+            if not isnumber(dicvalue):
+                error ="The value must be numeric"
+        elif objDictionarySelected.type == "char":
+                pass
+    else:
+        error ="the field can not be empty"
+
+    if error != "":
+        data = {
+                    'name': objDictionarySelected.name,
+                    'units': objDictionarySelected.units,
+                    'units_detail': objDictionarySelected.units_detail,
+                    'dicvalue': dicvalue,
+                    'in_list': in_list,
+                    'error':error,
+            
+        }
     
-    
-    
+        return  HttpResponse(json.dumps(data), content_type="application/json")   
 
     if pk == '-1' and todo == "phasecharacteristicchange":
         pass
@@ -2106,13 +2122,6 @@ def adddictionaryphasecharacteristic(request,pk):
                 in_list = False
                 dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
                 request.session['dictionaryValues' ] = dictionaryValues
-                
-
-        print dictionaryValues
-  
-    print  objDictionarySelected
-         
-   
 
     data = {
         'name': objDictionarySelected.name,
@@ -2123,17 +2132,11 @@ def adddictionaryphasecharacteristic(request,pk):
         'error':error,
 
     }
-    
-    
-    #del newItem
+
     
     return HttpResponse(json.dumps(data), content_type="application/json")   
     
-          
-          
-          
-          
-          
+       
 @login_required
 @csrf_exempt 
 def adddictionarymeasurement(request,pk): 
@@ -2141,29 +2144,29 @@ def adddictionarymeasurement(request,pk):
     todo  = request.POST.get('todo', False)
     dicvalue = request.POST.get('measurementvalue', False)
     in_list = False
-    error ="None"
-    if dicvalue == "":
-        dicvalue = "?"
-
-    
+    error =""
     dictionary_pk =  request.POST.get('dictionary_pk', False) 
-    
     objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
-    #isnumb = False
-    if objDictionarySelected.type == "numb":
-        #isnumb= isnumber(dicvalue)
-        if not isnumber(dicvalue):
-            error ="The value must be numeric"
-            data = {
-                 'error':error,
-             }
-            return  HttpResponse(json.dumps(data), content_type="application/json")   
-    elif objDictionarySelected.type == "char":
-        pass
+    if dicvalue != "": 
+        if objDictionarySelected.type == "numb":
+            if not isnumber(dicvalue):
+                error ="The value must be numeric"
+        elif objDictionarySelected.type == "char":
+            pass
+    else:
+        error ="the field can not be empty"
         
-    
-    
-    
+    if error != "":
+        data = {
+                    'name': objDictionarySelected.name,
+                    'units': objDictionarySelected.units,
+                    'units_detail': objDictionarySelected.units_detail,
+                    'dicvalue': dicvalue,
+                    'in_list': in_list,
+                    'error':error,
+            
+        }               
+        return  HttpResponse(json.dumps(data), content_type="application/json")   
 
     if pk == '-1' and todo == "measurementchange":
         pass
@@ -2182,12 +2185,6 @@ def adddictionarymeasurement(request,pk):
                 request.session['dictionaryValues' ] = dictionaryValues
                 
 
-        print dictionaryValues
-  
-    print  objDictionarySelected
-         
-   
-
     data = {
         'name': objDictionarySelected.name,
         'units': objDictionarySelected.units,
@@ -2198,8 +2195,7 @@ def adddictionarymeasurement(request,pk):
 
     }
     
-    
-    #del newItem
+ 
     
     return HttpResponse(json.dumps(data), content_type="application/json")           
           
@@ -2218,26 +2214,30 @@ def adddictionaryproperty(request,pk):
     todo  = request.POST.get('todo', False)
     dicvalue = request.POST.get('dicvalue', False)
     in_list = False
-    error ="None"
-    if dicvalue == "":
-        dicvalue = "?"
-
-    
+    error =""
     dictionary_pk =  request.POST.get('dictionary_pk', False) 
-    print dictionary_pk
     objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
-    print objDictionarySelected.type
-    
-    if objDictionarySelected.type == "numb":
-        #isnumb= isnumber(dicvalue)
-        if not isnumber(dicvalue):
-            error ="The value must be numeric"
+    if dicvalue != "":
+        if objDictionarySelected.type == "numb":
+            if not isnumber(dicvalue):
+                error ="The value must be numeric"        
+        elif objDictionarySelected.type == "char":
+            pass
+    else:
+        error ="the field can not be empty"        
+         
+    if error != "":  
             data = {
-                 'error':error,
-             }
+                'name': objDictionarySelected.name,
+                'units': objDictionarySelected.units,
+                'units_detail': objDictionarySelected.units_detail,
+                'dicvalue': dicvalue,
+                'in_list': in_list,
+                'error':error,
+         
+            }
             return  HttpResponse(json.dumps(data), content_type="application/json")   
-    elif objDictionarySelected.type == "char":
-        pass
+    
     
     
 
@@ -2258,13 +2258,6 @@ def adddictionaryproperty(request,pk):
                 in_list = False
                 dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
                 request.session['dictionaryValues' ] = dictionaryValues
-                
-
-        print dictionaryValues
-  
-    print  objDictionarySelected.name
-         
-   
 
     data = {
         'name': objDictionarySelected.name,

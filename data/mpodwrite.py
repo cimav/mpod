@@ -92,7 +92,14 @@ class MPODUtil():
         filepath=os.path.join(self.__cifs_dir_output, filenamempod)
         self.cif_created=filenamempod
         
-        files = os.listdir(str(self.__cifs_dir_output))
+        
+        
+        try:
+            files = os.listdir(str(self.__cifs_dir_output))
+        except:
+            os.mkdir(str(self.__cifs_dir_output)) 
+            files = os.listdir(str(self.__cifs_dir_output))
+    
         print files
         if len(files) == 0:
             print  "folder empty"
@@ -379,7 +386,11 @@ class MPODUtil():
             print objectValidated
             self.reportValidation=objectValidated
 
+      
+        if not os.path.exists(str(self.cifs_dir_valids)):          
+            os.mkdir(str(self.cifs_dir_valids)) 
             
+           
             
         filelist = []
         for code in validator.codeListValid:

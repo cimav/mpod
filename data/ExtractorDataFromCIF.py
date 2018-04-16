@@ -16,6 +16,7 @@ from parse_files_2 import *
 from django.core.exceptions import ObjectDoesNotExist
 
 
+
 class Extractor (object):
     def __init__(self,cifs_dir,core_dic_filepath,mpod_dic_filepath,cifs_dir_output,filelist):
         self.cifs_dir=cifs_dir
@@ -155,11 +156,12 @@ class Extractor (object):
         return tvs
     
     
-    def get_props(self,texto):
+    def get_props(self,texto,tags):
         
         
         tg="_prop"
-        ntgs= ['conditions','measurement','frame','symmetry', 'data']
+        #ntgs= ['conditions','measurement','frame','symmetry', 'data']
+        ntgs=tags
         props=[]
         propsStructure=[]
         propstag=[]
@@ -209,9 +211,11 @@ class Extractor (object):
 
     
     
-    def get_conds(self,texto):
+    def get_conds(self,texto,tags):
         tg="_prop"
-        ntgs= ['conditions','measurement','frame','symmetry']
+        #ntgs= ['conditions','measurement','frame','symmetry']
+        
+        ntgs = tags
         props=[]
         props_agg=[]
         lins = map(lambda x: x.strip(), texto.strip().split("\n"))
@@ -224,11 +228,12 @@ class Extractor (object):
                 if parts[1] in ntgs:
                     if prstr not in props_agg:
                         props_agg.append(prstr)
-                else:
+                """else:
                     if prstr not in props:
-                        props.append(prstr)
+                        props.append(prstr)"""
         return props_agg
     
+    #search in dictionary
     def props_info_in_dic(self,props):
         props_info = {}
         tgs = ['_name','_category','_type','_units', '_units_detail']
@@ -278,17 +283,20 @@ class Extractor (object):
     
     def extractConditions(self,approved):
         tg="_prop"
-        #props = []
-        #data_props={}
         conds = []
-        #data_conds={}
         inds=[]
+        ntgs=[]
+        proptagList=PropTags.objects.filter(active=1).exclude(tag__exact= 'data')        
+        for pt in proptagList:
+            proptag = PropTags()
+            proptag = pt
+            ntgs.append( proptag.tag )
+            
+            
         for i, fil in enumerate(self.filets):
             filepath=os.path.join(self.cifs_dir, fil)
             texto = self.read_file_1(filepath)
-            #code = self.get_data_code(texto)
-            #this_props, this_props_agg,propsStructure = self.get_props(texto)
-            this_conds = self.get_conds(texto)
+            this_conds = self.get_conds(texto,ntgs)
             for cn in this_conds:
                 if not cn in conds:
                     conds.append(cn)
@@ -297,9 +305,7 @@ class Extractor (object):
                 inds.append(cond_ind)
                 
             conds = sorted(conds)
-            #data_conds[code]=inds   
 
-        #experimentalParCondList=[]
         aa = self.props_info_in_dic(conds)
         for cond in conds:
             if approved == False:                
@@ -313,22 +319,46 @@ class Extractor (object):
             experimentalParCond.tag=tg+cond
             experimentalParCond.description=cond
 
-            tp = cond
-            na = aa[tp]['_name'][6:]
-            try:
-                un = aa[tp]['_units']
-            except:
-                un = 'n.a.'
-            try:
-                ud = aa[tp]['_units_detail']
-            except:
-                ud = 'n.a.'
+            #tp = cond
+            if bool(aa):         
+                try:       
+                    na = aa[cond]['_name'][6:]
+                    try:
+                        un = aa[cond]['_units']
+                    except:
+                        un = 'n.a.'
+                    try:
+                        ud = aa[cond]['_units_detail']
+                    except:
+                        ud = 'n.a.'
+                except:
+                    dictionary=Dictionary.objects.get(tag__exact=tg+cond)                 
+                    na=dictionary.name  
+                    un=dictionary.units  
+                    ud=dictionary.units_detail 
+                    
+               
+            else:
+                dictionary=Dictionary.objects.get(tag__exact=tg+cond)                 
+                #print dictionary.tag
+                na=dictionary.name  
+                #dictionary.description  
+                un=dictionary.units  
+                ud=dictionary.units_detail 
+                #dictionary.active 
+                #dictionary.definition 
+                #dictionary.deploy 
+                #dictionary.type  
+                #dictionary.category
+                    
+            
+             
             try:    
                 if approved == False:      
                     try:
                         experimentalParCondExist=ExperimentalParCondTemp.objects.get(tag__exact=experimentalParCond.tag)
                     except ObjectDoesNotExist as error:
-                        print "Error({0}): {1}".format(99, error.message)   
+                        print "Message({0}): {1}".format(99, error.message)   
                         experimentalParCondExist = None
                         
                 
@@ -351,7 +381,7 @@ class Extractor (object):
                     try:
                         experimentalParCondExist=ExperimentalParCond.objects.get(tag__exact=experimentalParCond.tag)
                     except ObjectDoesNotExist as error:
-                        print "Error({0}): {1}".format(99, error.message)   
+                        print "Message({0}): {1}".format(99, error.message)   
                         experimentalParCondExist = None
                  
                     if not experimentalParCondExist:
@@ -388,11 +418,18 @@ class Extractor (object):
             tg="_prop"
             props = []
             data_props={}
+            ntgs=[]
+            proptagList=PropTags.objects.filter(active=1)        
+            for pt in proptagList:
+                proptag = PropTags()
+                proptag = pt
+                ntgs.append( proptag.tag )
+            
             for i, fil in enumerate(self.filets):
                 filepath=os.path.join(self.cifs_dir, fil)
                 texto = self.read_file_1(filepath)
                 code = self.get_data_code(texto)          
-                this_props,props_agg,propsStructure = self.get_props(texto)
+                this_props,props_agg,propsStructure = self.get_props(texto,ntgs)
                 for pr in this_props:
                     if not pr in props:
                         props.append(pr)
@@ -406,7 +443,7 @@ class Extractor (object):
                     try:
                         propertyExist=PropertyTemp.objects.get(tag__exact=tg+pr._prop_name)
                     except ObjectDoesNotExist as error:
-                        print "Error({0}): {1}".format(99, error.message)   
+                        print "Message({0}): {1}".format(99, error.message)   
                         propertyExist = None
 
                     na = aa[pr._prop_name ]['_name']
@@ -427,39 +464,24 @@ class Extractor (object):
                         objProperty.units_detail = ud
                         objProperty.save()
                         
-                        dataFileProperty.property=objProperty
+                        dataFileProperty.propertytemp=objProperty
                     else:                     
-                        dataFileProperty.property=propertyExist
+                        dataFileProperty.propertytemp=propertyExist
                         
            
                     try:
                         dataFileTemp=DataFileTemp.objects.get(filename__exact=fil) 
-                        dataFileProperty.datafile=dataFileTemp
+                        dataFileProperty.datafiletemp=dataFileTemp
                         dataFileProperty.save()
                     except ObjectDoesNotExist as error:
                         print "Error({0}): {1}".format(99, error.message)   
     
-            """
-            aa = self.props_info_in_dic(props)
-            tgs = ['_name', '_units', '_units_detail']
-         
-            for prop  in enumerate(props):
-                tp = prop[1]
-                print aa[tp]
-                na = aa[tp]['_name']
-                un = aa[tp]['_units']
-                ud = aa[tp]['_units_detail']
-                
-                try:
-                    objPropertyExist=PropertyTemp.objects.get(tag__exact=tg+tp)
-                    objPropertyExist.update(units =un, units_detail =ud)
-                except ObjectDoesNotExist as error:
-                    print "Error({0}): {1}".format(99, error.message)  
-                """ 
+
                     
             
         except  Exception, e:
-                print "Error({0}): {1}".format(e.errno, e.strerror) 
+                #print "Error({0}): {1}".format(e.errno, e.strerror) 
+                pass
   
  
             
