@@ -988,11 +988,11 @@ class DictionaryAdmin(admin.ModelAdmin):
         return result
     
     
-    """
+    
     def add_view(self,request,extra_content=None):
         print 'add_view'
         return super(DictionaryAdmin,self).add_view(request)
-    """    
+    
  
     def changelist_view(self, request, extra_context=None):
         print 'changelist_view'
