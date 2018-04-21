@@ -1133,6 +1133,182 @@ class CatalogPropertyAdmin(admin.ModelAdmin):
     
 admin.site.register(CatalogProperty, CatalogPropertyAdmin)
 
+class TypeAdmin(admin.ModelAdmin):
+    list_display =('get_description','get_name',)  
+    #list_display =('title', 'authors', 'journal','year','volume','issue','first_page','last_page','reference','pages_number')
+    search_fields = ['name', 'description', ]
+    list_filter = ('description',)
+          
+          
+    def get_name(self, obj):
+        return  u'%s' % (obj.name)   
+            
+    def get_description(self, obj):
+        return  u'%s' % (obj.description)  
+    
+    get_name.short_description = 'Name'
+    get_name.allow_tags=True 
+    
+    get_description.short_description = 'Description'
+    get_description.allow_tags=True 
+    
+admin.site.register(Type, TypeAdmin)
+
+
+class CatalogAxisAdmin(admin.ModelAdmin):
+    list_display =('get_name','get_description',)  
+    #list_display =('title', 'authors', 'journal','year','volume','issue','first_page','last_page','reference','pages_number')
+    search_fields = ['name', 'description', ]
+    list_filter = ('name',)
+          
+          
+    def get_name(self, obj):
+        try:
+            return  u'%s' % (obj.name)               
+        except ObjectDoesNotExist as error:
+            return ""
+     
+            
+    def get_description(self, obj):
+        try:
+            return  u'%s' % (obj.description)               
+        except ObjectDoesNotExist as error:
+            return ""
+    
+    get_name.short_description = 'Name'
+    get_name.allow_tags=True 
+    
+    get_description.short_description = 'Description'
+    get_description.allow_tags=True 
+    
+admin.site.register(CatalogAxis, CatalogAxisAdmin)
+
+
+class CatalogCrystalSystemAdmin(admin.ModelAdmin):
+    list_display =('name','description','get_catalogproperty_description',)  
+    ordering = ('catalogproperty__description',) 
+    search_fields = ['name', 'description', ]
+    list_filter = ('catalogproperty__description',)
+
+        
+    def get_catalogproperty_description(self, obj):
+        try:
+            return  u'%s' % (obj.catalogproperty.description)               
+        except ObjectDoesNotExist as error:
+            return ""
+
+    get_catalogproperty_description.short_description = 'Property'
+    get_catalogproperty_description.allow_tags=True 
+    
+admin.site.register(CatalogCrystalSystem, CatalogCrystalSystemAdmin)
+
+
+
+
+class CatalogPropertyDetailAdmin(admin.ModelAdmin):
+    list_display =('name','get_type_description','get_crystalsystem_catalogproperty_description','get_crystalsystem_description','get_catalogaxis_name','get_catalogpointgroup_name','get_puntualgroupnames_name')  
+    #list_display =('title', 'authors', 'journal','year','volume','issue','first_page','last_page','reference','pages_number')
+    ordering = ('crystalsystem__catalogproperty__description',) 
+    search_fields = [ 'crystalsystem__description','type__description','catalogaxis__name',]
+    list_filter = ('crystalsystem__catalogproperty__description',)
+    #list_select_related = True
+    
+    fieldsets = (
+        ('Property Detail', {
+            'fields': ('name','description')
+        }),
+        ('Catalog Types', {
+            'fields': ('type', )
+        }),
+        ('Catalog Crystal System', {
+            'fields': ('crystalsystem', )
+        }),
+         ('Catalog Axis', {
+            'fields': ('catalogaxis', )
+        }),
+        ('Catalog Point Group', {
+            'fields': ('catalogpointgroup', )
+        }),
+        ('Catalog Puntual Group Names', {
+            'fields': ('puntualgroupnames', )
+        }),
+    )
+          
+          
+          
+    def get_type_name(self, obj):
+        try:
+            return  u'%s' % (obj.type.name)               
+        except ObjectDoesNotExist as error:
+            return ""
+     
+            
+    def get_type_description(self, obj):
+        try:
+            return  u'%s' % (obj.type.description)               
+        except ObjectDoesNotExist as error:
+            return ""
+    
+    def get_crystalsystem_description(self, obj):
+        try:
+            return  u'%s' % (obj.crystalsystem.description)               
+        except ObjectDoesNotExist as error:
+            return ""    
+        
+    def get_crystalsystem_catalogproperty_description(self, obj):
+        try:
+            return  u'%s' % (obj.crystalsystem.catalogproperty.description)               
+        except ObjectDoesNotExist as error:
+            return ""
+        
+         
+    def get_catalogaxis_name(self, obj):
+        try:
+            return  u'%s' % (obj.catalogaxis.name)               
+        except ObjectDoesNotExist as error:
+            return ""     
+        
+    def get_catalogpointgroup_name(self, obj):
+        try:
+            return  u'%s' % (obj.catalogpointgroup.name)               
+        except ObjectDoesNotExist as error:
+            return ""       
+        
+    def get_puntualgroupnames_name(self, obj):
+        try:
+            return  u'%s' % (obj.puntualgroupnames.name)               
+        except ObjectDoesNotExist as error:
+            return ""       
+    
+    get_type_name.short_description = 'Type Name'
+    get_type_name.allow_tags=True 
+    
+    get_type_description.short_description = 'Type Description'
+    get_type_description.allow_tags=True 
+    
+    get_crystalsystem_description.short_description = 'Crystal System'
+    get_crystalsystem_description.allow_tags=True 
+    
+    get_crystalsystem_catalogproperty_description.short_description = 'Property'
+    get_crystalsystem_catalogproperty_description.allow_tags=True 
+    
+    
+    get_catalogaxis_name.short_description = 'Axis'
+    get_catalogaxis_name.allow_tags=True 
+    
+    get_catalogpointgroup_name.short_description = 'Group'
+    get_catalogpointgroup_name.allow_tags=True 
+    
+    get_puntualgroupnames_name.short_description = 'Groups'
+    get_puntualgroupnames_name.allow_tags=True 
+    
+    
+     
+    
+    
+admin.site.register(CatalogPropertyDetail, CatalogPropertyDetailAdmin)
+
+
     
 
 

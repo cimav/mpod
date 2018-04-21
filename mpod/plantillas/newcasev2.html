@@ -121,7 +121,7 @@
 		                	     
 			                	 if (todo == 'add')
 			                		 {
-				                		 if (data.error == "None")
+				                		 if (data.error == "")
 				            		    	{
 						                		 if (data.in_list) {
 						                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
@@ -255,6 +255,7 @@
 			                	      
 			                		 if (data.error == "")
 		                		    	{
+			                			 alert("not added" );
 			                			   $('#errorphasecharacteristic').text('');
 		               	    		       $('#errorphasecharacteristic').hide();
 		               	    		       $('#units_detailpcchange').text(data.units_detail);
@@ -271,11 +272,11 @@
 			                else if (todo == "addmeasurement")
 		                		 {
 		                		       
-		                		    if (data.error == "None")
+		                		    if (data.error == "")
 		                		    	{
 		    				                if (data.in_list) {
 					                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
-		    				                	 alert("not added" );
+		    				                	 
 					                		 }
 					                		 else
 					                		 {
