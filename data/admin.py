@@ -988,12 +988,11 @@ class DictionaryAdmin(admin.ModelAdmin):
         return result
     
     
-    
+    """
     def add_view(self,request,extra_content=None):
         print 'add_view'
-         
         return super(DictionaryAdmin,self).add_view(request)
-        
+    """    
  
     def changelist_view(self, request, extra_context=None):
         print 'changelist_view'
@@ -1202,6 +1201,80 @@ class CatalogCrystalSystemAdmin(admin.ModelAdmin):
     
 admin.site.register(CatalogCrystalSystem, CatalogCrystalSystemAdmin)
 
+
+class CatalogPointGroupAdmin(admin.ModelAdmin):
+    list_display =('name',)  
+    ordering = ('name',) 
+    search_fields = ['name', ]
+    #list_filter = ('name',)
+
+        
+    def get_catalogpointgroup_name(self, obj):
+        try:
+            return  u'%s' % (obj.name)               
+        except ObjectDoesNotExist as error:
+            return ""
+
+    get_catalogpointgroup_name.short_description = 'Point Group'
+    get_catalogpointgroup_name.allow_tags=True 
+    
+admin.site.register(CatalogPointGroup, CatalogPointGroupAdmin)
+
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display =('name',)  
+    ordering = ('name',) 
+    search_fields = ['name', ]
+    #list_filter = ('name',)
+
+admin.site.register(Category, CategoryAdmin)
+
+
+class PuntualGroupNamesAdmin(admin.ModelAdmin):
+    list_display =('name',)  
+    ordering = ('name',) 
+    search_fields = ['name', ]
+    #list_filter = ('name',)
+
+        
+    def get_catalogpointgroup_name(self, obj):
+        try:
+            return  u'%s' % (obj.name)               
+        except ObjectDoesNotExist as error:
+            return ""
+
+    get_catalogpointgroup_name.short_description = 'Point Groups'
+    get_catalogpointgroup_name.allow_tags=True 
+    
+admin.site.register(PuntualGroupNames, PuntualGroupNamesAdmin)
+
+
+class PuntualGroupGroupsAdmin(admin.ModelAdmin):
+    list_display =('get_puntualgroupgroups_catalogpointgroup_name','get_puntualgroupgroups_puntualgroupnames_name')  
+    #ordering = ('name',) 
+    #search_fields = ['name', ]
+    #list_filter = ('name',)
+
+    def get_puntualgroupgroups_catalogpointgroup_name(self, obj):
+        try:
+            return  u'%s' % (obj.catalogpointgroup.name)               
+        except ObjectDoesNotExist as error:
+            return ""
+        
+    def get_puntualgroupgroups_puntualgroupnames_name(self, obj):
+        try:
+            return  u'%s' % (obj.puntualgroupnames.name)               
+        except ObjectDoesNotExist as error:
+            return ""
+
+    get_puntualgroupgroups_catalogpointgroup_name.short_description = 'Point Group'
+    get_puntualgroupgroups_catalogpointgroup_name.allow_tags=True 
+    
+    get_puntualgroupgroups_puntualgroupnames_name.short_description = 'Groups Name'
+    get_puntualgroupgroups_puntualgroupnames_name.allow_tags=True 
+    
+    
+admin.site.register(PuntualGroupGroups, PuntualGroupGroupsAdmin)
 
 
 

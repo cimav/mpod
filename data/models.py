@@ -45,7 +45,17 @@ class Path(models.Model):
         
 
  
-             
+class string_with_title(str):
+    def __new__(cls, value, title):
+        instance = str.__new__(cls, value)
+        instance._title = title
+        return instance
+
+    def title(self):
+        return self._title
+
+    __copy__ = lambda self: self
+    __deepcopy__ = lambda self, memodict: self         
 
 class FileProperty(object):
         def __init__(self,):
@@ -230,7 +240,7 @@ class PropertyValuesTemp(models.Model):
     
     class Meta:
         db_table = 'property_values_temp' 
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         #verbose_name = _('Crystal System')
         #verbose_name_plural = _('CrystalSystem')
         
@@ -247,7 +257,7 @@ class ExperimentalParCond(models.Model):
     
     class Meta:
         db_table = 'data_experimentalparcond' 
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Experimental par condition')
         verbose_name_plural = _('Experimental par conditions')
     
@@ -280,7 +290,7 @@ class CatalogProperty(models.Model):
    
     class Meta:
         db_table = 'data_catalogproperty'
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Poperty')
         verbose_name_plural = _('Properties')
         
@@ -296,7 +306,7 @@ class CatalogCrystalSystem(models.Model):
     
     class Meta:
         db_table = 'catalog_crystal_system'
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Crystal System')
         verbose_name_plural = _('Crystal Systems')
  
@@ -312,7 +322,7 @@ class Type(models.Model):
     
     class Meta:
         db_table = 'type'     
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Type')
         verbose_name_plural = _('Types') 
     
@@ -325,9 +335,10 @@ class CatalogPointGroup(models.Model):
     description = models.CharField(max_length=511)      
     class Meta:
         db_table = 'catalog_point_group'        
-        app_label = 'Properties'
-        #verbose_name = _('Crystal System')
-        #verbose_name_plural = _('CrystalSystem')
+        app_label = string_with_title("Properties", "Propertie Settings")
+        verbose_name = _('Point Group')
+        verbose_name_plural = _('Point Groups')
+        
     def __unicode__(self):
         return str(self.name)   
         
@@ -338,7 +349,7 @@ class CrystalSystemPointGroup(models.Model):
         
     class Meta:
         db_table = 'crystalsystem_point_group'    
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         #verbose_name = _('Crystal System')
         #verbose_name_plural = _('CrystalSystem')     
        
@@ -351,7 +362,7 @@ class CatalogAxis(models.Model):
    
     class Meta:
         db_table = 'catalog_axis'   
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Axis')
         verbose_name_plural = _('Axes')  
         
@@ -364,7 +375,7 @@ class CrystalSystemAxis(models.Model):
     catalogaxis= models.ForeignKey(CatalogAxis,verbose_name="Axis")       
     class Meta:
         db_table = 'crystalsystem_axis'  
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         #verbose_name = _('Crystal System')
         #verbose_name_plural = _('CrystalSystem')
         
@@ -375,11 +386,14 @@ class PuntualGroupNames(models.Model):
    
     class Meta:
         db_table = 'puntual_group_names'    
-        app_label = 'Properties'
-        #verbose_name = _('Crystal System')
-        #verbose_name_plural = _('CrystalSystem')
+        app_label = string_with_title("Properties", "Propertie Settings")
+        verbose_name = _('Group')
+        verbose_name_plural = _('Groups')
     def __unicode__(self):
         return str(self.name)   
+    
+
+    
         
 class PuntualGroupGroups(models.Model): 
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group") 
@@ -387,11 +401,13 @@ class PuntualGroupGroups(models.Model):
    
     class Meta:
         db_table = 'puntual_group_groups'            
-        app_label = 'Properties'
-        #verbose_name = _('Crystal System')
-        #verbose_name_plural = _('CrystalSystem')
+        #app_label = 'Propertie_Settings'
+        app_label = string_with_title("Properties", "Propertie Settings")
+        verbose_name = _('Point Group and Group')
+        verbose_name_plural = _('Point Groups and Groups')
          
-        
+    def __unicode__(self):
+        return str(self.catalogpointgroup.name)  +" "+ str(self.puntualgroupnames.name)        
           
 class CatalogPropertyDetail(models.Model): 
     name = models.CharField(max_length=255)
@@ -404,7 +420,7 @@ class CatalogPropertyDetail(models.Model):
     class Meta:
         db_table = 'catalog_property_detail'       
         
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Property Detail')
         verbose_name_plural = _('Properties Detail')
         
@@ -531,7 +547,7 @@ class FileUser(models.Model):
      
     class Meta:
         db_table = 'file_user'
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         #verbose_name = _('Uploaded file')
         #verbose_name_plural = _('Uploaded files')
     """     
@@ -590,9 +606,12 @@ class Category(models.Model):
     
     class Meta:
         db_table = 'category'
+        app_label = 'Dictionaries'
+        verbose_name = _('Category')
+        verbose_name_plural = _('Categories')
         
     def __unicode__(self): # __str__ on Python 3
-        return str(self.description)
+        return str(self.name)
         
         
 class Dictionary(models.Model):
@@ -604,7 +623,7 @@ class Dictionary(models.Model):
     active= models.BooleanField(_(u'Active'),max_length=1)
     definition= models.TextField()  
     deploy= models.BooleanField(_(u'Deploy'),max_length=1)
-    type = models.CharField(_(u'Type'),max_length=45,choices=(('char','char'),('numb','numb')))
+    type = models.CharField(_(u'Data type'),max_length=45,choices=(('char','char'),('numb','numb')))
     category = models.ForeignKey(Category,related_name="Category",verbose_name="Category")
     
     class Meta:
@@ -635,7 +654,7 @@ class CatalogpropertyDictionary(models.Model):
 
     class Meta:
         db_table = 'catalogproperty_dictionary'
-        app_label = 'Properties'
+        app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Detail Property')
         verbose_name_plural = _('Detail Properties')
      
