@@ -1229,51 +1229,104 @@ class CategoryAdmin(admin.ModelAdmin):
 
 admin.site.register(Category, CategoryAdmin)
 
+class PuntualGroupGroupsInline(admin.TabularInline):
+    model = PuntualGroupGroups
+    insert_after = 'description'
+    
 
 class PuntualGroupNamesAdmin(admin.ModelAdmin):
     list_display =('name',)  
     ordering = ('name',) 
     search_fields = ['name', ]
     #list_filter = ('name',)
-
+    #fields = ('name', 'display_point_group')
+ 
+    """
+    fields = (
+        'name',
+        'description'
+    )
+     
+    inlines = [
+            PuntualGroupGroupsInline,
+        ]
+    
+    """
+   
+   
+ 
+    
         
-    def get_catalogpointgroup_name(self, obj):
-        try:
-            return  u'%s' % (obj.name)               
-        except ObjectDoesNotExist as error:
-            return ""
+    def add_view(self,request,extra_content=None):
+        print 'PuntualGroupNames_add_view'
+        return super(PuntualGroupNamesAdmin,self).add_view(request)
+    
+    def selectlist_view(self, request, extra_context=None):
+            print 'PuntualGroupNames_selectlist_view'
+            temp_list_display_links = self.list_display_links
+            self.list_display_links = (None, )
+            response = self.changelist_view(request, extra_context)
+            self.list_display_links = temp_list_display_links
+            return response
+    
+    def change_view(self, request, object_id, extra_context=None):
+        print 'PuntualGroupNames_change_view'
+        
+        extra = {
+            'n1': 'Change Property', 
+            'n2':'Property',
+        }
+        
+        #print self.model._meta
+        
+        result = super(PuntualGroupNamesAdmin, self).change_view(request, object_id, extra_context=extra)        
+        puntualGroupNames = PuntualGroupNames.objects.get(id__exact=object_id)
+        #if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue'):
 
-    get_catalogpointgroup_name.short_description = 'Point Groups'
-    get_catalogpointgroup_name.allow_tags=True 
+        return result
+  
+    
+    def save_model(self, request, obj, form, change):
+        print 'PuntualGroupNames_save_model'
+        print request.POST
+        print obj.name
+        print form.changed_data # list name of field was changed
+        print change #True or False
+        if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
+            print "pass"
+        elif  request.POST.has_key('_addanother'): 
+            print request.POST.get('_addanother',False)
+        elif request.POST.has_key('_continue'): 
+            print request.POST.get('_continue',False)
+        elif request.POST.has_key('_save'):
+            print request.POST.get('_save',False)
+            
+            obj.save()
+     
+
     
 admin.site.register(PuntualGroupNames, PuntualGroupNamesAdmin)
 
+ 
+        
 
 class PuntualGroupGroupsAdmin(admin.ModelAdmin):
-    list_display =('get_puntualgroupgroups_catalogpointgroup_name','get_puntualgroupgroups_puntualgroupnames_name')  
-    #ordering = ('name',) 
-    #search_fields = ['name', ]
-    #list_filter = ('name',)
+   
+   
+    #form= PuntualGroupGroupsAdminForm
+    list_display =('puntualgroupnames','catalogpointgroup', )   
+ 
+            
+    #fields = ['puntualgroupnames','catalogpointgroup','catalogpointgroup1']
+    fieldsets = (
+        ('Point Groups and Groups', {
+            'fields': ('puntualgroupnames','catalogpointgroup',)
+        }),
 
-    def get_puntualgroupgroups_catalogpointgroup_name(self, obj):
-        try:
-            return  u'%s' % (obj.catalogpointgroup.name)               
-        except ObjectDoesNotExist as error:
-            return ""
-        
-    def get_puntualgroupgroups_puntualgroupnames_name(self, obj):
-        try:
-            return  u'%s' % (obj.puntualgroupnames.name)               
-        except ObjectDoesNotExist as error:
-            return ""
+ 
+    )
+ 
 
-    get_puntualgroupgroups_catalogpointgroup_name.short_description = 'Point Group'
-    get_puntualgroupgroups_catalogpointgroup_name.allow_tags=True 
-    
-    get_puntualgroupgroups_puntualgroupnames_name.short_description = 'Groups Name'
-    get_puntualgroupgroups_puntualgroupnames_name.allow_tags=True 
-    
-    
 admin.site.register(PuntualGroupGroups, PuntualGroupGroupsAdmin)
 
 
@@ -1380,6 +1433,25 @@ class CatalogPropertyDetailAdmin(admin.ModelAdmin):
     
     
 admin.site.register(CatalogPropertyDetail, CatalogPropertyDetailAdmin)
+
+
+class TypeDataPropertyAdmin(admin.ModelAdmin):
+    list_display =('type','data_property', )   
+ 
+            
+    #fields = ['puntualgroupnames','catalogpointgroup','catalogpointgroup1']
+    fieldsets = (
+        ('Type', {
+            'fields': ('type',)
+        }),
+        ('Data Property', {
+            'fields': ('data_property',)
+        }),
+
+ 
+    )
+    
+admin.site.register(TypeDataProperty, TypeDataPropertyAdmin)
 
 
     

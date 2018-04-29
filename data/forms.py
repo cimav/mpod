@@ -13,6 +13,16 @@ from django.core.mail import EmailMessage
 import string
 from django.utils.translation import ugettext_lazy as _
 from models import *
+from django.contrib.admin import widgets
+from django.contrib.admin.widgets import FilteredSelectMultiple
+ 
+from django.contrib.auth.models import Permission, Group
+from django.db.models import Q
+from django.conf import settings
+ 
+ 
+ 
+
 
  
  
@@ -229,20 +239,44 @@ class ValidateAddCaseFormv2(forms.Form):
              
          
 
+ 
+
+
+FAVORITE_COLORS_CHOICES = (
+    ('blue', 'Blue'),
+    ('green', 'Green'),
+    ('black', 'Black'),
+)
+CHOICES = (('1', 'First',), ('2', 'Second',))
+
+def get_permissions():
+    app_models_dict = {}
+
     """
-    class DictionaryForm(forms.ModelForm):
-        class Meta:
-            model = Dictionary
-      
-         
-        def clean_category(self):
-            if not self.cleaned_data['category']:
-                return Category()
-            return self.cleaned_data['category']     
+    for app_model in settings.GROUP_PERMISSIONS_MODELS:
+        app, model = app_model.split(".")
+        app_models_dict.setdefault(app, []).append(model)
+    """
+
+    q = Q()
+
+    for app, models in app_models_dict.iteritems():
+        q |= Q(content_type__app_label=app, content_type__model__in=models)
+
+    if q:
+        return Permission.objects.filter(q)
+    else:
+        return Permission.objects.all()
+
+    
+
+                
+
+           
+              
         
-        
-        def clean_type(self):
-            if not self.cleaned_data['type']:
-                return "char"
-            return self.cleaned_data['type']    
-        """
+             
+             
+
+                
+ 

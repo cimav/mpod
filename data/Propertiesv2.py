@@ -5,12 +5,13 @@ import numpy as N
 from django.db import models
 from data.models import *
 from django.db.models import Count
+from django.core.exceptions import ObjectDoesNotExist
 
  
 
 class Propertiesv2(object):
 
-    def __init__(self,catalogproperty_name, csn ,typesc,  *args,  **kwargs):
+    def __init__(self,catalogproperty_name, csn ,typesc,ismagnetoelectricity,  *args,  **kwargs):
             self.title =  ""
             self.authors =  ""
             self.journal =  ""
@@ -39,6 +40,7 @@ class Propertiesv2(object):
             self.puntualGroupList=[]
             self.axisList =[]
             self.listofemptyInputs =[]
+            self.magnetoelectricity = ismagnetoelectricity
             
             self.jquery= """
                                     function isScientificNotation(value)
@@ -71,6 +73,7 @@ class Propertiesv2(object):
                                  
                                  function inputpopclear(obj)
                                  {
+                                   
                                     obj.popover('hide');
                                     obj.attr('data-content', '');    
                                  }
@@ -82,6 +85,7 @@ class Propertiesv2(object):
             self.s = N.zeros([6,6])
             self.c = N.zeros([6,6])
             self.d = N.zeros([3,6])
+            self.k = N.zeros([3,3])
             self.__request = None
             
             if 'rq' in kwargs:
@@ -101,29 +105,45 @@ class Propertiesv2(object):
 
                         
     def NewProperties(self,pgn,aname):
-        self.objProperty=CatalogProperty.objects.get(name=self.catalogproperty_name) 
-        
-        if self.catalogproperty_name !='p':
-            if self.type != '':
+        try:
+            self.objProperty=CatalogProperty.objects.get(name=self.catalogproperty_name) 
+            
+            if self.catalogproperty_name =='e':
+                if self.type != '':
+                    self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name=self.type)   
+                else:
+                    self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name='s')   
+                if self.crystalsystem_name =='':
+                    self.crystalsystem_name='tc'
+                    
+                self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty) 
+                
+            if self.catalogproperty_name =='p':
+                self.type = 'd'           
+                self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name=self.type) 
+                if  self.crystalsystem_name == 'iso' or self.crystalsystem_name == False:
+                    self.crystalsystem_name='tc'
+                else:
+                    pass
+                
+                self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
+                
+            if self.catalogproperty_name =='2nd':
+                #self.type = 'k'      
                 self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name=self.type)   
-            else:
-                self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name='s')   
-        else: 
-            self.type = 'd'           
-            self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name=self.type) 
-            
-        if self.catalogproperty_name !='p':        
-            self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty) 
-        else:
-            if  self.crystalsystem_name == 'iso':
-                self.crystalsystem_name='tc'
-            else:
-                pass
-            
-            self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
-            
-
-
+                if self.magnetoelectricity == False:
+                    if self.crystalsystem_name == False:
+                        self.crystalsystem_name = 'tc'
+                        
+                    self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
+                    
+                    
+                         
+                 
+        except ObjectDoesNotExist as error:
+            print "Message({0}): {1}".format(99, error.message)   
+            self.message= "Message({0}): {1}".format(99, error.message)  
+                        
         self.puntualgroupselected_name =pgn
         self.axisselected_name =aname
         
@@ -4854,13 +4874,7 @@ class Propertiesv2(object):
                                                                              """
                 
                     self.jquery= self.jquery+"\n" 
-                    """
-                    for key in sorted(self.read_write_inputs.keys()):
-                        #print self.read_write_inputs[key] 
-                        if  self.read_write_inputs[key] == 'r':
-                            self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n" 
-                    """
-                    #self.listofemptyInputs.append(self.type+"55");
+
                     for key in sorted(self.read_write_inputs.keys()):
                         if  self.read_write_inputs[key] == 'r':
                             if  self.contains(self.listofemptyInputs,key):
@@ -4873,7 +4887,653 @@ class Propertiesv2(object):
                         
                     print self.jquery   
                     
+       
+        if self.catalogproperty_name == '2nd':   
+            if self.crystalsystem_name == 'tc':   
+                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '1, -1' :
+                    self.questionGp = 'Point Group:'       
+                    if self.magnetoelectricity == False:
+                        self.setPointGroup()    
+                        return    
 
+                if  self.__request != None and len(self.__inputList) > 0:
+                    for p in self.__inputList :
+                        if self.puntualgroupselected_name in  ('1, -1'):
+                            if str(p.name) == "k11":   
+                                self.k[0,0] = float (self.__request.POST.get(p.name, False))
+                            if str(p.name) == "k12":      
+                                self.k[0,1] = float (self.__request.POST.get(p.name, False))
+                                self.k[1,0]= self.k[0,1]
+                            if str(p.name) == "k13":      
+                                self.k[0,2] = float (self.__request.POST.get(p.name, False))
+                                self.k[2,0]= self.k[0,2]
+                            if str(p.name) == "k22":      
+                                self.k[1,1] = float (self.__request.POST.get(p.name, False))
+                            if str(p.name) == "k23":      
+                                self.k[1,2] = float (self.__request.POST.get(p.name, False))
+                                self.k[2,1]= self.k[1,2]
+                            if str(p.name) == "k33":      
+                                self.k[2,2] = float (self.__request.POST.get(p.name, False))                                
+                    print self.k
+                    self.sucess = 1;
+                    return
+                else:
+                    self.message= 'All the point groups of this crystal system have the same matrix'
+                    self.questionGp = 'Point Group:'     
+                    self.setPointGroup()   
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                    self.preparedataforjQuery(self.type )
+                    self.setCatalogPropertyDetail() 
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
+                    if self.puntualgroupselected_name in ('1, -1'):
+                        #list read-only fields and non-zero fields
+                        self.listofemptyInputs.append(self.type+"21");
+                        self.listofemptyInputs.append(self.type+"13");
+                        self.listofemptyInputs.append(self.type+"32");
+                      
+                        #fields for writing
+                        self.jquery= self.jquery + """                        
+                                                                            $('#""" +self.type+ """11').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """12').keyup(function ()
+                                                                            {
+                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                    $('#""" +self.type+ """21').val(value );
+
+                                                                            }else
+                                                                            {
+                                                                                inputpopclear($(this));
+                                                                                 $('#""" +self.type+ """21').val(''); 
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         
+                                                                            $('#""" +self.type+ """13').keyup(function ()
+                                                                            {
+                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                    $('#""" +self.type+ """31').val(value );
+
+                                                                            }else
+                                                                            {
+                                                                                inputpopclear($(this));
+                                                                                 $('#""" +self.type+ """31').val(''); 
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """22').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """23').keyup(function ()
+                                                                            {
+                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                    $('#""" +self.type+ """32').val(value );
+
+                                                                            }else
+                                                                            {
+                                                                                inputpopclear($(this));
+                                                                                 $('#""" +self.type+ """32').val(''); 
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         
+                                                                        $('#""" +self.type+ """33').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }     
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+        
+                                                                        """
+                
+                    self.jquery= self.jquery+"\n" 
+
+                    #Separation of fields of only reading zero and not zero
+                    for key in sorted(self.read_write_inputs.keys()):
+                        if  self.read_write_inputs[key] == 'r':
+                            if  self.contains(self.listofemptyInputs,key):
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                            else:
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                                
+                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
+                    print self.jquery 
+                    
+                    
+            if self.crystalsystem_name == 'm': 
+                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '2, 2m, 2/m' :
+                    self.questionGp = 'Point Group:'       
+                    if self.magnetoelectricity == False:
+                        self.setPointGroup()    
+                        return    
+                     
+                if  self.__request != None and len(self.__inputList) > 0:
+                    for p in self.__inputList :
+                        if self.puntualgroupselected_name in  ('2, m, 2/m'):
+                            if str(p.name) == "k11":   
+                                self.k[0,0] = float (self.__request.POST.get(p.name, False))
+                            if str(p.name) == "k13":      
+                                self.k[0,2] = float (self.__request.POST.get(p.name, False))
+                                self.k[2,0]= self.k[0,2]
+                            if str(p.name) == "k22":      
+                                self.k[1,1] = float (self.__request.POST.get(p.name, False))
+                            if str(p.name) == "k33":      
+                                self.k[2,2] = float (self.__request.POST.get(p.name, False))                                
+                    print self.k
+                    self.sucess = 1;
+                    return
+                else:
+                    self.message= 'All the point groups of this crystal system have the same matrix'
+                    self.questionGp = 'Point Group:'     
+                    self.setPointGroup()   
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                    self.preparedataforjQuery(self.type )
+                    self.setCatalogPropertyDetail() 
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
+                    if self.puntualgroupselected_name in ('2, 2m, 2/m'):
+                        #list read-only fields and non-zero fields
+                        self.listofemptyInputs.append(self.type+"31");
+
+                        #fields for writing
+                        self.jquery= self.jquery + """                        
+                                                                            $('#""" +self.type+ """11').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                            $('#""" +self.type+ """13').keyup(function ()
+                                                                            {
+                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                    $('#""" +self.type+ """31').val(value );
+
+                                                                            }else
+                                                                            {
+                                                                                inputpopclear($(this));
+                                                                                 $('#""" +self.type+ """31').val(''); 
+                                                                            }
+                                                                         });
+                                                                         
+                                                                         $('#""" +self.type+ """22').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                        $('#""" +self.type+ """33').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }     
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+        
+                                                                        """
+                    
+                    self.jquery= self.jquery+"\n" 
+
+                    #Separation of fields of only reading zero and not zero
+                    for key in sorted(self.read_write_inputs.keys()):
+                        if  self.read_write_inputs[key] == 'r':
+                            if  self.contains(self.listofemptyInputs,key):
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                            else:
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                                
+ 
+                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"
+                        
+                    print self.jquery 
+                    
+                    
+                    
+            if self.crystalsystem_name == 'o': 
+                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '222, 2mm, mmm' :
+                    self.questionGp = 'Point Group:'       
+                    if self.magnetoelectricity == False:
+                        self.setPointGroup()    
+                        return  
+                    
+                if  self.__request != None and len(self.__inputList) > 0:
+                    for p in self.__inputList :
+                        if self.puntualgroupselected_name in  ('222, 2mm, mmm'):
+                            if str(p.name) == "k11":   
+                                self.k[0,0] = float (self.__request.POST.get(p.name, False))
+                            if str(p.name) == "k22":      
+                                self.k[1,1] = float (self.__request.POST.get(p.name, False))            
+                            if str(p.name) == "k33":      
+                                self.k[2,2] = float (self.__request.POST.get(p.name, False))                                
+                    print self.k
+                    self.sucess = 1;
+                    return
+                else:
+                    self.message= 'All the point groups of this crystal system have the same matrix'
+                    self.questionGp = 'Point Group:'     
+                    self.setPointGroup()   
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                    self.preparedataforjQuery(self.type )
+                    self.setCatalogPropertyDetail() 
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
+                    if self.puntualgroupselected_name in ('222, mm2, mmm'):
+                        #list read-only fields and non-zero fields
+                        #self.listofemptyInputs.append(self.type+"21");
+
+                      
+                        #fields for writing
+                        self.jquery= self.jquery + """                        
+                                                                            $('#""" +self.type+ """11').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+        
+                                                                         
+                                                                         
+                                                     
+                                                                         
+                                                                         $('#""" +self.type+ """22').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+ 
+                                                                         
+                                                                         
+                                                                        $('#""" +self.type+ """33').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }     
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+        
+                                                                        """
+                
+                    self.jquery= self.jquery+"\n" 
+
+                    #Separation of fields of only reading zero and not zero
+                    for key in sorted(self.read_write_inputs.keys()):
+                        if  self.read_write_inputs[key] == 'r':
+                            if  self.contains(self.listofemptyInputs,key):
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                            else:
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                                
+                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
+                    print self.jquery 
+                    
+            if self.crystalsystem_name == 'u':
+                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '3, -3, 32, -3m, 3m, 4, -4, 4/m, 4mm, -42m, 422, 4/mmm, 6, -6, 3/m, 6/m, 6mm, 622, -6m2, 6/mmm, infinf, infinfm, inf, infm, inf/m, inf2, inf/mm' :
+                    self.questionGp = 'Point Group:'       
+                    if self.magnetoelectricity == False:
+                        self.setPointGroup()    
+                        return  
+                    
+                if  self.__request != None and len(self.__inputList) > 0:
+                    for p in self.__inputList :
+                        if self.puntualgroupselected_name in  ('3, -3, 32, -3m, 3m, 4, -4, 4/m, 4mm, -42m, 422, 4/mmm, 6, -6, 3/m, 6/m, 6mm, 622, -6m2, 6/mmm, infinf, infinfm, inf, infm, inf/m, inf2, inf/mm'):
+                            if str(p.name) == "k11":   
+                                self.k[0,0] = float (self.__request.POST.get(p.name, False))
+                                self.k[1,1]= self.k[0,0]
+                            if str(p.name) == "k33":   
+                                self.k[2,2] = float (self.__request.POST.get(p.name, False))
+                               
+                                
+                    print self.k
+                    self.sucess = 1;
+                    return
+                else:
+                    self.message= 'All the point groups of this crystal system have the same matrix'
+                    self.questionGp = 'Point Group:'     
+                    self.setPointGroup()   
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                    self.preparedataforjQuery(self.type )
+                    self.setCatalogPropertyDetail() 
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
+                    if self.puntualgroupselected_name in ('3, -3, 32, -3m, 3m, 4, -4, 4/m, 4mm, -42m, 422, 4/mmm, 6, -6, 3/m, 6/m, 6mm, 622, -6m2, 6/mmm, infinf, infinfm, inf, infm, inf/m, inf2, inf/mm'):
+                        #list read-only fields and non-zero fields
+                        self.listofemptyInputs.append(self.type+"22");
+ 
+                      
+                        #fields for writing
+                        self.jquery= self.jquery + """                        
+                                                                        $('#""" +self.type+ """11').keyup(function ()
+                                                                            {
+                                                                                
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                    $('#""" +self.type+ """22').val(value );
+
+                                                                            }else
+                                                                            {
+                                                                                inputpopclear($(this));
+                                                                                 $('#""" +self.type+ """22').val(''); 
+                                                                            }
+                                                                         });
+                      
+                                                                         
+                                                                        $('#""" +self.type+ """33').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }     
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+        
+                                                                        """
+                
+                    self.jquery= self.jquery+"\n" 
+
+                    #Separation of fields of only reading zero and not zero
+                    for key in sorted(self.read_write_inputs.keys()):
+                        if  self.read_write_inputs[key] == 'r':
+                            if  self.contains(self.listofemptyInputs,key):
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                            else:
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                                
+                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
+                    print self.jquery 
+                    
+                    
+            if self.crystalsystem_name == 'c':         
+                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '23, m3, 432, -43m, m3m, infinf, infinfm' :
+                    self.questionGp = 'Point Group:'       
+                    if self.magnetoelectricity == False:
+                        self.setPointGroup()    
+                        return  
+                    
+                if  self.__request != None and len(self.__inputList) > 0:
+                    for p in self.__inputList :
+                        if self.puntualgroupselected_name in  ('23, m3, 432, -43m, m3m, infinf, infinfm'):
+                            if str(p.name) == "k11":   
+                                self.k[0,0] = float (self.__request.POST.get(p.name, False))
+                                self.k[2,2] = self.k[1,1] = self.k[0,0] 
+                           
+                    print self.k
+                    self.sucess = 1;
+                    return
+                else:
+                    self.message= 'All the point groups of this crystal system have the same matrix'
+                    self.questionGp = 'Point Group:'     
+                    self.setPointGroup()   
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                    self.preparedataforjQuery(self.type )
+                    self.setCatalogPropertyDetail() 
+                    self.jquery= self.jquery + """
+                                                                    // inicio de codigo jQuery
+                                                                    $('#divwarningpropertyvalues').hide();
+                                                                    $(document).ready(
+                                                                        function() 
+                                                                        {
+                                                                     """
+                    
+                    if self.puntualgroupselected_name in ('23, m3, 432, -43m, m3m, infinf, infinfm'):
+                        #list read-only fields and non-zero fields
+                        self.listofemptyInputs.append(self.type+"22");
+                        self.listofemptyInputs.append(self.type+"33");
+
+                        #fields for writing
+                        self.jquery= self.jquery + """                        
+                                                                            $('#""" +self.type+ """11').keyup(function ()
+                                                                            {
+                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                    inputpop($(this));
+                                                                                    v = $(this).val();
+                                                                                    
+                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                                    {
+                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                      value = v;
+                                                                                    }
+                                                                                    
+                                                                                    $('#""" +self.type+ """22').val(value );
+                                                                                     $('#""" +self.type+ """33').val(value );
+                                                                            }else
+                                                                            { 
+                                                                                inputpopclear($(this));
+                                                                            }
+                                                                         });
+
+                                                                        """
+                
+                    self.jquery= self.jquery+"\n" 
+
+                    #Separation of fields of only reading zero and not zero
+                    for key in sorted(self.read_write_inputs.keys()):
+                        if  self.read_write_inputs[key] == 'r':
+                            if  self.contains(self.listofemptyInputs,key):
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                            else:
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                                
+                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
+                    print self.jquery 
+            
                          
     #start setCatalogPropertyDetail
     def setCatalogPropertyDetail(self):
@@ -4900,7 +5560,7 @@ class Propertiesv2(object):
                     cpd=obj        
                     self.read_write_inputs[cpd.name] = 'w'        
                     self.catalogPropertyDetail.append(cpd)        
-        
+
                 return   
             
                
@@ -4929,9 +5589,7 @@ class Propertiesv2(object):
                         del cpd     
                     return 
         
-        if self.catalogproperty_name == 'p':
-
-                
+        if self.catalogproperty_name == 'p':    
             if  ( self.crystalsystem_name == 'tc'  or self.crystalsystem_name == 'o'  or self.crystalsystem_name == 'te'  or self.crystalsystem_name == 'c' ) or (self.crystalsystem_name == 'tg' and self.puntualgroupselected_name != '3m' ) or (self.crystalsystem_name == 'h' and self.puntualgroupselected_name != '-6m2' ):
 
                 print 'Property:'  + self.objProperty.name 
@@ -4966,12 +5624,6 @@ class Propertiesv2(object):
                     return 
                 
             if  ( self.crystalsystem_name == 'm' ) or (self.crystalsystem_name == 'tg' and self.puntualgroupselected_name == '3m' ) or (self.crystalsystem_name == 'h' and self.puntualgroupselected_name == '-6m2' ):
-                '''print 'Property:'  + self.objProperty.name 
-                print 'crystalsystem_id=' + str(self.objCatalogCrystalSystemSelected.pk)
-                print 'type_id='  +  str(self.objTypeSelected.pk)
-                print  'catalogaxis_id=' + str( self.objAxisSelected.pk)
-                print  'catalogpointgroup_id=' +  str(self.objCatalogPointGroupSelected.pk)'''
-                
                 propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected, crystalsystem=self.objCatalogCrystalSystemSelected, catalogaxis=self.objAxisSelected, catalogpointgroup=self.objCatalogPointGroupSelected).order_by('name')
                 for obj in propertyDetail: 
                     cpd=CatalogPropertyDetail()
@@ -4981,6 +5633,31 @@ class Propertiesv2(object):
                     del cpd       
                 return    
         
+        if self.catalogproperty_name == '2nd':                                                                                                                                                                                                          
+            propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,catalogpointgroup=self.objCatalogPointGroupSelected).order_by('name')
+            if not propertyDetail:  
+                objPuntualGroupGroups=PuntualGroupGroups.objects.filter(catalogpointgroup=self.objCatalogPointGroupSelected)          
+                for obj in objPuntualGroupGroups:
+                    pgg=  PuntualGroupGroups()
+                    pgg = obj   
+                    propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,puntualgroupnames=pgg.puntualgroupnames).order_by('name')
+                    if  propertyDetail:
+                        for obj in propertyDetail:
+                            cpd=CatalogPropertyDetail()
+                            cpd = obj
+                            self.read_write_inputs[cpd.name] = 'w'
+                            self.catalogPropertyDetail.append(cpd) 
+                            del cpd                 
+                return  
+            else:                 
+                for obj in propertyDetail:
+                    cpd=CatalogPropertyDetail()
+                    cpd = obj
+                    self.read_write_inputs[cpd.name] = 'w'
+                    self.catalogPropertyDetail.append(cpd) 
+                    del cpd     
+                return 
+           
         
     #end setCatalogPropertyDetail    
         
@@ -5066,7 +5743,24 @@ class Propertiesv2(object):
                     y= y + 1 
                 self.catalogPropertyDetailReadOnly.append(row)     
                 row = []  
-        
+        elif t == "k":
+            x = 0
+            row = []
+            for r in self.k:
+                x=x+ 1
+                y=1   
+                for c in r: 
+                    col=t+str(x) + str(y)
+                    if col in self.read_write_inputs:
+                        pass
+                    else: 
+                        self.read_write_inputs[col] = "r"  
+                    row.append(col)
+                    y= y + 1 
+                self.catalogPropertyDetailReadOnly.append(row)     
+                row = []  
+            
+ 
 
 
                     

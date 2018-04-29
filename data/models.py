@@ -312,13 +312,14 @@ class CatalogCrystalSystem(models.Model):
  
     
     def __unicode__(self):
-        return str(self.description)
+        return str(self.catalogproperty.description)+" - " +  str(self.description) 
         
         
 class Type(models.Model): 
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=511)   
     catalogproperty=  models.ForeignKey(CatalogProperty,verbose_name="Property")
+    active = models.BooleanField(_(u'Active'),default=False)
     
     class Meta:
         db_table = 'type'     
@@ -327,7 +328,7 @@ class Type(models.Model):
         verbose_name_plural = _('Types') 
     
     def __unicode__(self):
-        return str(self.description)
+        return str(self.catalogproperty.description)+" - " +  str(self.description) 
         
 
 class CatalogPointGroup(models.Model): 
@@ -382,22 +383,40 @@ class CrystalSystemAxis(models.Model):
                 
 class PuntualGroupNames(models.Model): 
     name = models.CharField(max_length=255)
-    description = models.CharField(max_length=511)   
+    description = models.CharField(max_length=511,blank=True)   
    
     class Meta:
         db_table = 'puntual_group_names'    
         app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Group')
         verbose_name_plural = _('Groups')
+        
     def __unicode__(self):
         return str(self.name)   
     
-
+class PuntualGroupNamesManager(models.Manager):
+    use_for_related_fields = True
+     
     
+    def sample(self,name):
+        from django.db import connection
+        cursor = connection.cursor()
+        cursor.execute(""" SELECT name FROM mpod.catalog_point_group
+                                            where id in(SELECT catalogpointgroup_id FROM mpod.puntual_group_groups
+                                                                where puntualgroupnames_id in(SELECT id FROM mpod.puntual_group_names
+                                                                                                                  where name  = %s)
+                                                       )""", [name])
+        result_list = []
+        for row in cursor.fetchall():
+            annotation = row[-1]
+             
+            result_list.append(annotation)
+        return result_list
         
 class PuntualGroupGroups(models.Model): 
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group") 
-    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names") 
+    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")     
+    #objects   = PuntualGroupNamesManager()
    
     class Meta:
         db_table = 'puntual_group_groups'            
@@ -407,7 +426,12 @@ class PuntualGroupGroups(models.Model):
         verbose_name_plural = _('Point Groups and Groups')
          
     def __unicode__(self):
-        return str(self.catalogpointgroup.name)  +" "+ str(self.puntualgroupnames.name)        
+        return  str(self.puntualgroupnames)    
+    
+    
+ 
+    
+ 
           
 class CatalogPropertyDetail(models.Model): 
     name = models.CharField(max_length=255)
@@ -423,6 +447,10 @@ class CatalogPropertyDetail(models.Model):
         app_label = string_with_title("Properties", "Propertie Settings")
         verbose_name = _('Property Detail')
         verbose_name_plural = _('Properties Detail')
+        
+
+        
+    
         
         
 class MpodFile(models.Model): 
@@ -636,6 +664,8 @@ class Dictionary(models.Model):
          
         #verbose_name_plural = _('Uploaded files')
         
+    
+        
 class PropTags(models.Model):
     tag = models.CharField(_(u'tag'),max_length=100)
     active= models.BooleanField(_(u'Active'),max_length=1,default=True)
@@ -681,7 +711,16 @@ class  ExperimentalfilecontempDatafiletemp(models.Model):
     
  
  
+class   TypeDataProperty(models.Model):
+    type=  models.ForeignKey(Type,verbose_name="Type")
+    data_property= models.ForeignKey(Property,verbose_name="Data Property")
     
+    
+    class Meta:
+        db_table = 'type_data_property'
+        app_label = string_with_title("Properties", "Propertie Settings")
+        verbose_name = _('Type and Data Property')
+        verbose_name_plural = _('Types and Data Properties') 
     
     
 

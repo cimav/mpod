@@ -953,6 +953,10 @@
 											      <label for="journal">{{questiontype}}</label>
 											    </div>
 											    {% endif %}    
+											  
+											    
+											    
+											  
 							    
 										     <!-- db table type -->
 										     {% if typeList %}  
@@ -969,6 +973,35 @@
 											    </div>
 											    {% endif %} 
 											    
+											      {% if chkBoxMagnetoelectricity == 1 %} 
+											    <div class="form-group searches"  >
+											       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="1"> Yes/No</label>
+											    </div>
+											    {% endif %}    
+											    
+											    
+											  <!-- start db table data_property -->
+											  
+											   <div class="form-group searches"  >
+											      <label for="journal">Data Property Tag</label>
+											    </div>
+											    
+											 {% if dataPropertyList %}  
+											<div class="form-group searches"> 
+											    	<select id="datapropertytag" name="datapropertytag" onchange=""  class="form-control">       
+											       {% for dp in dataPropertyList %}       
+											        {% if dp.id == datapropertytagselected %} 
+													       <option  selected="selected" value="{{dp.id}}"  > {{dp.name }} </option>
+													 {% else %}
+													      <option value="{{dp.id}}"   > {{dp.name}} </option>
+													{% endif %}    
+											        {% endfor %}
+											      </select>
+											    </div>
+											    {% endif %} 
+											  
+											  
+											  <!-- end db table data_property -->
 											    
 										     <!-- db table catalog_crystal_system -->
 										    {% if catalogCrystalSystemList %}  
@@ -1194,7 +1227,27 @@
 																		      
 																		      {% endfor %}
 																	      {% endif %}  
+																	      
+																	      
+																	      
+																	           {% if property.objTypeSelected.name  == "k"%} 
+																		      {% for row  in property.k%} 
+																		       <tr>
+																					{% for col  in row %}  
+																				   <td>
+																				       <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																				   </td>	
+																				 {% endfor %}
+																		      
+																		      {% endfor %}
+																	      {% endif %}  
+																	      
+																	      
 																	      </table>
+																	      
+																	      
+																	
+																	       
 													      </td>
 													     <td>
 													            {% if property.dictionaryValues %} 

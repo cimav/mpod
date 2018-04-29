@@ -1531,7 +1531,7 @@ def newcasev2(request):
    
     typeList =  [];
    
-    list_Type = Type.objects.filter(catalogproperty=propertyCategoryName[0])
+    list_Type = Type.objects.filter(catalogproperty=propertyCategoryName[0],active=True)
     for register_type in list_Type: 
         objType=Type();
         objType = register_type
@@ -1551,6 +1551,22 @@ def newcasev2(request):
     questionAxis=''
     axisList =[]
     
+    if not 'dataPropertyListOnSession' in request.session or not request.session['dataPropertyListOnSession' ]:  
+        pass
+    else:
+        del request.session['dataPropertyListOnSession']    
+    
+    
+     
+    ids=CatalogProperty.objects.filter(name=catalogproperty_name).values_list('id', flat=True)    
+    type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
+    data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('data_property_id',flat=True)    
+    dataPropertyList=Property.objects.filter(id__in=data_property_ids)
+    request.session['dataPropertyListOnSession']=dataPropertyList
+    property=Property()
+    property = dataPropertyList[0] 
+    datapropertytagselected = property.id
+    
     #initialization
     ShowBtnSend = 1
     ShowBtnProcess = 0
@@ -1564,9 +1580,6 @@ def newcasev2(request):
     if not 'propertySessionList' in request.session or not request.session['propertySessionList' ]:  
         pass
     else:
-        #propertySessionList = request.session['propertySessionList' ]
-        #print propertySessionList
-        #lengthlist =len(propertySessionList) 
         del request.session['propertySessionList']    
  
         
@@ -1654,7 +1667,10 @@ def newcasev2(request):
                                                                                          "dictionaryPhaseList":dictionaryPhaseList,
                                                                                          "dictionaryPhaseCharacteristicList":dictionaryPhaseCharacteristicList,
                                                                                          #"experimentalparcond_name_selected":experimentalparcond_name_selected,
-                                                                                         "list_Type":list_Type}, context_instance=RequestContext(request))
+                                                                                         "list_Type":list_Type,
+                                                                                         'dataPropertyList':dataPropertyList,
+                                                                                         'datapropertytagselected':datapropertytagselected
+                                                                                         }, context_instance=RequestContext(request))
     
     
     
@@ -2281,7 +2297,7 @@ def addcasev2(request):
     
     todo = request.POST.get('todo', False)
     experimentalparcond_name_selected = request.POST.get('experimentalparcond_name', False)
-   
+    chkBoxmge = request.POST.getlist('chkBoxmge', False) 
     #print experimentalparcond_name_selected
 
     if todo == 'submit':
@@ -2309,20 +2325,40 @@ def addcasev2(request):
         catalogproperty_name = request.POST.get('catalogproperty_name', False)            
         crystalsystem_name= request.POST.get('crystalsystem_name', False) 
         
+        
+        datapropertytagselected = ''
+        datapropertytagselected= request.POST.get('datapropertytag', False) 
+        if datapropertytagselected == False:
+            datapropertytagselected =''   
+            
+        
+       
+        
         typeselected=''
         typeselected = request.POST.get('type', False)  
         if typeselected == False:
-            typeselected =''
-            
-            
-            
-             
+            typeselected =''   
         
         #initialisation
         questiontype =''
         if catalogproperty_name == "e":
             questiontype = "s (compliance) o c (stiffness)?"
             
+        if 'typeListOnSession' not in request.session  or not request.session['typeListOnSession']:
+            pass
+        else:
+            if catalogproperty_name == "e":
+                typeList=request.session['typeListOnSession']
+                typeselected = 's'
+            if catalogproperty_name == "p":
+                typeselected='d'
+            if catalogproperty_name == "2nd":
+                typeselected='k'
+            
+        chkBoxMagnetoelectricity = 0
+        if  catalogproperty_name == "2nd":
+            questiontype = "Magnetoelectricity?"            
+            chkBoxMagnetoelectricity = 1
             
         axisselected_name =''
         axisselected_name = request.POST.get('axisselected_name', False)   
@@ -2348,18 +2384,30 @@ def addcasev2(request):
             objCatalogCrystalSystem = register_catalogCrystalSystem
             catalogCrystalSystemList.append(objCatalogCrystalSystem)
 
-        del request.session['catalogCrystalSystemListOnSession']
-
-        request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
-          
-        
-        if 'typeListOnSession' not in request.session  or not request.session['typeListOnSession']:
+        if 'catalogCrystalSystemListOnSession' not in request.session  or not request.session['catalogCrystalSystemListOnSession']:
             pass
         else:
-            if catalogproperty_name == "e":
-                typeList=request.session['typeListOnSession']
-                
-                
+            del request.session['catalogCrystalSystemListOnSession']
+
+        if (chkBoxmge == False and catalogproperty_name == "2nd") or catalogproperty_name != "2nd":
+            request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
+        else:
+            catalogCrystalSystemList=[]
+            
+            
+        if 'dataPropertyListOnSession' not in request.session  or not request.session['dataPropertyListOnSession']:
+            pass
+        else:
+            del request.session['dataPropertyListOnSession']
+            
+         
+        ids=CatalogProperty.objects.filter(name=catalogproperty_name).values_list('id', flat=True)    
+        type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
+        data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('data_property_id',flat=True)    
+        dataPropertyList=Property.objects.filter(id__in=data_property_ids)
+        request.session['dataPropertyListOnSession']=dataPropertyList
+
+
         dictionaryList=[]
         dictionaryQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=9), deploy = 1)
         for dictionary in dictionaryQuerySet: 
@@ -2428,7 +2476,7 @@ def addcasev2(request):
       
              
         if form.is_valid():
-            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected,rq=request,inputList=inputList)
+            propertiesv2=Propertiesv2(catalogproperty_name, crystalsystem_name, typeselected, chkBoxmge, rq=request,inputList=inputList)
             propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
 
             sucess=propertiesv2.sucess  
@@ -2494,7 +2542,7 @@ def addcasev2(request):
 
             ShowBtnSend=1
             validationbyform = 1
-            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected)
+            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected, chkBoxmge)
             propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
 
             if  len(inputList) > 0:                
@@ -2542,7 +2590,10 @@ def addcasev2(request):
                                                                                              "dictionaryMeasurementList":dictionaryMeasurementList,                                                                               
                                                                                              "propertaddedmessage":propertaddedmessage,
                                                                                              "experimentalparcond_name_selected":experimentalparcond_name_selected,
-                                                                                             'propertySessionList':propertySessionList
+                                                                                             'propertySessionList':propertySessionList,
+                                                                                             'chkBoxMagnetoelectricity':chkBoxMagnetoelectricity,
+                                                                                             'dataPropertyList':dataPropertyList,
+                                                                                             'datapropertytagselected':datapropertytagselected
                                                                                        }, context_instance=RequestContext(request))
       
 def addToSession(request,customobject,nameObjectOnSession):
