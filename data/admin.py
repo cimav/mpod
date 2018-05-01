@@ -10,6 +10,9 @@ from django.conf.urls import patterns, url
 from functools import update_wrapper
  
  
+from django.core.urlresolvers import reverse
+ 
+ 
 
 from django.core  import urlresolvers
 
@@ -996,6 +999,8 @@ class DictionaryAdmin(admin.ModelAdmin):
  
     def changelist_view(self, request, extra_context=None):
         print 'changelist_view'
+ 
+        
         extra_context = extra_context or {}
         extra_context['some_var'] = 'This is what I want to show'
         return super(DictionaryAdmin, self).changelist_view(request, extra_context=extra_context)
@@ -1436,20 +1441,85 @@ admin.site.register(CatalogPropertyDetail, CatalogPropertyDetailAdmin)
 
 
 class TypeDataPropertyAdmin(admin.ModelAdmin):
+ 
+    
     list_display =('type','data_property', )   
  
-            
+    form = TypeDataPropertyAdminForm       
     #fields = ['puntualgroupnames','catalogpointgroup','catalogpointgroup1']
     fieldsets = (
+        ('Property', {
+            'fields': ('catalogproperty',)
+        }),
         ('Type', {
             'fields': ('type',)
         }),
-        ('Data Property', {
-            'fields': ('data_property',)
+        ('Data Property Detail', {
+            'fields': ('populate','data_property','quantity','catalogcrystalsystem','axis','catalogpointgroup','puntualgroupnames',)
         }),
+            
+    )
+    
+    #print fieldsets[3][1]['fields']
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        
+        #extra_context['catalogpropertydetailList'] = self.properties_typedataproperty_detail_view(request,object_id)
+        
+        
+        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+ 
+    def properties_typedataproperty_detail_view(self, request,  id):
+        catalogpropertydetailList = []
+        try:    
+            typedataproperty=TypeDataProperty.objects.get(id= id) 
+            CatalogProperty.objects.filter(id= typedataproperty.type.catalogproperty.id)
+            ccs=CatalogCrystalSystem.objects.filter(catalogproperty=typedataproperty.type.catalogproperty)
+            catalogpropertydetailList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccs[0].id)
+            print catalogpropertydetailList.count()
+            return catalogpropertydetailList
+        except ObjectDoesNotExist as error:
+            return  catalogpropertydetailList
+ 
+     
+
 
  
-    )
+    def get_urls(self):
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            wrapper.model_admin = self
+            return update_wrapper(wrapper, view)
+
+        urls = super(TypeDataPropertyAdmin,self).get_urls()
+
+        info = self.model._meta.app_label, self.model._meta.module_name
+    
+        n='%s_%s_detail' % info
+
+
+        my_urls = [ 
+                            #url(r'(?P<id>\d+)/detail/(?P<tdpid>\d+)/$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail_view' % info).lower()), 
+                            url(r'^(.+)/detail/(?P<tdpid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
+                             
+                            ]
+        
+         
+        print  my_urls + urls
+        return  my_urls + urls
+    
+    def account_actions(self, obj):
+        
+            #'<a class="button" href="{}">Deposit</a>&nbsp;'  '<a class="button" href="{}">Withdraw</a>', reverse('admin:account-deposit', args=[obj.pk]), reverse('admin:account-withdraw', args=[obj.pk]);
+        url= u'<a class="button" href="%s">%s</a>' % (reverse('admin:Properties_typedataproperty_detail', args=[obj.pk,obj.pk]),"ejemplo")  
+        return url
+        
+        
+    account_actions.short_description = 'Account Actions'
+    account_actions.allow_tags = True
+    
     
 admin.site.register(TypeDataProperty, TypeDataPropertyAdmin)
 

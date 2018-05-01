@@ -2349,7 +2349,8 @@ def addcasev2(request):
         else:
             if catalogproperty_name == "e":
                 typeList=request.session['typeListOnSession']
-                typeselected = 's'
+                if typeselected == '':
+                    typeselected = 's'
             if catalogproperty_name == "p":
                 typeselected='d'
             if catalogproperty_name == "2nd":
