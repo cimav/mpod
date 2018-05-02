@@ -5667,7 +5667,7 @@ class Propertiesv2(object):
         propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected).values('catalogpointgroup').annotate(total=Count('catalogpointgroup'))
        
         for d in propertyDetail:  
-            if d['catalogpointgroup'] != 0:       
+            if d['catalogpointgroup'] != 45:       
                 #print d['catalogpointgroup']  
                 objCatalogPointGroup=CatalogPointGroup.objects.filter(id__exact=d['catalogpointgroup'])         
                 for obj in  objCatalogPointGroup:
@@ -5683,7 +5683,7 @@ class Propertiesv2(object):
         propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected).values('puntualgroupnames').annotate(total=Count('puntualgroupnames'))
          
         for d in propertyDetail:
-            if d['puntualgroupnames'] != 0:   
+            if d['puntualgroupnames'] != 21:   
                 #print d['puntualgroupnames']              
                 objPuntualgroupnames=PuntualGroupNames.objects.filter(id__exact=d['puntualgroupnames']) 
                 objPuntualGroupGroups = PuntualGroupGroups.objects.filter(puntualgroupnames=objPuntualgroupnames)    
@@ -5700,7 +5700,7 @@ class Propertiesv2(object):
         propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected).values('catalogaxis').annotate(total=Count('catalogaxis'))
          
         for d in propertyDetail:  
-            if d['catalogaxis'] != 0:       
+            if d['catalogaxis'] != 4:       
                 #print d['catalogaxis']  
                 objCatalogAxis=CatalogAxis.objects.filter(id=d['catalogaxis'] )
                 for obj in objCatalogAxis:

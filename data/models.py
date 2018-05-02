@@ -713,7 +713,7 @@ class  ExperimentalfilecontempDatafiletemp(models.Model):
  
 class   TypeDataProperty(models.Model):
     type=  models.ForeignKey(Type,verbose_name="Type")
-    data_property= models.ForeignKey(Property,verbose_name="Data Property")
+    dataproperty= models.ForeignKey(Property,verbose_name="Data Property")
     
     
     class Meta:

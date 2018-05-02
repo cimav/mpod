@@ -3,7 +3,7 @@ Created on Aug 13, 2017
 
 @author: admin
 '''
-
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.admin import *
 from django.contrib import admin
 from django.conf.urls import patterns, url
@@ -56,6 +56,7 @@ from data.models import MessageCategoryDetail
 from django.db.models import get_app, get_models
 from django.contrib.admin.actions import delete_selected as delete_selected_
 
+from django.db.models.query import QuerySet
 
 """
 class UserAdmin(admin.ModelAdmin):
@@ -1443,7 +1444,7 @@ admin.site.register(CatalogPropertyDetail, CatalogPropertyDetailAdmin)
 class TypeDataPropertyAdmin(admin.ModelAdmin):
  
     
-    list_display =('type','data_property', )   
+    list_display =('type','get_crystalsystem','dataproperty', )   
  
     form = TypeDataPropertyAdminForm       
     #fields = ['puntualgroupnames','catalogpointgroup','catalogpointgroup1']
@@ -1455,35 +1456,111 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
             'fields': ('type',)
         }),
         ('Data Property Detail', {
-            'fields': ('populate','data_property','quantity','catalogcrystalsystem','axis','catalogpointgroup','puntualgroupnames',)
+            'fields': ('populate','catalogcrystalsystem','dataproperty','quantity','axis','catalogpointgroup','puntualgroupnames',)
         }),
             
     )
     
+    def get_crystalsystem(self,obj):
+        ids=CatalogProperty.objects.filter(id=obj.type.catalogproperty.id).values_list('id', flat=True) 
+        catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty_id__in=ids).values_list('description',flat=True)
+        
+        result = ""
+        for description in catalogcrystalsystemQuerySet:
+            if result =="":
+                result=   str(description)
+            else:
+                result= result + ", " + str(description)
+ 
+        return   result
+    
     #print fieldsets[3][1]['fields']
     
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        
-        #extra_context['catalogpropertydetailList'] = self.properties_typedataproperty_detail_view(request,object_id)
-        
-        
-        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
- 
-    def properties_typedataproperty_detail_view(self, request,  id):
+    def detail(self,  id):
         catalogpropertydetailList = []
         try:    
             typedataproperty=TypeDataProperty.objects.get(id= id) 
             CatalogProperty.objects.filter(id= typedataproperty.type.catalogproperty.id)
-            ccs=CatalogCrystalSystem.objects.filter(catalogproperty=typedataproperty.type.catalogproperty)
-            catalogpropertydetailList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccs[0].id)
-            print catalogpropertydetailList.count()
-            return catalogpropertydetailList
-        except ObjectDoesNotExist as error:
-            return  catalogpropertydetailList
+            ccsList=CatalogCrystalSystem.objects.filter(catalogproperty=typedataproperty.type.catalogproperty)
+            
+            axisinitial = 4
+            axisList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id).values_list('catalogaxis', flat=True).exclude(catalogaxis__id=axisinitial)
+            
+            if not axisList:
+                axisList= CatalogAxis.objects.all()
+            else:
+                axisinitial=axisList[0].id
+            
+            catalogpointgtoupinitial = 45
+            catalogpointgtoupList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id).values_list('catalogpointgroup', flat=True).exclude(catalogpointgroup__id=catalogpointgtoupinitial)
+            
+            if not catalogpointgtoupList:
+                catalogpointgtoupList= CatalogPointGroup.objects.all()
+            else:
+                catalogpointgtoupinitial=catalogpointgtoupList[0].id
+                
+            
+            
+            puntualgroupnamesinitial = 21
+            puntualgroupnamesList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id).values_list('puntualgroupnames__id', flat=True).exclude(puntualgroupnames__id=puntualgroupnamesinitial)
+            
+            if not puntualgroupnamesList:
+                puntualgroupnamesList= puntualgroupnamesList.objects.all()
+            else:
+                puntualgroupnamesinitial=puntualgroupnamesList[0]
+                
+                
+            catalogpropertydetailList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id,catalogaxis__id=axisinitial,catalogpointgroup__id=catalogpointgtoupinitial,puntualgroupnames__id=puntualgroupnamesinitial).order_by('name')
+            
+            
+            
+            return   catalogpropertydetailList
  
-     
+        except ObjectDoesNotExist as error:
+            print "Message({0}): {1}".format(99, error.message)   
+            return  error.message
+        
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        catalogpropertydetailList = self.detail( object_id)
+        if isinstance(catalogpropertydetailList, QuerySet):
+            extra_context['catalogpropertydetailList'] =catalogpropertydetailList
+        else:
+            catalogpropertydetailList = []
+            extra_context['catalogpropertydetailList'] =catalogpropertydetailList
+            
+        
+        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+ 
+    def properties_typedataproperty_detail_view(self, request, id,  tdpid):
+        
+        error = ""
+        catalogpropertydetailList = self.detail( id)
+        if isinstance(catalogpropertydetailList, QuerySet):
+            pass
+        else:
+            error = catalogpropertydetailList
+          
+        for item in catalogpropertydetailList:
+            print item.name
+         
+        
+        html ="<table><tr><td><td/><tr/><table/>"
+        
+        count = catalogpropertydetailList.count()
+        
+        data = {
+                'count':count,
+                'error':error,
+                'html':html,
+                
+            }
+            
+        return  HttpResponse(json.dumps(data), content_type="application/json")   
 
+
+ 
 
  
     def get_urls(self):
@@ -1501,13 +1578,12 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
 
 
         my_urls = [ 
-                            #url(r'(?P<id>\d+)/detail/(?P<tdpid>\d+)/$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail_view' % info).lower()), 
-                            url(r'^(.+)/detail/(?P<tdpid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
-                             
+                            #url(r'^(.+)/detail/(?P<tdpid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
+                            url(r'^(?P<id>\d+)/detail/(?P<tdpid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
                             ]
         
          
-        print  my_urls + urls
+        #print  my_urls + urls
         return  my_urls + urls
     
     def account_actions(self, obj):

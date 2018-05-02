@@ -1560,7 +1560,7 @@ def newcasev2(request):
      
     ids=CatalogProperty.objects.filter(name=catalogproperty_name).values_list('id', flat=True)    
     type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
-    data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('data_property_id',flat=True)    
+    data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
     dataPropertyList=Property.objects.filter(id__in=data_property_ids)
     request.session['dataPropertyListOnSession']=dataPropertyList
     property=Property()
@@ -2404,7 +2404,7 @@ def addcasev2(request):
          
         ids=CatalogProperty.objects.filter(name=catalogproperty_name).values_list('id', flat=True)    
         type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
-        data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('data_property_id',flat=True)    
+        data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
         dataPropertyList=Property.objects.filter(id__in=data_property_ids)
         request.session['dataPropertyListOnSession']=dataPropertyList
 

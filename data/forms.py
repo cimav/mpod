@@ -293,7 +293,7 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
     catalogpropertydetail = forms.ModelChoiceField(queryset=None,label="Coefficients detail")
     #name = forms.CharField(widget=forms.TextInput(),max_length=15,label=mark_safe('Your Name (<a href="/questions/whyname/" target="_blank">why</a>?)'))
      
-
+    dataproperty = forms.ModelChoiceField(queryset=None,label="Data Property")
     
     class Meta:
         model = TypeDataProperty
@@ -302,62 +302,66 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
         super(TypeDataPropertyAdminForm, self).__init__(*args, **kwargs) 
         typedataproperty = kwargs.pop('instance', None)
         if typedataproperty != None:
- 
-            self.fields['catalogproperty'].queryset= CatalogProperty.objects.filter(id= typedataproperty.type.catalogproperty.id)
-            self.fields['catalogproperty'].initial = typedataproperty.type.catalogproperty.id            
-            ccsList=CatalogCrystalSystem.objects.filter(catalogproperty=typedataproperty.type.catalogproperty)
-             
-            self.fields['catalogcrystalsystem'].queryset=ccsList
-            self.fields['catalogcrystalsystem'].initial=ccsList[0].id
             
+            print typedataproperty.type.id
+            print typedataproperty.type.catalogproperty.id
+            print typedataproperty.id
+            print typedataproperty.dataproperty.id
             
-            
-        
-            
-           
-            #self.fields['catalogcrystalsystem'].initial=CatalogCrystalSystem.objects.filter(catalogproperty=typeDataProperty.type.catalogproperty).values_list('id', flat=True)
-            self.fields['populate'].initial  = False
-            """
-            cpdList=CatalogPropertyDetail.objects.filter(type=typeDataProperty.type,crystalsystem__id=ccsList[0].id).values_list('name', flat=True)
-            self.fields['catalogpropertydetail'].queryset=cpdList 
-            self.fields['catalogpropertydetail'].initial  =ccsList[0]
-            """
-            
-            axisList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id).values_list('catalogaxis__description', flat=True).exclude(catalogaxis=4)
- 
-            if not axisList:
-                axisList= CatalogAxis.objects.all()
-                self.fields['axis'].initial = 4
-            
-            self.fields['axis'].queryset=axisList
-            
-            
-            pointGroupList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id).values_list('catalogpointgroup__name', flat=True).exclude(catalogpointgroup=45)
-            if not pointGroupList:
-                pointGroupList= CatalogPointGroup.objects.all()
-                self.fields['catalogpointgroup'].initial = 45
+            ids=CatalogProperty.objects.filter(id=typedataproperty.type.catalogproperty.id).values_list('id', flat=True) 
+            catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty_id__in=ids)   
+            print catalogcrystalsystemQuerySet
 
-            self.fields['catalogpointgroup'].queryset= pointGroupList
+
+            ids=CatalogProperty.objects.filter(name=typedataproperty.type.catalogproperty.name).values_list('id', flat=True)   
+            typeQuerySet=Type.objects.filter(catalogproperty_id__in=ids,active=True)   
+            #typeQuerySet = Type.objects.filter(id=typedataproperty.type.id)
+            
+            self.fields['type'].queryset= typeQuerySet
+            self.fields['type'].initial= typedataproperty.type.id
+            
+            
+            catalogpropertyQuerySet=CatalogProperty.objects.filter(id=typedataproperty.type.catalogproperty.id)
+            self.fields['catalogproperty'].queryset=CatalogProperty.objects.filter(id=typedataproperty.type.catalogproperty.id)
+            self.fields['catalogproperty'].initial=catalogpropertyQuerySet[0]
             
             
             
-            pgnl=PuntualGroupNames.objects.all()
-            self.fields['puntualgroupnames'].queryset= pgnl            
-            self.fields['puntualgroupnames'].initial = pgnl[0].id
+            self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet
+            self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemQuerySet[0] #initialization to first  on the list
             
-            #pgn = PuntualGroupNames.objects.get(name=pgnl[0])    
-            #self.fields['catalogpointgroupdetail'].queryset= PuntualGroupGroups.objects.filter(puntualgroupnames=pgn).values_list('catalogpointgroup__name', flat=True) 
-             
-             
-            typedataproperty=TypeDataProperty.objects.get(id= typedataproperty.id) 
-            CatalogProperty.objects.filter(id= typedataproperty.type.catalogproperty.id)
-            ccs=CatalogCrystalSystem.objects.filter(catalogproperty=typedataproperty.type.catalogproperty)
-            catalogpropertydetailList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccs[0].id)
+            axisid=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemQuerySet[0]).values_list('catalogaxis_id', flat=True)
+            axisQuerySet=CatalogAxis.objects.filter(id__in=axisid) 
+            self.fields['axis'].queryset=axisQuerySet
+            self.fields['axis'].initial = axisQuerySet[0] #initialization to first  on the list
             
             
-            self.fields['quantity'].initial =catalogpropertydetailList.count()
-             
+            catalogpointgroupids=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemQuerySet[0]).values_list('catalogpointgroup_id', flat=True)
+            catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroupids)
+            self.fields['catalogpointgroup'].queryset= catalogpointgroupQuerySet
+            self.fields['catalogpointgroup'].initial = catalogpointgroupQuerySet[0] #initialization to first  on the list
             
+            
+            puntualgroupnamesids=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemQuerySet[0]).values_list('puntualgroupnames_id', flat=True)
+            puntualgroupnamesQuerySet=PuntualGroupNames.objects.filter(id__in=puntualgroupnamesids)
+            #puntualgroupnamesQuerySet=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemQuerySet[0]).values_list('puntualgroupnames', flat=True)#.exclude(catalogpointgroup=45)
+            self.fields['puntualgroupnames'].queryset= puntualgroupnamesQuerySet
+            self.fields['puntualgroupnames'].initial = puntualgroupnamesQuerySet[0]
+            
+  
+            
+            catalogpropertydetailQuerySet=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemQuerySet[0],catalogaxis_id=axisQuerySet[0],catalogpointgroup_id=catalogpointgroupQuerySet[0],puntualgroupnames_id=puntualgroupnamesQuerySet[0])
+            self.fields['catalogpropertydetail'] =catalogpropertydetailQuerySet
+            
+            self.fields['quantity'].initial =catalogpropertydetailQuerySet.count()
+            self.fields['populate'].initial  = False
+            
+            ids=CatalogProperty.objects.filter(name=typedataproperty.type.catalogproperty.name).values_list('id', flat=True)    
+            type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typedataproperty.type.name).values_list('id',flat=True)    
+            dataproperty_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
+            datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids)   
+            self.fields['dataproperty'].queryset=datapropertyQuerySet
+            self.fields['dataproperty'].initial  = typedataproperty.dataproperty.id
             
              
         else:
@@ -369,6 +373,7 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
             self.fields['puntualgroupnames'].queryset= PuntualGroupNames.objects.all()       
             self.fields['catalogpropertydetail'].queryset= CatalogPropertyDetail.objects.all().values_list('name', flat=True) 
             self.fields['catalogpointgroupdetail'].queryset=PuntualGroupGroups.objects.all()
+            self.fields['dataproperty'].queryset=PuntualGroupGroups.objects.all()
            
              
             #'populate','data_property','quantity','catalogcrystalsystem','axis','catalogpointgroup','puntualgroupnames','catalogpointgroupdetail
