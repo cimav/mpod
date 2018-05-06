@@ -57,6 +57,7 @@ from django.db.models import get_app, get_models
 from django.contrib.admin.actions import delete_selected as delete_selected_
 
 from django.db.models.query import QuerySet
+from django.db.models import Count
 
 """
 class UserAdmin(admin.ModelAdmin):
@@ -1319,26 +1320,81 @@ admin.site.register(PuntualGroupNames, PuntualGroupNamesAdmin)
 class PuntualGroupGroupsAdmin(admin.ModelAdmin):
    
    
-    #form= PuntualGroupGroupsAdminForm
-    list_display =('puntualgroupnames','catalogpointgroup', )   
- 
-            
-    #fields = ['puntualgroupnames','catalogpointgroup','catalogpointgroup1']
+    form= PuntualGroupGroupsAdminForm
     fieldsets = (
         ('Point Groups and Groups', {
-            'fields': ('puntualgroupnames','catalogpointgroup',)
+            'fields': ('puntualgroupnames','pointgroups',)
         }),
 
- 
     )
+    
+    list_display =('catalogpointgroup','puntualgroupnames',)  
+    
+
+        
+            
+    #fields = ['puntualgroupnames','catalogpointgroup','catalogpointgroup1']
+    idList=[]  
+    nameList=[]
+    def get_puntualgroupnamesgroup_by(self, obj):
+        try:
+            puntualgroupnamesQuerySet=PuntualGroupGroups.objects.filter(puntualgroupnames=obj.puntualgroupnames).values('puntualgroupnames').annotate(total=Count('puntualgroupnames'))
+            name = ""
+            for d in puntualgroupnamesQuerySet:
+                if d['puntualgroupnames'] != 21:          
+                    objPuntualgroupnames=PuntualGroupNames.objects.get(id__exact=d['puntualgroupnames']) 
+                    if int(d['puntualgroupnames']) not in  self.idList:
+                        self.idList.append(int(d['puntualgroupnames']))
+                        name =objPuntualgroupnames.name
+                    else:
+                        #print "esta " + str(int(d['puntualgroupnames']))
+                        pass
+            return name
+
+        except ObjectDoesNotExist as error:
+            return ""
+    
+    
+    
  
+    """
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        print 'PuntualGroupGroupsAdmin_change_view'
+        extra_context = extra_context or {}
+
+        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+    """
+ 
+    def get_urls(self):
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            wrapper.model_admin = self
+            return update_wrapper(wrapper, view)
+
+        urls = super(PuntualGroupGroupsAdmin,self).get_urls()
+
+        info = self.model._meta.app_label, self.model._meta.module_name
+    
+        n='%s_%s_detail' % info
+
+        """
+        my_urls = [ 
+                            #url(r'^(.+)/detail/(?P<tdpid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
+                            url(r'^(?P<id>\d+)/detail/(?P<csid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
+                            ]
+        
+        """ 
+        print  urls
+        #return  my_urls + urls
+        return  urls
 
 admin.site.register(PuntualGroupGroups, PuntualGroupGroupsAdmin)
 
 
 
 class CatalogPropertyDetailAdmin(admin.ModelAdmin):
-    list_display =('name','get_type_description','get_crystalsystem_catalogproperty_description','get_crystalsystem_description','get_catalogaxis_name','get_catalogpointgroup_name','get_puntualgroupnames_name')  
+    list_display =('name','get_type_description','get_crystalsystem_catalogproperty_description','get_crystalsystem_description','get_catalogaxis_name','get_catalogpointgroup_name','get_puntualgroupnames_name','dataproperty')  
     #list_display =('title', 'authors', 'journal','year','volume','issue','first_page','last_page','reference','pages_number')
     ordering = ('crystalsystem__catalogproperty__description',) 
     search_fields = [ 'crystalsystem__description','type__description','catalogaxis__name',]
@@ -1353,16 +1409,20 @@ class CatalogPropertyDetailAdmin(admin.ModelAdmin):
             'fields': ('type', )
         }),
         ('Catalog Crystal System', {
-            'fields': ('crystalsystem', )
+            'fields': ('crystalsystem',)
         }),
-         ('Catalog Axis', {
-            'fields': ('catalogaxis', )
+        ('Property Tag', {
+            'fields': ('dataproperty' ,)
         }),
+
         ('Catalog Point Group', {
             'fields': ('catalogpointgroup', )
         }),
         ('Catalog Puntual Group Names', {
             'fields': ('puntualgroupnames', )
+        }),
+            ('Catalog Axis', {
+            'fields': ('catalogaxis', )
         }),
     )
           
@@ -1449,17 +1509,15 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
     form = TypeDataPropertyAdminForm       
     #fields = ['puntualgroupnames','catalogpointgroup','catalogpointgroup1']
     fieldsets = (
-        ('Property', {
-            'fields': ('catalogproperty',)
-        }),
-        ('Type', {
-            'fields': ('type',)
+        ('Property information', {
+            'fields': ('catalogproperty','type','catalogcrystalsystem',)
         }),
         ('Data Property Detail', {
-            'fields': ('populate','catalogcrystalsystem','dataproperty','quantity','axis','catalogpointgroup','puntualgroupnames',)
+            'fields': ('populate','dataproperty','quantity','coefficients','catalogpointgroup','puntualgroupnames','axis',)
         }),
             
     )
+ 
     
     def get_crystalsystem(self,obj):
         ids=CatalogProperty.objects.filter(id=obj.type.catalogproperty.id).values_list('id', flat=True) 
@@ -1476,86 +1534,260 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
     
     #print fieldsets[3][1]['fields']
     
+    def setPointGroup(self,objTypeSelected,objCatalogCrystalSystemSelected):  
+        propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected).values('catalogpointgroup').annotate(total=Count('catalogpointgroup'))
+        puntualGroupList = []
+        for d in propertyDetail:  
+            if d['catalogpointgroup'] != 45:       
+                #print d['catalogpointgroup']  
+                objCatalogPointGroup=CatalogPointGroup.objects.filter(id__exact=d['catalogpointgroup'])         
+                for obj in  objCatalogPointGroup:
+                    cpg=CatalogPointGroup()
+                    cpg=obj        
+                    """
+                    if self.puntualgroupselected_name == '':
+                        self.puntualgroupselected_name=cpg.name
+                    """
+               
+                    puntualGroupList.append(cpg)                       
+    
+                                                            
+        propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected).values('puntualgroupnames').annotate(total=Count('puntualgroupnames'))
+         
+        for d in propertyDetail:
+            if d['puntualgroupnames'] != 21:   
+                #print d['puntualgroupnames']              
+                objPuntualgroupnames=PuntualGroupNames.objects.filter(id__exact=d['puntualgroupnames']) 
+                objPuntualGroupGroups = PuntualGroupGroups.objects.filter(puntualgroupnames=objPuntualgroupnames)    
+                for obj in objPuntualGroupGroups:
+                    pgg=PuntualGroupGroups()
+                    pgg=obj
+                    #print pgg.catalogpointgroup.name
+                    """
+                    if self.puntualgroupselected_name == '':
+                        self.puntualgroupselected_name=pgg.catalogpointgroup.name
+                    """
+             
+                    puntualGroupList.append(pgg.catalogpointgroup)
+                    
+        return puntualGroupList
+                    
+    def setAxis(self,objTypeSelected,objCatalogCrystalSystemSelected):
+        propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected).values('catalogaxis').annotate(total=Count('catalogaxis'))
+        axisList = []
+        for d in propertyDetail:  
+            if d['catalogaxis'] != 4:       
+                #print d['catalogaxis']  
+                objCatalogAxis=CatalogAxis.objects.filter(id=d['catalogaxis'] )
+                for obj in objCatalogAxis:
+                    ca=CatalogAxis()
+                    ca=obj
+                    #print ca.name
+                    axisList.append(ca)
+                    
+        return  axisList   
+    
+    
     def detail(self,  id):
         catalogpropertydetailList = []
         try:    
             typedataproperty=TypeDataProperty.objects.get(id= id) 
             CatalogProperty.objects.filter(id= typedataproperty.type.catalogproperty.id)
-            ccsList=CatalogCrystalSystem.objects.filter(catalogproperty=typedataproperty.type.catalogproperty)
+            catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty=typedataproperty.type.catalogproperty)
             
-            axisinitial = 4
-            axisList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id).values_list('catalogaxis', flat=True).exclude(catalogaxis__id=axisinitial)
-            
-            if not axisList:
-                axisList= CatalogAxis.objects.all()
-            else:
-                axisinitial=axisList[0].id
-            
-            catalogpointgtoupinitial = 45
-            catalogpointgtoupList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id).values_list('catalogpointgroup', flat=True).exclude(catalogpointgroup__id=catalogpointgtoupinitial)
-            
-            if not catalogpointgtoupList:
-                catalogpointgtoupList= CatalogPointGroup.objects.all()
-            else:
-                catalogpointgtoupinitial=catalogpointgtoupList[0].id
-                
-            
-            
-            puntualgroupnamesinitial = 21
-            puntualgroupnamesList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id).values_list('puntualgroupnames__id', flat=True).exclude(puntualgroupnames__id=puntualgroupnamesinitial)
-            
-            if not puntualgroupnamesList:
-                puntualgroupnamesList= puntualgroupnamesList.objects.all()
-            else:
-                puntualgroupnamesinitial=puntualgroupnamesList[0]
-                
-                
-            catalogpropertydetailList=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem__id=ccsList[0].id,catalogaxis__id=axisinitial,catalogpointgroup__id=catalogpointgtoupinitial,puntualgroupnames__id=puntualgroupnamesinitial).order_by('name')
-            
-            
-            
+            print 'id_catalogcrystalsystem ' + str(catalogcrystalsystemQuerySet[0].id)
+
+            catalogpointgroupList=self.setPointGroup(typedataproperty.type,catalogcrystalsystemQuerySet[0])
+            print catalogpointgroupList
+
+            catalogpropertydetailList=[]
             return   catalogpropertydetailList
  
         except ObjectDoesNotExist as error:
             print "Message({0}): {1}".format(99, error.message)   
             return  error.message
         
+    def save_model(self, request, obj, form, change):
+        print 'PuntualGroupNames_save_model'
+        print request.POST
+        #print obj.name
+        print form.changed_data # list name of field was changed
+        print change #True or False
+        if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
+            print "pass"
+        elif  request.POST.has_key('_addanother'): 
+            print request.POST.get('_addanother',False)
+        elif request.POST.has_key('_continue'): 
+            print request.POST.get('_continue',False)
+        elif request.POST.has_key('_save'):
+            print request.POST.get('_save',False)
+            
+             
+            if  request.POST.has_key('populate'):
+                if request.POST.get('dataproperty',False) != False:
+                    datapropertytag=Property.objects.filter(id=request.POST.get('dataproperty',False) )
+                    print datapropertytag
+                    catalogpropertydetail = CatalogPropertyDetail.objects.filter(dataproperty=datapropertytag).values('dataproperty').annotate(total=Count('dataproperty'))
+
+                    print str(catalogpropertydetail[0]['total'])
+                    print str(catalogpropertydetail[0]['dataproperty'])
+
+                    print  request.POST.has_key('populate')
+                    print  request.POST.has_key('quantity')
+                    #self.message_user(request, "%s file(s) successfully saved.." % counter  )
+                        
+            else:
+                        #pass
+                #self.message_user(request, ""  )
+                #messages.debug(request, '%s SQL statements were executed.' % count)
+                #messages.info(request, 'Three credits remain in your account.')
+                #messages.success(request, 'Profile details updated.')
+                messages.set_level(request, messages.WARNING)
+                messages.warning(request, 'The process was not done, mark the populate field to perform the process.')
+                #messages.set_level(request, messages.ERROR)
+                #messages.error(request, 'The file was not populated.')
+                
+                
+            
+      
+            
+            
+            #obj.save()
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
-        catalogpropertydetailList = self.detail( object_id)
-        if isinstance(catalogpropertydetailList, QuerySet):
-            extra_context['catalogpropertydetailList'] =catalogpropertydetailList
-        else:
-            catalogpropertydetailList = []
-            extra_context['catalogpropertydetailList'] =catalogpropertydetailList
-            
-        
-        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+
+        extra_context = {
+                'original':'Type and Data Property',
+                'object_id':object_id
+            }
  
-    def properties_typedataproperty_detail_view(self, request, id,  tdpid):
-        
+        print 'id_typedataproperty ' + str(object_id)
+ 
+        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+      
+ 
+    def properties_typedataproperty_detail_view(self, request, id,  csid):
         error = ""
-        catalogpropertydetailList = self.detail( id)
-        if isinstance(catalogpropertydetailList, QuerySet):
-            pass
-        else:
-            error = catalogpropertydetailList
-          
-        for item in catalogpropertydetailList:
-            print item.name
-         
+        html ="<table id='result_list'>"
+        axisdic = []
+        try:
+            
+            id_puntualgroupnames  = request.POST.get('id_puntualgroupnames', False)
+            id_catalogproperty  = request.POST.get('id_catalogproperty', False)
+            id_axis  = request.POST.get('id_axis', False)
+            id_type  = request.POST.get('id_type', False)
+            id_catalogpointgroup  = request.POST.get('id_catalogpointgroup', False)
+            id_puntualgroupnames  = request.POST.get('id_puntualgroupnames', False)
+            todo  = request.POST.get('todo', False)
+            
+
+            
+            if  todo == False:
+                pass
+            else:
+                typedataproperty=TypeDataProperty.objects.get(id= id) 
+                if  todo == "crystalsystemchange":
+                    typeObj=Type.objects.get(id=id_type)
+                    catalogpropertyObj=CatalogProperty.objects.get(id= id_catalogproperty)
+                    catalogcrystalsystemObj=CatalogCrystalSystem.objects.get(id= csid)
+                    catalogaxisObj=CatalogAxis.objects.get(id=id_axis)
+                    catalogpointgroupObj=CatalogPointGroup.objects.get(id=id_catalogpointgroup)
+                    puntualgroupnamesObj=PuntualGroupNames.objects.get(id=id_puntualgroupnames)
+                    
+                    print "id_type " + str(id_type)
+                    print "id_crystalsystemchange " + str(csid)
+                    
+                    """
+                    axisid=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemObj).values_list('catalogaxis_id', flat=True)#.exclude(catalogaxis__id=4)
+                    axisQuerySet=CatalogAxis.objects.filter(id__in=axisid) 
+                    
+                    axisinitial = 4
+ 
+                    if axisQuerySet:
+                        axistostring = ""
+                        #axistostring =  axistostring + "<option value=''>---------</option>"
+                        for axis in axisQuerySet:
+                            if axis.id == axisQuerySet[0].id:
+                                axistostring = axistostring +  "<option value='" +str(axis.id) + "' selected='selected'>"+axis.name+"</option>"
+                            else:
+                                axistostring = axistostring +  "<option value='"+str(axis.id) +"' >"+axis.name+"</option>"
+                    else:
+                        axisObj= CatalogAxis.objects.get(id=axisinitial)
+                        axistostring = axistostring +  "<option value='" +str(axisObj.id) + "' selected='selected'>"+axisObj.name+"</option>"
+                            
+                    
+                     
+                    #print "id_axis " + str(axisQuerySet[0].id)
+       
+                   
+                    catalogpointgroupids=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemObj,catalogaxis= axisQuerySet[0]).values_list('catalogpointgroup_id', flat=True)#.exclude(catalogpointgroup__id=45)
+                    catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroupids)
+                     
+                    catalogpointgroupinitial = 45
+                    if  catalogpointgroupQuerySet:
+                        catalogpointgrouptostring = ""
+                        #catalogpointgrouptostring =  catalogpointgrouptostring + "<option value=''>---------</option>"
+                        for catalogpointgroup in catalogpointgroupQuerySet:
+                            if catalogpointgroup.id == catalogpointgroupQuerySet[0].id:
+                                catalogpointgrouptostring = catalogpointgrouptostring +  "<option value='" +str(catalogpointgroup.id) + "' selected='selected'>"+catalogpointgroup.name+"</option>"
+                            else:
+                                catalogpointgrouptostring = catalogpointgrouptostring +  "<option value='"+str(catalogpointgroup.id) +"' >"+catalogpointgroup.name+"</option>"
+                    else:
+                            catalogpointgroupObj= CatalogPointGroup.objects.get(id=catalogpointgroupinitial)
+                            catalogpointgrouptostring = catalogpointgrouptostring +  "<option value='" +str(catalogpointgroup.id) + "' selected='selected'>"+catalogpointgroup.name+"</option>"
+                            
+                            
+                    #print "id_catalogpointgroup " + str(catalogpointgroupQuerySet[0].id)
+                    
+                    
+                        
+                    puntualgroupnamesids=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemObj,catalogaxis= axisQuerySet[0],catalogpointgroup=catalogpointgroupQuerySet[0]).values_list('puntualgroupnames_id', flat=True)
+                    puntualgroupnamesQuerySet=PuntualGroupNames.objects.filter(id__in=puntualgroupnamesids)
+                    puntualgroupnamesinitial = 21
+                    if puntualgroupnamesQuerySet:
+                        puntualgroupnamestostring = ""
+                        for puntualgroupnames in puntualgroupnamesQuerySet:
+                            if puntualgroupnames.id == puntualgroupnamesQuerySet[0].id:
+                                puntualgroupnamestostring = puntualgroupnamestostring +  "<option value='" +str(puntualgroupnames.id) + "' selected='selected'>"+puntualgroupnames.name+"</option>"
+                            else:
+                                puntualgroupnamestostring = puntualgroupnamestostring +  "<option value='"+str(puntualgroupnames.id) +"' >"+puntualgroupnames.name+"</option>"
+                    else:
+                        puntualgroupnamesObj= PuntualGroupNames.objects.get(id=puntualgroupnamesinitial)
+                        puntualgroupnamestostring = puntualgroupnamestostring +  "<option value='" +str(puntualgroupnamesObj.id) + "' selected='selected'>"+puntualgroupnamesObj.name+"</option>"      
+                    
+                    
+                    
+                    #print "id_puntualgroupnames " + str(puntualgroupnamesQuerySet[0].id)
+                        
+                    catalogpropertydetailQuerySet= CatalogPropertyDetail.objects.filter(type=typeObj,crystalsystem=catalogcrystalsystemObj,catalogaxis=axisQuerySet[0],catalogpointgroup=catalogpointgroupQuerySet[0],puntualgroupnames=puntualgroupnamesQuerySet[0]).order_by('name')
+ 
+                    for i,catalogpropertydetail in enumerate(catalogpropertydetailQuerySet):
+                        
+                        if i % 2 == 0:
+                            html = html +"<tr class='row"+ str(1)+"'><td class='action-checkbox'>" + catalogpropertydetail.name + "</td/></tr>"
+                        else:
+                            html = html +"<tr class='row"+ str(2)+"'><td class='action-checkbox'>" + catalogpropertydetail.name + "</td/></tr>"
+ 
+                                   
+                    html = html +"</table>"
+                """
+                    
         
-        html ="<table><tr><td><td/><tr/><table/>"
+        except ObjectDoesNotExist as error:
+            print "Message({0}): {1}".format(99, error.message)   
+            return  error.message
         
-        count = catalogpropertydetailList.count()
+        
         
         data = {
-                'count':count,
                 'error':error,
                 'html':html,
-                
+                #'axistostring':axistostring,   
+                #'catalogpointgrouptostring':catalogpointgrouptostring,
+                #'puntualgroupnamestostring':puntualgroupnamestostring
             }
+        print data
             
         return  HttpResponse(json.dumps(data), content_type="application/json")   
 
@@ -1579,12 +1811,14 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
 
         my_urls = [ 
                             #url(r'^(.+)/detail/(?P<tdpid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
-                            url(r'^(?P<id>\d+)/detail/(?P<tdpid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
+                            url(r'^(?P<id>\d+)/detail/(?P<csid>\d+)$',wrap(self.properties_typedataproperty_detail_view), name=('%s_%s_detail' % info)), 
                             ]
         
          
         #print  my_urls + urls
         return  my_urls + urls
+    
+      
     
     def account_actions(self, obj):
         

@@ -441,6 +441,7 @@ class CatalogPropertyDetail(models.Model):
     catalogaxis= models.ForeignKey(CatalogAxis,verbose_name="Axes")  
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
     puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
+    dataproperty = models.ForeignKey(Property,verbose_name="Tag")  
     class Meta:
         db_table = 'catalog_property_detail'       
         
@@ -448,7 +449,8 @@ class CatalogPropertyDetail(models.Model):
         verbose_name = _('Property Detail')
         verbose_name_plural = _('Properties Detail')
         
-
+    def __unicode__(self):
+        return str(self.name)
         
     
         
@@ -462,6 +464,7 @@ class MpodFile(models.Model):
     class Meta:
         db_table = 'mpodfile'          
         
+
 
 
 class Configuration(models.Model):

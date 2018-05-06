@@ -1,147 +1,86 @@
 {% extends "admin/change_form.html" %}
+
+
+{% block extrahead %}
+{{ block.super }}
+{% url 'admin:jsi18n' as jsi18nurl %}
+{{ media }}
+<!-- start: two new lines for highcharts -->
+<script type="text/javascript" src="/static/admin/js/jquery.min.js"></script>
+<!-- end: two new lines for highcharts -->
+{% endblock %}
  
+
 
 {% block after_field_sets %}{{ block.super }}
+ <input type='hidden' id="id_todo" name='todo' value='' />
 {% if change %}
-			You are changing {{ original }}
+			You are changing {{ original }} 
+			<div id="content">
+				<div id="tabledetaildiv" class="results">
+
+				</div>
+			</div>
 			
-			{% if catalogpropertydetailList %}
-			   {% for item  in catalogpropertydetailList%} 
-			   		{{item.name}}
-			   {% endfor %}
-			{% endif %}  
-			 
- 
- <!--  
-<a href="#" onclick="call_ajax('{% url admin:Properties_typedataproperty_add%}','phasechange')">Click here</a>
-<a href="{% url admin:Properties_typedataproperty_add%}">Click here </a>     
- <a href="#" onclick="call_ajax('{% url admin:Properties_typedataproperty_delete 11%}','phasechange')">Click here</a>
- <a href="#" onclick="call_ajax('{% url admin:Properties_typedataproperty_detail 11 1%}','phasechange')">Click here</a>
- 
- <a href="{% url admin:Properties_typedataproperty_detail 11 1%}">Click here </a>
-  <a href="#" onclick="call_ajax('{% url admin:Properties_typedataproperty_detail 11 1%}','phasechange')">Click here</a>
- -->
-<script src="/static/js/jquery.min.js"></script>
- 
-
- 
- {% block javascript %}
-   <script>
-   function refreshdetail(obj)
-   {
-	   var id_catalogcrystalsystem = obj.value;
-	   var id_puntualgroupnames=0;
-	   var id_catalogproperty;
-	   var id_type = 0;
-	   var id_axis = 0;
-	   var id_catalogpointgroup = 0;
-	   var id_puntualgroupnames = 0;
- 
-	   var list = document.getElementsByName("catalogproperty");
-
-	   for (var item of list) {
-	 
-		   //alert(item.id)
-		   //alert(item.value)
-		   //alert( item.selectedIndex); 
-		    id_catalogproperty = item.options[item.selectedIndex].text
-		   //alert(x);
-		 }
-	   
-	   list = document.getElementsByName("type");
-
-	   for (var item of list) 
-	   {
-		   //alert(item.id)
-		   //alert(item.value)
-		   //alert( item.selectedIndex); 
-		   id_type = item.options[item.selectedIndex].text
-		   //alert(x);
-		 }
-	   
-	  
-	   list = document.getElementsByName("axis");
-
-	   for (var item of list) 
-	   {
-		   //alert(item.id)
-		   //alert(item.value)
-		   //alert( item.selectedIndex); 
-		   id_axis = item.options[item.selectedIndex].text
-	 
-		 }
-	   
-	   list = document.getElementsByName("catalogpointgroup");
-
-	   for (var item of list) 
-	   {
-		   //alert(item.id)
-		   //alert(item.value)
-		   //alert( item.selectedIndex); 
-		   id_catalogpointgroup = item.options[item.selectedIndex].text
-		   
-		 }
-	   
-	   list = document.getElementsByName("puntualgroupnames");
-
-	   for (var item of list) 
-	   {
-		   //alert(item.id)
-		   //alert(item.value)
-		   //alert( item.selectedIndex); 
-		   id_puntualgroupnames = item.options[item.selectedIndex].text
-		   
-		 }
-	   
-	   
-	   
-	   
-	   call_ajax('{% url admin:Properties_typedataproperty_detail 11 1%}','phasechange');
-        
-	    
-	    
-   }
-    function call_ajax(url,todo) 
-    {
- 
-    	    datasend ={'todo': todo,
-    	    				       'csrfmiddlewaretoken':"{{ csrf_token }}"
-    	    				       }
-    	     
-		       	 		                 
-	        $.ajax({
-	       	 type: "POST",
-	           url: url,
-	           data: datasend,
-	           dataType: 'json',
-	           success: function (data) 
-	           { 
-	        	    
-		      		 if (data.error == "")
-				     {
-				         //alert(data.count);
-		             }
-		      		 else
-		      		{
-		      			 alert(data.error);
-		      		}
-	            },
-	           error:function(error){
-	            console.log(error);
-	          }
-	            
-	         });
-    
-    }
-    </script>
-    {% endblock %}
-    
-    
-    
-
+<script type="text/javascript" charset="utf-8">
+/*
+var chart;
+$(document).ready(function() {
+	
+	    $('#id_catalogcrystalsystem').change(function ()
+	     {
+	    	alert(this.value);
+	    	//alert($('#id_dataproperty').val());
+	      });
+});
+*/
+</script>
 {% else %}
 			This is a new objecct
+			
+
 {% endif %} 
+
+<script type="text/javascript" charset="utf-8">
+var chart;
+$(document).ready(function() {
+		 
+	    $('#id_catalogproperty').change(function ()
+	     {
+	    	//alert(this.value);
+	    	$('#id_todo').val('selectcatalogpropertyChange')
+	    	
+	    	//$(this).closest('form').trigger('submit');
+	    	//alert($('#typedataproperty_form').name);
+	    	$( "#typedataproperty_form" ).submit();
+	    	
+	     });
+	  
+	    
+	    $('#id_type').change(function ()
+	   	     {
+	    		$('#id_todo').val('selecttypeChange')
+	    		$( "#typedataproperty_form" ).submit();
+	    	 
+	   	      });
+	    
+	    $('#id_catalogcrystalsystem').change(function ()
+	   	     {
+	    		$('#id_todo').val('selectcatalogcrystalsystemChange')
+	    		$( "#typedataproperty_form" ).submit();
+	    	 
+	   	    	
+	   	      });
+	    
+	    $('#id_dataproperty').change(function ()
+   	     {
+	    	$('#id_todo').val('selectdatapropertyChange')
+    		$( "#typedataproperty_form" ).submit();
+   	      });
+	    
+         
+});
+</script>
 
 
 {% endblock %} 
