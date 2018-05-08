@@ -441,7 +441,7 @@ class CatalogPropertyDetail(models.Model):
     catalogaxis= models.ForeignKey(CatalogAxis,verbose_name="Axes")  
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
     puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
-    dataproperty = models.ForeignKey(Property,verbose_name="Tag")  
+    dataproperty = models.ForeignKey(Property,verbose_name="Tag",blank=True)  
     class Meta:
         db_table = 'catalog_property_detail'       
         
@@ -453,6 +453,24 @@ class CatalogPropertyDetail(models.Model):
         return str(self.name)
         
     
+class CatalogPropertyDetailTemp(models.Model): 
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=511)   
+    type=  models.ForeignKey(Type)
+    crystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")    
+    catalogaxis= models.ForeignKey(CatalogAxis,verbose_name="Axes")  
+    catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
+    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
+    dataproperty = models.ForeignKey(Property,verbose_name="Tag",blank=True)  
+    class Meta:
+        db_table = 'catalog_property_detail_temp'       
+        
+        app_label = string_with_title("Properties", "Propertie Settings")
+        verbose_name = _('Property Detail')
+        verbose_name_plural = _('Properties Detail')
+        
+    def __unicode__(self):
+        return str(self.name)
         
         
 class MpodFile(models.Model): 

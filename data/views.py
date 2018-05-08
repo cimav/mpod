@@ -43,6 +43,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
 from django.http import Http404
 import json
+ 
 
 
 
@@ -2305,6 +2306,7 @@ def addcasev2(request):
         isvalid =False
         form=None  
         inputList = []   
+        coefficientsparts = []
         if 'inputList' not in request.session  or not request.session['inputList']:
             pass
         else:
@@ -2315,6 +2317,17 @@ def addcasev2(request):
             else:
                 del request.session['inputList']
                 
+ 
+        if 'coefficientsparts' not in request.session  or not request.session['coefficientsparts']:
+            pass
+        else:
+            selectChange = request.POST.get('selectChange', False)  
+            #print selectChange
+            if selectChange == "0":
+                coefficientsparts=request.session['coefficientsparts']
+            else:
+                del request.session['coefficientsparts']
+ 
  
             
         #list initialisation 
@@ -2477,7 +2490,7 @@ def addcasev2(request):
       
              
         if form.is_valid():
-            propertiesv2=Propertiesv2(catalogproperty_name, crystalsystem_name, typeselected, chkBoxmge, rq=request,inputList=inputList)
+            propertiesv2=Propertiesv2(catalogproperty_name, crystalsystem_name, typeselected,datapropertytagselected, chkBoxmge, rq=request,inputList=inputList,coefficientsparts=coefficientsparts)
             propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
 
             sucess=propertiesv2.sucess  
@@ -2486,6 +2499,8 @@ def addcasev2(request):
             if  sucess  == 0:
                 inputList=propertiesv2.catalogPropertyDetail
                 request.session['inputList']=inputList
+                request.session['coefficientsparts']=propertiesv2.coefficientsparts
+                
                 inputListReadOnly=propertiesv2.catalogPropertyDetailReadOnly
  
                 print "continue"
@@ -2543,7 +2558,7 @@ def addcasev2(request):
 
             ShowBtnSend=1
             validationbyform = 1
-            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected, chkBoxmge)
+            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected,datapropertytagselected, chkBoxmge)
             propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
 
             if  len(inputList) > 0:                

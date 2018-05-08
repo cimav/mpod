@@ -291,7 +291,7 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
     catalogcrystalsystem =forms.ModelChoiceField(queryset=None,label="Crystal System")
     
     
-    quantity = forms.IntegerField(min_value=1, label="Coefficients to capture" , required=True,)
+    #quantity = forms.IntegerField(min_value=1, label="Coefficients to capture" , required=True,)
     populate =  forms.BooleanField(required=False,label="Populated")
     axis=forms.ModelChoiceField(queryset=None,label="Axis", required=False,)
     #catalogpointgroup = forms.ModelMultipleChoiceFieldChoiceField(queryset=None,label="Point Group")
@@ -312,9 +312,16 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
             label="Coefficients",
             widget=FilteredSelectMultiple(
                 verbose_name='Name',
-                is_stacked=False
+                is_stacked=False,
+                 
+                
             )
         )
+    
+    def empty(self):
+        pass
+
+    coefficients.validate=empty
     
     
         
@@ -420,6 +427,15 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                     
         return  axisList   
     
+    def isnumber(self,param):
+        result = False
+        try:
+            val = float(param)
+            result = True
+            return result
+        except ValueError:
+            print("That's not an int!")
+            return result
        
     def __init__(self, *args, **kwargs):
        
@@ -530,7 +546,7 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                 print "Message({0}): {1}".format(99, error.message)   
                 return  error.message
         else:
-            if not args:
+            if not args: #it arrives here after _addanother
                 try:
                     super(TypeDataPropertyAdminForm, self).__init__(*args, **kwargs) 
                     self.fields['catalogproperty'].queryset= CatalogProperty.objects.all()
@@ -539,7 +555,7 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                     self.fields['axis'].queryset=CatalogAxis.objects.all()
                     self.fields['catalogpointgroup'].queryset= CatalogPointGroup.objects.all()
                     self.fields['puntualgroupnames'].queryset= PuntualGroupNames.objects.all()       
-                    self.fields['coefficients'].queryset = CatalogPropertyDetail.objects.all()                              
+                    self.fields['coefficients'].queryset = CatalogPropertyDetail.objects.none()                              
                     self.fields['dataproperty'].queryset=Property.objects.all()
                 except ObjectDoesNotExist as error:
                     print "Message({0}): {1}".format(99, error.message)   
@@ -548,9 +564,9 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                 for arg in args:
                     print arg
                     if arg:
-                        """for item in arg:
+                        for item in arg:
                             print item + ":" + str(arg[item] )
-                        """   
+                        
                         datapropertytag = None
                         
                         if arg.has_key('_continue') or arg.has_key('todo') and arg['todo'] != '': #'selectcatalogpropertyChange' or 'selecttypeChange' or 'selectcatalogcrystalsystemChange' or 'selectdatapropertyChange':
@@ -564,8 +580,6 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                                 super(TypeDataPropertyAdminForm, self).__init__(*args, **kwargs) 
                                 
                                 catalogproperty=CatalogProperty.objects.get(id=int(arg['catalogproperty']))
-                                
-                                 
                                 catalogcrystalsysteminitial=None
                                 catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty=catalogproperty)   
                                 self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet
@@ -576,8 +590,7 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                                     catalogcrystalsysteminitial = CatalogCrystalSystem.objects.get(id=int(arg['catalogcrystalsystem']))
                                     
                                 self.fields['catalogcrystalsystem'].initial=catalogcrystalsysteminitial
-                                
-                                  
+
                                 typeinitial= None
                                 typeQuerySet=Type.objects.filter(catalogproperty=catalogproperty,active=True) 
                                 self.fields['type'].queryset= typeQuerySet
@@ -587,18 +600,10 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                                     typeinitial=Type.objects.get(id=int(arg['type']))
 
                                 self.fields['type'].initial= Type.objects.get(id=typeinitial.id)    
-                                
-                                
-                                
-                                
-  
+ 
                                 self.fields['catalogproperty'].queryset=CatalogProperty.objects.all()
                                 self.fields['catalogproperty'].initial=int(arg['catalogproperty'])
-                                
-
-                                
-                                
-                 
+             
                                 catalogpointgroupList=self.setPointGroup(typeinitial, catalogcrystalsysteminitial)
                                 catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroupList)
                     
@@ -614,17 +619,14 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                                 else:
                                     self.fields['catalogpointgroup'].queryset= CatalogPointGroup.objects.all()
                                     self.fields['catalogpointgroup'].initial  = [c.id for c in catalogpointgroupQuerySet]
-                                    
-                                    
+
                                 dataproperty_ids = None
                                 type_ids=Type.objects.filter(catalogproperty=catalogproperty,active=True, name=typeinitial.name).values_list('id',flat=True)    
                                 if datapropertytag==None:
                                     dataproperty_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True) 
-                                    
                                 else:
                                     dataproperty_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True).exclude(dataproperty=datapropertytag) 
-                                     
-                
+ 
                                 datapropertyinitial= None
                                 datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids)   
                                 self.fields['dataproperty'].queryset=datapropertyQuerySet
@@ -636,23 +638,19 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                                     datapropertyinitial=Property.objects.get(id=int(arg['dataproperty']))
 
                                 self.fields['dataproperty'].initial= datapropertyinitial
-                                    
-         
+
                                 axisList= self.setAxis(typeinitial, catalogcrystalsysteminitial)
                                 axisQuerySet=CatalogAxis.objects.filter(id__in=axisList) 
                                 self.fields['axis'].queryset=axisQuerySet
                                 self.fields['axis'].initial = axisQuerySet[0] #initialization to first  on the list
-        
-                          
+
                                 pgn =False
                                 if self.checkPointGroup(typeinitial, catalogcrystalsysteminitial):
                                     catalogpropertydetailQuerySet=CatalogPropertyDetail.objects.filter(type=typeinitial,crystalsystem=catalogcrystalsysteminitial,catalogaxis_id=axisQuerySet[0],catalogpointgroup=catalogpointgroupQuerySet[0],puntualgroupnames_id=21,dataproperty=datapropertyinitial)
                                     dataporpertygroup_by=CatalogPropertyDetail.objects.filter(type=typeinitial,crystalsystem=catalogcrystalsysteminitial,catalogaxis_id=axisQuerySet[0],catalogpointgroup=catalogpointgroupQuerySet[0],puntualgroupnames_id=21).values('dataproperty').annotate(total=Count('dataproperty'))
                                     if dataporpertygroup_by[0]['total'] != 0:
                                         datapropertytag=Property.objects.get(id=dataporpertygroup_by[0]['dataproperty'])
-                                
-                                        
-                                        
+
                                     pgn = True
                                 
                                 pg =False
@@ -676,28 +674,22 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                     
                                 if pg == True:
                                     self.fields['catalogpointgroup'].widget.attrs['disabled'] = True
-                    
-                                    
+
                                 if pgn == True:
                                     self.fields['puntualgroupnames'].widget.attrs['disabled'] = True
-                                    
                                     
                                 if pgpgn == True:
                                     self.fields['catalogpointgroup'].widget.attrs['disabled'] = True
                                     self.fields['puntualgroupnames'].widget.attrs['disabled'] = True
 
-                                self.fields['quantity'].initial =catalogpropertydetailQuerySet.count()
-                                self.fields['quantity'].widget.attrs['readonly'] = True
-                                
-                                
-                                
+                                #self.fields['quantity'].initial =catalogpropertydetailQuerySet.count()
+                                #self.fields['quantity'].widget.attrs['readonly'] = True
+
                                 if catalogpropertydetailQuerySet.count() == 0:
                                     self.fields['populate'].initial  = False
                                     dimensions=datapropertyinitial.tensor_dimensions.split(',')
                                     none_catalogpropertydetailcustomQuerySet=CatalogPropertyDetail.objects.none()
-                                    
                                     catalogpropertydetailcustomObjList  = []
-                                
                                     qs = None
                                     if len(dimensions) == 2:
                                         coefficients = N.zeros([int(dimensions[0]),int(dimensions[1])])    
@@ -712,57 +704,140 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                                             for c in r: 
                                                 col= str(x) + str(y)                
                                                 print letters[0] +col + letters[1] 
-                                                catalogpropertydetailObj=CatalogPropertyDetail()
+                                                #catalogpropertydetailObj=CatalogPropertyDetail()
+                                                catalogpropertydetailObj=CatalogPropertyDetailTemp()
                                                 catalogpropertydetailObj.name= letters[0] +col + letters[1] 
+                                                catalogpropertydetailObj.type = typeinitial
+                                                catalogpropertydetailObj.crystalsystem= catalogcrystalsysteminitial
+                                                """
+                                                catalogpropertydetailObj.catalogaxis=
+                                                catalogpropertydetailObj.catalogpointgroup=
+                                                catalogpropertydetailObj.puntualgroupnames=
+                                                catalogpropertydetailObj.dataproperty=datapropertytag
+                                                """
+                                                catalogpropertydetailObj.save()
                                                 catalogpropertydetailcustomObjList.append(catalogpropertydetailObj)
                                                 y= y + 1 
                                     
                                        
                                         qs = list(chain(none_catalogpropertydetailcustomQuerySet, catalogpropertydetailcustomObjList))
-
-                             
-                                    creator_choices = [((i + 1), c.name) for i,c in enumerate(qs)]
-                                    print creator_choices
-           
-                                       
+                                    creator_choices = [(i, c.name) for i,c in enumerate(qs)]
+                                    
+                                    CatalogPropertyDetail
+                                    lastobjid = CatalogPropertyDetail.objects.latest('id')
+                                    counter= 0
+                                    creator_choices = []
+                                    for i,c in enumerate(qs):
+                                        counter=counter + 1
+                                        creator_choices.append((c,c))
+                                    
+                                    
                                     self.fields['coefficients'].choices=creator_choices
-                                    #self.fields['coefficients'].queryset =   
-                                    #self.fields['coefficients'].queryset = CatalogPropertyDetail.objects.filter(type=typeinitial)
-
-                                     
+  
                                 else:
                                     self.fields['populate'].initial  = True
                                     self.fields['coefficients'].queryset = CatalogPropertyDetail.objects.filter(type=typeinitial)
                                     self.fields['coefficients'].initial = catalogpropertydetailQuerySet
                                     print catalogpropertydetailQuerySet
-                                    
-                                    
-                                  
-    
-                                    
-                                    
+                                      
                             except ObjectDoesNotExist as error:
                                 print "Message({0}): {1}".format(99, error.message)   
                                 return  error.message   
                              
                         if arg.has_key('_save') :
                             try:
+                                
+                                valuelistcoefficients = arg.getlist('coefficients')
+                                create = False
+                                if not self.isnumber(valuelistcoefficients[0]):
+                                    print "crear coeficientes"
+                                    create = True
+                                    vals = []
+                                    
+                                    lastobjid = CatalogPropertyDetail.objects.latest('id')
+                                    counter= lastobjid.id
+                                    
+                                    catalogpropertydetailcustomObjList =[]
+                                    for i,v in enumerate(valuelistcoefficients):
+                                        vals.append(v)
+                                        cpdObj=CatalogPropertyDetail()
+                                        cpdObj.name = v
+                                        catalogpropertydetailcustomObjList.append(cpdObj)
+ 
+                                    
+                                    none_catalogpropertydetailcustomQuerySet=CatalogPropertyDetail.objects.none()
+                                    qs = list(chain(none_catalogpropertydetailcustomQuerySet, catalogpropertydetailcustomObjList))
+                                    #creator_choices = [(c, c.name) for i,c in enumerate(qs)]
+                                    print qs
+                                    creator_choices= tuple((str(i), str(n)) for i,n in  enumerate(valuelistcoefficients))
+                                    
+                                    """
+                                    creator_choices = []
+                                    for i,c in enumerate(qs):
+                                        counter=counter + 1
+                                        creator_choices.append((c,c))
+                                    """
+                                    
+                                 
+                                    for i,c in enumerate(valuelistcoefficients):
+                                        counter=counter + 1
+                                        #valuelistcoefficients[i] = u'' + str(c)
+            
+                                         
+
+                                    #print valuelistcoefficients
+                                    print args[0]
+                                    #print vals
+                                    print creator_choices
+                                else:
+                                    print "no crear coeficientes"
+                                    
+                                
                                 super(TypeDataPropertyAdminForm, self).__init__(*args, **kwargs) 
+                                
+                                    
+                                
                                 self.fields['catalogproperty'].queryset= CatalogProperty.objects.all()
                                 self.fields['catalogcrystalsystem'].queryset=CatalogCrystalSystem.objects.all()
                                 self.fields['populate'].initial  = False
                                 self.fields['axis'].queryset=CatalogAxis.objects.all()
                                 self.fields['catalogpointgroup'].queryset= CatalogPointGroup.objects.all()
                                 self.fields['puntualgroupnames'].queryset= PuntualGroupNames.objects.all()       
-                                self.fields['coefficients'].queryset = CatalogPropertyDetail.objects.all()
-                              
                                 self.fields['dataproperty'].queryset=Property.objects.all()
+                                self.fields['coefficients'].queryset = CatalogPropertyDetail.objects.all()
+                                #self.fields['coefficients'].choices = creator_choices
+                                
+                                
+                                """
+                                for v in enumerate(vals):
+                                        counter=counter + 1
+                                        valuelistcoefficients[i] = u'' + str(v)
+                                """
+                                    
+                                
+                                #print valuelist
+                                print '_save'
                             except ObjectDoesNotExist as error:
                                 print "Message({0}): {1}".format(99, error.message)   
                                 return  error.message  
                            
                         if arg.has_key('_addanother'):
                             try:
+                                valuelist = arg.getlist('coefficients')
+                                print valuelist
+                                lastobjid = CatalogPropertyDetail.objects.latest('id')
+                                counter= lastobjid.id
+                                creator_choices = []
+                                for i,c in enumerate(valuelist):
+                                    counter=counter + 1
+                                    creator_choices.append((counter,c))
+                                    
+                                #newargs= args.copy()
+                                print args[0]#QueryDict
+                                querydict = args[0]
+                                querydict['coefficients']=creator_choices
+                                print args[1]#MultiValueDict
+                                
                                 super(TypeDataPropertyAdminForm, self).__init__(*args, **kwargs) 
                                 self.fields['catalogproperty'].queryset= CatalogProperty.objects.all()
                                 self.fields['catalogcrystalsystem'].queryset=CatalogCrystalSystem.objects.all()
@@ -770,16 +845,47 @@ class TypeDataPropertyAdminForm(forms.ModelForm):
                                 self.fields['axis'].queryset=CatalogAxis.objects.all()
                                 self.fields['catalogpointgroup'].queryset= CatalogPointGroup.objects.all()
                                 self.fields['puntualgroupnames'].queryset= PuntualGroupNames.objects.all()       
-                                self.fields['coefficients'].queryset = CatalogPropertyDetail.objects.all()
+                                 
+                                #print '_addanother'
+                                listc= arg['coefficients']
+                                valuelist = arg.getlist('coefficients')
+                                """for key in arg.iterkeys(): 
+                                  
+                                    valuelist = arg.getlist(key)
+                                    print valuelist
+                                 """   
+                                """
+                                print valuelist
+                                lastobjid = CatalogPropertyDetail.objects.latest('id')
+                                counter= lastobjid.id
+                                creator_choices = []
+                                for i,c in enumerate(valuelist):
+                                    counter=counter + 1
+                                    creator_choices.append((counter,c))
+                                """    
+                                
+                                datapropertyinitial=Property.objects.get(id=int(arg['dataproperty']))
+                                catalogproperty=CatalogProperty.objects.get(id=int(arg['catalogproperty']))
+                                typeinitial= None
+                                typeQuerySet=Type.objects.filter(catalogproperty=catalogproperty,active=True) 
+                                self.fields['type'].queryset= typeQuerySet
+                                if arg['type'] =='':
+                                    typeinitial = typeQuerySet[0]
+                                else:
+                                    typeinitial=Type.objects.get(id=int(arg['type']))
+                                    
+                                catalogpropertydetailQuerySet  = CatalogPropertyDetail.objects.filter(type=typeinitial,crystalsystem_id=int(arg['catalogcrystalsystem']))
+                                self.fields['coefficients'].queryset = catalogpropertydetailQuerySet
+                                
+                                #self.fields['coefficients'].choices= creator_choices
+                                #self.fields['coefficients'].initial = creator_choices
+                                
+                                
                                 self.fields['dataproperty'].queryset=Property.objects.all()
                             except ObjectDoesNotExist as error:
                                 print "Message({0}): {1}".format(99, error.message)   
                                 return  error.message  
-                                
-                       
-                            
-        
-                                
+
                    
                         
                 

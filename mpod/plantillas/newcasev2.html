@@ -1112,9 +1112,6 @@
 						            
 						        
 						
-												       <div id="divwarningpropertyvalues" class="alert alert-warning" role="alert"  >
-												        <strong> {{propertaddedmessage}}</strong>  
-												      </div>
 						
 														  
 												      {% if inputListReadOnly %}  
@@ -1230,7 +1227,7 @@
 																	      
 																	      
 																	      
-																	           {% if property.objTypeSelected.name  == "k"%} 
+																	        {% if property.objTypeSelected.name  == "k"%} 
 																		      {% for row  in property.k%} 
 																		       <tr>
 																					{% for col  in row %}  

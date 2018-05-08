@@ -1513,7 +1513,7 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
             'fields': ('catalogproperty','type','catalogcrystalsystem',)
         }),
         ('Data Property Detail', {
-            'fields': ('populate','dataproperty','quantity','coefficients','catalogpointgroup','puntualgroupnames','axis',)
+            'fields': ('populate','dataproperty','coefficients','catalogpointgroup','puntualgroupnames','axis',)
         }),
             
     )
@@ -1619,21 +1619,20 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
             print request.POST.get('_addanother',False)
         elif request.POST.has_key('_continue'): 
             print request.POST.get('_continue',False)
+            #return super(TypeDataPropertyAdmin, self).change_view(request, obj, form, change)  
+            
         elif request.POST.has_key('_save'):
             print request.POST.get('_save',False)
-            
-             
             if  request.POST.has_key('populate'):
                 if request.POST.get('dataproperty',False) != False:
                     datapropertytag=Property.objects.filter(id=request.POST.get('dataproperty',False) )
                     print datapropertytag
                     catalogpropertydetail = CatalogPropertyDetail.objects.filter(dataproperty=datapropertytag).values('dataproperty').annotate(total=Count('dataproperty'))
 
-                    print str(catalogpropertydetail[0]['total'])
-                    print str(catalogpropertydetail[0]['dataproperty'])
+   
 
-                    print  request.POST.has_key('populate')
-                    print  request.POST.has_key('quantity')
+                  
+                    #print  request.POST.has_key('quantity')
                     #self.message_user(request, "%s file(s) successfully saved.." % counter  )
                         
             else:
@@ -1647,22 +1646,18 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
                 #messages.set_level(request, messages.ERROR)
                 #messages.error(request, 'The file was not populated.')
                 
-                
-            
-      
-            
-            
             #obj.save()
+        #super(TypeDataPropertyAdmin, self).save_model(request, obj, form, change)    
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
-
+       
         extra_context = {
                 'original':'Type and Data Property',
                 'object_id':object_id
             }
  
-        print 'id_typedataproperty ' + str(object_id)
+        #print 'id_typedataproperty ' + str(object_id)
  
         return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
       
@@ -1680,88 +1675,14 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
             id_catalogpointgroup  = request.POST.get('id_catalogpointgroup', False)
             id_puntualgroupnames  = request.POST.get('id_puntualgroupnames', False)
             todo  = request.POST.get('todo', False)
-            
 
-            
             if  todo == False:
                 pass
             else:
                 typedataproperty=TypeDataProperty.objects.get(id= id) 
                 if  todo == "crystalsystemchange":
-                    typeObj=Type.objects.get(id=id_type)
-                    catalogpropertyObj=CatalogProperty.objects.get(id= id_catalogproperty)
-                    catalogcrystalsystemObj=CatalogCrystalSystem.objects.get(id= csid)
-                    catalogaxisObj=CatalogAxis.objects.get(id=id_axis)
-                    catalogpointgroupObj=CatalogPointGroup.objects.get(id=id_catalogpointgroup)
-                    puntualgroupnamesObj=PuntualGroupNames.objects.get(id=id_puntualgroupnames)
-                    
-                    print "id_type " + str(id_type)
-                    print "id_crystalsystemchange " + str(csid)
                     
                     """
-                    axisid=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemObj).values_list('catalogaxis_id', flat=True)#.exclude(catalogaxis__id=4)
-                    axisQuerySet=CatalogAxis.objects.filter(id__in=axisid) 
-                    
-                    axisinitial = 4
- 
-                    if axisQuerySet:
-                        axistostring = ""
-                        #axistostring =  axistostring + "<option value=''>---------</option>"
-                        for axis in axisQuerySet:
-                            if axis.id == axisQuerySet[0].id:
-                                axistostring = axistostring +  "<option value='" +str(axis.id) + "' selected='selected'>"+axis.name+"</option>"
-                            else:
-                                axistostring = axistostring +  "<option value='"+str(axis.id) +"' >"+axis.name+"</option>"
-                    else:
-                        axisObj= CatalogAxis.objects.get(id=axisinitial)
-                        axistostring = axistostring +  "<option value='" +str(axisObj.id) + "' selected='selected'>"+axisObj.name+"</option>"
-                            
-                    
-                     
-                    #print "id_axis " + str(axisQuerySet[0].id)
-       
-                   
-                    catalogpointgroupids=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemObj,catalogaxis= axisQuerySet[0]).values_list('catalogpointgroup_id', flat=True)#.exclude(catalogpointgroup__id=45)
-                    catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroupids)
-                     
-                    catalogpointgroupinitial = 45
-                    if  catalogpointgroupQuerySet:
-                        catalogpointgrouptostring = ""
-                        #catalogpointgrouptostring =  catalogpointgrouptostring + "<option value=''>---------</option>"
-                        for catalogpointgroup in catalogpointgroupQuerySet:
-                            if catalogpointgroup.id == catalogpointgroupQuerySet[0].id:
-                                catalogpointgrouptostring = catalogpointgrouptostring +  "<option value='" +str(catalogpointgroup.id) + "' selected='selected'>"+catalogpointgroup.name+"</option>"
-                            else:
-                                catalogpointgrouptostring = catalogpointgrouptostring +  "<option value='"+str(catalogpointgroup.id) +"' >"+catalogpointgroup.name+"</option>"
-                    else:
-                            catalogpointgroupObj= CatalogPointGroup.objects.get(id=catalogpointgroupinitial)
-                            catalogpointgrouptostring = catalogpointgrouptostring +  "<option value='" +str(catalogpointgroup.id) + "' selected='selected'>"+catalogpointgroup.name+"</option>"
-                            
-                            
-                    #print "id_catalogpointgroup " + str(catalogpointgroupQuerySet[0].id)
-                    
-                    
-                        
-                    puntualgroupnamesids=CatalogPropertyDetail.objects.filter(type=typedataproperty.type,crystalsystem=catalogcrystalsystemObj,catalogaxis= axisQuerySet[0],catalogpointgroup=catalogpointgroupQuerySet[0]).values_list('puntualgroupnames_id', flat=True)
-                    puntualgroupnamesQuerySet=PuntualGroupNames.objects.filter(id__in=puntualgroupnamesids)
-                    puntualgroupnamesinitial = 21
-                    if puntualgroupnamesQuerySet:
-                        puntualgroupnamestostring = ""
-                        for puntualgroupnames in puntualgroupnamesQuerySet:
-                            if puntualgroupnames.id == puntualgroupnamesQuerySet[0].id:
-                                puntualgroupnamestostring = puntualgroupnamestostring +  "<option value='" +str(puntualgroupnames.id) + "' selected='selected'>"+puntualgroupnames.name+"</option>"
-                            else:
-                                puntualgroupnamestostring = puntualgroupnamestostring +  "<option value='"+str(puntualgroupnames.id) +"' >"+puntualgroupnames.name+"</option>"
-                    else:
-                        puntualgroupnamesObj= PuntualGroupNames.objects.get(id=puntualgroupnamesinitial)
-                        puntualgroupnamestostring = puntualgroupnamestostring +  "<option value='" +str(puntualgroupnamesObj.id) + "' selected='selected'>"+puntualgroupnamesObj.name+"</option>"      
-                    
-                    
-                    
-                    #print "id_puntualgroupnames " + str(puntualgroupnamesQuerySet[0].id)
-                        
-                    catalogpropertydetailQuerySet= CatalogPropertyDetail.objects.filter(type=typeObj,crystalsystem=catalogcrystalsystemObj,catalogaxis=axisQuerySet[0],catalogpointgroup=catalogpointgroupQuerySet[0],puntualgroupnames=puntualgroupnamesQuerySet[0]).order_by('name')
- 
                     for i,catalogpropertydetail in enumerate(catalogpropertydetailQuerySet):
                         
                         if i % 2 == 0:

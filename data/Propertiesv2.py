@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class Propertiesv2(object):
 
-    def __init__(self,catalogproperty_name, csn ,typesc,ismagnetoelectricity,  *args,  **kwargs):
+    def __init__(self,catalogproperty_name, csn ,typesc,datapropertytagselected,ismagnetoelectricity,  *args,  **kwargs):
             self.title =  ""
             self.authors =  ""
             self.journal =  ""
@@ -25,6 +25,9 @@ class Propertiesv2(object):
             self.crystalsystem_name = csn
             self.puntualgroupselected_name =None
             self.axisselected_name =None
+            self.dataproperty = datapropertytagselected
+            self.coefficientsparts =[]
+            self.coefficientspartssplit = []
             
             self.message=''
             self.questionAxis=''
@@ -41,6 +44,7 @@ class Propertiesv2(object):
             self.axisList =[]
             self.listofemptyInputs =[]
             self.magnetoelectricity = ismagnetoelectricity
+            self.objDataProperty = None
             
             self.jquery= """
                                     function isScientificNotation(value)
@@ -80,6 +84,7 @@ class Propertiesv2(object):
                                    
                             """
             self.__inputList = None
+            self.__coefficientsparts = None
             
             #self.inputList =[]
             self.s = N.zeros([6,6])
@@ -93,6 +98,9 @@ class Propertiesv2(object):
             
             if 'inputList' in kwargs:
                 self.__inputList  = kwargs.pop('inputList' )
+            
+            if 'coefficientsparts' in kwargs:
+                self.__coefficientsparts  = kwargs.pop('coefficientsparts' )
                 
                 
                 
@@ -129,7 +137,9 @@ class Propertiesv2(object):
                 self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
                 
             if self.catalogproperty_name =='2nd':
+                print self.type 
                 #self.type = 'k'      
+                self.objDataProperty = Property.objects.get(id=int(self.dataproperty))
                 self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name=self.type)   
                 if self.magnetoelectricity == False:
                     if self.crystalsystem_name == False:
@@ -4899,20 +4909,21 @@ class Propertiesv2(object):
                 if  self.__request != None and len(self.__inputList) > 0:
                     for p in self.__inputList :
                         if self.puntualgroupselected_name in  ('1, -1'):
-                            if str(p.name) == "k11":   
+                            
+                            if str(p.name) == self.__coefficientsparts[0]:   
                                 self.k[0,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "k12":      
+                            if str(p.name) == self.__coefficientsparts[1]:      
                                 self.k[0,1] = float (self.__request.POST.get(p.name, False))
                                 self.k[1,0]= self.k[0,1]
-                            if str(p.name) == "k13":      
+                            if str(p.name) == self.__coefficientsparts[2]:      
                                 self.k[0,2] = float (self.__request.POST.get(p.name, False))
                                 self.k[2,0]= self.k[0,2]
-                            if str(p.name) == "k22":      
+                            if str(p.name) == self.__coefficientsparts[3]:      
                                 self.k[1,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "k23":      
+                            if str(p.name) == self.__coefficientsparts[4]:      
                                 self.k[1,2] = float (self.__request.POST.get(p.name, False))
                                 self.k[2,1]= self.k[1,2]
-                            if str(p.name) == "k33":      
+                            if str(p.name) == self.__coefficientsparts[5]:      
                                 self.k[2,2] = float (self.__request.POST.get(p.name, False))                                
                     print self.k
                     self.sucess = 1;
@@ -4922,8 +4933,10 @@ class Propertiesv2(object):
                     self.questionGp = 'Point Group:'     
                     self.setPointGroup()   
                     self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
-                    self.preparedataforjQuery(self.type )
+                    #self.preparedataforjQuery(self.type )
+                    self.setCoefficientsforjQuery(self.type );
                     self.setCatalogPropertyDetail() 
+                    
                     self.jquery= self.jquery + """
                                                                     // inicio de codigo jQuery
                                                                     $('#divwarningpropertyvalues').hide();
@@ -4933,13 +4946,15 @@ class Propertiesv2(object):
                                                                      """
                     if self.puntualgroupselected_name in ('1, -1'):
                         #list read-only fields and non-zero fields
-                        self.listofemptyInputs.append(self.type+"21");
-                        self.listofemptyInputs.append(self.type+"13");
-                        self.listofemptyInputs.append(self.type+"32");
+                        
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" + self.coefficientspartssplit[1]);
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"13" +self.coefficientspartssplit[1]);
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "32" + self.coefficientspartssplit[1]);
+                        
                       
                         #fields for writing
                         self.jquery= self.jquery + """                        
-                                                                            $('#""" +self.type+ """11').keyup(function ()
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
                                                                             {
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
@@ -4959,7 +4974,7 @@ class Propertiesv2(object):
                                                                             }
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """12').keyup(function ()
+                                                                        $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
                                                                             {
                                                                                 
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
@@ -4974,17 +4989,20 @@ class Propertiesv2(object):
                                                                                     {
                                                                                       value = v;
                                                                                     }
-                                                                                    $('#""" +self.type+ """21').val(value );
+                                                                                    
+                                                                                    
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val(value );
 
                                                                             }else
                                                                             {
                                                                                 inputpopclear($(this));
-                                                                                 $('#""" +self.type+ """21').val(''); 
+                                                                                  
+                                                                                 $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                             }
                                                                          });
                                                                          
                                                                          
-                                                                            $('#""" +self.type+ """13').keyup(function ()
+                                                                            $('#""" +self.coefficientsparts[2]+ """').keyup(function ()
                                                                             {
                                                                                 
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
@@ -4999,16 +5017,18 @@ class Propertiesv2(object):
                                                                                     {
                                                                                       value = v;
                                                                                     }
-                                                                                    $('#""" +self.type+ """31').val(value );
+                                                                                    
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val(value );
 
                                                                             }else
                                                                             {
                                                                                 inputpopclear($(this));
-                                                                                 $('#""" +self.type+ """31').val(''); 
+                                                                                 
+                                                                                 $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """22').keyup(function ()
+                                                                         $('#""" +self.coefficientsparts[3]+ """').keyup(function ()
                                                                             {
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
@@ -5028,7 +5048,7 @@ class Propertiesv2(object):
                                                                             }
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """23').keyup(function ()
+                                                                        $('#""" +self.coefficientsparts[4]+ """').keyup(function ()
                                                                             {
                                                                                 
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
@@ -5043,17 +5063,19 @@ class Propertiesv2(object):
                                                                                     {
                                                                                       value = v;
                                                                                     }
-                                                                                    $('#""" +self.type+ """32').val(value );
+                                                                                    
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val(value );
 
                                                                             }else
                                                                             {
                                                                                 inputpopclear($(this));
-                                                                                 $('#""" +self.type+ """32').val(''); 
+                                                                           
+                                                                                 $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                             }
                                                                          });
                                                                          
                                                                          
-                                                                        $('#""" +self.type+ """33').keyup(function ()
+                                                                        $('#""" +self.coefficientsparts[5]+ """').keyup(function ()
                                                                             {
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
@@ -5076,7 +5098,8 @@ class Propertiesv2(object):
                                                                         """
                 
                     self.jquery= self.jquery+"\n" 
-
+                    
+                   
                     #Separation of fields of only reading zero and not zero
                     for key in sorted(self.read_write_inputs.keys()):
                         if  self.read_write_inputs[key] == 'r':
@@ -5085,7 +5108,12 @@ class Propertiesv2(object):
                             else:
                                 self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
                                 
-                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
+                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"      
+                  
+
+                    
+                    
+                                      
                     print self.jquery 
                     
                     
@@ -5634,13 +5662,13 @@ class Propertiesv2(object):
                 return    
         
         if self.catalogproperty_name == '2nd':                                                                                                                                                                                                          
-            propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,catalogpointgroup=self.objCatalogPointGroupSelected).order_by('name')
+            propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,dataproperty=self.objDataProperty,catalogpointgroup=self.objCatalogPointGroupSelected).order_by('name')
             if not propertyDetail:  
                 objPuntualGroupGroups=PuntualGroupGroups.objects.filter(catalogpointgroup=self.objCatalogPointGroupSelected)          
                 for obj in objPuntualGroupGroups:
                     pgg=  PuntualGroupGroups()
                     pgg = obj   
-                    propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,puntualgroupnames=pgg.puntualgroupnames).order_by('name')
+                    propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,dataproperty=self.objDataProperty,puntualgroupnames=pgg.puntualgroupnames).order_by('name')
                     if  propertyDetail:
                         for obj in propertyDetail:
                             cpd=CatalogPropertyDetail()
@@ -5744,6 +5772,7 @@ class Propertiesv2(object):
                 self.catalogPropertyDetailReadOnly.append(row)     
                 row = []  
         elif t == "k":
+            """
             x = 0
             row = []
             for r in self.k:
@@ -5759,7 +5788,53 @@ class Propertiesv2(object):
                     y= y + 1 
                 self.catalogPropertyDetailReadOnly.append(row)     
                 row = []  
+                """
+    def setCoefficientsforjQuery(self,t):            
+        if t == "s" or t == "c":
+            pass
+        elif t == "d":
+            pass
+        elif t == "k":
+            catalogPropertyDetail=CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,dataproperty=self.objDataProperty)
+            read_write_inputs_temp =  {}
+            for cpd in catalogPropertyDetail:
+                catalogPropertyDetailObj = CatalogPropertyDetail()
+                catalogPropertyDetailObj =  cpd
+                read_write_inputs_temp[catalogPropertyDetailObj.name] = "w"  
+                
+
+            datapropertyinitial=self.objDataProperty
+            dimensions=datapropertyinitial.tensor_dimensions.split(',')
+            print str(len(dimensions))
             
+            if len(dimensions) == 2:
+                coefficients = N.zeros([int(dimensions[0]),int(dimensions[1])])    
+                print datapropertyinitial.tag
+                parts=datapropertyinitial.tag.split('_')[-1]
+                letters =parts.split('ij')
+                x = 0
+                row = []
+                for r in coefficients:
+                    x=x+ 1
+                    y=1   
+                    for c in r: 
+                        col= str(x) + str(y)                
+                        print letters[0] +col + letters[1] 
+                        if  not self.coefficientspartssplit:
+                            self.coefficientspartssplit.append( letters[0] )
+                            self.coefficientspartssplit.append( letters[1] )
+                        
+                        if (letters[0] +col + letters[1]) not in read_write_inputs_temp:
+                            self.read_write_inputs[letters[0] +col + letters[1]] =   "r"  
+                            
+                        else:
+                            self.coefficientsparts.append(letters[0] +col + letters[1] )  
+ 
+                        row.append(letters[0] +col + letters[1] )
+                        y= y + 1 
+                    self.catalogPropertyDetailReadOnly.append(row)     
+                    row = [] 
+                    
  
 
 

@@ -38,6 +38,7 @@ class MPODUtil():
         self.__prop_elastic_compliance = False
         self.__prop_elastic_stiffness = False
         self.__prop_piezoelectric= False
+        self.__dielectric_permittivity_relative = False
         self.__loop_tag = False
         self.__loop_article_info = False
         self.__section_title = False
@@ -46,6 +47,7 @@ class MPODUtil():
         self.__sij = 'sij'
         self.__cij = 'cij'
         self.__dij = 'dij'
+        self.__kij = 'epsrij'
         self.__propertylist = None
         self.__cif_dir=''
         self.cifs_dir_valids=''
@@ -62,7 +64,11 @@ class MPODUtil():
     
     
  
+    def getTag(self,tag):    
+        parts=tag.split('_')[-1]
+        return parts
         
+ 
         
     def mpodwrite(self,filename,propertylist):
         self.__propertylist = propertylist
@@ -265,24 +271,30 @@ class MPODUtil():
                 self.__condition=True
                
             
-            if p.objTypeSelected.name != "d":
-                if p.objTypeSelected.name  == "c": 
-                    if self.__prop_elastic_stiffness == False:
-                        self.__line =  "_prop_elastic_stiffness_cij '"+self.__cij+"'"+ "\n"
-                        self.addline(self.__line)
-                        self.__prop_elastic_stiffness = True
-                  
-                elif p.objTypeSelected.name == "s":  
-                    if self.__prop_elastic_compliance == False:
-                        self.__line =   "_prop_elastic_compliance_sij '"+self.__sij+"'" + "\n"
-                        self.addline(self.__line)
-                        self.__prop_elastic_compliance= True
-            else:
+            
+            if p.objTypeSelected.name  == "c": 
+                if self.__prop_elastic_stiffness == False:
+                    self.__line =  "_prop_elastic_stiffness_cij '"+self.__cij+"'"+ "\n"
+                    self.addline(self.__line)
+                    self.__prop_elastic_stiffness = True
+              
+            elif p.objTypeSelected.name == "s":  
+                if self.__prop_elastic_compliance == False:
+                    self.__line =   "_prop_elastic_compliance_sij '"+self.__sij+"'" + "\n"
+                    self.addline(self.__line)
+                    self.__prop_elastic_compliance= True
+            elif p.objTypeSelected.name == "d":
                 if self.__prop_piezoelectric == False:
                     self.__line =    "_prop_piezoelectric_dij '"+self.__dij+"'" + "\n"
                     self.addline(self.__line)
                     self.__prop_piezoelectric= True
-                      
+            elif p.objTypeSelected.name == "k":
+                if self.__dielectric_permittivity_relative == False:
+                    self.__kij= self.getTag(p.objDataProperty.tag)
+                    self.__line =  p.objDataProperty.tag +" '"+self.__kij+"'" + "\n"
+                    self.addline(self.__line)
+                    self.__dielectric_permittivity_relative= True
+                          
              
             if self.__loop_tag==False:  
                 self.__line =  "loop_" +"\n"
@@ -364,7 +376,22 @@ class MPODUtil():
                             self.addline(self.__line)
                 
                 
-                
+            if self.__dielectric_permittivity_relative == True:    
+                #print  p.objTypeSelected.name
+                y = 0
+                x= 0       
+                if p.objTypeSelected.name  == "k":          
+                    for r in p.k:
+                        x = x + 1
+                        y= 0
+                        for c in r:
+                            y= y + 1
+                            indexx = str(x)
+                            indexy = str(y)
+                            index = ''
+                            index = indexx + indexy
+                            self.__line= self.__kij +" " + index + " "+ str(c) +"\n"
+                            self.addline(self.__line)
         
         
             
