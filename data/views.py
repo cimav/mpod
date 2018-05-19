@@ -1520,7 +1520,7 @@ def newcasev2(request):
     
     
     catalogCrystalSystemList = [];
-    list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=propertyCategoryName[0])
+    list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=propertyCategoryName[0],active=True)
     for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
         objCatalogCrystalSystem=CatalogCrystalSystem();
         objCatalogCrystalSystem = register_catalogCrystalSystem
@@ -1559,7 +1559,7 @@ def newcasev2(request):
     
     
      
-    ids=CatalogProperty.objects.filter(name=catalogproperty_name).values_list('id', flat=True)    
+    ids=CatalogProperty.objects.filter(active=True,name=catalogproperty_name).values_list('id', flat=True)    
     type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
     data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
     dataPropertyList=Property.objects.filter(id__in=data_property_ids)
@@ -2344,7 +2344,7 @@ def addcasev2(request):
         if datapropertytagselected == False:
             datapropertytagselected =''   
             
-        
+
        
         
         typeselected=''
@@ -2353,6 +2353,7 @@ def addcasev2(request):
             typeselected =''   
         
         #initialisation
+        chkBoxMagnetoelectricity = 0
         questiontype =''
         if catalogproperty_name == "e":
             questiontype = "s (compliance) o c (stiffness)?"
@@ -2368,11 +2369,9 @@ def addcasev2(request):
                 typeselected='d'
             if catalogproperty_name == "2nd":
                 typeselected='k'
-            
-        chkBoxMagnetoelectricity = 0
-        if  catalogproperty_name == "2nd":
-            questiontype = "Magnetoelectricity?"            
-            chkBoxMagnetoelectricity = 1
+                 
+                questiontype = "Magnetoelectricity?"            
+                chkBoxMagnetoelectricity = 1
             
         axisselected_name =''
         axisselected_name = request.POST.get('axisselected_name', False)   
@@ -2575,7 +2574,8 @@ def addcasev2(request):
                 print "invalid"
  
             
-      
+ 
+            
         return render_to_response('newcasev2.html', {   "form":form,
                                                                                              "propertyCategoryName":propertyCategoryName,
                                                                                              "catalogproperty_name":catalogproperty_name,
@@ -2609,7 +2609,7 @@ def addcasev2(request):
                                                                                              'propertySessionList':propertySessionList,
                                                                                              'chkBoxMagnetoelectricity':chkBoxMagnetoelectricity,
                                                                                              'dataPropertyList':dataPropertyList,
-                                                                                             'datapropertytagselected':datapropertytagselected
+                                                                                             'datapropertytagselected':int(datapropertytagselected)
                                                                                        }, context_instance=RequestContext(request))
       
 def addToSession(request,customobject,nameObjectOnSession):

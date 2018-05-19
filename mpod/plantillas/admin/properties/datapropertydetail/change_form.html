@@ -1,0 +1,70 @@
+{% extends "admin/change_form.html" %}
+
+
+{% block extrahead %}
+{{ block.super }}
+{% url 'admin:jsi18n' as jsi18nurl %}
+{{ media }}
+<!-- start: two new lines for highcharts -->
+<script type="text/javascript" src="/static/admin/js/jquery.min.js"></script>
+<!-- end: two new lines for highcharts -->
+<script>
+    $(document).ready(function() {
+        $('.move_to_submit_row').insertBefore('.submit-row>input:first');
+        var htmlString = $('.submit-row').html()
+        htmlString =  '<input type="submit" value="Populate" name="_popularte">' + htmlString ;
+        $('.submit-row').html(htmlString);
+    });
+</script>
+{% endblock %}
+
+
+{% block submit_buttons_bottom %}
+    {{ block.super }}
+
+     
+
+{% endblock %}
+ 
+ 
+
+
+{% block after_field_sets %}{{ block.super }}
+ <input type='hidden' id="id_todo" name='_todo' value='' />
+{% if change %}
+			You are changing {{ original }} 
+
+ 
+
+{% else %}
+			This is a new objecct
+			
+
+{% endif %} 
+
+<script type="text/javascript" charset="utf-8">
+var chart;
+$(document).ready(function() {
+ 
+	    $('#id_catalogcrystalsystem').change(function ()
+	   	     {
+	    		$('#id_todo').val('selectcatalogcrystalsystemChange')
+	    		$( "#datapropertydetail_form" ).submit();
+	    	 
+	   	    	
+	   	      });
+	    
+ 
+	    
+	    
+ 
+         
+});
+</script>
+
+
+
+{% endblock %} 
+
+
+ 

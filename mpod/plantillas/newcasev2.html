@@ -986,11 +986,13 @@
 											      <label for="journal">Data Property Tag</label>
 											    </div>
 											    
+											    
+											    
 											 {% if dataPropertyList %}  
 											<div class="form-group searches"> 
-											    	<select id="datapropertytag" name="datapropertytag" onchange=""  class="form-control">       
+											    	<select id="datapropertytag" name="datapropertytag" onchange="onchangeFunc()"  class="form-control" style="width: 300px;">       
 											       {% for dp in dataPropertyList %}       
-											        {% if dp.id == datapropertytagselected %} 
+											        {% if datapropertytagselected  == dp.id %} 
 													       <option  selected="selected" value="{{dp.id}}"  > {{dp.name }} </option>
 													 {% else %}
 													      <option value="{{dp.id}}"   > {{dp.name}} </option>
@@ -1189,8 +1191,8 @@
 														               
 														               </table>
 																	    <table>
-																		 	{% if property.objTypeSelected.name    == "s"%} 
-																		      {% for row  in property.s%} 
+																		 	
+																		      {% for row  in property.coefficientsmatrix%} 
 																		       <tr>
 																					{% for col  in row %}  
 																				   <td>
@@ -1200,18 +1202,8 @@
 																				 {% endfor %}
 																		      
 																		      {% endfor %}
-																	      {% endif %}  
-																	      {% if property.objTypeSelected.name   == "c"%} 
-																		      {% for row  in property.c%} 
-																		       <tr>
-																					{% for col  in row %}  
-																				   <td>
-																				      <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
-																				   </td>	
-																				 {% endfor %}
-																		      
-																		      {% endfor %}
-																	      {% endif %}  
+																	
+
 																	  
 																		 {% if property.objTypeSelected.name  == "d"%} 
 																		      {% for row  in property.d%} 
@@ -1227,8 +1219,8 @@
 																	      
 																	      
 																	      
-																	        {% if property.objTypeSelected.name  == "k"%} 
-																		      {% for row  in property.k%} 
+																	      {% if property.objTypeSelected.name  == "k"%} 
+																		      {% for row  in property.coefficientsmatrix%} 
 																		       <tr>
 																					{% for col  in row %}  
 																				   <td>
@@ -1237,7 +1229,9 @@
 																				 {% endfor %}
 																		      
 																		      {% endfor %}
-																	      {% endif %}  
+																	     {% endif %}  
+																	      
+										 
 																	      
 																	      
 																	      </table>
