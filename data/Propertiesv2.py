@@ -782,14 +782,18 @@ class Propertiesv2(object):
                         j= index[1]
                         print str(i) + "," + str(j)
                         
+                        if cursor == 0 or cursor == 1:                           
+                            if str(p.name) == self.__coefficientsparts[cursor]:      
+                                self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                        """             
                         if cursor == 0:
                             if str(p.name) == self.__coefficientsparts[cursor]:      
                                 self.coefficientsmatrix[1,1]= self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
-                                
+                            
                         if cursor == 1:
                             if str(p.name) == self.__coefficientsparts[cursor]:      
                                 self.coefficientsmatrix[1,0]= self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
-   
+                        """
                         if cursor == 2:
                             if str(p.name) == self.__coefficientsparts[cursor]:      
                                 self.coefficientsmatrix[1,2] = self.coefficientsmatrix[2,0] = self.coefficientsmatrix[2,1] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
@@ -798,9 +802,11 @@ class Propertiesv2(object):
                             if str(p.name) == self.__coefficientsparts[cursor]:      
                                 self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
                                 
+                        
                         if cursor == 4:
                             if str(p.name) == self.__coefficientsparts[cursor]:      
                                 self.coefficientsmatrix[4,4] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                      
                            
                             
                     if self.type == 's':
@@ -1022,7 +1028,10 @@ class Propertiesv2(object):
                             if cursor == 0 or cursor == 3 or cursor == 5 or cursor == 6 or cursor == 7 or cursor == 8:
                                 if str(p.name) == self.__coefficientsparts[cursor]:      
                                     self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
-                                    
+                            else:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                            """        
                             if cursor == 1:
                                 if str(p.name) == self.__coefficientsparts[cursor]:      
                                     self.coefficientsmatrix[1,0] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
@@ -1035,6 +1044,7 @@ class Propertiesv2(object):
                             if cursor == 4:
                                 if str(p.name) == self.__coefficientsparts[cursor]:      
                                     self.coefficientsmatrix[2,1] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))   
+                            """
 
                          
                         print (self.coefficientsmatrix)   
@@ -1092,10 +1102,12 @@ class Propertiesv2(object):
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                     inputpop($(this));
                                                                                     $('#divwarningpropertyvalues').hide();
-                                                                                    $('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                                    //$('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val($(this).val());
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """21').val('') ;
+                                                                                   //$('#""" +self.type+ """21').val('') ;
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
@@ -1107,10 +1119,12 @@ class Propertiesv2(object):
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                    inputpop($(this));
                                                                                    $('#divwarningpropertyvalues').hide();
-                                                                                   $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                                   //$('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val($(this).val());
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """31').val('') ;
+                                                                                   //$('#""" +self.type+ """31').val('') ;
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
@@ -1132,11 +1146,13 @@ class Propertiesv2(object):
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                     inputpop($(this));
                                                                                     $('#divwarningpropertyvalues').hide();
-                                                                                    $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                                    //$('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val($(this).val());
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """32').val('') ;
+                                                                                   //$('#""" +self.type+ """32').val('') ;
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
@@ -1239,7 +1255,58 @@ class Propertiesv2(object):
                     
             elif self.crystalsystem_name == 'tc':
                 if  self.__request != None and len(self.__inputList) > 0:
-                        for p in self.__inputList :
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
+                            index=self.getIndex(p.name) 
+                            i = index[0]
+                            j= index[1]
+                            print str(i) + "," + str(j)
+                            
+                            if cursor == 0 or cursor == 6 or cursor == 11 or cursor == 15 or cursor == 18 or cursor == 20:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))      
+                            else:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i]  = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))    
+                            
+                            """
+                            if cursor == 2:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
+                            if cursor == 3:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i]= self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
+                            if cursor == 4:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
+                            if cursor == 5:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
+                            if cursor == 7:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
+                            if cursor == 8:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i]  = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
+                            if cursor == 9:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
+                            if cursor == 10:
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
+                           """ 
+                            
+                            """
+                            if str(p.name) == "s34":
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.s[2,3] = self.s[3,2] = float (self.__request.POST.get(p.name, False))
+                            if str(p.name) == "s35":
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.s[2,4] = self.s[4,2] = float (self.__request.POST.get(p.name, False))
+                            if str(p.name) == "s36":
+                                if str(p.name) == self.__coefficientsparts[cursor]:
+                                    self.s[2,5] = self.s[5,2] = float (self.__request.POST.get(p.name, False))
+                            
                             if str(p.name) == "s11":    
                                 self.s[0,0] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "s12":
@@ -1325,13 +1392,14 @@ class Propertiesv2(object):
                                 self.c[4,5] = self.c[5,4] =float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "c66":
                                 self.c[5,5] = float (self.__request.POST.get(p.name, False))
-                            
-
+                            """
+                        """
                         if self.type == 's':
                             print (self.s)
                         elif self.type == 'c':
                             print (self.c)
-                            
+                        """
+                        print self.coefficientsmatrix   
                         self.sucess = 1;
                         return
                 else:
@@ -1350,6 +1418,7 @@ class Propertiesv2(object):
                     
                     self.setCatalogPropertyDetail()
                     #self.preparedataforjQuery(self.type )
+                    """
                     self.listofemptyInputs.append(self.type+"21");
                     self.listofemptyInputs.append(self.type+"31");
                     self.listofemptyInputs.append(self.type+"41");
@@ -1365,6 +1434,23 @@ class Propertiesv2(object):
                     self.listofemptyInputs.append(self.type+"54");
                     self.listofemptyInputs.append(self.type+"64");
                     self.listofemptyInputs.append(self.type+"65");
+                    """
+    
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" +self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "31" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+"41" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+"51" +self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "61" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "32" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "42" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+"52" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+"62" +self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "43" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+"53" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+"63" +self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "54" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "64" + self.coefficientspartssplit[1])
+                    self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "65" + self.coefficientspartssplit[1])
                     
                     self.jquery= self.jquery +  """
                                         // inicio de codigo jQuery
@@ -1374,8 +1460,8 @@ class Propertiesv2(object):
                                             {
                                          """
                     self.jquery= self.jquery + """
-                                                         $('#""" +self.type+ """11').focusout(function ()
-                                                            {
+                                                      
+                                                        $('#""" +self.coefficientsparts[0]+ """').focusout(function (){
                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                     inputpop($(this));
                                                                 }else
@@ -1385,207 +1471,236 @@ class Propertiesv2(object):
                                                                 }
                                                              });
                                                              
-                                                             $('#""" +self.type+ """11').keyup(function ()
-                                                            {
+                                                         
+                                                           $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                 inputpop($(this));                                                                                   
                                                              });
                                                                          
-                                                             $('#""" +self.type+ """12').keyup(function ()
-                                                                {
+                                                       
+                                                            $('#""" +self.coefficientsparts[1]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """21').val('') ;
+                                                                       //$('#""" +self.type+ """21').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
-                                                                $('#""" +self.type+ """13').keyup(function ()
-                                                                {
+                                                     
+                                                                $('#""" +self.coefficientsparts[2]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """31').val('') ;
+                                                                       //$('#""" +self.type+ """31').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
-                                                                 $('#""" +self.type+ """14').keyup(function ()
-                                                                {
+                                                         
+                                                                $('#""" +self.coefficientsparts[3]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                          inputpop($(this));
-                                                                        $('#""" +self.type+ """41').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """41').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """41"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """41').val('') ;
+                                                                       //$('#""" +self.type+ """41').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """41"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                       inputpopclear($(this));
+                                                                    }
+                                                                 });
+                                                    
+                                                                $('#""" +self.coefficientsparts[4]+ """').keyup(function (){
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                        inputpop($(this));
+                                                                        //$('#""" +self.type+ """51').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """51"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
+                                                                 
+                                                                    }else
+                                                                    {
+                                                                       //$('#""" +self.type+ """51').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """51"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
                                                                  
-                                                                $('#""" +self.type+ """15').keyup(function ()
-                                                                {
+                                                      
+                                                                $('#""" +self.coefficientsparts[5]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """51').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """61').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """61"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """51').val('') ;
+                                                                       //$('#""" +self.type+ """61').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """61"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
-                                                                 
-                                                                $('#""" +self.type+ """16').keyup(function ()
-                                                                {
+                                                        
+                                                                $('#""" +self.coefficientsparts[7]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """61').val($(this).val() ) ;
-                                                                 
+                                                                        //$('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """61').val('') ;
+                                                                       //$('#""" +self.type+ """32').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                        inputpopclear($(this));
                                                                     }
                                                                  });
                                                                  
-                                                                 
-                                                                                          
-                                                                $('#""" +self.type+ """23').keyup(function ()
-                                                                {
+                                    
+                                                                $('#""" +self.coefficientsparts[8]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """42').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """42"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """32').val('') ;
-                                                                       inputpopclear($(this));
-                                                                    }
-                                                                 });
-                                                                 
-                                                                $('#""" +self.type+ """24').keyup(function ()
-                                                                {
-                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                        inputpop($(this));
-                                                                        $('#""" +self.type+ """42').val($(this).val() ) ;
-                                                                    }else
-                                                                    {
-                                                                       $('#""" +self.type+ """42').val('') ;
+                                                                       //$('#""" +self.type+ """42').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """42"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  });  
                                                                  
-                                                                $('#""" +self.type+ """25').keyup(function ()
-                                                                {
+                            
+                                                                $('#""" +self.coefficientsparts[9]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """52').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """52').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """52"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """52').val('') ;
+                                                                      // $('#""" +self.type+ """52').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """52"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                       inputpopclear($(this));
+                                                                    }
+                                                                 }); 
+                                              
+                                                                $('#""" +self.coefficientsparts[10]+ """').keyup(function (){
+                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                        inputpop($(this));
+                                                                        //$('#""" +self.type+ """62').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """62"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
+                                                                 
+                                                                    }else
+                                                                    {
+                                                                       //$('#""" +self.type+ """62').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """62"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
-                                                                $('#""" +self.type+ """26').keyup(function ()
-                                                                {
-                                                                    if(Number($(this).val()).toPrecision() != 'NaN') {
-                                                                        inputpop($(this));
-                                                                        $('#""" +self.type+ """62').val($(this).val() ) ;
-                                                                 
-                                                                    }else
-                                                                    {
-                                                                       $('#""" +self.type+ """62').val('') ;
-                                                                       inputpopclear($(this));
-                                                                    }
-                                                                 }); 
-                                                                 
-                                                                 $('#""" +self.type+ """34').keyup(function ()
-                                                                {
+                                                        
+                                                                $('#""" +self.coefficientsparts[12]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """43').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """43').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """43"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """43').val('') ;
+                                                                       //$('#""" +self.type+ """43').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """43"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  }); 
-                                                                $('#""" +self.type+ """35').keyup(function ()
-                                                                {
+                                                                 
+                                                         
+                                                                $('#""" +self.coefficientsparts[13]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """53').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """53').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """53"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """53').val('') ;
+                                                                       //$('#""" +self.type+ """53').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """53"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
-                                                                $('#""" +self.type+ """36').keyup(function ()
-                                                                {
+                                                      
+                                                                $('#""" +self.coefficientsparts[14]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """63').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """63').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """63"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """63').val('') ;
+                                                                       //$('#""" +self.type+ """63').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """63"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
-                                                               $('#""" +self.type+ """45').keyup(function ()
-                                                                {
+                                                      
+                                                                $('#""" +self.coefficientsparts[16]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """54').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """54').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """54"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """54').val('');
+                                                                       //$('#""" +self.type+ """54').val('');
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """54"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
-                                                                $('#""" +self.type+ """46').keyup(function ()
-                                                                {
+                                                          
+                                                                $('#""" +self.coefficientsparts[17]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """64').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """64').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """64"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """64').val('') ;
+                                                                       //$('#""" +self.type+ """64').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """64"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
+                                                                 /*
                                                                 $('#""" +self.type+ """56').keyup(function ()
-                                                                {
+                                                                {*/
+                                                                $('#""" +self.coefficientsparts[19]+ """').keyup(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """65').val($(this).val() ) ;
+                                                                        //$('#""" +self.type+ """65').val($(this).val() ) ;
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """65"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                  
                                                                     }else
                                                                     {
-                                                                       $('#""" +self.type+ """65').val('') ;
+                                                                       //$('#""" +self.type+ """65').val('') ;
+                                                                       $('#""" +self.coefficientspartssplit[0]+ """65"""+self.coefficientspartssplit[1]+"""').val('');
                                                                        inputpopclear($(this));
                                                                     }
                                                                  }); 
                                                                  
-                                                                 $('#""" +self.type+ """22').focusout(function ()
-                                                                {
+                                                  
+                                                                
+                                                                $('#""" +self.coefficientsparts[6]+ """').focusout(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
                                                                     }else
@@ -1598,9 +1713,8 @@ class Propertiesv2(object):
                                                                 
                                                                  
                                                                  
-                                                                 
-                                                                 $('#""" +self.type+ """33').focusout(function ()
-                                                                {
+                                                      
+                                                                $('#""" +self.coefficientsparts[11]+ """').focusout(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
                                                                     }else
@@ -1610,8 +1724,8 @@ class Propertiesv2(object):
                                                                     }
                                                                  });
                                                                  
-                                                                 $('#""" +self.type+ """44').focusout(function ()
-                                                                {
+                                                              
+                                                                $('#""" +self.coefficientsparts[15]+ """').focusout(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
                                                                     }else
@@ -1621,8 +1735,8 @@ class Propertiesv2(object):
                                                                     }
                                                                  });
                                                                  
-                                                                 $('#""" +self.type+ """55').focusout(function ()
-                                                                {
+                                                
+                                                                $('#""" +self.coefficientsparts[18]+ """').focusout(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
                                                                     }else
@@ -1632,8 +1746,8 @@ class Propertiesv2(object):
                                                                     }
                                                                  });
                                                                  
-                                                                 $('#""" +self.type+ """66').focusout(function ()
-                                                                {
+                                                        
+                                                                $('#""" +self.coefficientsparts[20]+ """').focusout(function (){
                                                                     if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                         inputpop($(this));
                                                                     }else
@@ -1643,28 +1757,33 @@ class Propertiesv2(object):
                                                                     }
                                                                  });
                                                                  
-                                                                $('#""" +self.type+ """22').keyup(function ()
-                                                                {
+                                                     
+                                                                $('#""" +self.coefficientsparts[6]+ """').keyup(function ()
+                                                                 {
                                                                     inputpop($(this));                                                                                   
                                                                  });
                                                                  
-                                                                 $('#""" +self.type+ """33').keyup(function ()
-                                                                {
+                                                
+                                                                $('#""" +self.coefficientsparts[11]+ """').keyup(function ()
+                                                                 {
                                                                     inputpop($(this));                                                                                   
                                                                  });
                                                                  
-                                                                $('#""" +self.type+ """44').keyup(function ()
-                                                                {
+                                                           
+                                                                $('#""" +self.coefficientsparts[15]+ """').keyup(function ()
+                                                                 {
                                                                     inputpop($(this));                                                                                   
                                                                  });
                                                                  
-                                                                 $('#""" +self.type+ """55').keyup(function ()
-                                                                {
+                                            
+                                                                $('#""" +self.coefficientsparts[18]+ """').keyup(function ()
+                                                                 {
                                                                     inputpop($(this));                                                                                   
                                                                  });
                                                                  
-                                                                 $('#""" +self.type+ """66').keyup(function ()
-                                                                {
+                                                             
+                                                                $('#""" +self.coefficientsparts[20]+ """').keyup(function ()
+                                                                 {
                                                                     inputpop($(this));                                                                                   
                                                                  });
                                                                  
@@ -1695,16 +1814,45 @@ class Propertiesv2(object):
  
                     
             elif self.crystalsystem_name == 'te':                     
-                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '4, -4, 4/m, 422, 4mm, -42m, 4/mmm':
+                if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '4, -4, 4/m, 422, 4mm, -42m, 4/mmm':
                     self.questionGp = 'Point Group?'    
                     self.setPointGroup()
                     self.setAxis()
                     return
                     
                 if  self.__request != None and len(self.__inputList) > 0:
-                    for p in self.__inputList :
+                    
+                    self.setDimension(self.objDataProperty)
+                    for cursor, p in enumerate(self.__inputList) :
+                        index=self.getIndex(p.name) 
+                        i = index[0]
+                        j= index[1]
+                        print str(i) + "," + str(j)
+                            
+                            
                         if self.puntualgroupselected_name in ('4mm', '-42m', '422', '4/mmm'):
-                            if str(p.name) == "s11":       
+        
+                            if cursor == 0:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[1,1]= self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+             
+                            if cursor == 1:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                               
+                            if cursor == 2:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[2,1] = self.coefficientsmatrix[1,2] = self.coefficientsmatrix[2,0] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))     
+                                    
+                            if cursor == 4:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[4,4] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))         
+                                    
+                            if cursor == 5 or  cursor == 3:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                        
+                            """if str(p.name) == "s11":       
                                 self.s[0,0] = self.s[1,1] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "s12":  
                                 self.s[0,1] = self.s[1,0] = float (self.__request.POST.get(p.name, False))
@@ -1729,7 +1877,32 @@ class Propertiesv2(object):
                                 self.c[3,3] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "c66":  
                                 self.c[5,5] = float (self.__request.POST.get(p.name, False))
+                            """
                         elif self.puntualgroupselected_name in ('4', '-4', '4/m'): 
+                            if cursor == 0:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[1,1]= self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+             
+                            if cursor == 1 or cursor == 3:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                               
+                            if cursor == 2:
+                                #if self.type == 's':
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[2,1] = self.coefficientsmatrix[1,2] = self.coefficientsmatrix[2,0] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
+                                """else: 
+                                        self.coefficientsmatrix[1,2] = self.coefficientsmatrix[2,0] = self.coefficientsmatrix[2,1] = self.coefficientsmatrix[1,2] = self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
+                                """     
+                            if  cursor == 4  or cursor == 6:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))         
+                                    
+                            if cursor == 5:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[4,4] =  self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+     
+                            """       
                             if str(p.name) == "s11": 
                                 self.s[0,0] = self.s[1,1] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "s12": 
@@ -1744,6 +1917,7 @@ class Propertiesv2(object):
                                 self.s[3,3] = self.s[4,4] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "s66": 
                                 self.s[5,5] = float (self.__request.POST.get(p.name, False))
+                            
                                 
                             if str(p.name) == "c11":    
                                 self.c[0,0] = self.c[1,1] = float (self.__request.POST.get(p.name, False))
@@ -1759,15 +1933,15 @@ class Propertiesv2(object):
                                 self.c[3,3] = self.c[4,4] =  float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "c66":    
                                 self.c[5,5] = float (self.__request.POST.get(p.name, False))
+                            """
     
                     if self.type == 's':
-                        self.s[1,5] = self.s[5,1] = -self.s[0,5]
-                        print (self.s)
+                        self.coefficientsmatrix[1,5] = self.coefficientsmatrix[5,1] = -self.coefficientsmatrix[0,5]
                     elif self.type == 'c':
-                        self.c[1,5] = self.c[5,1] = -self.c[0,5]
-                        print (self.c)
+                        self.coefficientsmatrix[1,5] = self.coefficientsmatrix[5,1] = -self.coefficientsmatrix[0,5]
+ 
                         
-                        
+                    print (self.coefficientsmatrix)    
                     self.sucess = 1;                        
                     return
                 else:
@@ -1787,60 +1961,90 @@ class Propertiesv2(object):
                                                                      """
                      
                     if self.puntualgroupselected_name in ('4mm', '-42m', '422', '4/mmm'):
-                        self.listofemptyInputs.append(self.type+"22");
+                        """self.listofemptyInputs.append(self.type+"22");
                         self.listofemptyInputs.append(self.type+"21");
                         self.listofemptyInputs.append(self.type+"23");
                         self.listofemptyInputs.append(self.type+"31");
                         self.listofemptyInputs.append(self.type+"32");
                         self.listofemptyInputs.append(self.type+"55");
+                        """
+                        
+                        
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "23" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"32" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "55" + self.coefficientspartssplit[1])
+ 
+                    
                         self.jquery= self.jquery + """
                         
-                                                                 $('#""" +self.type+ """11').keyup(function ()
-                                                                    {
+                                                                 /*$('#""" +self.type+ """11').keyup(function ()
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """22').val($(this).val() );
+                                                                        //$('#""" +self.type+ """22').val($(this).val() );
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#""" +self.type+ """22').val('');
+                                                                           //$('#""" +self.type+ """22').val('');
+                                                                           $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val('');
                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
                                                                      
-                                                                     $('#""" +self.type+ """12').keyup(function ()
-                                                                    {
+                                                                     /*$('#""" +self.type+ """12').keyup(function ()
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[1]+ """').keyup(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                         }else
                                                                         {
-                                                                           $('#""" +self.type+ """21').val('');
+                                                                           //$('#""" +self.type+ """21').val('');
+                                                                           $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('');
                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
                                                                      
+                                                                    /*
                                                                    $('#""" +self.type+ """13').keyup(function ()
-                                                                    {
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[2]+ """').keyup(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """23').val($(this).val() ) ;
+                                                                            /*$('#""" +self.type+ """23').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                            */
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """23"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                      
                                                                         }else
                                                                         {
-                                                                            $('#""" +self.type+ """23').val('') ;
+                                                                            /*$('#""" +self.type+ """23').val('') ;
                                                                             $('#""" +self.type+ """31').val('') ;
                                                                             $('#""" +self.type+ """32').val('') ;
+                                                                            */
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """23"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('');
                                                                             inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
+                                                                     /*
                                                                      $('#""" +self.type+ """33').focusout(function ()
                                                                     {
+                                                                    */
+                                                                    $('#""" +self.coefficientsparts[3]+ """').focusout(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                             inputpop($(this));
                                                                         }else
@@ -1849,9 +2053,35 @@ class Propertiesv2(object):
                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
+                                                                     
+                                                                     
+                                                                   /*$('#""" +self.type+ """44').keyup(function ()
+                                                                    {*/
+                                                                $('#""" +self.coefficientsparts[4]+ """').keyup(function (){
+                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            //$('#""" +self.type+ """55').val($(this).val());
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """55"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
+                                                                     
+                                                                        }else
+                                                                        {
+                                                                           //$('#""" +self.type+ """55').val('');
+                                                                           $('#""" +self.coefficientspartssplit[0]+ """55"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                           inputpopclear($(this));
+                                                                        }
+                                                                     });
+                                                                     
+                                                                    /*$('#""" +self.type+ """33').keyup(function ()
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[3]+ """').keyup(function (){
+                                                                        inputpop($(this));
+                                                                    });
                                                                                  
+                                                                 /*
                                                                      $('#""" +self.type+ """66').focusout(function ()
                                                                     {
+                                                                    */
+                                                                $('#""" +self.coefficientsparts[5]+ """').focusout(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                             inputpop($(this));
                                                                         }else
@@ -1860,28 +2090,13 @@ class Propertiesv2(object):
                                                                            inputpopclear($(this));
                                                                         }
                                                                  });
-                                                                     $('#""" +self.type+ """44').keyup(function ()
-                                                                    {
-                                                                        if(Number($(this).val()).toPrecision() != 'NaN') {
-                                                                            inputpop($(this));
-                                                                            $('#""" +self.type+ """55').val($(this).val());
-                                                                     
-                                                                        }else
-                                                                        {
-                                                                           $('#""" +self.type+ """55').val('');
-                                                                           inputpopclear($(this));
-                                                                        }
-                                                                     });
-                                                                     
-                                                                    $('#""" +self.type+ """33').keyup(function ()
-                                                                    {
-                                                                        inputpop($(this));
-                                                                    });
+
                                                                     
                                                                      
                                                                     
-                                                                     $('#""" +self.type+ """66').keyup(function ()
-                                                                    {
+                                                                    /* $('#""" +self.type+ """66').keyup(function ()
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[5]+ """').keyup(function (){
                                                                         inputpop($(this));
                                                                     });
                                                                      
@@ -1889,7 +2104,7 @@ class Propertiesv2(object):
                                                                      """                    
                                          
                     elif self.puntualgroupselected_name in ('4', '-4', '4/m'):
-                        self.listofemptyInputs.append(self.type+"22");
+                        """self.listofemptyInputs.append(self.type+"22");
                         self.listofemptyInputs.append(self.type+"21");
                         self.listofemptyInputs.append(self.type+"23");
                         self.listofemptyInputs.append(self.type+"31");
@@ -1898,44 +2113,70 @@ class Propertiesv2(object):
                         self.listofemptyInputs.append(self.type+"62");
                         self.listofemptyInputs.append(self.type+"26");
                         self.listofemptyInputs.append(self.type+"55");
+                        """
+                        
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "23" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"32" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "61" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"62" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"26" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "55" + self.coefficientspartssplit[1])
+                        
                         self.jquery= self.jquery + """
-                                                                 $('#""" +self.type+ """11').keyup(function ()
-                                                                    {
+                                                                 /*$('#""" +self.type+ """11').keyup(function ()
+                                                                    {*/
+                                                                $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """22').val($(this).val());
+                                                                            //$('#""" +self.type+ """22').val($(this).val());
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                         }else
                                                                         {
-                                                                           $('#""" +self.type+ """22').val('');
+                                                                           //$('#""" +self.type+ """22').val('');
+                                                                           $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val('');
                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
+                                                                     /*
                                                                      $('#""" +self.type+ """12').keyup(function ()
-                                                                    {
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[1]+ """').keyup(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """21').val($(this).val());
+                                                                            //$('#""" +self.type+ """21').val($(this).val());
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                         }else
                                                                         {
-                                                                            $('#""" +self.type+ """21').val('');
+                                                                            //$('#""" +self.type+ """21').val('');
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('');
                                                                             inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
-                                                                     
+                                                                  /*   
                                                                    $('#""" +self.type+ """13').keyup(function ()
-                                                                    {
+                                                                    {*/
+                                                                $('#""" +self.coefficientsparts[2]+ """').keyup(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """23').val($(this).val());
+                                                                            /*$('#""" +self.type+ """23').val($(this).val());
                                                                             $('#""" +self.type+ """31').val($(this).val());
-                                                                            $('#""" +self.type+ """32').val($(this).val());
+                                                                            $('#""" +self.type+ """32').val($(this).val());*/
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """23"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                         }else
                                                                         {
-                                                                            $('#""" +self.type+ """23').val('');
+                                                                            /*$('#""" +self.type+ """23').val('');
                                                                             $('#""" +self.type+ """31').val('');
-                                                                            $('#""" +self.type+ """32').val('');
+                                                                            $('#""" +self.type+ """32').val('');*/
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """23"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('');
                                                                             inputpopclear($(this));
                                                                         }
                                                                      });
@@ -1943,8 +2184,9 @@ class Propertiesv2(object):
                                    
                                                                      
                                                                      
-                                                                    $('#""" +self.type+ """16').keyup(function ()
-                                                                    {
+                                                                    /*$('#""" +self.type+ """16').keyup(function ()
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[3]+ """').keyup(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                             inputpop($(this));
                                                                             v = $(this).val()
@@ -1953,21 +2195,29 @@ class Propertiesv2(object):
                                                                             else
                                                                                 value = v 
   
-                                                                            $('#""" +self.type+ """61').val(value);
+                                                                            /*$('#""" +self.type+ """61').val(value);
                                                                             $('#""" +self.type+ """62').val(-value);
-                                                                            $('#""" +self.type+ """26').val(-value);
+                                                                            $('#""" +self.type+ """26').val(-value);*/
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """61"""+self.coefficientspartssplit[1]+"""').val(value);
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """62"""+self.coefficientspartssplit[1]+"""').val(-value );
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val(-value);
                                                                      
                                                                         }else
                                                                         {
-                                                                            $('#""" +self.type+ """61').val('');
+                                                                            /*$('#""" +self.type+ """61').val('');
                                                                             $('#""" +self.type+ """62').val('');
                                                                             $('#""" +self.type+ """26').val('');
+                                                                            */
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """61"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """62"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val('');
                                                                             inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
-                                                                     $('#""" +self.type+ """33').focusout(function ()
-                                                                    {
+                                                                     /*$('#""" +self.type+ """33').focusout(function ()
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[4]+ """').focusout(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                             inputpop($(this));
                                                                         }else
@@ -1979,22 +2229,27 @@ class Propertiesv2(object):
                                                                      
                                                                      
                                                                      
-                                                                     
+                                                                     /*
                                                                     $('#""" +self.type+ """44').keyup(function ()
-                                                                    {
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[5]+ """').keyup(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                         inputpop($(this));
-                                                                        $('#""" +self.type+ """55').val($(this).val());
+                                                                        //$('#""" +self.type+ """55').val($(this).val());
+                                                                        $('#""" +self.coefficientspartssplit[0]+ """55"""+self.coefficientspartssplit[1]+"""').val($(this).val());
                                                                      
                                                                         }else
                                                                         {
-                                                                           $('#""" +self.type+ """55').val('');
+                                                                           //$('#""" +self.type+ """55').val('');
+                                                                           $('#""" +self.coefficientspartssplit[0]+ """55"""+self.coefficientspartssplit[1]+"""').val('');
                                                                            inputpopclear($(this));
                                                                         }
                                                                      });
                                                                      
+                                                                     /*
                                                                      $('#""" +self.type+ """66').focusout(function ()
-                                                                    {
+                                                                    {*/
+                                                                  $('#""" +self.coefficientsparts[6]+ """').focusout(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                             inputpop($(this));
                                                                         }else
@@ -2004,13 +2259,15 @@ class Propertiesv2(object):
                                                                         }
                                                                      });
                                                                      
-                                                                    $('#""" +self.type+ """33').keyup(function ()
-                                                                    {
+                                                                    /*$('#""" +self.type+ """33').keyup(function ()
+                                                                    {*/
+                                                                    $('#""" +self.coefficientsparts[4]+ """').keyup(function (){
                                                                         inputpop($(this));
                                                                     });
                                                                     
-                                                                     $('#""" +self.type+ """66').keyup(function ()
-                                                                    {
+                                                                     /*$('#""" +self.type+ """66').keyup(function ()
+                                                                    {*/
+                                                                  $('#""" +self.coefficientsparts[6]+ """').keyup(function (){
                                                                         inputpop($(this));
                                                                     });
                                                                      
@@ -2042,9 +2299,26 @@ class Propertiesv2(object):
             elif self.crystalsystem_name == 'm':   
 
                 if  self.__request != None and len(self.__inputList) > 0:
+                    self.setDimension(self.objDataProperty)
                     
-                    for p in self.__inputList :
+                    for cursor, p in enumerate(self.__inputList) :
+                        index=self.getIndex(p.name) 
+                        i = index[0]
+                        j= index[1]
+                        print str(i) + "," + str(j)
+ 
+                                
                         if self.axisselected_name  == 'x2':
+                            if cursor == 0 or cursor == 4  or cursor == 7 or cursor == 9  or cursor ==11 or cursor == 12 :
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                            
+                            if cursor == 1 or cursor == 2 or cursor == 3 or cursor == 5 or cursor == 6 or cursor == 10:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))        
+                                    
+                                
+                            """    
                             if str(p.name) == "s11":  
                                 self.s[0,0] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "s12": 
@@ -2100,12 +2374,19 @@ class Propertiesv2(object):
                                 self.c[4,4] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "c66":  
                                 self.c[5,5] = float (self.__request.POST.get(p.name, False))
-                             
+                            """
                         elif self.axisselected_name  == 'x3':
-                            print self.axisselected_name
-                            print p.name
-                            print self.__request.POST.get(p.name, False)
-                            if str(p.name) == "s11":  
+                            
+                            if cursor == 0 or cursor == 4  or cursor == 7 or cursor == 9  or cursor ==11 or cursor == 12 :
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                            
+                            if cursor == 1 or cursor == 2 or cursor == 3 or cursor == 5 or cursor == 6 or cursor == 8 or cursor == 10:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
+                             
+                            """       
+                            if str(p.name) == "s11":
                                 self.s[0,0] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "s12":
                                 self.s[0,1] = self.s[1,0] = float (self.__request.POST.get(p.name, False))
@@ -2159,13 +2440,16 @@ class Propertiesv2(object):
                                 self.c[4,4] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "c66":  
                                 self.c[5,5] = float (self.__request.POST.get(p.name, False))
+                            """
 
-                            
+                    """         
                     if self.type == 's':    
                         print self.s
                     elif self.type == 'c': 
                         print self.c 
+                    """
                         
+                    print self.coefficientsmatrix   
                     self.sucess = 1;  
                 else:    
                     """if  self.puntualgroupselected_name == '':
@@ -2200,16 +2484,27 @@ class Propertiesv2(object):
                                                                     {
                                                                  """
                     if self.axisselected_name  == 'x2':
-                        self.listofemptyInputs.append(self.type+"21");
+                        """self.listofemptyInputs.append(self.type+"21");
                         self.listofemptyInputs.append(self.type+"31");
                         self.listofemptyInputs.append(self.type+"51");
                         self.listofemptyInputs.append(self.type+"32");
                         self.listofemptyInputs.append(self.type+"52");
                         self.listofemptyInputs.append(self.type+"53");
                         self.listofemptyInputs.append(self.type+"64");
+                        """
+                        
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "51" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"32" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"52" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "53" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "64" + self.coefficientspartssplit[1])
+                    
+                    
                         self.jquery= self.jquery + """
-                                                                      $('#""" +self.type+ """11').focusout(function ()
-                                                                        {
+                                                                       
+                                                                        $('#""" +self.coefficientsparts[0]+ """').focusout(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                 inputpop($(this));
                                                                             }else
@@ -2219,108 +2514,139 @@ class Propertiesv2(object):
                                                                             }
                                                                          });
                                                                          
+                                                                    /*
                                                                      $('#""" +self.type+ """12').keyup(function ()
-                                                                        {
+                                                                        {*/
+                                                                    $('#""" +self.coefficientsparts[1]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """21').val('');
+                                                                               //$('#""" +self.type+ """21').val('');
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """13').keyup(function ()
-                                                                        {
+                                                                         /*$('#""" +self.type+ """13').keyup(function ()
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[2]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               //$('#""" +self.type+ """31').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
+                                                                        /*
                                                                          $('#""" +self.type+ """15').keyup(function ()
-                                                                        {
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[3]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """51').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """51').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """51"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                                $('#""" +self.type+ """51').val('') ;
+                                                                                //$('#""" +self.type+ """51').val('') ;
+                                                                                $('#""" +self.coefficientspartssplit[0]+ """51"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                 inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """22').focusout(function ()
-                                                                        {
-                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                inputpop($(this));
-                                                                            }else
-                                                                            {
-                                                                               $(this).val('');
-                                                                               inputpopclear($(this));
-                                                                            }
-                                                                         });
+    
                                                                          
+                                                                         /*
                                                                          $('#""" +self.type+ """23').keyup(function ()
                                                                         {
+                                                                        */
+                                                                        $('#""" +self.coefficientsparts[5]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                              // $('#""" +self.type+ """32').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
+                                                                         /*
                                                                         $('#""" +self.type+ """25').keyup(function ()
-                                                                        {
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[6]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """52').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """52').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """52"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """52').val('') ;
+                                                                              // $('#""" +self.type+ """52').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """52"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """33').focusout(function ()
-                                                                        {
-                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                inputpop($(this));
-                                                                            }else
-                                                                            {
-                                                                               $(this).val('');
-                                                                               inputpopclear($(this));
-                                                                            }
-                                                                         });
+     
                                                                          
+                                                                         /*
                                                                          $('#""" +self.type+ """35').keyup(function ()
-                                                                        {
+                                                                        {/*
+                                                                        $('#""" +self.coefficientsparts[8]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));;
-                                                                            $('#""" +self.type+ """53').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """53').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """53"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """53').val('') ;
+                                                                               //$('#""" +self.type+ """53').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """53"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+
+                                                                         
+                                                                         /*
+                                                                         $('#""" +self.type+ """46').keyup(function ()
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[10]+ """').keyup(function (){
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
+                                                                            inputpop($(this));
+                                                                            //$('#""" +self.type+ """64').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """64"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
+                                                                         
+                                                                            }else
+                                                                            {
+                                                                               //$('#""" +self.type+ """64').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """64"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """44').focusout(function ()
-                                                                        {
+                                                                         
+                                                                         
+       
+                                                                         
+                                                                         
+                                                                                                                                              /*
+                                                                         $('#""" +self.type+ """22').focusout(function ()
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[4]+ """').focusout(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                 inputpop($(this));
                                                                             }else
@@ -2330,21 +2656,37 @@ class Propertiesv2(object):
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """46').keyup(function ()
-                                                                        {
-                                                                            if(Number($(this).val()).toPrecision() != 'NaN') {
-                                                                            inputpop($(this));
-                                                                            $('#""" +self.type+ """64').val($(this).val() ) ;
-                                                                         
+                                                                                                                                             /*
+                                                                         $('#""" +self.type+ """33').focusout(function ()
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[7]+ """').focusout(function (){
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """64').val('') ;
+                                                                               $(this).val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
+                                                                                                                                                  
+                                                                         /*
+                                                                         $('#""" +self.type+ """44').focusout(function ()
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[9]+ """').focusout(function (){
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                                                                                           /*
                                                                          $('#""" +self.type+ """55').focusout(function ()
-                                                                        {
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[11]+ """').focusout(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                 inputpop($(this));
                                                                             }else
@@ -2354,8 +2696,10 @@ class Propertiesv2(object):
                                                                             }
                                                                          });
                                                                                  
+                                                                        /*
                                                                          $('#""" +self.type+ """66').focusout(function ()
-                                                                        {
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[12]+ """').focusout(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                 inputpop($(this));
                                                                             }else
@@ -2365,34 +2709,40 @@ class Propertiesv2(object):
                                                                             }
                                                                          });
                                                                          
-                                                                         
-                                                                         $('#""" +self.type+ """11').keyup(function ()
-                                                                        {                                                                            
+                                                                        /* $('#""" +self.type+ """11').keyup(function ()
+                                                                        {   */
+                                                                        $('#""" +self.coefficientsparts[0]+ """').keyup(function (){                                                                         
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """22').keyup(function ()
-                                                                        {                                                                            
+                                                                         /*$('#""" +self.type+ """22').keyup(function ()
+                                                                        {   */
+                                                                        $('#""" +self.coefficientsparts[4]+ """').keyup(function (){                                                                         
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """33').keyup(function ()
-                                                                        {                                                                            
+                                                                         /*$('#""" +self.type+ """33').keyup(function ()
+                                                                        {     */
+                                                                        $('#""" +self.coefficientsparts[7]+ """').keyup(function (){                                                                       
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
+                                                                         /*
                                                                          $('#""" +self.type+ """44').keyup(function ()
-                                                                        {                                                                            
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[9]+ """').keyup(function (){                                                                            
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """55').keyup(function ()
-                                                                        {                                                                            
+                                                                         /*$('#""" +self.type+ """55').keyup(function ()
+                                                                        {  */
+                                                                        $('#""" +self.coefficientsparts[11]+ """').keyup(function (){                                                                          
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """66').keyup(function ()
-                                                                        {                                                                            
+                                                                         /*$('#""" +self.type+ """66').keyup(function ()
+                                                                        {  */
+                                                                        $('#""" +self.coefficientsparts[12]+ """').keyup(function (){                                                                          
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
@@ -2400,16 +2750,26 @@ class Propertiesv2(object):
                                                                          
                                                                          """
                     elif self.axisselected_name  == 'x3':
-                        self.listofemptyInputs.append(self.type+"21");
+                        """self.listofemptyInputs.append(self.type+"21");
                         self.listofemptyInputs.append(self.type+"31");
                         self.listofemptyInputs.append(self.type+"61");
                         self.listofemptyInputs.append(self.type+"32");
                         self.listofemptyInputs.append(self.type+"62");
                         self.listofemptyInputs.append(self.type+"63");
                         self.listofemptyInputs.append(self.type+"54");
+                        """
+                        
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "61" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"32" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"62" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "63" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "54" + self.coefficientspartssplit[1])
+                        
                         self.jquery= self.jquery + """
-                                                                        $('#""" +self.type+ """11').focusout(function ()
-                                                                        {
+                                                                       
+                                                                        $('#""" +self.coefficientsparts[0]+ """').focusout(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                 inputpop($(this));
                                                                             }else
@@ -2418,140 +2778,117 @@ class Propertiesv2(object):
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
-                                                                         
-                                                                     $('#""" +self.type+ """12').keyup(function ()
-                                                                        {
+                                                                    
+                                                                 
+                                                                        $('#""" +self.coefficientsparts[1]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """21').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """21').val('') ;
+                                                                               //$('#""" +self.type+ """21').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """13').keyup(function ()
-                                                                        {
+                                                                   
+                                                                        $('#""" +self.coefficientsparts[2]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               //$('#""" +self.type+ """31').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """16').keyup(function ()
-                                                                        {
+                                                                
+                                                                        $('#""" +self.coefficientsparts[3]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """61').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """61').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """61"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """61').val('') ;
+                                                                               //$('#""" +self.type+ """61').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """61"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """23').keyup(function ()
-                                                                        {
+                                                                         
+                                                              
+                                                                        $('#""" +self.coefficientsparts[5]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                              inputpop($(this));
-                                                                            $('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """32').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """32').val('') ;
+                                                                               //$('#""" +self.type+ """32').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """26').keyup(function ()
-                                                                        {
+                                                               
+                                                                        $('#""" +self.coefficientsparts[6]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """62').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """62').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """62"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """62').val('') ;
+                                                                               //$('#""" +self.type+ """62').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """62"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """36').keyup(function ()
-                                                                        {
+                                                                  
+                                                                        $('#""" +self.coefficientsparts[8]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """63').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """63').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """63"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                                $('#""" +self.type+ """63').val('') ;
+                                                                                //$('#""" +self.type+ """63').val('') ;
+                                                                                $('#""" +self.coefficientspartssplit[0]+ """63"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                 inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """45').keyup(function ()
-                                                                        {
+                                                               
+                                                                        $('#""" +self.coefficientsparts[10]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """54').val($(this).val() ) ;
+                                                                            //$('#""" +self.type+ """54').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """54"""+self.coefficientspartssplit[1]+"""').val($(this).val()  );
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """54').val('') ;
+                                                                               //$('#""" +self.type+ """54').val('') ;
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """54"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
                                                                          
-                                                                         $('#""" +self.type+ """22').focusout(function ()
-                                                                        {
-                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                inputpop($(this));
-                                                                            }else
-                                                                            {
-                                                                               $(this).val('');
-                                                                               inputpopclear($(this));
-                                                                            }
-                                                                         });
-                                                                         $('#""" +self.type+ """33').focusout(function ()
-                                                                        {
-                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                inputpop($(this));
-                                                                            }else
-                                                                            {
-                                                                               $(this).val('');
-                                                                               inputpopclear($(this));
-                                                                            }
-                                                                         });
-                                                                         $('#""" +self.type+ """44').focusout(function ()
-                                                                        {
-                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                inputpop($(this));
-                                                                            }else
-                                                                            {
-                                                                               $(this).val('');
-                                                                               inputpopclear($(this));
-                                                                            }
-                                                                         });
-                                                                         $('#""" +self.type+ """55').focusout(function ()
-                                                                        {
-                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                inputpop($(this));
-                                                                            }else
-                                                                            {
-                                                                               $(this).val('');
-                                                                               inputpopclear($(this));
-                                                                            }
-                                                                         });
-                                                                         $('#""" +self.type+ """66').focusout(function ()
-                                                                        {
+                                                                         
+                                                                         
+                                                                    
+                                                                        $('#""" +self.coefficientsparts[4]+ """').focusout(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                 inputpop($(this));
                                                                             }else
@@ -2561,33 +2898,77 @@ class Propertiesv2(object):
                                                                             }
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """11').keyup(function ()
-                                                                        {                                                                            
+                                                                         
+                                                                  
+                                                                        $('#""" +self.coefficientsparts[7]+ """').focusout(function (){
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                    
+                                                                        $('#""" +self.coefficientsparts[9]+ """').focusout(function (){
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                  
+                                                                        $('#""" +self.coefficientsparts[11]+ """').focusout(function (){
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                                   
+                                                                        $('#""" +self.coefficientsparts[12]+ """').focusout(function (){
+                                                                            if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                inputpop($(this));
+                                                                            }else
+                                                                            {
+                                                                               $(this).val('');
+                                                                               inputpopclear($(this));
+                                                                            }
+                                                                         });
+                                                                         
+                                                               
+                                                                        $('#""" +self.coefficientsparts[0]+ """').keyup(function (){                                                                           
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """22').keyup(function ()
-                                                                        {                                                                            
+                                                                       
+                                                                        $('#""" +self.coefficientsparts[4]+ """').keyup(function (){                                                                          
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """33').keyup(function ()
-                                                                        {                                                                            
+                                                                
+                                                                        $('#""" +self.coefficientsparts[7]+ """').keyup(function (){                                                                           
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """44').keyup(function ()
-                                                                        {                                                                            
+                                                                     
+                                                                        $('#""" +self.coefficientsparts[9]+ """').keyup(function (){                                                                           
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """55').keyup(function ()
-                                                                        {                                                                            
+                                                                     
+                                                                        $('#""" +self.coefficientsparts[11]+ """').keyup(function (){                                                                            
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          
-                                                                        $('#""" +self.type+ """66').keyup(function ()
-                                                                        {                                                                            
+                                                                      
+                                                                        $('#""" +self.coefficientsparts[12]+ """').keyup(function (){                                                                          
                                                                             inputpop($(this));                                                                          
                                                                          });
                                                                          

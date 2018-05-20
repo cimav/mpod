@@ -1,0 +1,41 @@
+#------------------------------------------------------------------------------
+#$Date: 2018-05-08 00:43:39 +0000 (Tue, 08 May 2018) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://mpod.cimav.edu.mx/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_zakozrfxinykjdxab
+_cod_database_code ?
+_symmetry_point_group_name_H-M 1
+loop_
+_publ_author_name
+'n'
+_publ_section_title
+;
+n
+;
+_journal_name_full 'n' 
+_journal_volume  '1' 
+_journal_page_first  '1' 
+_journal_page_last  '1' 
+_journal_year  '1' 
+_prop_dielectric_permittivity_relative_epsrij 'epsrij'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+epsrij 11 1.0
+epsrij 12 2.0
+epsrij 13 3.0
+epsrij 21 2.0
+epsrij 22 4.0
+epsrij 23 6.0
+epsrij 31 3.0
+epsrij 32 6.0
+epsrij 33 6.0
