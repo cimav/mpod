@@ -1639,7 +1639,7 @@ class DataPropertyDetailAdmin(admin.ModelAdmin):
                         catalogpropertydetail.catalogpointgroup =   catalogpropertydetailtempQuerySet[i].catalogpointgroup
                         catalogpropertydetail.puntualgroupnames = catalogpropertydetailtempQuerySet[i].puntualgroupnames
                         catalogpropertydetail.dataproperty = catalogpropertydetailtempQuerySet[i].dataproperty
-                        catalogpropertydetail.save()
+                        #catalogpropertydetail.save()
             else:
                 fieldstemp = CatalogPropertyDetail.objects.filter(id__in= coefficients_ids).values('name')
                 print len(fieldstemp)
@@ -1660,7 +1660,7 @@ class DataPropertyDetailAdmin(admin.ModelAdmin):
 
                     catalogpropertydetail.dataproperty = catalogpropertydetailtempQuerySet[i].dataproperty
 
-                    catalogpropertydetail.save()
+                    #catalogpropertydetail.save()
 
                 
                 """    
