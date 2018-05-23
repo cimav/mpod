@@ -157,12 +157,11 @@ class Propertiesv2(object):
                         
                 if  self.crystalsystem_name == 'iso' or self.crystalsystem_name == False:
                     self.crystalsystem_name='tc'
-                     
-                else:
-                    pass
-                
+ 
                 
                 self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
+             
+             
                 
             if self.catalogproperty_name =='2nd':
                 print self.type 
@@ -178,13 +177,26 @@ class Propertiesv2(object):
                     dataPropertyList=Property.objects.filter(id__in=data_property_ids)
                     self.objDataProperty = dataPropertyList[0]
                         
-                if self.magnetoelectricity == False:
-                    if self.crystalsystem_name == False:
-                        self.crystalsystem_name = 'tc'
-                        self.objDataProperty = Property.objects.get(id=int(self.dataproperty))
+                catalogPropertyDetail = CatalogPropertyDetail.objects.filter(  dataproperty  = self.objDataProperty,             
+                                                                                                                                       type =self.objTypeSelected ).order_by('crystalsystem')
+                                                                                                                                         
+                if self.crystalsystem_name != None or self.crystalsystem_name != False or self.crystalsystem_name != '' :
+                    for i,cpd in enumerate( catalogPropertyDetail):
+                        if catalogPropertyDetail[i].crystalsystem.name == self.crystalsystem_name:
+                            self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
+                            break
                         
-                    self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
-                    
+                    if self.objCatalogCrystalSystemSelected == None:
+                        self.crystalsystem_name = catalogPropertyDetail[0].crystalsystem.name
+                        self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(id=catalogPropertyDetail[0].crystalsystem.id,catalogproperty=self.objProperty)
+                
+                else:
+                    self.crystalsystem_name = catalogPropertyDetail[0].crystalsystem.name
+                    self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(id=catalogPropertyDetail[0].crystalsystem.id,catalogproperty=self.objProperty)
+                
+             
+        
+                           
                     
                          
                  
@@ -5539,7 +5551,7 @@ class Propertiesv2(object):
                                                                                     {
                                                                                       value = v 
                                                                                       //$('#""" +self.type+ """26').val(2*(value));
-                                                                                      $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val(2*(value) );
+                                                                                      $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val(2*(v) );
                                                                                     }
       
                                                                                     //$('#""" +self.type+ """12').val(value);
@@ -5686,7 +5698,7 @@ class Propertiesv2(object):
                     return
                 
                 if self.puntualgroupselected_name == '-6m2':
-                    if  self.axisselected_name == '' or self.axisselected_name not in 'x1, x2':
+                    if  self.axisselected_name == None or self.axisselected_name == '' or self.axisselected_name not in 'x1, x2':
                         self.questionAxis = 'Where is the special axis?' 
                         self.questionGp = 'Point Group:'     
                         self.setPointGroup()   
@@ -5699,8 +5711,34 @@ class Propertiesv2(object):
                 
                 
                 if  self.__request != None and len(self.__inputList) > 0:
-                    for p in self.__inputList : 
+                    self.setDimension(self.objDataProperty)
+             
+                    for cursor, p in enumerate(self.__inputList) :
+                        index=self.getIndex(p.name) 
+                        i = index[0]
+                        j= index[1]
+                        print str(i) + "," + str(j)
                         if self.puntualgroupselected_name == '6':
+                            if cursor == 0:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[1,4] = -self.coefficientsmatrix[i,j] 
+                            if cursor == 1:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[1,3] = self.coefficientsmatrix[i,j]
+                                    
+                            if cursor == 2:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[2,1] = self.coefficientsmatrix[i,j]
+                                    
+                            if cursor == 3:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                          
+                             
+                        """if self.puntualgroupselected_name == '6':
                             if str(p.name) == "d14":   
                                 self.d[0,3] = float (self.__request.POST.get(p.name, False))
                                 self.d[1,4] = -self.d[0,3]
@@ -5709,22 +5747,57 @@ class Propertiesv2(object):
                             if str(p.name) == "d31":
                                 self.d[2,0] = self.d[2,1] =float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "d33":
-                                self.d[2,2] = float (self.__request.POST.get(p.name, False))
+                                self.d[2,2] = float (self.__request.POST.get(p.name, False))"""
                         
-                        elif self.puntualgroupselected_name == '6mm':
+                        if self.puntualgroupselected_name == '6mm':
+                            if cursor == 0:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[1,3] = self.coefficientsmatrix[i,j] 
+                                    
+                            if cursor == 1:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[2,1] = self.coefficientsmatrix[i,j]          
+                                    
+                            if cursor == 2:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                    
+                            
+                        """if self.puntualgroupselected_name == '6mm':
                             if str(p.name) == "d15":                            
                                 self.d[0,4] = self.d[1,3] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "d31":
                                 self.d[2,0] = self.d[2,1] = float (self.__request.POST.get(p.name, False))
                             if str(p.name) == "d33":
-                                self.d[2,2] = float (self.__request.POST.get(p.name, False))
-                        
-                        elif self.puntualgroupselected_name == '622':
+                                self.d[2,2] = float (self.__request.POST.get(p.name, False))"""
+                        if self.puntualgroupselected_name == '622':
+                            if cursor == 0:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[1,4] = -self.coefficientsmatrix[i,j] 
+                            
+                            
+                        """if self.puntualgroupselected_name == '622':
                             if str(p.name) == "d14":
                                 self.d[0,3] = float (self.__request.POST.get(p.name, False))
-                                self.d[1,4] = -self.d[0,3]
-                        
-                        elif self.puntualgroupselected_name == '-6':
+                                self.d[1,4] = -self.d[0,3]"""
+                        if self.puntualgroupselected_name == '-6':
+                            if cursor == 0:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[0,1] = -self.coefficientsmatrix[i,j]
+                                        self.coefficientsmatrix[1,5] = -2*self.coefficientsmatrix[i,j]
+                                        
+                            if cursor == 1:
+                                if str(p.name) == self.__coefficientsparts[cursor]:      
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[1,0] = -self.coefficientsmatrix[i,j]
+                                        self.coefficientsmatrix[0,5] = -2*self.coefficientsmatrix[i,j]
+                            
+                            
+                        """if self.puntualgroupselected_name == '-6':
                             if str(p.name) == "d11":
                                 self.d[0,0] = float (self.__request.POST.get(p.name, False))
                                 self.d[0,1] = -self.d[0,0]
@@ -5732,9 +5805,25 @@ class Propertiesv2(object):
                             if str(p.name) == "d22":
                                 self.d[1,1] = float (self.__request.POST.get(p.name, False))
                                 self.d[1,0] = -self.d[1,1]
-                                self.d[0,5] = -2*self.d[1,1]
-                        
-                        elif self.puntualgroupselected_name == '-6m2':
+                                self.d[0,5] = -2*self.d[1,1]"""
+                        if self.puntualgroupselected_name == '-6m2':
+                            if self.axisselected_name == 'x1':
+                                if cursor == 0:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:      
+                                            self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                            self.coefficientsmatrix[1,0] = -self.coefficientsmatrix[i,j]
+                                            self.coefficientsmatrix[0,5] = -2*self.coefficientsmatrix[i,j]
+      
+                                            
+                            if self.axisselected_name == 'x2':
+                                if cursor == 0:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:      
+                                            self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                            self.coefficientsmatrix[0,1] = -self.coefficientsmatrix[i,j] 
+                                            self.coefficientsmatrix[1,5] = -2*self.coefficientsmatrix[i,j] 
+              
+                            
+                        """if self.puntualgroupselected_name == '-6m2':
                             if self.axisselected_name == 'x1':
                                 if str(p.name) == "d22":
                                     self.d[1,1] = float (self.__request.POST.get(p.name, False))
@@ -5744,10 +5833,10 @@ class Propertiesv2(object):
                                 if str(p.name) == "d11":
                                     self.d[0,0] = float (self.__request.POST.get(p.name, False))
                                     self.d[0,1] = -self.d[0,0]
-                                    self.d[1,5] = -2*self.d[0,0]
+                                    self.d[1,5] = -2*self.d[0,0]"""
                             
                         
-                    print self.d
+                    print self.coefficientsmatrix
                     self.sucess = 1;
                     return
                 else:
@@ -5768,12 +5857,17 @@ class Propertiesv2(object):
                                                                      """
                     
                     if self.puntualgroupselected_name == '6':
-                        self.listofemptyInputs.append(self.type+"25");
+                        """self.listofemptyInputs.append(self.type+"25");
                         self.listofemptyInputs.append(self.type+"24");
-                        self.listofemptyInputs.append(self.type+"32");
+                        self.listofemptyInputs.append(self.type+"32");"""
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"25" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"24" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "32" + self.coefficientspartssplit[1])
+                    
                         self.jquery= self.jquery + """
-                                                                         $('#""" +self.type+ """14').keyup(function ()
-                                                                            {
+                                                                         /*$('#""" +self.type+ """14').keyup(function ()
+                                                                            {*/
+                                                                           $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
                                                                                     v = -$(this).val();
@@ -5782,17 +5876,20 @@ class Propertiesv2(object):
                                                                                     else
                                                                                       value = v; 
       
-                                                                                    $('#""" +self.type+ """25').val(value);
+                                                                                    //$('#""" +self.type+ """25').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """25"""+self.coefficientspartssplit[1]+"""').val(value );
                                             
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   //$('#""" +self.type+ """25').val('');
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """25"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
-                                                                            $('#""" +self.type+ """15').keyup(function ()
-                                                                            {
+                                                                            /*$('#""" +self.type+ """15').keyup(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[1]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                     inputpop($(this));
                                                                                     
@@ -5803,18 +5900,21 @@ class Propertiesv2(object):
                                                                                     else
                                                                                       value = v;
                                                                                       
-                                                                                    $('#""" +self.type+ """24').val(value);
+                                                                                    //$('#""" +self.type+ """24').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """24"""+self.coefficientspartssplit[1]+"""').val(value );
                        
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   //$('#""" +self.type+ """24').val('');
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """24"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
-                                                                             $('#""" +self.type+ """31').keyup(function ()
-                                                                            {
+                                                                            /* $('#""" +self.type+ """31').keyup(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[2]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                     inputpop($(this));
                                                                                     
@@ -5824,18 +5924,21 @@ class Propertiesv2(object):
                                                                                     else
                                                                                       value = v;
                                                                                       
-                                                                                    $('#""" +self.type+ """32').val(value);
+                                                                                    //$('#""" +self.type+ """32').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val(value );
         
                                                                              
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   //$('#""" +self.type+ """32').val('');
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
-                                                                            $('#""" +self.type+ """33').focusout(function ()
-                                                                            {
+                                                                           /*$('#""" +self.type+ """33').focusout(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[3]+ """').focusout(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
                                                                                 }else
@@ -5845,19 +5948,26 @@ class Propertiesv2(object):
                                                                                 }
                                                                              });  
                                                                              
-                                                                             $('#""" +self.type+ """33').keyup(function ()
-                                                                            {                                                                            
+                                                                            /* $('#""" +self.type+ """33').keyup(function ()
+                                                                            { */
+                                                                            $('#""" +self.coefficientsparts[3]+ """').keyup(function (){                                                                           
                                                                                 inputpop($(this));                                                                          
                                                                              });
 
                                                                              """
                     
                     elif self.puntualgroupselected_name == '6mm':
-                        self.listofemptyInputs.append(self.type+"24");
-                        self.listofemptyInputs.append(self.type+"32");
+                        """self.listofemptyInputs.append(self.type+"24");
+                        self.listofemptyInputs.append(self.type+"32");"""
+       
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"24" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "32" + self.coefficientspartssplit[1])
+                        
+                        
                         self.jquery= self.jquery + """
-                                                                         $('#""" +self.type+ """15').keyup(function ()
-                                                                            {
+                                                                         /*$('#""" +self.type+ """15').keyup(function ()
+                                                                            {*/
+                                                                          $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                     inputpop($(this));
                                                                                     
@@ -5867,17 +5977,20 @@ class Propertiesv2(object):
                                                                                     else
                                                                                       value = v;
                                                                                       
-                                                                                    $('#""" +self.type+ """24').val(value);
+                                                                                    //$('#""" +self.type+ """24').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """24"""+self.coefficientspartssplit[1]+"""').val(value );
                                             
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """24').val('');
+                                                                                   //$('#""" +self.type+ """24').val('');
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """24"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
-                                                                            $('#""" +self.type+ """31').keyup(function ()
-                                                                            {
+                                                                            /*$('#""" +self.type+ """31').keyup(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[1]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
                                                                                     v = $(this).val();
@@ -5886,17 +5999,20 @@ class Propertiesv2(object):
                                                                                     else
                                                                                       value = v;
                                                                                       
-                                                                                    $('#""" +self.type+ """32').val(value);
+                                                                                    //$('#""" +self.type+ """32').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val(value );
             
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """32').val('');
+                                                                                   //$('#""" +self.type+ """32').val('');
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
                                                                              
-                                                                            $('#""" +self.type+ """33').focusout(function ()
-                                                                            {
+                                                                            /*$('#""" +self.type+ """33').focusout(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[2]+ """').focusout(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
                                                                                 }else
@@ -5906,18 +6022,22 @@ class Propertiesv2(object):
                                                                                 }
                                                                              });  
                                                                              
-                                                                             $('#""" +self.type+ """33').keyup(function ()
-                                                                            {                                                                            
+                                                                             /*$('#""" +self.type+ """33').keyup(function ()
+                                                                            {   */
+                                                                            $('#""" +self.coefficientsparts[2]+ """').keyup(function (){                                                                         
                                                                                 inputpop($(this));                                                                          
                                                                              });
                    
                                                                              """
                     
                     elif self.puntualgroupselected_name == '622':
-                        self.listofemptyInputs.append(self.type+"25");
+                        #self.listofemptyInputs.append(self.type+"25");
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"25" +self.coefficientspartssplit[1])
+                         
                         self.jquery= self.jquery + """
-                                                                         $('#""" +self.type+ """14').keyup(function ()
-                                                                            {
+                                                                        /* $('#""" +self.type+ """14').keyup(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                     inputpop($(this));
                                                                                     v = -$(this).val();
@@ -5926,11 +6046,13 @@ class Propertiesv2(object):
                                                                                     else
                                                                                       value = v;
                                                                                       
-                                                                                    $('#""" +self.type+ """25').val(value);
+                                                                                    //$('#""" +self.type+ """25').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """25"""+self.coefficientspartssplit[1]+"""').val(value );
                                             
                                                                                 }else
                                                                                 {
-                                                                                   $('#""" +self.type+ """25').val('');
+                                                                                   //$('#""" +self.type+ """25').val('');
+                                                                                   $('#""" +self.coefficientspartssplit[0]+ """25"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                    inputpopclear($(this));
                                                                                 }
                                                                              });
@@ -5940,13 +6062,19 @@ class Propertiesv2(object):
                                                                              """
                     
                     elif self.puntualgroupselected_name == '-6':
-                        self.listofemptyInputs.append(self.type+"12");
+                        """self.listofemptyInputs.append(self.type+"12");
                         self.listofemptyInputs.append(self.type+"26");
                         self.listofemptyInputs.append(self.type+"21");
-                        self.listofemptyInputs.append(self.type+"16");
+                        self.listofemptyInputs.append(self.type+"16");"""
+                        
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"12" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "26" + self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" +self.coefficientspartssplit[1])
+                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "16" + self.coefficientspartssplit[1])
                         self.jquery= self.jquery + """
-                                                                         $('#""" +self.type+ """11').keyup(function ()
-                                                                            {
+                                                                         /*$('#""" +self.type+ """11').keyup(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
                                                                                     v = -$(this).val();
@@ -5954,47 +6082,59 @@ class Propertiesv2(object):
                                                                                     if ( isScientificNotation($(this).val()) == 1 )
                                                                                     {
                                                                                       value = Number.parseFloat(v).toExponential();
-                                                                                      $('#""" +self.type+ """26').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                      //$('#""" +self.type+ """26').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                       
+                                                                                       $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val(Number.parseFloat(2*(v) ).toExponential() );
                                                                                     }
                                                                                     else
                                                                                     {
                                                                                       value = v;
+                                                                                      $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val(2*(v) );
                                                                                     }
                                                                                       
-                                                                                    $('#""" +self.type+ """12').val(value);
+                                                                                    //$('#""" +self.type+ """12').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """12"""+self.coefficientspartssplit[1]+"""').val(value );
                                                                                  
                                                                                  
                                             
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """12').val('');
-                                                                                $('#""" +self.type+ """26').val('')
+                                                                                //$('#""" +self.type+ """12').val('');
+                                                                                //$('#""" +self.type+ """26').val('')
+                                                                                $('#""" +self.coefficientspartssplit[0]+ """12"""+self.coefficientspartssplit[1]+"""').val('');
+                                                                                $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                 inputpopclear($(this));
                                                                             }
                                                                          });
                                                                              
-                                                                        $('#""" +self.type+ """22').keyup(function ()
-                                                                        {
+                                                                        /*$('#""" +self.type+ """22').keyup(function ()
+                                                                        {*/
+                                                                        $('#""" +self.coefficientsparts[1]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
-                                                                                    value = -$(this).val();
+                                                                                    v = -$(this).val();
                                                                                      if ( isScientificNotation($(this).val()) == 1 )
                                                                                     {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                      $('#""" +self.type+ """16').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                      //value = Number.parseFloat(v).toExponential();
+                                                                                      //$('#""" +self.type+ """16').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                      $('#""" +self.coefficientspartssplit[0]+ """16"""+self.coefficientspartssplit[1]+"""').val(Number.parseFloat(2*(v) ).toExponential());
                                                                                     }
                                                                                     else
                                                                                     {
                                                                                       value = v;
+                                                                                      $('#""" +self.coefficientspartssplit[0]+ """16"""+self.coefficientspartssplit[1]+"""').val(2*(v) );
                                                                                     }
                                                                                     
-                                                                                    $('#""" +self.type+ """21').val(value);
+                                                                                    //$('#""" +self.type+ """21').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val(value );
                                                                                  
             
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """21').val('');
-                                                                                $('#""" +self.type+ """16').val('');
+                                                                                //$('#""" +self.type+ """21').val('');
+                                                                                //$('#""" +self.type+ """16').val('');
+                                                                                $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                                $('#""" +self.coefficientspartssplit[0]+ """16"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                 inputpopclear($(this));
                                                                             }
                                                                          });
@@ -6003,32 +6143,42 @@ class Propertiesv2(object):
                     
                     elif self.puntualgroupselected_name == '-6m2':
                         if self.axisselected_name == 'x1':
-                            self.listofemptyInputs.append(self.type+"21");
-                            self.listofemptyInputs.append(self.type+"16");
+                            """self.listofemptyInputs.append(self.type+"21");
+                            self.listofemptyInputs.append(self.type+"16");"""
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" +self.coefficientspartssplit[1])
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "16" + self.coefficientspartssplit[1])
+                        
                             self.jquery= self.jquery + """
-                                                                          $('#""" +self.type+ """22').keyup(function ()
-                                                                            {
+                                                                          /*$('#""" +self.type+ """22').keyup(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                                     inputpop($(this));
                                                                                     v = -$(this).val();
                                                                                     if ( isScientificNotation($(this).val()) == 1 )
                                                                                     {
                                                                                       value = Number.parseFloat(v).toExponential();
-                                                                                      $('#""" +self.type+ """16').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                      //$('#""" +self.type+ """16').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                      $('#""" +self.coefficientspartssplit[0]+ """16"""+self.coefficientspartssplit[1]+"""').val(Number.parseFloat(2*(v) ).toExponential() );
+                                                                                      
                                                                                     }
                                                                                     else
                                                                                     {
                                                                                       value = v;
+                                                                                      $('#""" +self.coefficientspartssplit[0]+ """16"""+self.coefficientspartssplit[1]+"""').val(2*(v) );
                                                                                     }
                      
                                                                                     
-                                                                                    $('#""" +self.type+ """21').val(value);
+                                                                                   // $('#""" +self.type+ """21').val(value);
+                                                                                    $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val(value );
                                                                                 
                                             
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """21').val('');
-                                                                               $('#""" +self.type+ """16').val('');
+                                                                               //$('#""" +self.type+ """21').val('');
+                                                                               //$('#""" +self.type+ """16').val('');
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """16"""+self.coefficientspartssplit[1]+"""').val('');
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });
@@ -6036,29 +6186,39 @@ class Propertiesv2(object):
                         elif self.axisselected_name == 'x2':
                             self.listofemptyInputs.append(self.type+"12");
                             self.listofemptyInputs.append(self.type+"26");
+                            
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"12" +self.coefficientspartssplit[1])
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "26" + self.coefficientspartssplit[1])
+                        
                             self.jquery= self.jquery + """
-                                                                          $('#""" +self.type+ """11').keyup(function ()
-                                                                            {
+                                                                          /*$('#""" +self.type+ """11').keyup(function ()
+                                                                            {*/
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function (){
                                                                                 if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                                     inputpop($(this));
                                                                                     v = -$(this).val();
                                                                                      if ( isScientificNotation($(this).val()) == 1 )
                                                                                     {
                                                                                       value = Number.parseFloat(v).toExponential();
-                                                                                      $('#""" +self.type+ """26').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                      //$('#""" +self.type+ """26').val(Number.parseFloat(2*(v) ).toExponential());
+                                                                                      $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val(Number.parseFloat(2*(v) ).toExponential() );
                                                                                     }
                                                                                     else
                                                                                     {
                                                                                       value = v;
+                                                                                      $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val(2*(v) );
                                                                                     }
                                                                                     
-                                                                                    $('#""" +self.type+ """12').val(value);
+                                                                                    //$('#""" +self.type+ """12').val(value);
+                                                                                     $('#""" +self.coefficientspartssplit[0]+ """12"""+self.coefficientspartssplit[1]+"""').val(value );
                                                                                  
                                             
                                                                             }else
                                                                             {
-                                                                                $('#""" +self.type+ """12').val('');
-                                                                                $('#""" +self.type+ """26').val('');
+                                                                               // $('#""" +self.type+ """12').val('');
+                                                                               // $('#""" +self.type+ """26').val('');
+                                                                                  $('#""" +self.coefficientspartssplit[0]+ """12"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                                  $('#""" +self.coefficientspartssplit[0]+ """26"""+self.coefficientspartssplit[1]+"""').val('' );
                                                                                 inputpopclear($(this));
                                                                             }
                                                                          });
@@ -6081,11 +6241,11 @@ class Propertiesv2(object):
        
         if self.catalogproperty_name == '2nd':   
             if self.crystalsystem_name == 'tc':   
-                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '1, -1' :
+                if  self.puntualgroupselected_name == None or  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '1, -1' :
                     self.questionGp = 'Point Group:'       
                     if self.magnetoelectricity == False:
                         self.setPointGroup()    
-                        
+                        self.setAxis() 
                         return    
 
                 if  self.__request != None and len(self.__inputList) > 0:
@@ -6093,29 +6253,31 @@ class Propertiesv2(object):
                     self.setDimension(self.objDataProperty)
              
                     for cursor, p in enumerate(self.__inputList) :
+                        index=self.getIndex(p.name) 
+                        i = index[0]
+                        j= index[1]
+                        print str(i) + "," + str(j)
+                        
                         if self.puntualgroupselected_name in  ('1, -1'):
-                            index=self.getIndex(p.name)# get index of coefficients tag: example gets 0.0 from the 'epsr11' tag
-                            print str(index[0]) + "," + str(index[1])# output of print str(0)  + "," +  str(0) = 0, 0
-                            
                             if cursor == 0 or cursor == 3 or cursor == 4:
                                 if str(p.name) == self.__coefficientsparts[cursor]:   
-                                    self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
                                 
                             if cursor == 1:
                                 if str(p.name) == self.__coefficientsparts[cursor]:      
-                                    self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[1,0]= self.coefficientsmatrix[index[0],index[1]]
+                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[1,0]= self.coefficientsmatrix[i,j]
                                     
                             if cursor == 2:
                                 if str(p.name) == self.__coefficientsparts[cursor]:      
-                                    self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[2,0]= self.coefficientsmatrix[index[0],index[1]]
+                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[2,0]= self.coefficientsmatrix[i,j]
                             
  
                             if cursor == 5:
                                 if str(p.name) == self.__coefficientsparts[cursor]:      
-                                    self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[2,1]= self.coefficientsmatrix[index[0],index[1]]
+                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[2,1]= self.coefficientsmatrix[i,j]
                             
                                                   
                     print self.coefficientsmatrix
@@ -6317,22 +6479,26 @@ class Propertiesv2(object):
                     self.questionGp = 'Point Group:'       
                     if self.magnetoelectricity == False:
                         self.setPointGroup()    
+                        self.setAxis() 
                         return    
                      
                 if  self.__request != None and len(self.__inputList) > 0:
                     self.setDimension(self.objDataProperty)
                     for cursor, p in enumerate(self.__inputList) :
                         if self.puntualgroupselected_name in  ('2, m, 2/m'):
-                            index=self.getIndex(p.name)                                                                                                                     # get index of coefficients tag: example gets 0.0 from the 'epsr11' tag
-                            print str(index[0]) + "," + str(index[1])                                                                                                     # output of print str(0)  + "," +  str(0) = 0, 0
+                            index=self.getIndex(p.name) 
+                            i = index[0]
+                            j= index[1]
+                            print str(i) + "," + str(j)
+                            
                             if cursor != 1:
                                 if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
-                                    self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
 
                             if cursor == 1:
                                 if str(p.name) == self.__coefficientsparts[cursor]:        
-                                    self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[2,0]= self.coefficientsmatrix[index[0],index[1]]
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[2,0]= self.coefficientsmatrix[i,j]
               
                     print self.coefficientsmatrix
                     self.sucess = 1;
@@ -6476,10 +6642,12 @@ class Propertiesv2(object):
                     self.setDimension(self.objDataProperty)
                     for cursor, p in enumerate(self.__inputList) :
                         if self.puntualgroupselected_name in  ('222, 2mm, mmm'):
-                            index=self.getIndex(p.name)                                                                                                                     # get index of coefficients tag: example gets 0.0 from the 'epsr11' tag
-                            print str(index[0]) + "," + str(index[1])                                                                                                     # output of print str(0)  + "," +  str(0) = 0, 0
+                            index=self.getIndex(p.name) 
+                            i = index[0]
+                            j= index[1]
+                            print str(i) + "," + str(j)
                             if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
-                                self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+                                self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
 
               
                     print self.coefficientsmatrix
@@ -6600,14 +6768,17 @@ class Propertiesv2(object):
                     self.setDimension(self.objDataProperty)
                     for cursor, p in enumerate(self.__inputList) :
                         if self.puntualgroupselected_name in  ('3, -3, 32, -3m, 3m, 4, -4, 4/m, 4mm, -42m, 422, 4/mmm, 6, -6, 3/m, 6/m, 6mm, 622, -6m2, 6/mmm, infinf, infinfm, inf, infm, inf/m, inf2, inf/mm'):
-                            index=self.getIndex(p.name)                                                                                                                     # get index of coefficients tag: example gets 0.0 from the 'epsr11' tag
-                            print str(index[0]) + "," + str(index[1])                                                                                                     # output of print str(0)  + "," +  str(0) = 0, 0
+                            index=self.getIndex(p.name) 
+                            i = index[0]
+                            j= index[1]
+                            print str(i) + "," + str(j)
+                            
                             if cursor == 0:
                                 if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
-                                    self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[1,1]= self.coefficientsmatrix[0,0]
+                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[1,1]= self.coefficientsmatrix[i,j]
                             if cursor != 0:   
-                                self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))     
+                                self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))     
                                 
               
                     print self.coefficientsmatrix
@@ -6705,18 +6876,21 @@ class Propertiesv2(object):
                     self.questionGp = 'Point Group:'       
                     if self.magnetoelectricity == False:
                         self.setPointGroup()    
+                        self.setAxis() 
                         return  
                     
                 if  self.__request != None and len(self.__inputList) > 0:
                     self.setDimension(self.objDataProperty)
                     for cursor, p in enumerate(self.__inputList) :
                         if self.puntualgroupselected_name in  ('23, m3, 432, -43m, m3m, infinf, infinfm'):
-                            index=self.getIndex(p.name)                                                                                                                     # get index of coefficients tag: example gets 0.0 from the 'epsr11' tag
-                            print str(index[0]) + "," + str(index[1])                                                                                                     # output of print str(0)  + "," +  str(0) = 0, 0
+                            index=self.getIndex(p.name) 
+                            i = index[0]
+                            j= index[1]
+                            print str(i) + "," + str(j)
                             if cursor == 0:
                                 if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
-                                    self.coefficientsmatrix[index[0],index[1]] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[2,2] = self.coefficientsmatrix[1,1] = self.coefficientsmatrix[0,0] 
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+                                    self.coefficientsmatrix[2,2] = self.coefficientsmatrix[i,j]  = self.coefficientsmatrix[0,0] 
      
                                 
               
@@ -6795,7 +6969,7 @@ class Propertiesv2(object):
         print  'catalogaxis_id=' + str( self.objAxisSelected.pk)
         print  'catalogpointgroup_id=' +  str(self.objCatalogPointGroupSelected.pk)'''
         
-        if self.catalogproperty_name == 'e' or self.catalogproperty_name == 'p':
+        if self.catalogproperty_name == 'e' or self.catalogproperty_name == 'p' or self.catalogproperty_name == '2nd':
             propertyDetail = CatalogPropertyDetail.objects.filter(  dataproperty  = self.objDataProperty,
                                                                                                                 crystalsystem =self.objCatalogCrystalSystemSelected,
                                                                                                                 type =self.objTypeSelected,
@@ -6868,8 +7042,8 @@ class Propertiesv2(object):
                         self.catalogPropertyDetail.append(cpd) 
                         del cpd     
                     return 
-         """
-        if self.catalogproperty_name == 'p1':    
+         
+        if self.catalogproperty_name == 'p':    
             if  ( self.crystalsystem_name == 'tc'  or self.crystalsystem_name == 'o'  or self.crystalsystem_name == 'te'  or self.crystalsystem_name == 'c' ) or (self.crystalsystem_name == 'tg' and self.puntualgroupselected_name != '3m' ) or (self.crystalsystem_name == 'h' and self.puntualgroupselected_name != '-6m2' ):
 
                 print 'Property:'  + self.objProperty.name 
@@ -6938,7 +7112,7 @@ class Propertiesv2(object):
                     del cpd     
                 return 
            
-        
+        """
     #end setCatalogPropertyDetail    
         
                 

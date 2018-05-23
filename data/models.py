@@ -450,7 +450,7 @@ class CatalogPropertyDetail(models.Model):
     puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
     dataproperty = models.ForeignKey(Property,verbose_name="Tag",blank=True)  
     class Meta:
-        db_table = 'catalog_property_detail1'       
+        db_table = 'catalog_property_detail'       
         
         app_label = string_with_title("Properties", "Properties Settings")
         verbose_name = _('Property Detail')

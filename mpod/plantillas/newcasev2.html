@@ -1202,37 +1202,6 @@
 																				 {% endfor %}
 																		      
 																		      {% endfor %}
-																	
-
-																	  
-																		 {% if property.objTypeSelected.name  == "d1"%} 
-																		      {% for row  in property.d%} 
-																		       <tr>
-																					{% for col  in row %}  
-																				   <td>
-																				       <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
-																				   </td>	
-																				 {% endfor %}
-																		      
-																		      {% endfor %}
-																	      {% endif %}  
-																	      
-																	      
-																	      
-																	      {% if property.objTypeSelected.name  == "k1"%} 
-																		      {% for row  in property.coefficientsmatrix%} 
-																		       <tr>
-																					{% for col  in row %}  
-																				   <td>
-																				       <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
-																				   </td>	
-																				 {% endfor %}
-																		      
-																		      {% endfor %}
-																	     {% endif %}  
-																	      
-										 
-																	      
 																	      
 																	      </table>
 																	      

@@ -44,9 +44,9 @@ class MPODUtil():
         self.__section_title = False
         self.__symmetry_point_group_name= False
         self.__condition = False
-        self.__sij = 'sij'
-        self.__cij = 'cij'
-        self.__dij = 'dij'
+        self.__sij = ''
+        self.__cij = ''
+        self.__dij = ''
         self.__kij = ''
         self.__propertylist = None
         self.__cif_dir=''
@@ -273,7 +273,7 @@ class MPODUtil():
                
             
             
-            if p.objTypeSelected.name  == "c": 
+            """if p.objTypeSelected.name  == "c": 
                 if self.__prop_elastic_stiffness == False:
                     self.__line =  "_prop_elastic_stiffness_cij '"+self.__cij+"'"+ "\n"
                     self.addline(self.__line)
@@ -290,6 +290,35 @@ class MPODUtil():
                     self.addline(self.__line)
                     self.__prop_piezoelectric= True
             elif p.objTypeSelected.name == "k":
+                if self.__magnetoelectricity == False:
+                    self.__kij= self.getTag(p.objDataProperty.tag)
+                    self.__line =  p.objDataProperty.tag +" '"+self.__kij+"'" + "\n"
+                    self.addline(self.__line)
+                    self.__magnetoelectricity= True"""
+                    
+                    
+            if p.objTypeSelected.name  == "c": 
+                if self.__prop_elastic_stiffness == False:
+                    self.__cij= self.getTag(p.objDataProperty.tag)
+                    self.__line =  p.objDataProperty.tag +" '"+self.__cij+"'" + "\n"
+                    self.addline(self.__line)
+                    self.__prop_elastic_stiffness= True
+          
+            if p.objTypeSelected.name  == "s": 
+                if self.__prop_elastic_compliance == False:
+                    self.__sij= self.getTag(p.objDataProperty.tag)
+                    self.__line =  p.objDataProperty.tag +" '"+self.__sij+"'" + "\n"
+                    self.addline(self.__line)
+                    self.__prop_elastic_compliance= True
+                
+            if p.objTypeSelected.name  == "d": 
+                if self.__prop_piezoelectric == False:
+                    self.__dij= self.getTag(p.objDataProperty.tag)
+                    self.__line =  p.objDataProperty.tag +" '"+self.__dij+"'" + "\n"
+                    self.addline(self.__line)
+                    self.__prop_piezoelectric= True
+                
+            if p.objTypeSelected.name  == "k": 
                 if self.__magnetoelectricity == False:
                     self.__kij= self.getTag(p.objDataProperty.tag)
                     self.__line =  p.objDataProperty.tag +" '"+self.__kij+"'" + "\n"
@@ -328,71 +357,65 @@ class MPODUtil():
             if self.__prop_elastic_stiffness == True:
                 y = 0
                 x= 0
-                if p.objTypeSelected.name  == "c":
-                    for r in p.c:
-                        x = x + 1
-                        y= 0
-                        for c in r:
-                            y= y + 1
-                            indexx = str(x)
-                            indexy = str(y)
-                            index = ''
-                            index = indexx + indexy
-                            self.__line= self.__cij +" " + index + " "+ str(c) +"\n"
-                            self.addline(self.__line)   
+                for r in p.coefficientsmatrix:
+                    x = x + 1
+                    y= 0
+                    for c in r:
+                        y= y + 1
+                        indexx = str(x)
+                        indexy = str(y)
+                        index = ''
+                        index = indexx + indexy
+                        self.__line= self.__cij +" " + index + " "+ str(c) +"\n"
+                        self.addline(self.__line)   
                  
            
             if self.__prop_elastic_compliance == True:
                 y = 0
-                x= 0     
-                if p.objTypeSelected.name  == "s":    
-                    for r in p.s:
-                        x = x + 1
-                        y= 0
-                        for c in r:
-                            y= y + 1
-                            indexx = str(x)
-                            indexy = str(y)
-                            index = ''
-                            index = indexx + indexy
-                            self.__line= self.__sij +" " + index + " "+ str(c) +"\n"
-                            self.addline(self.__line)   
+                x= 0       
+                for r in p.coefficientsmatrix:
+                    x = x + 1
+                    y= 0
+                    for c in r:
+                        y= y + 1
+                        indexx = str(x)
+                        indexy = str(y)
+                        index = ''
+                        index = indexx + indexy
+                        self.__line= self.__sij +" " + index + " "+ str(c) +"\n"
+                        self.addline(self.__line)   
             
                    
             if self.__prop_piezoelectric == True:    
-                #print  p.objTypeSelected.name
                 y = 0
                 x= 0       
-                if p.objTypeSelected.name  == "d":          
-                    for r in p.d:
-                        x = x + 1
-                        y= 0
-                        for c in r:
-                            y= y + 1
-                            indexx = str(x)
-                            indexy = str(y)
-                            index = ''
-                            index = indexx + indexy
-                            self.__line= self.__dij +" " + index + " "+ str(c) +"\n"
-                            self.addline(self.__line)
+                for r in p.coefficientsmatrix:
+                    x = x + 1
+                    y= 0
+                    for c in r:
+                        y= y + 1
+                        indexx = str(x)
+                        indexy = str(y)
+                        index = ''
+                        index = indexx + indexy
+                        self.__line= self.__dij +" " + index + " "+ str(c) +"\n"
+                        self.addline(self.__line)
                 
                 
             if self.__magnetoelectricity == True:    
-                #print  p.objTypeSelected.name
                 y = 0
                 x= 0       
-                if p.objTypeSelected.name  == "k":          
-                    for r in p.coefficientsmatrix:
-                        x = x + 1
-                        y= 0
-                        for c in r:
-                            y= y + 1
-                            indexx = str(x)
-                            indexy = str(y)
-                            index = ''
-                            index = indexx + indexy
-                            self.__line= self.__kij +" " + index + " "+ str(c) +"\n"
-                            self.addline(self.__line)
+                for r in p.coefficientsmatrix:
+                    x = x + 1
+                    y= 0
+                    for c in r:
+                        y= y + 1
+                        indexx = str(x)
+                        indexy = str(y)
+                        index = ''
+                        index = indexx + indexy
+                        self.__line= self.__kij +" " + index + " "+ str(c) +"\n"
+                        self.addline(self.__line)
         
         
             
