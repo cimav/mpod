@@ -424,6 +424,7 @@ class Extractor (object):
                 proptag = PropTags()
                 proptag = pt
                 ntgs.append( proptag.tag )
+                del proptag
             
             for i, fil in enumerate(self.filets):
                 filepath=os.path.join(self.cifs_dir, fil)
@@ -465,9 +466,10 @@ class Extractor (object):
                         objProperty.save()
                         
                         dataFileProperty.propertytemp=objProperty
+                        del objProperty
                     else:                     
                         dataFileProperty.propertytemp=propertyExist
-                        
+                        del propertyExist
            
                     try:
                         dataFileTemp=DataFileTemp.objects.get(filename__exact=fil) 
@@ -652,7 +654,7 @@ class Extractor (object):
                 try:
                        
                     datafile.save()
-                    
+                    del publicArticle
     
                     for obj in self.experimentalParCondList:
                         print type(obj) # <class 'project.app.models.Car'>
@@ -662,6 +664,7 @@ class Extractor (object):
                         experimentalfilecontempDatafiletemp.datafiletemp = datafile
                      
                         experimentalfilecontempDatafiletemp.save()
+                        del datafile
                     
                 except  Exception as e:
                         print "Error: {1}".format( e.message, e.args)       

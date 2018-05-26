@@ -1334,23 +1334,58 @@ admin.site.register(PuntualGroupNames, PuntualGroupNamesAdmin)
  
         
 
-class PuntualGroupGroupsAdmin(admin.ModelAdmin):
-   
-   
- 
-    fieldsets = (
-        ('Point Groups and Groups', {
-            'fields': ('puntualgroupnames','catalogpointgroup',)
+
+
+class GroupNamesDetailAdmin(admin.ModelAdmin):
+    form=GroupNamesDetailAdminForm
+    """fieldsets = (
+        ('Group Names Detail', {
+            'fields': ('puntualgroupnames', 'catalogpointgroup',)
         }),
-
     )
+    """
     
-    list_display =('puntualgroupnames','catalogpointgroup',)  
     
+    def get_fieldsets(self, *args, **kwargs):
+        return  (
+            ('Group Names Detail', {
+                'fields': ('name','description', 'catalogpointgroup'),
+            }),
+        )
+ 
+    
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {
+            #'groups': [x[0] for x in groups],
+            'obj':'obj',
+        }
+        return super(GroupNamesDetailAdmin, self).changelist_view(request, extra_context=extra_context)
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        model = self.model
+        opts = model._meta
+        obj = self.get_object(request, unquote(object_id))
+        if obj is None:
+            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
+                                                                                           
+        extra_context = extra_context or {}
+        extra_context = {
+                'original':obj,
 
-admin.site.register(PuntualGroupGroups, PuntualGroupGroupsAdmin)
+            }
+        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+        
+    def save_model(self, request, obj, form, change):
+        print 'GroupNamesDetailAdmin_save'
+        print request.POST
 
+    def queryset(self, request):
+        qs = super(GroupNamesDetailAdmin, self).queryset(request)
 
+        return qs.all().exclude(id=21)
+        #return super(GroupNamesDetailAdmin, self).get_queryset().all().exclude(id=21)
+
+admin.site.register(GroupNamesDetail, GroupNamesDetailAdmin)
 
 class CatalogPropertyDetailAdmin(admin.ModelAdmin):
     list_display =('name','get_type_description','get_crystalsystem_catalogproperty_description','get_crystalsystem_description','get_catalogaxis_name','get_catalogpointgroup_name','get_puntualgroupnames_name','dataproperty')  
@@ -1503,8 +1538,6 @@ class DataPropertyDetailAdmin(admin.ModelAdmin):
         ('Property information', {
             'fields': ('catalogproperty','type','dataproperty','catalogcrystalsystem','catalogpointgroup','puntualgroupnames','axis','coefficients')
         }),
-      
-            
     )
     
     def has_add_permission(self, request):
@@ -1686,49 +1719,7 @@ class DataPropertyDetailAdmin(admin.ModelAdmin):
             print request.POST.getlist('catalogpointgroup',False)
             print request.POST.getlist('coefficients',False)
             
-            """
-            coefficients=  request.POST.getlist('coefficients',False)
-            coefficients_name = []
-            coefficients_ids_temp = []
-            coefficients_ids = []
-            for id in coefficients:
-                coefficients_ids.append(int(id))
-            
-            fieldstemp = CatalogPropertyDetailTemp.objects.filter(id__in= coefficients_ids).values('name')
-            if fieldstemp:
-                for field in fieldstemp:
-                    coefficients_name.append(field['name'])
-                    
-                catalogpropertydetailtempQuerySet = CatalogPropertyDetailTemp.objects.filter(name__in=coefficients_name)
-                for i, cpdt in enumerate(catalogpropertydetailtempQuerySet):
-                    #coefficients_ids_temp.append(catalogpropertydetailtempQuerySet[i].id)
-                    catalogpropertydetail = CatalogPropertyDetail1()
-                    catalogpropertydetail.name = catalogpropertydetailtempQuerySet[i].name
-                    catalogpropertydetail.description = catalogpropertydetailtempQuerySet[i].description
-                    catalogpropertydetail.type =  catalogpropertydetailtempQuerySet[i].type
-                    catalogpropertydetail.crystalsystem = catalogpropertydetailtempQuerySet[i].crystalsystem   
-                    catalogpropertydetail.catalogaxis = catalogpropertydetailtempQuerySet[i].catalogaxis
-                    catalogpropertydetail.catalogpointgroup =   catalogpropertydetailtempQuerySet[i].catalogpointgroup
-                    catalogpropertydetail.puntualgroupnames = catalogpropertydetailtempQuerySet[i].puntualgroupnames
-                    catalogpropertydetail.dataproperty = catalogpropertydetailtempQuerySet[i].dataproperty
-            else:
-                fieldstemp = CatalogPropertyDetail1.objects.filter(id__in= coefficients_ids).values('name')
-                for field in fieldstemp:
-                    coefficients_name.append(field['name'])
-                    
-                catalogpropertydetailtempQuerySet = CatalogPropertyDetailTemp.objects.filter(name__in=coefficients_name)
-                for i, cpdt in enumerate(catalogpropertydetailtempQuerySet):
-                    catalogpropertydetail = CatalogPropertyDetail1()
-                    catalogpropertydetail.name = catalogpropertydetailtempQuerySet[i].name
-                    catalogpropertydetail.description = catalogpropertydetailtempQuerySet[i].description
-                    catalogpropertydetail.type =  catalogpropertydetailtempQuerySet[i].type
-                    catalogpropertydetail.crystalsystem = catalogpropertydetailtempQuerySet[i].crystalsystem   
-                    catalogpropertydetail.catalogaxis = catalogpropertydetailtempQuerySet[i].catalogaxis
-                    catalogpropertydetail.catalogpointgroup =   catalogpropertydetailtempQuerySet[i].catalogpointgroup
-                    catalogpropertydetail.puntualgroupnames = catalogpropertydetailtempQuerySet[i].puntualgroupnames
-                    catalogpropertydetail.dataproperty = catalogpropertydetailtempQuerySet[i].dataproperty
-            
-            """
+ 
             
 admin.site.register(DataPropertyDetail, DataPropertyDetailAdmin)
 

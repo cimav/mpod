@@ -1278,11 +1278,81 @@ class DataPropertyDetailAdminForm(forms.ModelForm):
                                 except ObjectDoesNotExist as error:
                                     print "Message({0}): {1}".format(99, error.message)   
                                     return  error.message   
-       
-
-
+                                
+  
             
+            
+            
+class GroupNamesDetailAdminForm(forms.ModelForm):  
+    
+    class Meta:
+        model = GroupNamesDetail
+        
  
+    def clean(self,*args,**kwargs):
+        puntualgroupnames=self.cleaned_data.get("puntualgroupnames")
+        catalogpointgroup=self.cleaned_data.get("catalogpointgroup")
+         
+        if not catalogpointgroup:
+            raise forms.ValidationError("the 'Point Group' field are not selected, you must select one of the two!")
+           
+    
+        if not puntualgroupnames:
+            pass
+            #raise forms.ValidationError("the 'Group Name' field are not selected, you must select one of the two!")
+        
+        return super(GroupNamesDetailAdminForm,self).clean(*args,**kwargs)
+
+    
+    def __init__(self, *args, **kwargs):
+        super(GroupNamesDetailAdminForm, self).__init__(*args, **kwargs)
+        self.fields['name'] = forms.CharField(label='Groups Name',widget=forms.TextInput(attrs={'size': 40}))
+        self.fields['name'].help_text = "enter the name or leave the field blank to autogenerate the name"
+        self.fields['name'].required = False 
+        
+        self.fields['description'] = forms.CharField(label='Groups Description',widget=forms.TextInput(attrs={'size': 40}))
+        self.fields['description'].help_text = "enter the description or leave the field blank to autogenerate the description"
+        self.fields['description'].required = False 
  
- 
- 
+        self.fields['catalogpointgroup'] = forms.ModelMultipleChoiceField(queryset=None,
+                                                                                                                        required=False,
+                                                                                                                        label="Point Group",
+                                                                                                                        widget=FilteredSelectMultiple(
+                                                                                                                            verbose_name='Point Group',
+                                                                                                                            is_stacked=False
+                                                                                                                        ))
+        print self.instance.pk
+        if self.instance.pk:#if hasattr(self, 'instance'):
+            puntualgroupnamesSelected=PuntualGroupNames.objects.get(id=self.instance.id)
+            #self.fields['puntualgroupnames'].queryset =PuntualGroupNames.objects.filter(id=self.instance.id)
+            #self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
+            self.fields['name'].initial=puntualgroupnamesSelected.name
+            self.fields['description'].initial=puntualgroupnamesSelected.description
+                
+            puntualgroupnamesQuerySet =  PuntualGroupGroups.objects.filter(puntualgroupnames=self.instance)
+            catalogpointgroup_ids = []
+            for i, pgg in  enumerate(puntualgroupnamesQuerySet):
+                catalogpointgroup_ids.append( puntualgroupnamesQuerySet[i].catalogpointgroup.id )
+                
+            self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()
+            self.fields['catalogpointgroup'].initial = CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
+        else:
+            if args:
+                puntualgroupnames_name = str(args[0]['name'])
+                puntualgroupnames_description = str(args[0]['description'])
+                self.fields['name'].initial=puntualgroupnames_name
+                self.fields['description'].initial=puntualgroupnames_description
+
+                catalogpointgroupids=args[0].getlist('catalogpointgroup')
+                catalogpointgroup_ids = []
+                for id in catalogpointgroupids:
+                    catalogpointgroup_ids.append(int(id))
+                
+                self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()
+                self.fields['catalogpointgroup'].initial = CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
+            else:
+                self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()
+
+        
+
+        

@@ -401,29 +401,11 @@ class PuntualGroupNames(models.Model):
     def __unicode__(self):
         return str(self.name)   
     
-class PuntualGroupNamesManager(models.Manager):
-    use_for_related_fields = True
-     
-    
-    def sample(self,name):
-        from django.db import connection
-        cursor = connection.cursor()
-        cursor.execute(""" SELECT name FROM mpod.catalog_point_group
-                                            where id in(SELECT catalogpointgroup_id FROM mpod.puntual_group_groups
-                                                                where puntualgroupnames_id in(SELECT id FROM mpod.puntual_group_names
-                                                                                                                  where name  = %s)
-                                                       )""", [name])
-        result_list = []
-        for row in cursor.fetchall():
-            annotation = row[-1]
-             
-            result_list.append(annotation)
-        return result_list
+
         
 class PuntualGroupGroups(models.Model): 
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group") 
     puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")     
-    #objects   = PuntualGroupNamesManager()
    
     class Meta:
         db_table = 'puntual_group_groups'            
@@ -469,7 +451,7 @@ class CatalogPropertyDetail1(models.Model):
     puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
     dataproperty = models.ForeignKey(Property,verbose_name="Tag",blank=True)  
     class Meta:
-        db_table = 'catalog_property_detail1'       
+        db_table = 'catalog_property_detail12'       
         
         app_label = string_with_title("Properties", "Properties Settings")
         verbose_name = _('Property Detail')
@@ -786,8 +768,40 @@ class DataPropertyDetail(TypeDataProperty):
         app_label = string_with_title("Properties", "Properties Settings")
         verbose_name = _('Data Property Detail')
         verbose_name_plural = _('Data Properties Details') 
-       
         
+        
+class PuntualGroupsDetail(PuntualGroupGroups):
+    class Meta:
+        proxy=True
+        app_label = string_with_title("Properties", "Properties Settings")
+        verbose_name = _('Group Detail')
+        verbose_name_plural = _('Groups Detail')
+        
+    """def save(self, *args, **kwargs):
+        self.catalogpointgroup = CatalogPointGroup.objects.get(name='1')
+         
+        super(PuntualGroupsDetail, self).save(*args, **kwargs)
+    """   
+    
+  
+  
+class PuntualGroupNamesManager(models.Manager):
+    def get_queryset(self):
+
+        return super(PuntualGroupNamesManager, self).get_queryset().all().exclude(id=21)
+        
+class GroupNamesDetail(PuntualGroupNames):
+    #objects = PuntualGroupNamesManager()
+
+    class Meta:
+        proxy=True
+        app_label = string_with_title("Properties", "Properties Settings")
+        verbose_name = _('Group Name Detail')
+        verbose_name_plural = _('Group Names Detail')  
+    def save(self, *args, **kwargs):
+        #self.section = Section.objects.get(name='reviews')
+        super(GroupNamesDetail, self).save(*args, **kwargs)
+
         
 class DummyModel(models.Model):
         def __init__(self, filename, original=None):
