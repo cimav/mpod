@@ -1277,13 +1277,7 @@ class PuntualGroupNamesAdmin(admin.ModelAdmin):
     
     """
    
-   
  
-    
-        
-    def add_view(self,request,extra_content=None):
-        print 'PuntualGroupNames_add_view'
-        return super(PuntualGroupNamesAdmin,self).add_view(request)
     
     def selectlist_view(self, request, extra_context=None):
             print 'PuntualGroupNames_selectlist_view'
@@ -1329,7 +1323,7 @@ class PuntualGroupNamesAdmin(admin.ModelAdmin):
      
 
     
-admin.site.register(PuntualGroupNames, PuntualGroupNamesAdmin)
+#admin.site.register(PuntualGroupNames, PuntualGroupNamesAdmin)
 
  
         
@@ -1366,7 +1360,7 @@ class GroupNamesDetailAdmin(admin.ModelAdmin):
         opts = model._meta
         obj = self.get_object(request, unquote(object_id))
         if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
+            raise Http404(('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
                                                                                            
         extra_context = extra_context or {}
         extra_context = {
@@ -1374,10 +1368,142 @@ class GroupNamesDetailAdmin(admin.ModelAdmin):
 
             }
         return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+    
+    def delete_model_queryset(self, request, queryset):
+        for obj in queryset:
+            print obj
+            #obj.delete()
+            
+    def delete_model(self, request, obj):
+        pass
+        #obj.delete()
+        
+           
+    def delete_view(self, request, object_id, extra_context=None):    
+        opts = self.model._meta
+        app_label = opts.app_label
+        try:
+            obj = self.model._default_manager.get(pk=object_id)
+        except self.model.DoesNotExist:
+            obj = None
+                
+        print obj   
+        if obj is None:
+              raise Http404('%s object with primary key %r does not exist.' % (force_unicode(opts.verbose_name), escape(object_id)))
+          
+        using = router.db_for_write(self.model)  
+ 
+ 
+        (deleted_objects, perms_needed, protected) = get_deleted_objects([obj], opts, request.user, self.admin_site, using)
+        if request.POST: # The user has already confirmed the deletion.
+            if perms_needed:
+                raise PermissionDenied
+            obj_display = force_unicode(obj)
+            self.log_deletion(request, obj, obj_display)
+            
+            #TODO:checar primero que no alla sido usado en catalog_property_detail
+           
+            queryset = PuntualGroupGroups.objects.filter(puntualgroupnames=obj)
+            self.delete_model_queryset( request, queryset)
+            self.delete_model(request, obj)
+
+            self.message_user(request,_('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})
+
+            if not self.has_change_permission(request, None):
+                return HttpResponseRedirect(reverse('admin:index',
+                                                    current_app=self.admin_site.name))
+            return HttpResponseRedirect(reverse('admin:%s_%s_changelist' %
+                                        (opts.app_label, opts.module_name),
+                                        current_app=self.admin_site.name))
+
+        object_name = force_unicode(opts.verbose_name)
+
+        if perms_needed or protected:
+            title = ("Cannot delete %(name)s") % {"name": object_name}
+        else:
+            title = ("Are you sure?")
+
+        context = {
+            "title": title,
+            "object_name": object_name,
+            "object": obj,
+            "deleted_objects": deleted_objects,
+            "perms_lacking": perms_needed,
+            "protected": protected,
+            "opts": opts,
+            "app_label": app_label,
+        }
+        context.update(extra_context or {})
+
+        return TemplateResponse(request, self.delete_confirmation_template or [
+            "admin/%s/%s/delete_confirmation.html" % (app_label, opts.object_name.lower()),
+            "admin/%s/delete_confirmation.html" % app_label,
+            "admin/delete_confirmation.html"
+        ], context, current_app=self.admin_site.name)
         
     def save_model(self, request, obj, form, change):
         print 'GroupNamesDetailAdmin_save'
         print request.POST
+        print obj.name
+        print form.changed_data # list name of field was changed
+        print change #True or False
+        if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
+            print "pass"
+        elif  request.POST.has_key('_addanother'): 
+            obj.name = request.POST.get('name',False)
+            obj.description = request.POST.get('description',False)
+            #obj.save()
+            catalogpointgroup=  request.POST.getlist('catalogpointgroup',False)
+            catalogpointgroup_ids = []
+            for id in catalogpointgroup:
+                catalogpointgroup_ids.append(int(id))
+                
+            catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
+ 
+            for i, cpg in enumerate( catalogpointgroupQuerySet ):
+                pgg=PuntualGroupGroups()
+                pgg.catalogpointgroup = catalogpointgroupQuerySet[i]
+                pgg.puntualgroupnames = obj
+                #pgg.save()
+ 
+                del pgg
+        elif request.POST.has_key('_continue'): 
+            obj.name = request.POST.get('name',False)
+            obj.description = request.POST.get('description',False)
+            #obj.save()
+            catalogpointgroup=  request.POST.getlist('catalogpointgroup',False)
+            catalogpointgroup_ids = []
+            for id in catalogpointgroup:
+                catalogpointgroup_ids.append(int(id))
+                
+            catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
+ 
+            for i, cpg in enumerate( catalogpointgroupQuerySet ):
+                pgg=PuntualGroupGroups()
+                pgg.catalogpointgroup = catalogpointgroupQuerySet[i]
+                pgg.puntualgroupnames = obj
+                #pgg.save()
+ 
+                del pgg
+        elif request.POST.has_key('_save'):
+            obj.name = request.POST.get('name',False)
+            obj.description = request.POST.get('description',False)
+            #obj.save()
+            catalogpointgroup=  request.POST.getlist('catalogpointgroup',False)
+            catalogpointgroup_ids = []
+            for id in catalogpointgroup:
+                catalogpointgroup_ids.append(int(id))
+                
+            catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
+ 
+            for i, cpg in enumerate( catalogpointgroupQuerySet ):
+                pgg=PuntualGroupGroups()
+                pgg.catalogpointgroup = catalogpointgroupQuerySet[i]
+                pgg.puntualgroupnames = obj
+                #pgg.save()
+                del pgg
+   
+        #super(GroupNamesDetailAdmin, self).save_model(request, obj, form, change)
 
     def queryset(self, request):
         qs = super(GroupNamesDetailAdmin, self).queryset(request)
@@ -1643,7 +1769,7 @@ class DataPropertyDetailAdmin(admin.ModelAdmin):
                 for field in fieldstemp:
                     coefficients_name.append(field['name'])
                     
-                
+                """
                 catalogpropertydetailtempQuerySetpopulated = CatalogPropertyDetail1.objects.filter(name__in=coefficients_name,
                                                                                                                                                                         dataproperty_id = dataproperty_id,
                                                                                                                                                                         crystalsystem_id=catalogcrystalsystem_id,
@@ -1694,7 +1820,7 @@ class DataPropertyDetailAdmin(admin.ModelAdmin):
                     catalogpropertydetail.dataproperty = catalogpropertydetailtempQuerySet[i].dataproperty
 
                     #catalogpropertydetail.save()
-
+                """
                 
                 """    
                 messages.set_level(request, messages.WARNING)
@@ -1721,11 +1847,174 @@ class DataPropertyDetailAdmin(admin.ModelAdmin):
             
  
             
-admin.site.register(DataPropertyDetail, DataPropertyDetailAdmin)
+#admin.site.register(DataPropertyDetail, DataPropertyDetailAdmin)
 
 class PropertyAdmin(admin.ModelAdmin):
     pass
     
     
 admin.site.register(Property,PropertyAdmin)
+
+
+
+
+
+
+
+
+
+
+class TensorAdmin(admin.ModelAdmin):
+    form=TensorAdminForm
+    readonly_fields=['name','description','active']
+    fieldsets = (
+            ('Tensor', {
+                'fields': ('name','description','active',),
+            }),
+        )
+    
+    def get_fieldsets(self, *args, **kwargs):
+        return  (
+            ('Tensor', {
+                'fields': ('type','dataproperty','catalogcrystalsystem','catalogpointgroup','puntualgroupnames','axis','coefficients'),
+            }),
+        )
  
+
+    
+    
+ 
+    """def changelist_view(self, request, extra_context=None):
+        extra_context = {
+            #'groups': [x[0] for x in groups],
+            'obj':'obj',
+        }
+        return super(TensorAdmin, self).changelist_view(request, extra_context=extra_context)
+    """
+    
+    """def change_view(self, request, object_id, form_url='', extra_context=None):
+        model = self.model
+        opts = model._meta
+        obj = self.get_object(request, unquote(object_id))
+        if obj is None:
+            raise Http404(('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
+                                                                                           
+        extra_context = extra_context or {}
+        extra_context = {
+                'original':obj,
+
+            }
+        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)"""
+    
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
+    
+    def delete_model_queryset(self, request, queryset):
+        for obj in queryset:
+            print obj
+            #obj.delete()
+            
+    def delete_model(self, request, obj):
+        pass
+        #obj.delete()
+        
+           
+    def delete_view(self, request, object_id, extra_context=None):    
+        opts = self.model._meta
+        app_label = opts.app_label
+        try:
+            obj = self.model._default_manager.get(pk=object_id)
+        except self.model.DoesNotExist:
+            obj = None
+                
+        print obj   
+        if obj is None:
+              raise Http404('%s object with primary key %r does not exist.' % (force_unicode(opts.verbose_name), escape(object_id)))
+          
+        using = router.db_for_write(self.model)  
+ 
+ 
+        (deleted_objects, perms_needed, protected) = get_deleted_objects([obj], opts, request.user, self.admin_site, using)
+        if request.POST: # The user has already confirmed the deletion.
+            if perms_needed:
+                raise PermissionDenied
+            obj_display = force_unicode(obj)
+            self.log_deletion(request, obj, obj_display)
+            
+            #TODO:checar primero que no alla sido usado en catalog_property_detail
+           
+            queryset = PuntualGroupGroups.objects.filter(puntualgroupnames=obj)
+            self.delete_model_queryset( request, queryset)
+            self.delete_model(request, obj)
+
+            self.message_user(request,_('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})
+
+            if not self.has_change_permission(request, None):
+                return HttpResponseRedirect(reverse('admin:index',
+                                                    current_app=self.admin_site.name))
+            return HttpResponseRedirect(reverse('admin:%s_%s_changelist' %
+                                        (opts.app_label, opts.module_name),
+                                        current_app=self.admin_site.name))
+
+        object_name = force_unicode(opts.verbose_name)
+
+        if perms_needed or protected:
+            title = ("Cannot delete %(name)s") % {"name": object_name}
+        else:
+            title = ("Are you sure?")
+
+        context = {
+            "title": title,
+            "object_name": object_name,
+            "object": obj,
+            "deleted_objects": deleted_objects,
+            "perms_lacking": perms_needed,
+            "protected": protected,
+            "opts": opts,
+            "app_label": app_label,
+        }
+        context.update(extra_context or {})
+
+        return TemplateResponse(request, self.delete_confirmation_template or [
+            "admin/%s/%s/delete_confirmation.html" % (app_label, opts.object_name.lower()),
+            "admin/%s/delete_confirmation.html" % app_label,
+            "admin/delete_confirmation.html"
+        ], context, current_app=self.admin_site.name)
+        
+    def save_model(self, request, obj, form, change):
+        print 'TensorAdmin_save'
+        print request.POST
+        print form.changed_data # list name of field was changed
+        print change #True or False
+        if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
+            print "pass"
+        elif  request.POST.has_key('_addanother'): 
+            print obj.name
+            print obj.description
+            #obj.save()
+
+                
+        elif request.POST.has_key('_continue'): 
+            print obj.name
+            print obj.description
+            #obj.save()
+
+        elif request.POST.has_key('_save'):
+            print obj.name
+            print obj.description
+            #obj.save()
+
+   
+        #super(TensorAdmin, self).save_model(request, obj, form, change)
+
+    def queryset(self, request):
+        qs = super(TensorAdmin, self).queryset(request)
+
+        return qs.all()
+        #return super(TensorAdmin, self).get_queryset().all().exclude(id=21)
+ 
+admin.site.register(Tensor,TensorAdmin)
