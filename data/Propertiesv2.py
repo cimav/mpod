@@ -134,12 +134,7 @@ class Propertiesv2(object):
                     
                 if self.crystalsystem_name =='':
                     self.crystalsystem_name='tc'
-                    
- 
-                    
-                    #self.objDataProperty = Property.objects.get(id=int(self.dataproperty))
-                    
-                
+
                     
                 self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty) 
                 
@@ -257,7 +252,7 @@ class Propertiesv2(object):
                     return
                 else:
                      
-                    if  self.puntualgroupselected_name == '':
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '':
                         self.message= 'All the point groups of this crystal system have the same matrix'
                         self.questionGp = 'Point Group?'    
                         self.setPointGroup()

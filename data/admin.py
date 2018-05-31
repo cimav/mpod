@@ -1867,16 +1867,12 @@ admin.site.register(Property,PropertyAdmin)
 class TensorAdmin(admin.ModelAdmin):
     form=TensorAdminForm
     readonly_fields=['name','description','active']
-    fieldsets = (
-            ('Tensor', {
-                'fields': ('name','description','active',),
-            }),
-        )
+ 
     
     def get_fieldsets(self, *args, **kwargs):
         return  (
             ('Tensor', {
-                'fields': ('type','dataproperty','catalogcrystalsystem','catalogpointgroup','puntualgroupnames','axis','coefficients'),
+                'fields': ('name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup','puntualgroupnames','axis','coefficients'),
             }),
         )
  
@@ -1990,26 +1986,112 @@ class TensorAdmin(admin.ModelAdmin):
         print request.POST
         print form.changed_data # list name of field was changed
         print change #True or False
-        if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
+        """if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
             print "pass"
         elif  request.POST.has_key('_addanother'): 
-            print obj.name
-            print obj.description
-            #obj.save()
-
-                
+            pass
+            #obj.save()      
         elif request.POST.has_key('_continue'): 
-            print obj.name
-            print obj.description
-            #obj.save()
+            pass
+            #obj.save()"""
 
-        elif request.POST.has_key('_save'):
-            print obj.name
-            print obj.description
-            #obj.save()
+        if request.POST.has_key('_save') or request.POST.has_key('_continue'):
+            dataproperty_id = 0
+            if request.POST.get('dataproperty',False)  != False:
+                dataproperty_id = request.POST.get('dataproperty',False)   
+                datapropertySelected=Property.objects.get(id=int(dataproperty_id)) 
+            
+            catalogcrystalsystem_id = 0
+            if request.POST.get('catalogcrystalsystem',False)  != False:
+                catalogcrystalsystem_id = request.POST.get('catalogcrystalsystem',False)
+                
+            type_id = 0
+            if  request.POST.get('type',False) != False:
+                type_id=request.POST.get('type',False)
+                
+            puntualgroupnameslist_ids = []
+            if request.POST.getlist('puntualgroupnames',False)  != False:
+                puntualgroupnames_ids = request.POST.getlist('puntualgroupnames',False)  
+                if puntualgroupnames_ids[0] != '':
+                    for id in puntualgroupnames_ids:
+                        puntualgroupnameslist_ids.append(int(id))
+                else:
+                    puntualgroupnameslist_ids.append(21)
+                    
+            else:
+                puntualgroupnameslist_ids.append(21)
+                
+            catalogpointgrouplist_ids = []
+            if  request.POST.getlist('catalogpointgroup',False):
+                catalogpointgroup_ids= request.POST.getlist('catalogpointgroup',False)
+                if catalogpointgroup_ids[0] != '':
+                    for id in catalogpointgroup_ids:
+                        catalogpointgrouplist_ids.append(int(id))
+                else:
+                    catalogpointgrouplist_ids.append(45)
+                        
+            else:
+                    catalogpointgrouplist_ids.append(45)
+                    
+            catalogaxislist_ids = []
+            if  request.POST.getlist('axis',False)  != False:
+                catalogaxis_ids = request.POST.getlist('axis',False)
+                if catalogaxis_ids[0] != '':
+                    for id in catalogaxis_ids:
+                        catalogaxislist_ids.append(int(id))
+                else:   
+                    catalogaxislist_ids.append(4)
+            else:
+                catalogaxislist_ids.append(4)
+                
 
+
+            if request.POST.getlist('coefficients',False):
+                coefficients=  request.POST.getlist('coefficients',False)
+                if coefficients[0] != '':
+                    coefficients_name = []
+                    coefficients_ids_temp = []
+                    coefficients_ids = []
+                    for id in coefficients:
+                        coefficients_ids.append(int(id))
+                    
+                    catalogPropertyDetailTempQuerySet = CatalogPropertyDetailTemp.objects.filter(id__in= coefficients_ids) 
+                    
+                    
+                    fieldstemp = CatalogPropertyDetailTemp.objects.filter(id__in= coefficients_ids).values('name')
+                    if fieldstemp:
+                        for field in fieldstemp:
+                            coefficients_name.append(field['name'])
+                            
+                    catalogpropertydetailQuerySet = CatalogPropertyDetail.objects.filter(   name__in=coefficients_name,
+                                                                                                                                                        dataproperty_id = dataproperty_id,
+                                                                                                                                                        crystalsystem_id=catalogcrystalsystem_id,
+                                                                                                                                                        type_id=type_id,
+                                                                                                                                                        puntualgroupnames_id__in=puntualgroupnameslist_ids,
+                                                                                                                                                        catalogpointgroup_id__in=catalogpointgrouplist_ids,
+                                                                                                                                                       catalogaxis_id__in=catalogaxislist_ids)
+                            
+                            
+                    
+                    print catalogPropertyDetailTempQuerySet
+                    #obj.save()
+                    
+                    
+                else:
+                    messages.set_level(request, messages.WARNING)
+                    messages.warning(request, 'the process was not done, no coefficient for this property: ' + datapropertySelected.name) 
+                    #messages.set_level(request, messages.ERROR)
+                    #messages.ERROR(request, 'The process was not done')
+                
+            else:
+                messages.set_level(request, messages.WARNING)
+                messages.warning(request, 'the process was not done, no coefficient selected for this property: ' + datapropertySelected.name)
+                
    
         #super(TensorAdmin, self).save_model(request, obj, form, change)
+
+
+
 
     def queryset(self, request):
         qs = super(TensorAdmin, self).queryset(request)
