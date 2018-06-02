@@ -6627,7 +6627,7 @@ class Propertiesv2(object):
                     
                     
             if self.crystalsystem_name == 'o': 
-                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '222, 2mm, mmm' :
+                if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '222, 2mm, mmm' :
                     self.questionGp = 'Point Group:'       
                     if self.magnetoelectricity == False:
                         self.setPointGroup()    

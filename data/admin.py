@@ -1867,14 +1867,26 @@ admin.site.register(Property,PropertyAdmin)
 class TensorAdmin(admin.ModelAdmin):
     form=TensorAdminForm
     readonly_fields=['name','description','active']
- 
+   
     
     def get_fieldsets(self, *args, **kwargs):
         return  (
             ('Tensor', {
-                'fields': ('name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup','puntualgroupnames','axis','coefficients'),
+                'fields': ('name','description','active','type','dataproperty','catalogcrystalsystem'),
             }),
         )
+                
+        """return  (
+            ('Tensor', {
+                'fields': ('name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup'),
+            }),
+            (None, {
+                'fields': ('puntualgroupnames','pointgroup'),
+            }),
+            (None, {
+                'fields': ('axis','coefficients'),
+            }),
+        )"""
  
 
     
@@ -1998,88 +2010,122 @@ class TensorAdmin(admin.ModelAdmin):
         if request.POST.has_key('_save') or request.POST.has_key('_continue'):
             dataproperty_id = 0
             if request.POST.get('dataproperty',False)  != False:
-                dataproperty_id = request.POST.get('dataproperty',False)   
-                datapropertySelected=Property.objects.get(id=int(dataproperty_id)) 
+                dataproperty_id = int(request.POST.get('dataproperty',False))
+                print dataproperty_id
+                datapropertySelected=Property.objects.get(id=int(dataproperty_id))
+                print datapropertySelected
             
             catalogcrystalsystem_id = 0
             if request.POST.get('catalogcrystalsystem',False)  != False:
-                catalogcrystalsystem_id = request.POST.get('catalogcrystalsystem',False)
+                catalogcrystalsystem_id = int(request.POST.get('catalogcrystalsystem',False))
+                print catalogcrystalsystem_id
                 
             type_id = 0
             if  request.POST.get('type',False) != False:
-                type_id=request.POST.get('type',False)
+                type_id=int(request.POST.get('type',False))
+                print type_id
                 
-            puntualgroupnameslist_ids = []
-            if request.POST.getlist('puntualgroupnames',False)  != False:
-                puntualgroupnames_ids = request.POST.getlist('puntualgroupnames',False)  
-                if puntualgroupnames_ids[0] != '':
-                    for id in puntualgroupnames_ids:
-                        puntualgroupnameslist_ids.append(int(id))
-                else:
-                    puntualgroupnameslist_ids.append(21)
+            puntualgroupnames_id = 21
+            if  request.POST.get('puntualgroupnames',False) != False:
+                puntualgroupnames_id=int(request.POST.get('puntualgroupnames',False))
+                print puntualgroupnames_id
+
+            catalogpointgroup_id = 45
+            if  request.POST.get('catalogpointgroup',False) != False:
+                catalogpointgroup_id=int(request.POST.get('catalogpointgroup',False))
+                print catalogpointgroup_id
                     
-            else:
-                puntualgroupnameslist_ids.append(21)
+            catalogaxis_id = 4
+            if  request.POST.get('axis',False) != False:
+                catalogaxis_id=int(request.POST.get('axis',False))
+                print catalogaxis_id
                 
-            catalogpointgrouplist_ids = []
-            if  request.POST.getlist('catalogpointgroup',False):
-                catalogpointgroup_ids= request.POST.getlist('catalogpointgroup',False)
-                if catalogpointgroup_ids[0] != '':
-                    for id in catalogpointgroup_ids:
-                        catalogpointgrouplist_ids.append(int(id))
-                else:
-                    catalogpointgrouplist_ids.append(45)
-                        
-            else:
-                    catalogpointgrouplist_ids.append(45)
-                    
-            catalogaxislist_ids = []
-            if  request.POST.getlist('axis',False)  != False:
-                catalogaxis_ids = request.POST.getlist('axis',False)
-                if catalogaxis_ids[0] != '':
-                    for id in catalogaxis_ids:
-                        catalogaxislist_ids.append(int(id))
-                else:   
-                    catalogaxislist_ids.append(4)
-            else:
-                catalogaxislist_ids.append(4)
+ 
                 
 
 
             if request.POST.getlist('coefficients',False):
                 coefficients=  request.POST.getlist('coefficients',False)
                 if coefficients[0] != '':
-                    coefficients_name = []
-                    coefficients_ids_temp = []
                     coefficients_ids = []
                     for id in coefficients:
                         coefficients_ids.append(int(id))
+                        
+                    try:
+                        nameTempValuesQuerySet = CatalogPropertyDetailTemp.objects.filter(id__in= coefficients_ids).values('name')
+                        coefficients_name_temp = []
+                        if nameTempValuesQuerySet:
+                            for field in nameTempValuesQuerySet:
+                                coefficients_name_temp.append(field['name'])
                     
-                    catalogPropertyDetailTempQuerySet = CatalogPropertyDetailTemp.objects.filter(id__in= coefficients_ids) 
+                        #TODO: checar que hacer si llos coefficnetes son nuevos
+                        nameValuesQuerySet = CatalogPropertyDetail.objects.filter(   dataproperty_id = dataproperty_id,
+                                                                                                                                            crystalsystem_id=catalogcrystalsystem_id,
+                                                                                                                                            type_id=type_id,
+                                                                                                                                            puntualgroupnames_id=puntualgroupnames_id,
+                                                                                                                                            catalogpointgroup_id=catalogpointgroup_id,
+                                                                                                                                            catalogaxis_id=catalogaxis_id).values('name')
+                        coefficients_name = []
+                        if nameValuesQuerySet:
+                            for field in nameValuesQuerySet:
+                                coefficients_name.append(field['name'])
                     
+                        listAB = list(set(coefficients_name_temp) & set(coefficients_name))
+                        
+                        disctincttemp = []
+                        disctinct = []
+                        for c in coefficients_name_temp:
+                            if c not in listAB:
+                                disctincttemp.append(str(c))
                     
-                    fieldstemp = CatalogPropertyDetailTemp.objects.filter(id__in= coefficients_ids).values('name')
-                    if fieldstemp:
-                        for field in fieldstemp:
-                            coefficients_name.append(field['name'])
+                        for c in coefficients_name:
+                            if c not in listAB:
+                                disctinct.append(str(c))
+                                
+                        if len(disctincttemp) != 0:
+                            print disctincttemp
+                            tempQuerySet= CatalogPropertyDetailTemp.objects.filter(name__in =disctincttemp)  
+                            for i,obj in enumerate(tempQuerySet):
+                                newObj= CatalogPropertyDetail()
+                                newObj.name = tempQuerySet[i].name
+                                newObj.dataproperty = Property.objects.get(id=int(dataproperty_id))
+                                newObj.crystalsystem = CatalogCrystalSystem.objects.get(id=int(catalogcrystalsystem_id))
+                                newObj.type = Type.objects.get(id=int(type_id))
+                                newObj.puntualgroupnames = PuntualGroupNames.objects.get(id=int(puntualgroupnames_id))
+                                newObj.catalogpointgroup = CatalogPointGroup.objects.get(id=int(catalogpointgroup_id))
+                                newObj.catalogaxis = CatalogAxis.objects.get(id=int(catalogaxis_id))
+                                print 'save ' + newObj.name 
+                                #newObj.save()
+                                
+                                
+                
+                        if len(disctinct) != 0:
+                                print disctinct
+                                for i,c in enumerate(disctinct):
+                                    oldObj= CatalogPropertyDetail.objects.get(name__exact =c,
+                                                                                                                    dataproperty_id = dataproperty_id,
+                                                                                                                    crystalsystem_id=catalogcrystalsystem_id,
+                                                                                                                    type_id=type_id,
+                                                                                                                    puntualgroupnames_id=puntualgroupnames_id,
+                                                                                                                    catalogpointgroup_id=catalogpointgroup_id,
+                                                                                                                   catalogaxis_id=catalogaxis_id)  
+                                    #oldObj.delete()
+                                    print 'delete ' + oldObj.name 
+                         
+                        if len(disctincttemp) == 0 and len(disctinct) == 0:
+                            messages.set_level(request, messages.WARNING)
+                            messages.warning(request, 'the process was not done, no coefficient selected for this property: ' + datapropertySelected.name)    
                             
-                    catalogpropertydetailQuerySet = CatalogPropertyDetail.objects.filter(   name__in=coefficients_name,
-                                                                                                                                                        dataproperty_id = dataproperty_id,
-                                                                                                                                                        crystalsystem_id=catalogcrystalsystem_id,
-                                                                                                                                                        type_id=type_id,
-                                                                                                                                                        puntualgroupnames_id__in=puntualgroupnameslist_ids,
-                                                                                                                                                        catalogpointgroup_id__in=catalogpointgrouplist_ids,
-                                                                                                                                                       catalogaxis_id__in=catalogaxislist_ids)
-                            
-                            
-                    
-                    print catalogPropertyDetailTempQuerySet
-                    #obj.save()
+                                    
+                    except ObjectDoesNotExist as error:
+                        messages.set_level(request, messages.ERROR)
+                        messages.error(request, 'the process was not done, no coefficient selected for this property: ' + error) 
+                        
                     
                     
                 else:
                     messages.set_level(request, messages.WARNING)
-                    messages.warning(request, 'the process was not done, no coefficient for this property: ' + datapropertySelected.name) 
+                    messages.warning(request, 'the process was not done, no coefficient selected for this property: ' + datapropertySelected.name) 
                     #messages.set_level(request, messages.ERROR)
                     #messages.ERROR(request, 'The process was not done')
                 
