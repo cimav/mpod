@@ -62,6 +62,7 @@
 															counterElements++;
 															var file_name ="";
 															var value = "{{tens_val}}";
+															 
 															var valueTen = "";
 															var promertyname="";
 
@@ -201,12 +202,18 @@
 																"{{tens_prop.0}}" == "thermal conductivity kappaij" || 
 																"{{tens_prop.0}}" == "thermal diffusivity kappadij" || 
 																"{{tens_prop.0}}" == "thermal expansion alphaij" || 
-																"{{tens_prop.0}}" == "thermoelectric Seebeck Seij" || 
-																"{{tens_prop.0}}" == "magnetoelectric MEalphaij"){
+																"{{tens_prop.0}}" == "thermoelectric Seebeck Seij"){
+																//"|| {{tens_prop.0}}" == "magnetoelectric MEalphaij"){
 																type = 0;
 																file_name =codefile + "{{tens_prop.0}}" 
 																
 															}
+															else if(
+																	"{{tens_prop.0}}" == "magnetoelectric MEalphaij"){
+																	type = 7;
+																	file_name =codefile + "{{tens_prop.0}}" 
+																	
+																}
 															else if("{{tens_prop.0}}" == "electromechanical coupling kij" || 
 																	    "{{tens_prop.0}}" == "piezoelectric dij" || 
 																	    "{{tens_prop.0}}" == "piezoelectric eij" ||
@@ -262,7 +269,7 @@
 															}
 															else
 														   {
-																type =7;
+																type =8;
 																
 															}
 
@@ -283,7 +290,7 @@
 							    var options="toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=false,width=525,height=700,top="+h+",left="+w+"";
 							    var optionscs="toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=false,width=1070,height=700,top="+h+",left="+wcs+"";
 							    
-								if(type == 0){
+								if(type == 0 || type == 7){
 									type0filename=file_name;
 									values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value21="+val4+"&value22="+val5+"&value23="+val6+"&value31="+val7+"&value32="+val8+"&value33="+val9 ;
 									
@@ -298,7 +305,7 @@
 										
   										var url = values + "&color=" + selectedColor +"&filename="+type0filename;
 									    urlGraph = "/dataitem/" + pathname[2] + "/secondranktensor/" + url;
-									   //alert(urlGraph);
+									    alert(urlGraph);
 									    window.open(urlGraph,"",options);
 									}
 

@@ -60,6 +60,7 @@ from django.db.models.query import QuerySet
 from django.db.models import Count
 
 import decimal
+from data.Utils import requestPostToIntList
 
 """
 class UserAdmin(admin.ModelAdmin):
@@ -1208,10 +1209,12 @@ admin.site.register(CatalogAxis, CatalogAxisAdmin)
 
 
 class CatalogCrystalSystemAdmin(admin.ModelAdmin):
+    form = CatalogCrystalSystemAdminForm
     list_display =('name','description','get_catalogproperty_description',)  
     ordering = ('catalogproperty__description',) 
     search_fields = ['name', 'description', ]
-    list_filter = ('catalogproperty__description',)
+    list_filter = ('description','active')
+    #readonly_fields=['name','description','active']
 
         
     def get_catalogproperty_description(self, obj):
@@ -1222,6 +1225,196 @@ class CatalogCrystalSystemAdmin(admin.ModelAdmin):
 
     get_catalogproperty_description.short_description = 'Property'
     get_catalogproperty_description.allow_tags=True 
+    
+    def get_fieldsets(self, *args, **kwargs):
+        return  (
+            ('Crystal System', {
+                'fields': ('name','description','active','catalogproperty','type','catalogpointgroup','pointgroupdetail','puntualgroupnames','puntualgroupnamesdetail','axis','axisdetail'),
+            }),
+        )
+        
+    def save_model(self, request, obj, form, change):
+        print 'CatalogCrystalSystemAdmin_save_model'
+        print request.POST
+        print obj.name
+        print form.changed_data # list name of field was changed
+        print change #True or False
+        if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
+            print "pass"
+        elif  request.POST.has_key('_addanother') or request.POST.has_key('_continue') or request.POST.has_key('_save'):
+            if change:
+                obj.save() 
+                
+            catalogpointgroup_id = requestPostToInt(request.POST,'catalogpointgroup')
+            puntualgroupnames_id = requestPostToInt(request.POST,'puntualgroupnames')
+            type_id  = requestPostToInt(request.POST,'type')
+            del_catalogpointgroup_ids = requestPostToIntList(request.POST,'delete_catalogpointgroup')
+            del_puntualgroupnames_ids = requestPostToIntList(request.POST,'delete_puntualgroupnames')
+            axis_new_ids = requestPostToIntList(request.POST,'axis')
+            typeSelected = Type.objects.get(id= type_id)
+            puntualgroupnamesSelected = PuntualGroupNames.objects.get(id= puntualgroupnames_id)
+            catalogpointgroupSelected = CatalogPointGroup.objects.get(id=catalogpointgroup_id)
+            
+            
+            if axis_new_ids:
+                axis_old_ids = CrystalSystemAxis.objects.filter(catalogcrystalsystem=obj,type_id = type_id,catalogpointgroup= catalogpointgroupSelected,puntualgroupnames = puntualgroupnamesSelected,active=1).values_list('axis_id',flat=True)  
+                listAB = list(set(axis_old_ids) & set(axis_new_ids))
+                newlist = []
+                oldlist = []
+                for c in axis_old_ids:
+                    if c not in listAB:
+                        oldlist.append(str(c))
+            
+                for c in axis_new_ids:
+                    if c not in listAB:
+                        newlist.append(str(c))
+                        
+                
+                if len(newlist) != 0:
+                    for i,o in enumerate(newlist):
+                        #csa = CrystalSystemAxis.objects.get(catalogcrystalsystem=obj,type_id = type_id, axis_id = newlist[i],active=0)
+                        csaQuerySet = CrystalSystemAxis.objects.filter(axis_id=newlist[i],catalogcrystalsystem=obj,type_id = type_id,catalogpointgroup= catalogpointgroupSelected,puntualgroupnames = puntualgroupnamesSelected,active=0)
+                        if csaQuerySet:
+                            csa =   csaQuerySet[0]
+                        
+                            csa.active = 1
+                            csa.save()
+                        else:
+                            csa=CrystalSystemAxis()
+                            csa.active = 1
+                            csa.catalogcrystalsystem = obj
+                            csa.axis = CatalogAxis.objects.get(id=newlist[i])
+                            csa.type = typeSelected
+                            csa.catalogpointgroup= catalogpointgroupSelected
+                            csa.puntualgroupnames = puntualgroupnamesSelected
+                            csa.save()
+                            
+                        del csa
+                        
+                    print 'save'
+                
+                if len(oldlist) != 0:
+                    for i,o in enumerate(oldlist):
+                        csa = CrystalSystemAxis.objects.get(catalogcrystalsystem=obj,type_id = type_id, axis_id = oldlist[i],active=1)
+                        if csa:
+                            csa.active = 0
+                            csa.save()
+                            #catalogaxisOldQuerySet[i].delete()
+                        del csa
+                        
+                    print 'delete'
+ 
+ 
+    
+            if del_catalogpointgroup_ids or del_puntualgroupnames_ids:
+ 
+                for id in del_puntualgroupnames_ids:
+                    catalogpointgroupSelected = CatalogPointGroup.objects.get(id= id)
+                    cspgn=CrystalSystemPuntualGroupNames.objects.get(catalogcrystalsystem=obj,puntualgroupnames_id=id,type_id = type_id)
+                    cspgn.active = 0
+                    print cspgn.puntualgroupnames.name
+                    cspgn.save()
+                    del cspgn
+                    
+                for id in del_catalogpointgroup_ids:
+                    cspg=CrystalSystemPointGroup.objects.get(catalogcrystalsystem=obj,catalogpointgroup=catalogpointgroupSelected,type_id = type_id)
+                    cspg.active = 0
+                    cspg.save()
+                    #cspg.delete()
+                    del cspg
+  
+            else:
+                if  (catalogpointgroup_id == 45  and  puntualgroupnames_id  != 21 ):
+                    if obj.pk: 
+                        crystalsystempuntualgroupnamesQuerySet = CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=obj,puntualgroupnames=puntualgroupnamesSelected,type=typeSelected,active =1)
+                        if  crystalsystempuntualgroupnamesQuerySet:
+                            messages.set_level(request, messages.WARNING)
+                            messages.warning(request, 'the process was not done, puntual group names "'+ puntualgroupnamesSelected.name +'" already exist for this crystal system: ' + typeSelected.description)
+                        else:
+                            crystalsystempuntualgroupnamesQuerySet = CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=obj,puntualgroupnames=puntualgroupnamesSelected,type=typeSelected,active =0)
+                            if crystalsystempuntualgroupnamesQuerySet:
+                                for i,o in enumerate(crystalsystempuntualgroupnamesQuerySet):
+                                    crystalsystempuntualgroupnamesQuerySet[i].active = True
+                                    crystalsystempuntualgroupnamesQuerySet[i].save()
+    
+                                crystalsystempointgroupQuerySet = CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=obj, type=typeSelected,active =1)
+                                if crystalsystempointgroupQuerySet:
+                                    for i,o in enumerate(crystalsystempointgroupQuerySet):
+                                        crystalsystempointgroupQuerySet[i].active = False
+                                        crystalsystempointgroupQuerySet[i].save()
+                    
+                            else:
+                                crystalsystempuntualgroupnames=CrystalSystemPuntualGroupNames()
+                                crystalsystempuntualgroupnames.catalogcrystalsystem = obj
+                                crystalsystempuntualgroupnames.puntualgroupnames= puntualgroupnamesSelected
+                                crystalsystempuntualgroupnames.type=typeSelected
+                                crystalsystempuntualgroupnames.active = True
+                                crystalsystempuntualgroupnames.save()
+                                
+                                crystalsystempointgroupQuerySet = CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=obj, type=typeSelected,active =1)
+                                if crystalsystempointgroupQuerySet:
+                                    for i,o in enumerate(crystalsystempointgroupQuerySet):
+                                        crystalsystempointgroupQuerySet[i].active = False
+                                        crystalsystempointgroupQuerySet[i].save()
+                    else:
+                        obj.save()
+                        crystalsystempuntualgroupnames=CrystalSystemPuntualGroupNames()
+                        crystalsystempuntualgroupnames.catalogcrystalsystem = obj
+                        crystalsystempuntualgroupnames.puntualgroupnames= puntualgroupnamesSelected
+                        crystalsystempuntualgroupnames.type=typeSelected
+                        crystalsystempuntualgroupnames.active = True
+                        crystalsystempuntualgroupnames.save()
+    
+                elif (catalogpointgroup_id  != 45  and  puntualgroupnames_id== 21):
+                    if obj.pk: 
+                        crystalsystempointgroupQuerySet = CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=obj,catalogpointgroup=catalogpointgroupSelected, type=typeSelected,active =1)
+                        if  crystalsystempointgroupQuerySet:
+                            messages.set_level(request, messages.WARNING)
+                            messages.warning(request, 'the process was not done, puntual group  "'+ catalogpointgroupSelected.name +'" already exist for this crystal system: ' + typeSelected.description)
+                        else:
+                            crystalsystempointgroupQuerySet = CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=obj,catalogpointgroup=catalogpointgroupSelected, type=typeSelected,active =0)
+                            if crystalsystempointgroupQuerySet:
+                                for i,o in enumerate(crystalsystempointgroupQuerySet):
+                                    crystalsystempointgroupQuerySet[i].active = True
+                                    crystalsystempointgroupQuerySet[i].save()
+                                        
+                                
+                                crystalsystempuntualgroupnamesQuerySet = CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=obj,type=typeSelected,active =1)
+                                if crystalsystempuntualgroupnamesQuerySet:
+                                    for i,o in enumerate(crystalsystempuntualgroupnamesQuerySet):
+                                        print crystalsystempuntualgroupnamesQuerySet[i].puntualgroupnames
+                                        crystalsystempuntualgroupnamesQuerySet[i].active = False
+                                        crystalsystempuntualgroupnamesQuerySet[i].save()
+   
+                            else:       
+                                crystalsystempointgroup=CrystalSystemPointGroup()
+                                crystalsystempointgroup.catalogcrystalsystem = obj
+                                crystalsystempointgroup.type=typeSelected
+                                crystalsystempointgroup.active = True
+                                crystalsystempointgroup.catalogpointgroup= catalogpointgroupSelected
+                                crystalsystempointgroup.save()
+                            
+                                crystalsystempuntualgroupnamesQuerySet = CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=obj,type=typeSelected,active =1)
+                                if crystalsystempuntualgroupnamesQuerySet:
+                                    for i,o in enumerate(crystalsystempuntualgroupnamesQuerySet):
+                                        print crystalsystempuntualgroupnamesQuerySet[i].puntualgroupnames
+                                        crystalsystempuntualgroupnamesQuerySet[i].active = False
+                                        crystalsystempuntualgroupnamesQuerySet[i].save()
+                    else:
+                        obj.save()
+                        crystalsystempointgroup=CrystalSystemPointGroup()
+                        crystalsystempointgroup.catalogcrystalsystem = obj
+                        crystalsystempointgroup.type=typeSelected
+                        crystalsystempointgroup.active = True
+                        crystalsystempointgroup.catalogpointgroup= catalogpointgroupSelected
+                        crystalsystempointgroup.save()
+                
+                 
+                else:
+                    print  "Error o warning"
+  
+            
+            #obj.save()
     
 admin.site.register(CatalogCrystalSystem, CatalogCrystalSystemAdmin)
 
@@ -1338,12 +1531,13 @@ class GroupNamesDetailAdmin(admin.ModelAdmin):
         }),
     )
     """
+    readonly_fields=['name','description']
     
     
     def get_fieldsets(self, *args, **kwargs):
         return  (
             ('Group Names Detail', {
-                'fields': ('name','description', 'catalogpointgroup'),
+                'fields': ('name','description', 'catalogpointgroup',),
             }),
         )
  
@@ -1449,7 +1643,45 @@ class GroupNamesDetailAdmin(admin.ModelAdmin):
         print change #True or False
         if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
             print "pass"
-        elif  request.POST.has_key('_addanother'): 
+ 
+        elif request.POST.has_key('_save') or  request.POST.has_key('_continue') or request.POST.has_key('_addanother'): 
+            obj.name = request.POST.get('name',False)
+            obj.description = request.POST.get('description',False)
+            obj.save()
+            catalogpointgroup_new_ids = requestPostToIntList(request.POST,'catalogpointgroup')
+            catalogpointgroup_old_ids =  PuntualGroupGroups.objects.filter(puntualgroupnames=obj).values_list('catalogpointgroup_id',flat=True)  
+            listAB = list(set(catalogpointgroup_old_ids) & set(catalogpointgroup_new_ids))
+
+            newlist = []
+            oldlist = []
+            for c in catalogpointgroup_old_ids:
+                if c not in listAB:
+                    oldlist.append(str(c))
+        
+            for c in catalogpointgroup_new_ids:
+                if c not in listAB:
+                    newlist.append(str(c))
+                    
+            if len(newlist) != 0:
+                catalogpointgroupNewQuerySet=CatalogPointGroup.objects.filter(id__in=newlist)
+                for i,o in enumerate(catalogpointgroupNewQuerySet):
+                    pgg=PuntualGroupGroups()
+                    pgg.catalogpointgroup = catalogpointgroupNewQuerySet[i]
+                    pgg.puntualgroupnames = obj
+                    pgg.save()
+                    
+                print 'save'
+            
+            if len(oldlist) != 0:
+                catalogpointgroupOldQuerySet=CatalogPointGroup.objects.filter(id__in=oldlist)
+                for i,o in enumerate(catalogpointgroupOldQuerySet):
+                    print catalogpointgroupOldQuerySet[i].name
+                    catalogpointgroupOldQuerySet[i].delete()
+                    
+                print 'delete'
+                            
+                            
+        """elif request.POST.has_key('_save'):
             obj.name = request.POST.get('name',False)
             obj.description = request.POST.get('description',False)
             #obj.save()
@@ -1465,43 +1697,7 @@ class GroupNamesDetailAdmin(admin.ModelAdmin):
                 pgg.catalogpointgroup = catalogpointgroupQuerySet[i]
                 pgg.puntualgroupnames = obj
                 #pgg.save()
- 
-                del pgg
-        elif request.POST.has_key('_continue'): 
-            obj.name = request.POST.get('name',False)
-            obj.description = request.POST.get('description',False)
-            #obj.save()
-            catalogpointgroup=  request.POST.getlist('catalogpointgroup',False)
-            catalogpointgroup_ids = []
-            for id in catalogpointgroup:
-                catalogpointgroup_ids.append(int(id))
-                
-            catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
- 
-            for i, cpg in enumerate( catalogpointgroupQuerySet ):
-                pgg=PuntualGroupGroups()
-                pgg.catalogpointgroup = catalogpointgroupQuerySet[i]
-                pgg.puntualgroupnames = obj
-                #pgg.save()
- 
-                del pgg
-        elif request.POST.has_key('_save'):
-            obj.name = request.POST.get('name',False)
-            obj.description = request.POST.get('description',False)
-            #obj.save()
-            catalogpointgroup=  request.POST.getlist('catalogpointgroup',False)
-            catalogpointgroup_ids = []
-            for id in catalogpointgroup:
-                catalogpointgroup_ids.append(int(id))
-                
-            catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
- 
-            for i, cpg in enumerate( catalogpointgroupQuerySet ):
-                pgg=PuntualGroupGroups()
-                pgg.catalogpointgroup = catalogpointgroupQuerySet[i]
-                pgg.puntualgroupnames = obj
-                #pgg.save()
-                del pgg
+                del pgg"""
    
         #super(GroupNamesDetailAdmin, self).save_model(request, obj, form, change)
 
@@ -1651,200 +1847,7 @@ admin.site.register(TypeDataProperty, TypeDataPropertyAdmin)
  
  
 
-class DataPropertyDetailAdmin(admin.ModelAdmin):
-    form=DataPropertyDetailAdminForm
-    list_display =('type','dataproperty', )   
-    list_filter = ('type__catalogproperty','type')
-    #search_fields = [ 'type__catalogproperty__tag',]
-    
-    ordering = ('type',)
-     
-    
-    fieldsets = (
-        ('Property information', {
-            'fields': ('catalogproperty','type','dataproperty','catalogcrystalsystem','catalogpointgroup','puntualgroupnames','axis','coefficients')
-        }),
-    )
-    
-    def has_add_permission(self, request):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-    
-
-    #https://books.agiliq.com/projects/django-admin-cookbook/en/latest/custom_button.html
-    #https://books.agiliq.com/projects/django-admin-cookbook/en/latest/remove_add_delete.html
-    #https://books.agiliq.com/projects/django-admin-cookbook/en/latest/action_buttons.html
-    #https://books.agiliq.com/projects/django-admin-cookbook/en/latest/optimize_queries.html
-    def get_queryset(self,request):
-            
-            print "self.kwargs"
-            print request.POST
-            print self.model.objects
-            return self.model.objects.none()
-
-    
-    
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        extra_context = {
-                'original':'Data Property Detail',
-                'object_id':object_id
-            }
-        
-        print "change_view"
-        print request.POST
-       
-        
- 
-        return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
-
-    def save_model(self, request, obj, form, change):
-        print 'DataPropertyDetail_save_model'
-        print request.POST
-        #print obj.name
-        print form.changed_data # list name of field was changed
-        print change #True or False
-        if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
-            print "pass"
-        elif  request.POST.has_key('_addanother'): 
-            print request.POST.get('_addanother',False)
-        elif request.POST.has_key('_continue'): 
-            
-            print request.POST.get('_continue',False)
-            
-            catalogproperty_id = 0
-            if request.POST.get('catalogproperty',False) != False:
-                catalogproperty_id = request.POST.get('catalogproperty',False)
-            
-            dataproperty_id = 0
-            if request.POST.get('dataproperty',False)  != False:
-                dataproperty_id = request.POST.get('dataproperty',False)   
-            
-            catalogcrystalsystem_id = 0
-            if request.POST.get('catalogcrystalsystem',False)  != False:
-                catalogcrystalsystem_id = request.POST.get('catalogcrystalsystem',False)
-                
-            type_id = 0
-            if  request.POST.get('type',False) != False:
-                type_id=request.POST.get('type',False)
-                
-            puntualgroupnameslist_ids = []
-            if request.POST.getlist('puntualgroupnames',False)  != False:
-                puntualgroupnames_ids = request.POST.getlist('puntualgroupnames',False)  
-                for id in puntualgroupnames_ids:
-                    puntualgroupnameslist_ids.append(int(id))
-            else:
-                puntualgroupnameslist_ids.append(21)
-                
-            catalogpointgrouplist_ids = []
-            if  request.POST.getlist('catalogpointgroup',False)  != False:
-                catalogpointgroup_ids= request.POST.getlist('catalogpointgroup',False)
-                for id in catalogpointgroup_ids:
-                    catalogpointgrouplist_ids.append(int(id))
-            else:
-                    catalogpointgrouplist_ids.append(45)
-                    
-            catalogaxislist_ids = []
-            if  request.POST.getlist('axis',False)  != False:
-                catalogaxis_ids = request.POST.getlist('axis',False)
-                for id in catalogaxis_ids:
-                    catalogaxislist_ids.append(int(id))
-            else:
-                catalogaxislist_ids.append(4)
-                
-
-
-            #print request.POST.getlist('coefficients',False)
-            coefficients=  request.POST.getlist('coefficients',False)
-            coefficients_name = []
-            coefficients_ids_temp = []
-            coefficients_ids = []
-            for id in coefficients:
-                coefficients_ids.append(int(id))
-            
-            fieldstemp = CatalogPropertyDetailTemp.objects.filter(id__in= coefficients_ids).values('name')
-            if fieldstemp:
-                for field in fieldstemp:
-                    coefficients_name.append(field['name'])
-                    
-                """
-                catalogpropertydetailtempQuerySetpopulated = CatalogPropertyDetail1.objects.filter(name__in=coefficients_name,
-                                                                                                                                                                        dataproperty_id = dataproperty_id,
-                                                                                                                                                                        crystalsystem_id=catalogcrystalsystem_id,
-                                                                                                                                                                        type_id=type_id,
-                                                                                                                                                                        puntualgroupnames_id__in=puntualgroupnameslist_ids,
-                                                                                                                                                                        catalogpointgroup_id__in=catalogpointgrouplist_ids,
-                                                                                                                                                                        catalogaxis_id__in=catalogaxislist_ids)
-                    
-                catalogpropertydetailtempQuerySet = CatalogPropertyDetailTemp.objects.filter(name__in=coefficients_name,
-                                                                                                                                                                        dataproperty_id = dataproperty_id,
-                                                                                                                                                                        crystalsystem_id=catalogcrystalsystem_id,
-                                                                                                                                                                        type_id=type_id,
-                                                                                                                                                                        puntualgroupnames_id__in=puntualgroupnameslist_ids,
-                                                                                                                                                                        catalogpointgroup_id__in=catalogpointgrouplist_ids,
-                                                                                                                                                                       catalogaxis_id__in=catalogaxislist_ids)
-                #ya fue credo los coeficientes
-                if not  catalogpropertydetailtempQuerySetpopulated:
-                    for i, cpdt in enumerate(catalogpropertydetailtempQuerySet):
-                        #coefficients_ids_temp.append(catalogpropertydetailtempQuerySet[i].id)
-                        catalogpropertydetail = CatalogPropertyDetail1()
-                        catalogpropertydetail.name = catalogpropertydetailtempQuerySet[i].name
-                        catalogpropertydetail.description = catalogpropertydetailtempQuerySet[i].description
-                        catalogpropertydetail.type =  catalogpropertydetailtempQuerySet[i].type
-                        catalogpropertydetail.crystalsystem = catalogpropertydetailtempQuerySet[i].crystalsystem   
-                        catalogpropertydetail.catalogaxis = catalogpropertydetailtempQuerySet[i].catalogaxis
-                        catalogpropertydetail.catalogpointgroup =   catalogpropertydetailtempQuerySet[i].catalogpointgroup
-                        catalogpropertydetail.puntualgroupnames = catalogpropertydetailtempQuerySet[i].puntualgroupnames
-                        catalogpropertydetail.dataproperty = catalogpropertydetailtempQuerySet[i].dataproperty
-                        #catalogpropertydetail.save()
-            else:
-                fieldstemp = CatalogPropertyDetail.objects.filter(id__in= coefficients_ids).values('name')
-                print len(fieldstemp)
-                for field in fieldstemp:
-                    coefficients_name.append(field['name'])
-                    
-                catalogpropertydetailtempQuerySet = CatalogPropertyDetail.objects.filter(name__in=coefficients_name,dataproperty_id = dataproperty_id)
-                print len(catalogpropertydetailtempQuerySet)
-                for i, cpdt in enumerate(catalogpropertydetailtempQuerySet):
-                    catalogpropertydetail = CatalogPropertyDetail1()
-                    catalogpropertydetail.name = catalogpropertydetailtempQuerySet[i].name
-                    catalogpropertydetail.description = catalogpropertydetailtempQuerySet[i].description
-                    catalogpropertydetail.type =  catalogpropertydetailtempQuerySet[i].type
-                    catalogpropertydetail.crystalsystem = catalogpropertydetailtempQuerySet[i].crystalsystem   
-                    catalogpropertydetail.catalogaxis = catalogpropertydetailtempQuerySet[i].catalogaxis
-                    catalogpropertydetail.catalogpointgroup =   catalogpropertydetailtempQuerySet[i].catalogpointgroup
-                    catalogpropertydetail.puntualgroupnames = catalogpropertydetailtempQuerySet[i].puntualgroupnames
-
-                    catalogpropertydetail.dataproperty = catalogpropertydetailtempQuerySet[i].dataproperty
-
-                    #catalogpropertydetail.save()
-                """
-                
-                """    
-                messages.set_level(request, messages.WARNING)
-                messages.warning(request, 'The process was  done')
-                """
- 
-                """   
-                else:
-                    messages.set_level(request, messages.ERROR)
-                    messages.ERROR(request, 'The process was not done')
-                """
-
-        elif request.POST.has_key('_save'):
-            messages.set_level(request, messages.WARNING)
-            messages.warning(request, 'The process was  done')
-            print request.POST.get('_save',False)
-            print request.POST.get('catalogproperty',False)
-            print request.POST.get('dataproperty',False)   
-            print request.POST.get('catalogcrystalsystem',False)
-            print request.POST.get('type',False)
-            print request.POST.getlist('puntualgroupnames',False)
-            print request.POST.getlist('catalogpointgroup',False)
-            print request.POST.getlist('coefficients',False)
-            
+   
  
             
 #admin.site.register(DataPropertyDetail, DataPropertyDetailAdmin)
@@ -1872,25 +1875,9 @@ class TensorAdmin(admin.ModelAdmin):
     def get_fieldsets(self, *args, **kwargs):
         return  (
             ('Tensor', {
-                'fields': ('name','description','active','type','dataproperty','catalogcrystalsystem'),
+                'fields': ('name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup','pointgroupdetail','puntualgroupnames','puntualgroupnamesdetail','axis','axisdetail','coefficients',),
             }),
         )
-                
-        """return  (
-            ('Tensor', {
-                'fields': ('name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup'),
-            }),
-            (None, {
-                'fields': ('puntualgroupnames','pointgroup'),
-            }),
-            (None, {
-                'fields': ('axis','coefficients'),
-            }),
-        )"""
- 
-
-    
-    
  
     """def changelist_view(self, request, extra_context=None):
         extra_context = {
@@ -2095,7 +2082,7 @@ class TensorAdmin(admin.ModelAdmin):
                                 newObj.catalogpointgroup = CatalogPointGroup.objects.get(id=int(catalogpointgroup_id))
                                 newObj.catalogaxis = CatalogAxis.objects.get(id=int(catalogaxis_id))
                                 print 'save ' + newObj.name 
-                                #newObj.save()
+                                newObj.save()
                                 
                                 
                 
@@ -2109,7 +2096,7 @@ class TensorAdmin(admin.ModelAdmin):
                                                                                                                     puntualgroupnames_id=puntualgroupnames_id,
                                                                                                                     catalogpointgroup_id=catalogpointgroup_id,
                                                                                                                    catalogaxis_id=catalogaxis_id)  
-                                    #oldObj.delete()
+                                    oldObj.delete()
                                     print 'delete ' + oldObj.name 
                          
                         if len(disctincttemp) == 0 and len(disctinct) == 0:

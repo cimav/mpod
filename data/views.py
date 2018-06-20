@@ -47,6 +47,8 @@ import json
 
 
 
+
+
 #from django.core.urlresolvers import reverse
 #from django.core.administration import EmailMessage
 #from django.contrib.sites.models import *
@@ -417,7 +419,6 @@ def viewsecondranktensor(request):
 
 
            
-        
         
         #stl_dir=".\\media\\stlfiles\\"
         #stl_dir="/var/www/MPOD/media/stlfiles/"
@@ -2353,6 +2354,7 @@ def addcasev2(request):
             typeselected =''   
         
         #initialisation
+        magnetoelectricity = 0
         chkBoxMagnetoelectricity = 0
         questiontype =''
         if catalogproperty_name == "e":
@@ -2368,10 +2370,16 @@ def addcasev2(request):
             if catalogproperty_name == "p":
                 typeselected='d'
             if catalogproperty_name == "2nd":
-                typeselected='k'
-                 
-                questiontype = "Magnetoelectricity?"            
                 chkBoxMagnetoelectricity = 1
+                questiontype = "Magnetoelectricity?"  
+                if chkBoxmge == False:
+                    magnetoelectricity = 0
+                    typeselected='k'
+                else:
+                    magnetoelectricity = 1  
+                    typeselected='y'
+ 
+                     
             
         axisselected_name =''
         axisselected_name = request.POST.get('axisselected_name', False)   
@@ -2391,7 +2399,7 @@ def addcasev2(request):
             propertyCategoryName =request.session['propertyCategoryNameListOnSession']
           
           
-        list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=CatalogProperty.objects.get(name__exact=catalogproperty_name))
+        list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=CatalogProperty.objects.get(name__exact=catalogproperty_name),active=True)
         for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
             objCatalogCrystalSystem=CatalogCrystalSystem();
             objCatalogCrystalSystem = register_catalogCrystalSystem
@@ -2402,10 +2410,12 @@ def addcasev2(request):
         else:
             del request.session['catalogCrystalSystemListOnSession']
 
-        if (chkBoxmge == False and catalogproperty_name == "2nd") or catalogproperty_name != "2nd":
+        """if (chkBoxmge == False or str(chkBoxmge[0]) == '1'  and catalogproperty_name == "2nd") or catalogproperty_name != "2nd":
             request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
         else:
-            catalogCrystalSystemList=[]
+            catalogCrystalSystemList=[]"""
+            
+        request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
             
             
         if 'dataPropertyListOnSession' not in request.session  or not request.session['dataPropertyListOnSession']:
@@ -2414,7 +2424,7 @@ def addcasev2(request):
             del request.session['dataPropertyListOnSession']
             
          
-        ids=CatalogProperty.objects.filter(name=catalogproperty_name).values_list('id', flat=True)    
+        ids=CatalogProperty.objects.filter(name=catalogproperty_name,active=True).values_list('id', flat=True)    
         type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
         data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
         dataPropertyList=Property.objects.filter(id__in=data_property_ids)
@@ -2609,7 +2619,8 @@ def addcasev2(request):
                                                                                              'propertySessionList':propertySessionList,
                                                                                              'chkBoxMagnetoelectricity':chkBoxMagnetoelectricity,
                                                                                              'dataPropertyList':dataPropertyList,
-                                                                                             'datapropertytagselected':int(datapropertytagselected)
+                                                                                             'datapropertytagselected':int(datapropertytagselected),
+                                                                                             'magnetoelectricity':magnetoelectricity
                                                                                        }, context_instance=RequestContext(request))
       
 def addToSession(request,customobject,nameObjectOnSession):

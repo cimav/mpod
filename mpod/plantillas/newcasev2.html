@@ -926,11 +926,6 @@
 						            </div>
 						            <div class="panel-body">
 
-
-
- 
-						             
-										     
 						                  <!-- db table data_catalogproperty -->
 										    {% if propertyCategoryName %}  
 										    <div class="form-group searches">
@@ -974,9 +969,17 @@
 											    {% endif %} 
 											    
 											      {% if chkBoxMagnetoelectricity == 1 %} 
-											    <div class="form-group searches"  >
-											       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="1"> Yes/No</label>
-											    </div>
+											      		{% if magnetoelectricity == 0 %} 
+											      
+														    <div class="form-group searches"  >
+														       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="" onclick="onchangeFunc();"> Yes/No</label>
+														    </div>
+											    			{% else %}
+														     <div class="form-group searches"  >
+														       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="1" onclick="onchangeFunc();" checked> Yes/No</label>
+														    </div>
+														     {% endif %}   
+											    
 											    {% endif %}    
 											    
 											    

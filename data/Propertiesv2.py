@@ -7,6 +7,7 @@ from data.models import *
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 import re
+from data.Utils import *
  
 
 class Propertiesv2(object):
@@ -42,9 +43,17 @@ class Propertiesv2(object):
             self.catalogPropertyDetail=[]
             self.catalogPropertyDetailReadOnly = []
             self.puntualGroupList=[]
+            self.puntualGroupListNames =[]
+            self.puntualGroupNamesList = []
             self.axisList =[]
             self.listofemptyInputs =[]
-            self.magnetoelectricity = ismagnetoelectricity
+            self.magnetoelectricity = None
+            if ismagnetoelectricity == False:
+                self.magnetoelectricity = 0
+            else:
+                self.magnetoelectricity = 1
+                
+                
             self.objDataProperty = None
             
             self.jquery= """
@@ -116,99 +125,144 @@ class Propertiesv2(object):
                         
     def NewProperties(self,pgn,aname):
         try:
-            self.objProperty=CatalogProperty.objects.get(name=self.catalogproperty_name) 
+            self.objProperty=CatalogProperty.objects.get(name=self.catalogproperty_name)
+            typeQuerySet=Type.objects.filter(active=True,catalogproperty= self.objProperty)   
+            type_ids = getIdsFromQuerySet(typeQuerySet) 
             
-            if self.catalogproperty_name =='e':
-                if self.type != '':
-                    self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name=self.type) 
-                    ids=CatalogProperty.objects.filter(active=True,name=self.catalogproperty_name).values_list('id', flat=True)    
-                    type_ids=Type.objects.filter(active=True, name=self.objTypeSelected.name).values_list('id',flat=True)    
-                    data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
-                    if int(self.dataproperty) in data_property_ids:
-                        self.objDataProperty = Property.objects.get(id=int(self.dataproperty))
-                    else:
-                        dataPropertyList=Property.objects.filter(id__in=data_property_ids)
-                        self.objDataProperty = dataPropertyList[0]                        
+            #*******************************type*************************************
+            if self.type != '':
+                objType  = Type.objects.get(catalogproperty=self.objProperty,name=self.type)
+                if objType.id in type_ids:
+                    self.objTypeSelected  = objType
                 else:
-                    self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name='s')   
+                    self.objTypeSelected  = typeQuerySet[0]
+            else:
+                self.objTypeSelected  = typeQuerySet[0]
+                
+                
+            #*******************************dataproperty*************************************
+            dataproperty_ids=TypeDataProperty.objects.filter(type=self.objTypeSelected).values_list('dataproperty_id',flat=True)    
+            datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids)   
+            if int(self.dataproperty) in dataproperty_ids:
+                self.objDataProperty = Property.objects.get(id=int(self.dataproperty))  
+            else:
+                self.objDataProperty = datapropertyQuerySet[0]
+             
+             
+            #*******************************catalogcrystalsystem*************************************
+            catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.objProperty)   
+            catalogcrystalsystem_names=CatalogCrystalSystem.objects.filter(catalogproperty= self.objProperty).values_list('name',flat=True)                        
+            if self.crystalsystem_name in catalogcrystalsystem_names:
+                self.objCatalogCrystalSystemSelected = CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty) 
+            else:
+                self.objCatalogCrystalSystemSelected = catalogcrystalsystemQuerySet[0]   
+                
+                
+            #*******************************catalogpointgroup*************************************
+            catalogpointgroup_id = 0
+            if pgn != '':
+                self.puntualgroupselected_name =pgn 
+                catalogpointgroup_id = CatalogPointGroup.objects.filter(name__exact=pgn).values_list('id',flat=True)[0]    
+                self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(id=catalogpointgroup_id)
+            
+            
+            catalogpointgroup_ids= CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=self.objCatalogCrystalSystemSelected,type=self.objTypeSelected,active=1).values_list('catalogpointgroup_id',flat=True)  
+            if catalogpointgroup_ids:
+                self.questionGp = 'Point Group?'  
+                catalogpointgroupQuerySet =  CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
+                for i,pggobj in enumerate(catalogpointgroupQuerySet):
+                    self.puntualGroupList.append(catalogpointgroupQuerySet[i])
+                    self.puntualGroupListNames.append(str(catalogpointgroupQuerySet[i].name))
                     
-                if self.crystalsystem_name =='':
-                    self.crystalsystem_name='tc'
+            
+                if catalogpointgroup_id in catalogpointgroup_ids:
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(id=catalogpointgroup_id)
+                else:
+                    self.objCatalogPointGroupSelected  = catalogpointgroupQuerySet[0]
+            else:
+                if catalogpointgroup_id in catalogpointgroup_ids:
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(id=catalogpointgroup_id)
+                else:
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(id=45)
+                    
+                    
+                    
+            #*******************************puntualgroupnames*************************************
+            groups = []
+            puntualgroupnames_ids= CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=self.objCatalogCrystalSystemSelected,type=self.objTypeSelected,active=1).values_list('puntualgroupnames_id',flat=True)  
+            if puntualgroupnames_ids:
+                self.questionGp = 'Point Group?'  
+                puntualgroupnamesQuerySet = PuntualGroupNames.objects.filter(id__in=puntualgroupnames_ids)
+                for i,pgnobj in enumerate(puntualgroupnamesQuerySet):
+                    objPuntualGroupGroups = PuntualGroupGroups.objects.filter(puntualgroupnames=puntualgroupnamesQuerySet[i])  
+                    #catalogpointgroup_ids = PuntualGroupGroups.objects.filter(puntualgroupnames=puntualgroupnamesQuerySet[i]).values_list('catalogpointgroup_id',flat=True)
+                    for j,pggobj in enumerate(objPuntualGroupGroups):
+                        self.puntualGroupList.append(objPuntualGroupGroups[j].catalogpointgroup)
+                        self.puntualGroupListNames.append(str(objPuntualGroupGroups[j].catalogpointgroup.name))
+                        groups.append(str(objPuntualGroupGroups[j].catalogpointgroup.name))
+     
+                        if(objPuntualGroupGroups[j].catalogpointgroup.id ==catalogpointgroup_id):
+                            self.puntualgroupselected_name = objPuntualGroupGroups[j].catalogpointgroup.name
+                            self.objPuntualgroupNamesSelected  = puntualgroupnamesQuerySet[i]
+                            
+                    self.puntualGroupNamesList.append(groups)
+                    groups = []
+                            
+                if not self.objPuntualgroupNamesSelected:
+                    self.puntualgroupselected_name = objPuntualGroupGroups[0].catalogpointgroup.name
+                    self.objPuntualgroupNamesSelected  = puntualgroupnamesQuerySet[0]
+                            
+                            
+                        
+            else:  
+                self.objPuntualgroupNamesSelected  = PuntualGroupNames.objects.get(id=21)
 
+
+             
+            if  self.objPuntualgroupNamesSelected.id ==21 and self.objCatalogPointGroupSelected.id ==45:
+                self.message ="there is no registered 'Point Group' for this 'Crystal System'"
+                return
+            
+            #*******************************axis*************************************
+            axis_id = 0
+            if aname != '':
+                self.axisselected_name =aname
+                axis_id = CatalogAxis.objects.filter(name__exact=aname).values_list('id',flat=True)[0] 
+                self.objAxisSelected = CatalogAxis.objects.get(id=axis_id)
+            
+            
+            axis_ids= CrystalSystemAxis.objects.filter(catalogcrystalsystem=self.objCatalogCrystalSystemSelected,catalogpointgroup= self.objCatalogPointGroupSelected,puntualgroupnames = self.objPuntualgroupNamesSelected  ,type=self.objTypeSelected,active=1).values_list('axis_id',flat=True)  
+            if axis_ids:
+                self.questionAxis = 'Where is the special axis?' 
+                axisQuerySet = CatalogAxis.objects.filter(id__in=axis_ids)
+                for i,ax in enumerate(axisQuerySet):
+                    self.axisList.append(axisQuerySet[i])
+                
+                if axis_id in axis_ids:
+                    self.objAxisSelected  = CatalogAxis.objects.get(id=int(axis_id))  
+                else:
+                    self.objAxisSelected  = axisQuerySet[0]
                     
-                self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty) 
-                
-            if self.catalogproperty_name =='p':
-                self.type = 'd'           
-                self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name=self.type) 
-                ids=CatalogProperty.objects.filter(active=True,name=self.catalogproperty_name).values_list('id', flat=True)    
-                type_ids=Type.objects.filter(active=True, name=self.objTypeSelected.name).values_list('id',flat=True)    
-                data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
-                if int(self.dataproperty) in data_property_ids:
-                    self.objDataProperty = Property.objects.get(id=int(self.dataproperty))
-                else:
-                    dataPropertyList=Property.objects.filter(id__in=data_property_ids)
-                    self.objDataProperty = dataPropertyList[0]
-                        
-                if  self.crystalsystem_name == 'iso' or self.crystalsystem_name == False:
-                    self.crystalsystem_name='tc'
- 
-                
-                self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
+                self.axisselected_name = self.objAxisSelected.name
+            else:
+                    self.objAxisSelected  = CatalogAxis.objects.get(id=4)
              
-             
-                
-            if self.catalogproperty_name =='2nd':
-                print self.type 
-                #self.type = 'k'      
-               
-                self.objTypeSelected = Type.objects.get(catalogproperty=self.objProperty,name=self.type)   
-                ids=CatalogProperty.objects.filter(active=True,name=self.catalogproperty_name).values_list('id', flat=True)    
-                type_ids=Type.objects.filter(active=True, name=self.objTypeSelected.name).values_list('id',flat=True)    
-                data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
-                if int(self.dataproperty) in data_property_ids:
-                    self.objDataProperty = Property.objects.get(id=int(self.dataproperty))
-                else:
-                    dataPropertyList=Property.objects.filter(id__in=data_property_ids)
-                    self.objDataProperty = dataPropertyList[0]
-                        
-                catalogPropertyDetail = CatalogPropertyDetail.objects.filter(  dataproperty  = self.objDataProperty,             
-                                                                                                                                       type =self.objTypeSelected ).order_by('crystalsystem')
-                                                                                                                                         
-                if self.crystalsystem_name != None or self.crystalsystem_name != False or self.crystalsystem_name != '' :
-                    for i,cpd in enumerate( catalogPropertyDetail):
-                        if catalogPropertyDetail[i].crystalsystem.name == self.crystalsystem_name:
-                            self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(name=self.crystalsystem_name,catalogproperty=self.objProperty)
-                            break
-                        
-                    if self.objCatalogCrystalSystemSelected == None:
-                        self.crystalsystem_name = catalogPropertyDetail[0].crystalsystem.name
-                        self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(id=catalogPropertyDetail[0].crystalsystem.id,catalogproperty=self.objProperty)
-                
-                else:
-                    self.crystalsystem_name = catalogPropertyDetail[0].crystalsystem.name
-                    self.objCatalogCrystalSystemSelected= CatalogCrystalSystem.objects.get(id=catalogPropertyDetail[0].crystalsystem.id,catalogproperty=self.objProperty)
-                
-             
-        
-                           
-                    
-                         
-                 
+            
+
         except ObjectDoesNotExist as error:
             print "Message({0}): {1}".format(99, error.message)   
             self.message= "Message({0}): {1}".format(99, error.message)  
                         
                         
-        if pgn != '':
+        """if pgn != '':
             self.puntualgroupselected_name =pgn 
         else:
-            self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(id=45)  
+            self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(id=45)
 
         if aname != '':
             self.axisselected_name =aname
         else:
-            self.objAxisSelected = CatalogAxis.objects.get(id=4)
+            self.objAxisSelected = CatalogAxis.objects.get(id=4)"""
             
         
         if self.catalogproperty_name == 'e':
@@ -252,16 +306,16 @@ class Propertiesv2(object):
                     return
                 else:
                      
-                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '':
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == None or self.puntualgroupselected_name == '':
                         self.message= 'All the point groups of this crystal system have the same matrix'
                         self.questionGp = 'Point Group?'    
-                        self.setPointGroup()
+                        """self.setPointGroup()"""
                         return
                 
                     self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group?'    
+                    """self.questionGp = 'Point Group?'    
                     self.setPointGroup()
-                    self.setAxis()
+                    self.setAxis()"""
                     self.setCoefficientsforjQuery(self.type );
                     self.setCatalogPropertyDetail()
                     #self.preparedataforjQuery(self.type );
@@ -442,7 +496,7 @@ class Propertiesv2(object):
                                                                             function() 
                                                                             {
                                                                                //$('#c11').change(function()  
-                                                                               $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                               $('#""" +self.coefficientsparts[0]+ """').change(function ()
                                                                                {
                                                                                    
                                                                                     if(Number($(this).val()).toPrecision() != 'NaN') {
@@ -635,17 +689,17 @@ class Propertiesv2(object):
                     self.sucess = 1;                       
                     return
                 else:
-                    if  self.puntualgroupselected_name == '':
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '':
                         self.message= 'All the point groups of this crystal system have the same matrix'
                         self.questionGp = 'Point Group?'    
-                        self.setPointGroup()
-                        self.setAxis()
+                        """self.setPointGroup()
+                        self.setAxis()"""
                         return
                 
                     self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group?'    
+                    """self.questionGp = 'Point Group?'    
                     self.setPointGroup()
-                    self.setAxis()
+                    self.setAxis()"""
                     self.setCoefficientsforjQuery(self.type );
                     self.setCatalogPropertyDetail()
                     #self.preparedataforjQuery(self.type )
@@ -827,17 +881,17 @@ class Propertiesv2(object):
                     self.sucess = 1;
                     return
                 else:
-                    if  self.puntualgroupselected_name == '':
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '':
                         self.message= 'All the point groups of this crystal system have the same matrix'
                         self.questionGp = 'Point Group?'    
-                        self.setPointGroup()
-                        self.setAxis()
+                        """self.setPointGroup()
+                        self.setAxis()"""
                         return
                 
                     self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group?'    
+                    """self.questionGp = 'Point Group?'    
                     self.setPointGroup()
-                    self.setAxis()
+                    self.setAxis()"""
                     self.setCoefficientsforjQuery(self.type );
                     self.setCatalogPropertyDetail()
                     #self.preparedataforjQuery(self.type )
@@ -1058,17 +1112,17 @@ class Propertiesv2(object):
                         self.sucess = 1;                            
                         return
                     else:
-                        if  self.puntualgroupselected_name == '':
+                        if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '':
                             self.message= 'All the point groups of this crystal system have the same matrix'
                             self.questionGp = 'Point Group?'    
-                            self.setPointGroup()
-                            self.setAxis()
+                            """self.setPointGroup()
+                            self.setAxis()"""
                             return
                     
                         self.message= 'All the point groups of this crystal system have the same matrix'
-                        self.questionGp = 'Point Group?'    
+                        """self.questionGp = 'Point Group?'    
                         self.setPointGroup()
-                        self.setAxis()
+                        self.setAxis()"""
                         self.setCoefficientsforjQuery(self.type );
                         self.setCatalogPropertyDetail()
                         #self.preparedataforjQuery(self.type )
@@ -1275,174 +1329,24 @@ class Propertiesv2(object):
                             else:
                                 if str(p.name) == self.__coefficientsparts[cursor]:
                                     self.coefficientsmatrix[j,i]  = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))    
-                            
-                            """
-                            if cursor == 2:
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
-                            if cursor == 3:
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.coefficientsmatrix[j,i]= self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
-                            if cursor == 4:
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
-                            if cursor == 5:
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
-                            if cursor == 7:
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
-                            if cursor == 8:
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.coefficientsmatrix[j,i]  = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
-                            if cursor == 9:
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
-                            if cursor == 10:
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.coefficientsmatrix[j,i] = self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))  
-                           """ 
-                            
-                            """
-                            if str(p.name) == "s34":
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.s[2,3] = self.s[3,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s35":
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.s[2,4] = self.s[4,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s36":
-                                if str(p.name) == self.__coefficientsparts[cursor]:
-                                    self.s[2,5] = self.s[5,2] = float (self.__request.POST.get(p.name, False))
-                            
-                            if str(p.name) == "s11":    
-                                self.s[0,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s12":
-                                self.s[0,1] = self.s[1,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s13":
-                                self.s[0,2] = self.s[2,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s14":
-                                self.s[0,3] = self.s[3,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s15":
-                                self.s[0,4] = self.s[4,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s16":
-                                self.s[0,5] = self.s[5,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s22":
-                                self.s[1,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s23":
-                                self.s[1,2] = self.s[2,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s24":
-                                self.s[1,3] = self.s[3,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s25":
-                                self.s[1,4] = self.s[4,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s26":
-                                self.s[1,5] = self.s[5,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s33":
-                                self.s[2,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s34":
-                                self.s[2,3] = self.s[3,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s35":
-                                self.s[2,4] = self.s[4,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s36":
-                                self.s[2,5] = self.s[5,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s44":
-                                self.s[3,3] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s45":
-                                self.s[3,4] = self.s[4,3] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s46":
-                                self.s[3,5] = self.s[5,3] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s55":
-                                self.s[4,4] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s56":
-                                self.s[4,5] = self.s[5,4] =float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "s66":
-                                self.s[5,5] = float (self.__request.POST.get(p.name, False))
-                                
-                            if str(p.name) == "c11":    
-                                self.c[0,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c12":
-                                self.c[0,1] = self.c[1,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c13":
-                                self.c[0,2] = self.c[2,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c14":
-                                self.c[0,3] = self.c[3,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c15":
-                                self.c[0,4] = self.c[4,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c16":
-                                self.c[0,5] = self.c[5,0] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c22":
-                                self.c[1,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c23":
-                                self.c[1,2] = self.c[2,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c24":
-                                self.c[1,3] = self.c[3,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c25":
-                                self.c[1,4] = self.c[4,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c26":
-                                self.c[1,5] = self.c[5,1] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c33":
-                                self.c[2,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c34":
-                                self.c[2,3] = self.c[3,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c35":
-                                self.c[2,4] = self.c[4,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c36":
-                                self.c[2,5] = self.c[5,2] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c44":
-                                self.c[3,3] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c45":
-                                self.c[3,4] = self.c[4,3] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c46":
-                                self.c[3,5] = self.c[5,3] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c55":
-                                self.c[4,4] = float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c56":
-                                self.c[4,5] = self.c[5,4] =float (self.__request.POST.get(p.name, False))
-                            if str(p.name) == "c66":
-                                self.c[5,5] = float (self.__request.POST.get(p.name, False))
-                            """
-                        """
-                        if self.type == 's':
-                            print (self.s)
-                        elif self.type == 'c':
-                            print (self.c)
-                        """
+
                         print self.coefficientsmatrix   
                         self.sucess = 1;
                         return
                 else:
-                    """if  self.puntualgroupselected_name == '':
-                        self.message= 'All the point groups of this crystal system have the same matrix'
-                        self.questionGp = 'Point Group?'    
-                        self.setPointGroup()
-                        return"""
-                
+ 
+                     
                     self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group?'    
+                    """self.questionGp = 'Point Group?'    
                     self.setPointGroup()   
-                    self.setAxis()
+                    self.setAxis()"""
+                    
+
                     #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
                     self.setCoefficientsforjQuery(self.type );
                     
                     self.setCatalogPropertyDetail()
-                    #self.preparedataforjQuery(self.type )
-                    """
-                    self.listofemptyInputs.append(self.type+"21");
-                    self.listofemptyInputs.append(self.type+"31");
-                    self.listofemptyInputs.append(self.type+"41");
-                    self.listofemptyInputs.append(self.type+"51");
-                    self.listofemptyInputs.append(self.type+"61");
-                    self.listofemptyInputs.append(self.type+"32");
-                    self.listofemptyInputs.append(self.type+"42");
-                    self.listofemptyInputs.append(self.type+"52");
-                    self.listofemptyInputs.append(self.type+"62");
-                    self.listofemptyInputs.append(self.type+"43");
-                    self.listofemptyInputs.append(self.type+"53");
-                    self.listofemptyInputs.append(self.type+"63");
-                    self.listofemptyInputs.append(self.type+"54");
-                    self.listofemptyInputs.append(self.type+"64");
-                    self.listofemptyInputs.append(self.type+"65");
-                    """
-    
+ 
                     self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" +self.coefficientspartssplit[1])
                     self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "31" + self.coefficientspartssplit[1])
                     self.listofemptyInputs.append(self.coefficientspartssplit[0]+"41" + self.coefficientspartssplit[1])
@@ -1823,8 +1727,8 @@ class Propertiesv2(object):
             elif self.crystalsystem_name == 'te':                     
                 if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '4, -4, 4/m, 422, 4mm, -42m, 4/mmm':
                     self.questionGp = 'Point Group?'    
-                    self.setPointGroup()
-                    self.setAxis()
+                    """self.setPointGroup()
+                    self.setAxis()"""
                     return
                     
                 if  self.__request != None and len(self.__inputList) > 0:
@@ -1953,8 +1857,8 @@ class Propertiesv2(object):
                     return
                 else:
                     self.questionGp = 'Point Group?'    
-                    self.setPointGroup()
-                    self.setAxis()
+                    """self.setPointGroup()
+                    self.setAxis()"""
                     #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)     
                     self.setCoefficientsforjQuery(self.type );
                     self.setCatalogPropertyDetail() 
@@ -2459,26 +2363,25 @@ class Propertiesv2(object):
                     print self.coefficientsmatrix   
                     self.sucess = 1;  
                 else:    
-                    """if  self.puntualgroupselected_name == '':
-                        self.message= 'All the point groups of this crystal system have the same matrix'
-                        self.questionGp = 'Point Group?'    
-                        self.setPointGroup()
-                        return"""
+                    if self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '2, m, 2/m':
+                        self.questionGp = 'Point Group:'     
+                        """self.setPointGroup() 
+                        self.setAxis()"""                
+                        return
                 
-                    self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group?'    
-                    self.setPointGroup()       
-                    
+ 
                 
                     
                     if  self.axisselected_name   == None or self.axisselected_name   == '' or self.axisselected_name  not in 'x2, x3':
-                        #self.questionAxis = 'Where is the special axis?' 
-                        self.setAxis()
-                        return    
+                        self.questionAxis = 'Where is the special axis?' 
+                        """self.setAxis()"""
+                        return
                     
-                    self.questionAxis = 'Where is the special axis?' 
-                    self.setAxis()
-                    self.objAxisSelected=CatalogAxis.objects.get(name__exact=self.axisselected_name )  
+                   
+          
+                    """self.objAxisSelected=CatalogAxis.objects.get(name__exact=self.axisselected_name )  
+                    self.setPointGroup() 
+                    self.setAxis()"""
                     self.setCoefficientsforjQuery(self.type );
                     self.setCatalogPropertyDetail() 
                     #self.preparedataforjQuery(self.type )
@@ -3000,12 +2903,12 @@ class Propertiesv2(object):
 
                 
             elif self.crystalsystem_name == 'tg':       
-                print self.crystalsystem_name
+                
                
                 if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '3, -3, 32, 3m, -3m':
                     self.questionGp = 'Point Group:'     
-                    self.setPointGroup() 
-                    self.setAxis()
+                    """self.setPointGroup() 
+                    self.setAxis()"""
                     #self.ShowBtnSend = 1                        
                     return
                 
@@ -3193,9 +3096,9 @@ class Propertiesv2(object):
                     self.sucess = 1;
                 else:
 
-                    self.questionGp = 'Point Group:'     
-                    self.setPointGroup() 
-                    self.setAxis()
+                    self.questionGp = 'Point Group?'     
+                    """self.setPointGroup() 
+                    self.setAxis()"""
                     #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)    
                     self.setCoefficientsforjQuery(self.type );
                     self.setCatalogPropertyDetail()
@@ -3853,16 +3756,16 @@ class Propertiesv2(object):
             if self.crystalsystem_name == 'tc':          
  
                 if  self.puntualgroupselected_name ==None or  self.puntualgroupselected_name == '' or self.puntualgroupselected_name  not in '1, -1':
-                    self.questionGp = 'Point Group:'   
-                    self.setPointGroup()     
-                    self.setAxis()
+                    self.questionGp = 'Point Group?'   
+                    """self.setPointGroup()     
+                    self.setAxis()"""
                     return
               
                 if self.puntualgroupselected_name == '-1':
                     self.message ='This point group does not have priezoelectricity'
-                    self.questionGp = 'Point Group:'   
-                    self.setPointGroup() 
-                    self.setAxis()
+                    self.questionGp = 'Point Group?'   
+                    """self.setPointGroup() 
+                    self.setAxis()"""
                     return
                 
                 if  self.__request != None and len(self.__inputList) > 0:
@@ -3928,14 +3831,11 @@ class Propertiesv2(object):
                             
                 else:    
 
-                    self.questionGp = 'Point Group:'   
+                    """self.questionGp = 'Point Group:'   
+                    self.questionAxis = 'Where is the special axis?' 
                     self.setPointGroup() 
-                    self.setAxis()
-                    #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)    
-                    #print self.objCatalogPointGroupSelected.name
-                    #print self.type 
+                    self.setAxis()"""
                     self.setCoefficientsforjQuery(self.type );
-                    #self.preparedataforjQuery(self.type )
                     self.setCatalogPropertyDetail()
                     self.jquery=self.jquery + """
                                                                 // inicio de codigo jQuery
@@ -3986,17 +3886,17 @@ class Propertiesv2(object):
                 if (self.axisselected_name == None  or self.axisselected_name == '' or self.axisselected_name not in 'x2, x3') or  (self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in  '2, m, 2/m'):
                     self.questionAxis = 'Where is the special axis?' 
                     self.questionGp = 'Point Group:'      
-                    self.setPointGroup() 
-                    self.setAxis()              
+                    """self.setPointGroup() 
+                    self.setAxis() """             
                     return
                 
                 if self.puntualgroupselected_name == '2/m':
                     self.questionAxis = 'Where is the special axis?' 
                     self.questionGp = 'Point Group:' 
                     self.message='This point group does not have priezoelectricity'
-                    self.setPointGroup() 
+                    """self.setPointGroup() 
                     self.setAxis()
-                    print self.message
+                    print self.message"""
                     return
                 
                 
@@ -4108,11 +4008,11 @@ class Propertiesv2(object):
 
                     self.questionAxis = 'Where is the special axis?' 
                     self.questionGp = 'Point Group:'     
-                    self.setPointGroup()   
-                    self.setAxis() 
+                    """self.setPointGroup()   
+                    self.setAxis()"""
                      
                     #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
-                    self.objAxisSelected = CatalogAxis.objects.get(name__exact=self.axisselected_name)
+                    """self.objAxisSelected = CatalogAxis.objects.get(name__exact=self.axisselected_name)"""
                     #self.setCatalogPropertyDetail()
                     self.setCoefficientsforjQuery(self.type );
                     #self.preparedataforjQuery(self.type )
@@ -4163,16 +4063,16 @@ class Propertiesv2(object):
                 
             if self.crystalsystem_name == 'o':
                 if  self.puntualgroupselected_name ==  None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not  in '222, 2mm, mmm' :
-                    self.questionGp = 'Point Group:'        
-                    self.setPointGroup() 
-                    self.setAxis() 
+                    self.questionGp = 'Point Group?'        
+                    """self.setPointGroup() 
+                    self.setAxis()""" 
                     return
            
                 if self.puntualgroupselected_name == 'mmm':
                     self.message ='This point group does not have priezoelectricity'
-                    self.questionGp = 'Point Group:'        
-                    self.setPointGroup() 
-                    self.setAxis() 
+                    self.questionGp = 'Point Group?'        
+                    """self.setPointGroup() 
+                    self.setAxis() """
                     return
                 
                 if  self.__request != None and len(self.__inputList) > 0:
@@ -4219,8 +4119,8 @@ class Propertiesv2(object):
                 else:
                
                     self.questionGp = 'Point Group:' 
-                    self.setPointGroup()  
-                    self.setAxis()
+                    """self.setPointGroup()  
+                    self.setAxis()"""
                     #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name) 
                     self.setCoefficientsforjQuery(self.type );
                     #self.preparedataforjQuery(self.type )
@@ -4265,24 +4165,20 @@ class Propertiesv2(object):
                     self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"
                         
                     print self.jquery
-                    
-                    
-                    
-                   
-            
+ 
             
             if self.crystalsystem_name == 'te':
-                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '4, -4, 4/m, 422, 4mm, -42m, 4/mmm':
+                if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '4, -4, 4/m, 422, 4mm, -42m, 4/mmm':
                     self.questionGp = 'Point Group:'    
-                    self.setPointGroup()  
-                    self.setAxis()         
+                    """self.setPointGroup()  
+                    self.setAxis()"""         
                     return
                
                 if self.puntualgroupselected_name in ('4/m', '4/mmm'):
                     self.message ='This point group does not have priezoelectricity'
                     self.questionGp = 'Point Group:'    
-                    self.setPointGroup()   
-                    self.setAxis()
+                    """self.setPointGroup()   
+                    self.setAxis()"""
                     return
                 
                 if  self.__request != None and len(self.__inputList) > 0:
@@ -4421,9 +4317,9 @@ class Propertiesv2(object):
                 else:
                 
                     self.questionGp = 'Point Group:'    
-                    self.setPointGroup()   
+                    """self.setPointGroup()   
                     self.setAxis()
-                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name) 
+                    self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name) """
                     self.setCoefficientsforjQuery(self.type );
                     #self.preparedataforjQuery(self.type )
                     self.setCatalogPropertyDetail() 
@@ -4820,15 +4716,15 @@ class Propertiesv2(object):
             
             
             if self.crystalsystem_name == 'c':
-                if  self.puntualgroupselected_name == ''  or self.puntualgroupselected_name not in '23, m3, 432, -43m, m3m':
+                if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == ''  or self.puntualgroupselected_name not in '23, m3, 432, -43m, m3m':
                     self.questionGp = 'Point Group:'         
-                    self.setPointGroup()    
+                    """self.setPointGroup()"""  
                     return
                
                 if self.puntualgroupselected_name in ('m3', '432', 'm3m'):
                     self.message ='This point group does not have priezoelectricity'
                     self.questionGp = 'Point Group:'    
-                    self.setPointGroup()    
+                    """self.setPointGroup()"""
                     return
                 
                 if  self.__request != None and len(self.__inputList) > 0:
@@ -4854,8 +4750,8 @@ class Propertiesv2(object):
                 else:
                                
                     self.questionGp = 'Point Group:'    
-                    self.setPointGroup()   
-                    self.setAxis() 
+                    """self.setPointGroup()   
+                    self.setAxis()"""
                     #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name) 
                     self.setCoefficientsforjQuery(self.type );
                     #self.preparedataforjQuery(self.type )
@@ -4932,27 +4828,27 @@ class Propertiesv2(object):
             elif self.crystalsystem_name == 'tg':
                 if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '3, -3, 32, 3m, -3m':
                     self.questionGp = 'Point Group:'       
-                    self.setPointGroup()    
+                    """self.setPointGroup() """   
                     return
                
                 if self.puntualgroupselected_name in ('-3', '-3m'):
                     self.message ='This point group does not have priezoelectricity'
                     self.questionGp = 'Point Group:'       
-                    self.setPointGroup()     
-                    self.setAxis() 
+                    """self.setPointGroup()     
+                    self.setAxis() """
                     return
                 
                 if self.puntualgroupselected_name == '3m':
                     if self.axisselected_name == None or self.axisselected_name == '' or self.axisselected_name not in 'x1, x2':
                         self.questionAxis = 'Where is the special axis?' 
                         self.questionGp = 'Point Group:'     
-                        self.setPointGroup()   
-                        self.setAxis() 
+                        """"self.setPointGroup()   
+                        self.setAxis() """
                         return 
                     
                     self.questionAxis = 'Where is the special axis?' 
-                    self.setAxis() 
-                    self.objAxisSelected = CatalogAxis.objects.get(name__exact=self.axisselected_name)
+                    """self.setAxis() 
+                    self.objAxisSelected = CatalogAxis.objects.get(name__exact=self.axisselected_name)"""
                 
                 
                 if  self.__request != None and len(self.__inputList) > 0:
@@ -5128,8 +5024,8 @@ class Propertiesv2(object):
 
                     
                     self.questionGp = 'Point Group:'     
-                    self.setPointGroup()   
-                    self.setAxis() 
+                    """self.setPointGroup()   
+                    self.setAxis() """
                     #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
                     self.setCoefficientsforjQuery(self.type );
                     #self.preparedataforjQuery(self.type )
@@ -5681,28 +5577,28 @@ class Propertiesv2(object):
             elif self.crystalsystem_name == 'h':
                 if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '6, -6, 6/m, 6mm, 622, -6m2, 6/mmm' :
                     self.questionGp = 'Point Group:'       
-                    self.setPointGroup() 
-                    self.setAxis()   
+                    """self.setPointGroup() 
+                    self.setAxis()"""   
                     return    
 
                 if self.puntualgroupselected_name  in ('6/m', '6/mmm'):
                     self.message ='This point group does not have priezoelectricity' 
                     self.questionGp = 'Point Group:'       
-                    self.setPointGroup()    
-                    self.setAxis()   
+                    """self.setPointGroup()    
+                    self.setAxis()""" 
                     return
                 
                 if self.puntualgroupselected_name == '-6m2':
                     if  self.axisselected_name == None or self.axisselected_name == '' or self.axisselected_name not in 'x1, x2':
                         self.questionAxis = 'Where is the special axis?' 
                         self.questionGp = 'Point Group:'     
-                        self.setPointGroup()   
-                        self.setAxis() 
+                        """self.setPointGroup()   
+                        self.setAxis()""" 
                         return 
                     
                     self.questionAxis = 'Where is the special axis?' 
-                    self.setAxis() 
-                    self.objAxisSelected = CatalogAxis.objects.get(name__exact=self.axisselected_name)
+                    """self.setAxis()
+                    self.objAxisSelected = CatalogAxis.objects.get(name__exact=self.axisselected_name)""" 
                 
                 
                 if  self.__request != None and len(self.__inputList) > 0:
@@ -5837,8 +5733,8 @@ class Propertiesv2(object):
                 else:
 
                     self.questionGp = 'Point Group:'     
-                    self.setPointGroup()   
-                    self.setAxis() 
+                    """self.setPointGroup()   
+                    self.setAxis() """
                     #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
                     self.setCoefficientsforjQuery(self.type );
                     #self.preparedataforjQuery(self.type )
@@ -6235,45 +6131,44 @@ class Propertiesv2(object):
                     
        
         if self.catalogproperty_name == '2nd':   
-            if self.crystalsystem_name == 'tc':   
-                if  self.puntualgroupselected_name == None or  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '1, -1' :
+            if self.crystalsystem_name == 'tc': 
+                if  self.puntualgroupselected_name == None or  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '1, -1 -1*' :
                     self.questionGp = 'Point Group:'       
-                    if self.magnetoelectricity == False:
-                        self.setPointGroup()    
-                        self.setAxis() 
-                        return    
+                    """self.setPointGroup()    
+                    self.setAxis() """
+                    return
+                         
 
                 if  self.__request != None and len(self.__inputList) > 0:
-                    
                     self.setDimension(self.objDataProperty)
-             
                     for cursor, p in enumerate(self.__inputList) :
                         index=self.getIndex(p.name) 
                         i = index[0]
                         j= index[1]
                         print str(i) + "," + str(j)
-                        
-                        if self.puntualgroupselected_name in  ('1, -1'):
-                            if cursor == 0 or cursor == 3 or cursor == 4:
-                                if str(p.name) == self.__coefficientsparts[cursor]:   
-                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
-                                
-                            if cursor == 1:
-                                if str(p.name) == self.__coefficientsparts[cursor]:      
-                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[1,0]= self.coefficientsmatrix[i,j]
+                        if self.magnetoelectricity == 0 or self.magnetoelectricity == 1:  
+                            if self.puntualgroupselected_name in  ('1, -1, -1*'):
+                                if cursor == 0 or cursor == 3 or cursor == 4:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:   
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
                                     
-                            if cursor == 2:
-                                if str(p.name) == self.__coefficientsparts[cursor]:      
-                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[2,0]= self.coefficientsmatrix[i,j]
-                            
+                                if cursor == 1:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:      
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[1,0]= self.coefficientsmatrix[i,j]
+                                        
+                                if cursor == 2:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:      
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[2,0]= self.coefficientsmatrix[i,j]
+                                
+     
+                                if cursor == 5:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:      
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[2,1]= self.coefficientsmatrix[i,j]
  
-                            if cursor == 5:
-                                if str(p.name) == self.__coefficientsparts[cursor]:      
-                                    self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[2,1]= self.coefficientsmatrix[i,j]
-                            
+                               
                                                   
                     print self.coefficientsmatrix
                     self.sucess = 1;
@@ -6281,11 +6176,8 @@ class Propertiesv2(object):
                 else:
                     self.message= 'All the point groups of this crystal system have the same matrix'
                     self.questionGp = 'Point Group:'     
-                    self.setPointGroup()   
-                    
-                    self.setAxis() 
-                    #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
-                    #self.preparedataforjQuery(self.type )
+                    """self.setPointGroup()   
+                    self.setAxis() """
                     self.setCoefficientsforjQuery(self.type );
                     self.setCatalogPropertyDetail() 
                     
@@ -6296,158 +6188,41 @@ class Propertiesv2(object):
                                                                         function() 
                                                                         {
                                                                      """
-                    if self.puntualgroupselected_name in ('1, -1'):
+                    if self.puntualgroupselected_name in ('1, -1, -1*'):
                         #list read-only fields and non-zero fields
                         
-                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" + self.coefficientspartssplit[1]);
-                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"13" +self.coefficientspartssplit[1]);
-                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+ "32" + self.coefficientspartssplit[1]);
-                        
+                        if not self.puntualGroupList:
+                            for i,p in enumerate(self.coefficientsparts):
+                                self.listofemptyInputs.append(self.coefficientsparts[i]);
+
+                     
                       
                         #fields for writing
-                        self.jquery= self.jquery + """                        
-                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
+                        for i,p in enumerate(self.coefficientsparts):
+                            self.jquery= self.jquery + """                        
+                                                                                $('#""" +self.coefficientsparts[i]+ """').keyup(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                }else
+                                                                                { 
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                             });
+                                                                             
+                                                                             """
                                                                          
-                                                                        $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
-                                                                            {
-                                                                                
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                                    
-                                                                                    
-                                                                                    $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val(value );
-
-                                                                            }else
-                                                                            {
-                                                                                inputpopclear($(this));
-                                                                                  
-                                                                                 $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('' );
-                                                                            }
-                                                                         });
-                                                                         
-                                                                         
-                                                                            $('#""" +self.coefficientsparts[2]+ """').keyup(function ()
-                                                                            {
-                                                                                
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                                    
-                                                                                    $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val(value );
-
-                                                                            }else
-                                                                            {
-                                                                                inputpopclear($(this));
-                                                                                 
-                                                                                 $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val('' );
-                                                                            }
-                                                                         });
-                                                                         
-                                                                         $('#""" +self.coefficientsparts[3]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-                                                                         
-                                                                        $('#""" +self.coefficientsparts[4]+ """').keyup(function ()
-                                                                            {
-                                                                                
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                                    
-                                                                                    $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val(value );
-
-                                                                            }else
-                                                                            {
-                                                                                inputpopclear($(this));
-                                                                           
-                                                                                 $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('' );
-                                                                            }
-                                                                         });
-                                                                         
-                                                                         
-                                                                        $('#""" +self.coefficientsparts[5]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }     
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-        
-                                                                        """
+ 
                 
                     self.jquery= self.jquery+"\n" 
                     
@@ -6467,392 +6242,485 @@ class Propertiesv2(object):
                     
                                       
                     print self.jquery 
-                    
+
                     
             if self.crystalsystem_name == 'm': 
-                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '2, 2m, 2/m' :
-                    self.questionGp = 'Point Group:'       
-                    if self.magnetoelectricity == False:
-                        self.setPointGroup()    
-                        self.setAxis() 
-                        return    
-                     
-                if  self.__request != None and len(self.__inputList) > 0:
-                    self.setDimension(self.objDataProperty)
-                    for cursor, p in enumerate(self.__inputList) :
-                        if self.puntualgroupselected_name in  ('2, m, 2/m'):
-                            index=self.getIndex(p.name) 
-                            i = index[0]
-                            j= index[1]
-                            print str(i) + "," + str(j)
-                            
-                            if cursor != 1:
-                                if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
-                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
-
-                            if cursor == 1:
-                                if str(p.name) == self.__coefficientsparts[cursor]:        
-                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[2,0]= self.coefficientsmatrix[i,j]
-              
-                    print self.coefficientsmatrix
-                    self.sucess = 1;
-                    return
-                else:
-                    self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group:'     
-                    self.setPointGroup()   
-                    self.setAxis() 
-                    #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
-                    #self.preparedataforjQuery(self.type )
-                    self.setCoefficientsforjQuery(self.type);
-                    self.setCatalogPropertyDetail() 
-                    self.jquery= self.jquery + """
-                                                                    // inicio de codigo jQuery
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $(document).ready(
-                                                                        function() 
-                                                                        {
-                                                                     """
-                    if self.puntualgroupselected_name in ('2, 2m, 2/m'):
-                        #list read-only fields and non-zero fields
-                         
-                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" + self.coefficientspartssplit[1]);
-
-                        #fields for writing
-                        self.jquery= self.jquery + """                        
-                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-                                                                         
-                                                                            $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
-                                                                            {
-                                                                                
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                                   
-                                                                                    $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val(value );
-
-                                                                            }else
-                                                                            {
-                                                                                inputpopclear($(this));
-                                                                                
-                                                                                 $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val( '');
-                                                                            }
-                                                                         });
-                                                                         
-                                                                         $('#""" +self.coefficientsparts[2]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-                                                                         
-                                                                        $('#""" +self.coefficientsparts[3]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }     
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-        
-                                                                        """
+                if self.magnetoelectricity == False:
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in self.puntualGroupListNames:#self.puntualgroupselected_name not in ['2', '2m', '2/m'] :
+                        self.questionGp = 'Point Group:'       
+                        return   
                     
-                    self.jquery= self.jquery+"\n" 
-
-                    #Separation of fields of only reading zero and not zero
-                    for key in sorted(self.read_write_inputs.keys()):
-                        if  self.read_write_inputs[key] == 'r':
-                            if  self.contains(self.listofemptyInputs,key):
-                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
-                            else:
-                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                    if  self.__request != None and len(self.__inputList) > 0:
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
+                            if self.puntualgroupselected_name in  ('2, m, 2/m'):
+                                index=self.getIndex(p.name) 
+                                i = index[0]
+                                j= index[1]
+                                print str(i) + "," + str(j)
                                 
- 
-                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"
+                                if cursor != 1:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+    
+                                if cursor == 1:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:        
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[2,0]= self.coefficientsmatrix[i,j]
+                  
+                        print self.coefficientsmatrix
+                        self.sucess = 1;
+                        return
+                    else:
+                        self.message= 'All the point groups of this crystal system have the same matrix'
+                        self.questionGp = 'Point Group:'     
+                        """self.setPointGroup()   
+                        self.setAxis()"""
+                        #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                        #self.preparedataforjQuery(self.type )
+                        self.setCoefficientsforjQuery(self.type);
+                        self.setCatalogPropertyDetail() 
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                         """
+                        if self.puntualgroupselected_name in self.puntualGroupListNames:# ('2, 2m, 2/m'):
+                            #list read-only fields and non-zero fields
+                             
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" + self.coefficientspartssplit[1]);
+    
+                            #fields for writing
+                            self.jquery= self.jquery + """                        
+                                                                                $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                }else
+                                                                                { 
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                             });
+                                                                             
+                                                                                $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
+                                                                                {
+                                                                                    
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                       
+                                                                                        $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val(value );
+    
+                                                                                }else
+                                                                                {
+                                                                                    inputpopclear($(this));
+                                                                                    
+                                                                                     $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val( '');
+                                                                                }
+                                                                             });
+                                                                             
+                                                                             $('#""" +self.coefficientsparts[2]+ """').keyup(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                }else
+                                                                                { 
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                             });
+                                                                             
+                                                                            $('#""" +self.coefficientsparts[3]+ """').keyup(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }     
+                                                                                }else
+                                                                                { 
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                             });
+            
+                                                                            """
                         
-                    print self.jquery 
+                        self.jquery= self.jquery+"\n" 
+                    
+                    
+                     
+                else:
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in  self.puntualGroupListNames: # self.puntualgroupselected_name not in ['2','m*','2/m*', '2*','m','2*/m'] :
+                        self.questionGp = 'Point Group:'       
+                        return    
+                    
+                    
+                    if  self.__request != None and len(self.__inputList) > 0:
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
+                            if self.puntualgroupselected_name in  ['2','m*','2/m*','2*','m','2*/m']:
+                                index=self.getIndex(p.name) 
+                                i = index[0]
+                                j= index[1]
+                                print str(i) + "," + str(j)
+                                if str(p.name) == self.__coefficientsparts[cursor]:   
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
+  
+                            
+                                      
+                        print self.coefficientsmatrix
+                        self.sucess = 1;
+                        return
+                    else:
+                        #self.message= 'All the point groups of this crystal system have the same matrix'
+                        self.questionGp = 'Point Group:'     
+
+                        self.setCoefficientsforjQuery(self.type);
+                        self.setCatalogPropertyDetail() 
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
+                                                                            {
+                         
+                                                                        """
+                        if self.puntualgroupselected_name in  self.puntualGroupListNames: 
+                        #if self.puntualgroupselected_name in  ['2','m*','2/m*','2*','m','2*/m']:
+                            #list read-only fields and non-zero fields
+                             
+                            #self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" + self.coefficientspartssplit[1]);
+    
+                            #fields for writing
+                            for i,p in enumerate(self.coefficientsparts):
+                                self.jquery= self.jquery + """                        
+                                                                                    $('#""" +self.coefficientsparts[i]+ """').keyup(function ()
+                                                                                    {
+                                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                            inputpop($(this));
+                                                                                            v = $(this).val();
+                                                                                            
+                                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                            {
+                                                                                              value = Number.parseFloat(v).toExponential();
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                              value = v;
+                                                                                            }
+                                                                                    }else
+                                                                                    { 
+                                                                                        inputpopclear($(this));
+                                                                                    }
+                                                                                 });
+                                                                                 
+                                                                                 """
+
+                        self.jquery= self.jquery+"\n" 
+                
+
+                #Separation of fields of only reading zero and not zero
+                for key in sorted(self.read_write_inputs.keys()):
+                    if  self.read_write_inputs[key] == 'r':
+                        if  self.contains(self.listofemptyInputs,key):
+                            self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                        else:
+                            self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                           
+
+                self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"
+                   
+                print self.jquery 
                     
                     
                     
             if self.crystalsystem_name == 'o': 
-                if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '222, 2mm, mmm' :
-                    self.questionGp = 'Point Group:'       
-                    if self.magnetoelectricity == False:
-                        self.setPointGroup()    
+                if self.magnetoelectricity == False:
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in  self.puntualGroupListNames: #self.puntualgroupselected_name not in '222, 2mm, mmm' :
+                        self.questionGp = 'Point Group:'       
                         return  
                     
-                if  self.__request != None and len(self.__inputList) > 0:
-                    self.setDimension(self.objDataProperty)
-                    for cursor, p in enumerate(self.__inputList) :
-                        if self.puntualgroupselected_name in  ('222, 2mm, mmm'):
-                            index=self.getIndex(p.name) 
-                            i = index[0]
-                            j= index[1]
-                            print str(i) + "," + str(j)
-                            if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
-                                self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
-
-              
-                    print self.coefficientsmatrix
-                    self.sucess = 1;
-                    return
-                else:
-                    self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group:'     
-                    self.setPointGroup()   
-                    self.setAxis() 
-                    #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
-                    #self.preparedataforjQuery(self.type )
-                    self.setCoefficientsforjQuery(self.type);
-                    self.setCatalogPropertyDetail() 
-                    self.jquery= self.jquery + """
-                                                                    // inicio de codigo jQuery
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $(document).ready(
-                                                                        function() 
-                                                                        {
-                                                                     """
-                    if self.puntualgroupselected_name in ('222, mm2, mmm'):
-                        #list read-only fields and non-zero fields
-                        #self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" + self.coefficientspartssplit[1]);
-
-                      
-                        #fields for writing
-                        self.jquery= self.jquery + """                        
-                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-        
-                                                                         
-                                                                         
-                                                     
-                                                                         
-                                                                         $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
- 
-                                                                         
-                                                                         
-                                                                        $('#""" +self.coefficientsparts[2]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }     
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-        
-                                                                        """
-                
-                    self.jquery= self.jquery+"\n" 
-
-                    #Separation of fields of only reading zero and not zero
-                    for key in sorted(self.read_write_inputs.keys()):
-                        if  self.read_write_inputs[key] == 'r':
-                            if  self.contains(self.listofemptyInputs,key):
-                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
-                            else:
-                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
-                                
-                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
-                    print self.jquery 
-                    
-            if self.crystalsystem_name == 'u':
-                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '3, -3, 32, -3m, 3m, 4, -4, 4/m, 4mm, -42m, 422, 4/mmm, 6, -6, 3/m, 6/m, 6mm, 622, -6m2, 6/mmm, infinf, infinfm, inf, infm, inf/m, inf2, inf/mm' :
-                    self.questionGp = 'Point Group:'       
-                    if self.magnetoelectricity == False:
-                        self.setPointGroup()    
-                        return  
-                    
-                if  self.__request != None and len(self.__inputList) > 0:      
-                    self.setDimension(self.objDataProperty)
-                    for cursor, p in enumerate(self.__inputList) :
-                        if self.puntualgroupselected_name in  ('3, -3, 32, -3m, 3m, 4, -4, 4/m, 4mm, -42m, 422, 4/mmm, 6, -6, 3/m, 6/m, 6mm, 622, -6m2, 6/mmm, infinf, infinfm, inf, infm, inf/m, inf2, inf/mm'):
-                            index=self.getIndex(p.name) 
-                            i = index[0]
-                            j= index[1]
-                            print str(i) + "," + str(j)
-                            
-                            if cursor == 0:
+                    if  self.__request != None and len(self.__inputList) > 0:
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
+                            if self.puntualgroupselected_name in  self.puntualGroupListNames:#('222, 2mm, mmm'):
+                                index=self.getIndex(p.name) 
+                                i = index[0]
+                                j= index[1]
+                                print str(i) + "," + str(j)
                                 if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
                                     self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[1,1]= self.coefficientsmatrix[i,j]
-                            if cursor != 0:   
-                                self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))     
-                                
-              
-                    print self.coefficientsmatrix
-                    self.sucess = 1;
-                    return
-                else:
-                    self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group:'     
-                    self.setPointGroup()   
-                    self.setAxis() 
-                    #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
-                    #self.preparedataforjQuery(self.type )
-                    self.setCoefficientsforjQuery(self.type);
-                    self.setCatalogPropertyDetail() 
-                    self.jquery= self.jquery + """
-                                                                    // inicio de codigo jQuery
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $(document).ready(
-                                                                        function() 
-                                                                        {
-                                                                     """
-                    if self.puntualgroupselected_name in ('3, -3, 32, -3m, 3m, 4, -4, 4/m, 4mm, -42m, 422, 4/mmm, 6, -6, 3/m, 6/m, 6mm, 622, -6m2, 6/mmm, infinf, infinfm, inf, infm, inf/m, inf2, inf/mm'):
-                        #list read-only fields and non-zero fields
-                        #self.listofemptyInputs.append(self.type+"22");
-                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1]);
- 
-                      
-                        #fields for writing
-                        self.jquery= self.jquery + """                        
-                                                                        $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+    
+                  
+                        print self.coefficientsmatrix
+                        self.sucess = 1;
+                        return
+                    else:
+                        self.message= 'All the point groups of this crystal system have the same matrix'
+                        self.questionGp = 'Point Group:'     
+                        """self.setPointGroup()   
+                        self.setAxis()""" 
+                        #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                        #self.preparedataforjQuery(self.type )
+                        self.setCoefficientsforjQuery(self.type);
+                        self.setCatalogPropertyDetail() 
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
                                                                             {
-                                                                                
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
+                                                                         """
+                        if self.puntualgroupselected_name in  self.puntualGroupListNames: 
+                        #if self.puntualgroupselected_name in  ['2','m*','2/m*','2*','m','2*/m']:
+                            #list read-only fields and non-zero fields
+                             
+                            #self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" + self.coefficientspartssplit[1]);
+    
+                            #fields for writing
+                            for i,p in enumerate(self.coefficientsparts):
+                                self.jquery= self.jquery + """                        
+                                                                                    $('#""" +self.coefficientsparts[i]+ """').keyup(function ()
                                                                                     {
-                                                                                      value = Number.parseFloat(v).toExponential();
+                                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                            inputpop($(this));
+                                                                                            v = $(this).val();
+                                                                                            
+                                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                            {
+                                                                                              value = Number.parseFloat(v).toExponential();
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                              value = v;
+                                                                                            }
+                                                                                    }else
+                                                                                    { 
+                                                                                        inputpopclear($(this));
                                                                                     }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-                                                                                  
-                                                                                    $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
+                                                                                 });
+                                                                                 
+                                                                                 """
 
-                                                                            }else
+                        self.jquery= self.jquery+"\n" 
+                else:
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in  self.puntualGroupListNames: #self.puntualgroupselected_name not in '222, 2mm, mmm' :
+                        self.questionGp = 'Point Group:'       
+                        return
+                    
+                    if  self.__request != None and len(self.__inputList) > 0:
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
+                            if self.puntualgroupselected_name in  self.puntualGroupListNames:# ['2','m*','2/m*','2*','m','2*/m']:
+                                index=self.getIndex(p.name) 
+                                i = index[0]
+                                j= index[1]
+                                print str(i) + "," + str(j)
+                                if str(p.name) == self.__coefficientsparts[cursor]:   
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
+  
+                            
+                                      
+                        print self.coefficientsmatrix
+                        self.sucess = 1;
+                        return
+                    else:
+                        #self.message= 'All the point groups of this crystal system have the same matrix'
+                        self.questionGp = 'Point Group:'     
+
+                        self.setCoefficientsforjQuery(self.type);
+                        self.setCatalogPropertyDetail() 
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
                                                                             {
-                                                                                inputpopclear($(this));
-                                                                              
-                                                                                 $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val('' );
-                                                                            }
-                                                                         });
-                      
-                                                                         
-                                                                        $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
-                                                                            {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
-                                                                                    
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }     
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-        
+                         
                                                                         """
-                
-                    self.jquery= self.jquery+"\n" 
+                        if self.puntualgroupselected_name in  self.puntualGroupListNames: 
+                        #if self.puntualgroupselected_name in  ['2','m*','2/m*','2*','m','2*/m']:
+                            #list read-only fields and non-zero fields
+                             
+                            #self.listofemptyInputs.append(self.coefficientspartssplit[0]+"31" + self.coefficientspartssplit[1]);
+    
+                            #fields for writing
+                            for i,p in enumerate(self.coefficientsparts):
+                                self.jquery= self.jquery + """                        
+                                                                                    $('#""" +self.coefficientsparts[i]+ """').keyup(function ()
+                                                                                    {
+                                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                            inputpop($(this));
+                                                                                            v = $(this).val();
+                                                                                            
+                                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                            {
+                                                                                              value = Number.parseFloat(v).toExponential();
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                              value = v;
+                                                                                            }
+                                                                                    }else
+                                                                                    { 
+                                                                                        inputpopclear($(this));
+                                                                                    }
+                                                                                 });
+                                                                                 
+                                                                                 """
+
+                        self.jquery= self.jquery+"\n" 
+                    
+                    
+                    
+                #Separation of fields of only reading zero and not zero
+                for key in sorted(self.read_write_inputs.keys()):
+                    if  self.read_write_inputs[key] == 'r':
+                        if  self.contains(self.listofemptyInputs,key):
+                            self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                        else:
+                            self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                            
+                self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
+                print self.jquery 
+                    
+            if self.crystalsystem_name == 'u':
+                if self.magnetoelectricity == False:
+                    if  self.puntualgroupselected_name ==  None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in self.puntualGroupListNames:
+                        self.questionGp = 'Point Group:'       
+                        return  
+                    
+                    if  self.__request != None and len(self.__inputList) > 0:      
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
+                            if self.puntualgroupselected_name in self.puntualGroupListNames:
+                                index=self.getIndex(p.name) 
+                                i = index[0]
+                                j= index[1]
+                                print str(i) + "," + str(j)
+                                
+                                if cursor == 0:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[1,1]= self.coefficientsmatrix[i,j]
+                                if cursor != 0:   
+                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))     
+                                    
+                  
+                        print self.coefficientsmatrix
+                        self.sucess = 1;
+                        return
+                    else:
+                        #self.message= 'All the point groups of this crystal system have the same matrix'
+                        self.questionGp = 'Point Group:'     
+                        """self.setPointGroup()   
+                        self.setAxis() """
+                        #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                        #self.preparedataforjQuery(self.type )
+                        self.setCoefficientsforjQuery(self.type);
+                        self.setCatalogPropertyDetail() 
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                         """
+                        if self.puntualgroupselected_name in self.puntualGroupListNames:#('3, -3, 32, -3m, 3m, 4, -4, 4/m, 4mm, -42m, 422, 4/mmm, 6, -6, 3/m, 6/m, 6mm, 622, -6m2, 6/mmm, infinf, infinfm, inf, infm, inf/m, inf2, inf/mm'):
+                            #list read-only fields and non-zero fields
+                            #self.listofemptyInputs.append(self.type+"22");
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1]);
+     
+                          
+                            #fields for writing
+                            self.jquery= self.jquery + """                        
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                                {
+                                                                                    
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                      
+                                                                                        $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
+    
+                                                                                }else
+                                                                                {
+                                                                                    inputpopclear($(this));
+                                                                                  
+                                                                                     $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                                }
+                                                                             });
+                          
+                                                                             
+                                                                            $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }     
+                                                                                }else
+                                                                                { 
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                             });
+            
+                                                                            """
+                    
+                        self.jquery= self.jquery+"\n" 
 
                     #Separation of fields of only reading zero and not zero
                     for key in sorted(self.read_write_inputs.keys()):
@@ -6864,85 +6732,289 @@ class Propertiesv2(object):
                                 
                     self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
                     print self.jquery 
+                else:
                     
-                    
-            if self.crystalsystem_name == 'c':         
-                if  self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in '23, m3, 432, -43m, m3m, infinf, infinfm' :
-                    self.questionGp = 'Point Group:'       
-                    if self.magnetoelectricity == False:
-                        self.setPointGroup()    
-                        self.setAxis() 
+                    if  self.puntualgroupselected_name ==  None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in self.puntualGroupListNames:
+                        self.questionGp = 'Point Group:'       
                         return  
                     
-                if  self.__request != None and len(self.__inputList) > 0:
-                    self.setDimension(self.objDataProperty)
-                    for cursor, p in enumerate(self.__inputList) :
-                        if self.puntualgroupselected_name in  ('23, m3, 432, -43m, m3m, infinf, infinfm'):
+                    if  self.__request != None and len(self.__inputList) > 0:      
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
                             index=self.getIndex(p.name) 
                             i = index[0]
                             j= index[1]
                             print str(i) + "," + str(j)
-                            if cursor == 0:
-                                if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
-                                    self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
-                                    self.coefficientsmatrix[2,2] = self.coefficientsmatrix[i,j]  = self.coefficientsmatrix[0,0] 
-     
-                                
-              
-                    print self.coefficientsmatrix
-                    self.sucess = 1;
-                    return
-                else:
-                    self.message= 'All the point groups of this crystal system have the same matrix'
-                    self.questionGp = 'Point Group:'     
-                    self.setPointGroup()   
-                    self.setAxis() 
-                    #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
-                    #self.preparedataforjQuery(self.type )
-                    self.setCoefficientsforjQuery(self.type);
-                    self.setCatalogPropertyDetail() 
-                    self.jquery= self.jquery + """
-                                                                    // inicio de codigo jQuery
-                                                                    $('#divwarningpropertyvalues').hide();
-                                                                    $(document).ready(
-                                                                        function() 
-                                                                        {
-                                                                     """
-                    
-                    if self.puntualgroupselected_name in ('23, m3, 432, -43m, m3m, infinf, infinfm'):
-                        #list read-only fields and non-zero fields
-  
-                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1]);
-                        self.listofemptyInputs.append(self.coefficientspartssplit[0]+"33" + self.coefficientspartssplit[1]);
-
-                        #fields for writing
-                        self.jquery= self.jquery + """                        
-                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                            if self.puntualgroupselected_name in ['4', '3', '6', 'inf', '-3*', '-4*', '4/m*', '-6*', '6/m*', 'infm*']:
+                                if cursor == 0:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:  
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False)) 
+                                        self.coefficientsmatrix[1,1]= self.coefficientsmatrix[i,j]
+                                        
+                                if cursor == 1:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:  
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False)) 
+                                        self.coefficientsmatrix[1,0]= -self.coefficientsmatrix[i,j]
+                                        
+                                if cursor == 2:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:  
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False)) 
+                            
+                              
+                            
+                            if self.puntualgroupselected_name in ['422', '32', '622', 'inf2', 'infm*', '3m*', '-3*m*','4m*m*', '4/m*m*m*', '6m*m*', '-6*m*2', '-4*2m*', '6/m*m*m*', 'inf/m*m*']:
+                                if str(p.name) == self.__coefficientsparts[cursor]:  
+                                    if cursor == 0:
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False)) 
+                                        self.coefficientsmatrix[1,1]= self.coefficientsmatrix[i,j]
+                                        
+                                    if cursor == 1:
+                                        if str(p.name) == self.__coefficientsparts[cursor]:  
+                                            self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False)) 
+                              
+                            if self.puntualgroupselected_name in ['4mm', '3m', '6mm', '32*', '42*2*','4/m*mm', '62*2*', '-6*m2*', '6/m*mm', 'inf2*', 'inf/m*m', '-3*m', '-4*2*m']:  
+                                if str(p.name) == self.__coefficientsparts[cursor]:  
+                                    if cursor == 0:
+                                        self.coefficientsmatrix[i,j]= float (self.__request.POST.get(p.name, False)) 
+                                        self.coefficientsmatrix[1,0]= -self.coefficientsmatrix[i,j]
+                            
+                                    
+                  
+                        print self.coefficientsmatrix
+                        self.sucess = 1;
+                        return
+                    else:
+                        #self.message= 'All the point groups of this crystal system have the same matrix'
+                        self.questionGp = 'Point Group?'     
+ 
+                        self.setCoefficientsforjQuery(self.type);
+                        self.setCatalogPropertyDetail() 
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
                                                                             {
-                                                                                if(Number($(this).val()).toPrecision() != 'NaN'){
-                                                                                    inputpop($(this));
-                                                                                    v = $(this).val();
+                                                                         """
+                        if self.puntualgroupselected_name in ['4', '3', '6', 'inf', '-3*', '-4*', '4/m*', '-6*', '6/m*', 'infm*']:
+                            #list read-only fields and non-zero fields
+                            #self.listofemptyInputs.append(self.type+"22");
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1]);
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" + self.coefficientspartssplit[1]);
+     
+                          
+                            #fields for writing
+                            self.jquery= self.jquery + """                        
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                                {
                                                                                     
-                                                                                    if ( isScientificNotation($(this).val()) == 1 )
-                                                                                    {
-                                                                                      value = Number.parseFloat(v).toExponential();
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      value = v;
-                                                                                    }
-
-                                                                                     $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
-                                                                                     $('#""" +self.coefficientspartssplit[0]+ """33"""+self.coefficientspartssplit[1]+"""').val(value );
-                                                                            }else
-                                                                            { 
-                                                                                inputpopclear($(this));
-                                                                            }
-                                                                         });
-
-                                                                        """
-                
-                    self.jquery= self.jquery+"\n" 
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                      
+                                                                                        $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
+    
+                                                                                }else
+                                                                                {
+                                                                                    inputpopclear($(this));
+                                                                                  
+                                                                                     $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                                }
+                                                                             });
+                                                                             
+                                                                             
+                                                                             $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
+                                                                                {
+                                                                                    
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = -$(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                      
+                                                                                        $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val(value );
+    
+                                                                                }else
+                                                                                {
+                                                                                    inputpopclear($(this));
+                                                                                  
+                                                                                     $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                                }
+                                                                             });
+                                                                             
+                                                                             $('#""" +self.coefficientsparts[2]+ """').keyup(function ()
+                                                                                {
+                                                                                    
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                        
+                                                                                        $(this).val(value)
+                                                     
+    
+                                                                                }else
+                                                                                {
+                                                                                    inputpopclear($(this));
+                                                                                  
+                                                                                     
+                                                                                }
+                                                                             });
+                                                                         
+                                                                                
+                                                                            $('#""" +self.coefficientsparts[0]+ """').change(function ()
+                                                                               {
+                                                                                   
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                      
+                                                                                        $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
+    
+                                                                                }else
+                                                                                {
+                                                                                    inputpopclear($(this));
+                                                                                  
+                                                                                     $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                                }
+                                                                             });
+                                                                             
+        
+            
+                                                                            """
+                    
+                            self.jquery= self.jquery+"\n" 
+                            
+                        if self.puntualgroupselected_name in ['422', '32', '622', 'inf2', 'infm*', '3m*', '-3*m*','4m*m*', '4/m*m*m*', '6m*m*', '-6*m*2', '-4*2m*', '6/m*m*m*', 'inf/m*m*']:
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1]);
+     
+                          
+                            #fields for writing
+                            self.jquery= self.jquery + """                        
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                                {
+                                                                                    
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                      
+                                                                                        $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
+    
+                                                                                }else
+                                                                                {
+                                                                                    inputpopclear($(this));
+                                                                                  
+                                                                                     $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                                }
+                                                                             });
+                          
+                                                                             
+                                                                            $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }     
+                                                                                        
+                                                                                        $(this).val(value)
+                                                                                }else
+                                                                                { 
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                             });
+            
+                                                                            """
+                    
+                            self.jquery= self.jquery+"\n" 
+                            
+                        if self.puntualgroupselected_name in ['4mm', '3m', '6mm', '32*', '42*2*','4/m*mm', '62*2*', '-6*m2*', '6/m*mm', 'inf2*', 'inf/m*m', '-3*m', '-4*2*m']:
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" + self.coefficientspartssplit[1]);
+     
+                          
+                            #fields for writing
+                            self.jquery= self.jquery + """                        
+                                                                            $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                                {
+                                                                                    
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = -$(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+                                                                                      
+                                                                                        $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val(value );
+    
+                                                                                }else
+                                                                                {
+                                                                                    inputpopclear($(this));
+                                                                                  
+                                                                                     $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val('' );
+                                                                                }
+                                                                             });
+                          
+                                                                             
+                                
+            
+                                                                            """
+                    
+                            self.jquery= self.jquery+"\n" 
 
                     #Separation of fields of only reading zero and not zero
                     for key in sorted(self.read_write_inputs.keys()):
@@ -6953,17 +7025,270 @@ class Propertiesv2(object):
                                 self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
                                 
                     self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
-                    print self.jquery 
-            
+                    print self.jquery
+                       
+                    
+            if self.crystalsystem_name == 'c':         
+                if self.magnetoelectricity == False or self.magnetoelectricity == True:
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in self.puntualGroupListNames:#self.puntualgroupselected_name not in '23, m3, 432, -43m, m3m, infinf, infinfm' :
+                        self.questionGp = 'Point Group:'       
+                        
+                        """self.setPointGroup()    
+                        self.setAxis() """
+                        return  
+                        
+                    if  self.__request != None and len(self.__inputList) > 0:
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
+                            if self.puntualgroupselected_name in  self.puntualGroupListNames:#('23, m3, 432, -43m, m3m, infinf, infinfm'):
+                                index=self.getIndex(p.name) 
+                                i = index[0]
+                                j= index[1]
+                                print str(i) + "," + str(j)
+                                if cursor == 0:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[2,2] = self.coefficientsmatrix[i,j]  = self.coefficientsmatrix[0,0] 
+         
+                                    
+                  
+                        print self.coefficientsmatrix
+                        self.sucess = 1;
+                        return
+                    else:
+                        self.message= 'All the point groups of this crystal system have the same matrix'
+                        self.questionGp = 'Point Group:'     
+                        """self.setPointGroup()   
+                        self.setAxis() """
+                        #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                        #self.preparedataforjQuery(self.type )
+                        self.setCoefficientsforjQuery(self.type);
+                        self.setCatalogPropertyDetail() 
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                         """
+                        
+                        if self.puntualgroupselected_name in self.puntualGroupListNames:#('23, m3, 432, -43m, m3m, infinf, infinfm'):
+                            #list read-only fields and non-zero fields
+      
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1]);
+                            self.listofemptyInputs.append(self.coefficientspartssplit[0]+"33" + self.coefficientspartssplit[1]);
+    
+                            #fields for writing
+                            self.jquery= self.jquery + """                        
+                                                                                $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                                {
+                                                                                    if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                        inputpop($(this));
+                                                                                        v = $(this).val();
+                                                                                        
+                                                                                        if ( isScientificNotation($(this).val()) == 1 )
+                                                                                        {
+                                                                                          value = Number.parseFloat(v).toExponential();
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          value = v;
+                                                                                        }
+    
+                                                                                         $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
+                                                                                         $('#""" +self.coefficientspartssplit[0]+ """33"""+self.coefficientspartssplit[1]+"""').val(value );
+                                                                                }else
+                                                                                { 
+                                                                                    inputpopclear($(this));
+                                                                                }
+                                                                             });
+    
+                                                                            """
+                    
+                        self.jquery= self.jquery+"\n" 
+    
+                        #Separation of fields of only reading zero and not zero
+                        for key in sorted(self.read_write_inputs.keys()):
+                            if  self.read_write_inputs[key] == 'r':
+                                if  self.contains(self.listofemptyInputs,key):
+                                    self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                                else:
+                                    self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                                    
+                        self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
+                        print self.jquery 
+                        
+                        
+            if self.crystalsystem_name == 'te':         
+                if self.magnetoelectricity == False:
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in self.puntualGroupListNames:#self.puntualgroupselected_name not in '23, m3, 432, -43m, m3m, infinf, infinfm' :
+                        self.questionGp = 'Point Group?'       
+                        
+                        """self.setPointGroup()    
+                        self.setAxis() """
+                        return  
+                        
+                    
+                else:
+                    if  self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name not in self.puntualGroupListNames:#self.puntualgroupselected_name not in '23, m3, 432, -43m, m3m, infinf, infinfm' :
+                        self.questionGp = 'Point Group?'       
+                        return  
+                    
+                    if  self.__request != None and len(self.__inputList) > 0:
+                        self.setDimension(self.objDataProperty)
+                        for cursor, p in enumerate(self.__inputList) :
+                            index=self.getIndex(p.name) 
+                            i = index[0]
+                            j= index[1]
+                            print str(i) + "," + str(j)
+                            if self.puntualgroupselected_name in ['-4', '4*/m*', '4*']: 
+                                if cursor == 0:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:   
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
+                                        self.coefficientsmatrix[1,1] = -self.coefficientsmatrix[i,j] 
+                                        
+                                if cursor == 1:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:   
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False)) 
+                                        self.coefficientsmatrix[1,0] = self.coefficientsmatrix[i,j] 
+         
+                            if self.puntualgroupselected_name in  ['-42m', '4*22', '4*mm*', '-42*m*', '4*/m*mm*']:  
+                                if cursor == 0:
+                                    if str(p.name) == self.__coefficientsparts[cursor]:  #__coefficientsparts[list of field]  list of field will be filled by user
+                                        self.coefficientsmatrix[i,j] = float (self.__request.POST.get(p.name, False))# first iteration self.matris[0,0]= float (self.__request.POST.get(p.name, False))
+                                        self.coefficientsmatrix[1,1] = -self.coefficientsmatrix[i,j]  
+                                             
+                  
+                        print self.coefficientsmatrix
+                        self.sucess = 1;
+                        return
+                    else:
+                        #self.message= 'All the point groups of this crystal system have the same matrix'
+                        self.questionGp = 'Point Group:'     
+                        """self.setPointGroup()   
+                        self.setAxis() """
+                        #self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name)  
+                        #self.preparedataforjQuery(self.type )
+                        self.setCoefficientsforjQuery(self.type);
+                        self.setCatalogPropertyDetail() 
+                        self.jquery= self.jquery + """
+                                                                        // inicio de codigo jQuery
+                                                                        $('#divwarningpropertyvalues').hide();
+                                                                        $(document).ready(
+                                                                            function() 
+                                                                            {
+                                                                         """
+                        
+                        if self.puntualgroupselected_name in self.puntualGroupListNames:
+                            
+                            if self.puntualgroupselected_name in ['-4', '4*/m*', '4*']: #
+                            #list read-only fields and non-zero fields
+      
+                                self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1]);
+                                self.listofemptyInputs.append(self.coefficientspartssplit[0]+"21" + self.coefficientspartssplit[1]);
+        
+                                #fields for writing
+                                self.jquery= self.jquery + """                        
+                                                                                    $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                                    {
+                                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                            inputpop($(this));
+                                                                                            v = -$(this).val();
+                                                                                            
+                                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                            {
+                                                                                              value = Number.parseFloat(v).toExponential();
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                              value = v;
+                                                                                            }
+        
+                                                                                             $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
+                                                                                        
+                                                                                    }else
+                                                                                    { 
+                                                                                        inputpopclear($(this));
+                                                                                    }
+                                                                                 });
+                                                                                 
+                                                                                 
+                                                                                $('#""" +self.coefficientsparts[1]+ """').keyup(function ()
+                                                                                    {
+                                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                            inputpop($(this));
+                                                                                            v = $(this).val();
+                                                                                            
+                                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                            {
+                                                                                              value = Number.parseFloat(v).toExponential();
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                              value = v;
+                                                                                            }
+        
+                                                                                             $('#""" +self.coefficientspartssplit[0]+ """21"""+self.coefficientspartssplit[1]+"""').val(value );
+                                                                                              
+                                                                                    }else
+                                                                                    { 
+                                                                                        inputpopclear($(this));
+                                                                                    }
+                                                                                 });
+        
+                                                                                """
+                        
+                                self.jquery= self.jquery+"\n" 
+                            
+                            if self.puntualgroupselected_name in  ['-42m', '4*22', '4*mm*', '-42*m*', '4*/m*mm*']:
+                                self.listofemptyInputs.append(self.coefficientspartssplit[0]+"22" + self.coefficientspartssplit[1]);
+                      
+        
+                                #fields for writing
+                                self.jquery= self.jquery + """                        
+                                                                                    $('#""" +self.coefficientsparts[0]+ """').keyup(function ()
+                                                                                    {
+                                                                                        if(Number($(this).val()).toPrecision() != 'NaN'){
+                                                                                            inputpop($(this));
+                                                                                            v = -$(this).val();
+                                                                                            
+                                                                                            if ( isScientificNotation($(this).val()) == 1 )
+                                                                                            {
+                                                                                              value = Number.parseFloat(v).toExponential();
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                              value = v;
+                                                                                            }
+        
+                                                                                             $('#""" +self.coefficientspartssplit[0]+ """22"""+self.coefficientspartssplit[1]+"""').val(value );
+                                                                                        
+                                                                                    }else
+                                                                                    { 
+                                                                                        inputpopclear($(this));
+                                                                                    }
+                                                                                 });
+    
+                                                                                """
+                        
+                                self.jquery= self.jquery+"\n" 
+                            
+                            
+    
+                    #Separation of fields of only reading zero and not zero
+                    for key in sorted(self.read_write_inputs.keys()):
+                        if  self.read_write_inputs[key] == 'r':
+                            if  self.contains(self.listofemptyInputs,key):
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val('');" +"\n"     
+                            else:
+                                self.jquery=self.jquery+ " $('#"+ key +"').attr('readonly', true).val(0);" +"\n"
+                                
+                    self.jquery=  self.jquery+ "\n"  + "\n"  +  " });"                        
+                    print self.jquery
+                           
                          
     #start setCatalogPropertyDetail
     def setCatalogPropertyDetail(self):
-        '''print 'Property:'  + self.objProperty.name 
-        print 'crystalsystem_id=' + str(self.objCatalogCrystalSystemSelected.pk)
-        print 'type_id='  +  str(self.objTypeSelected.pk)
-        print  'catalogaxis_id=' + str( self.objAxisSelected.pk)
-        print  'catalogpointgroup_id=' +  str(self.objCatalogPointGroupSelected.pk)'''
-        
         if self.catalogproperty_name == 'e' or self.catalogproperty_name == 'p' or self.catalogproperty_name == '2nd':
             propertyDetail = CatalogPropertyDetail.objects.filter(  dataproperty  = self.objDataProperty,
                                                                                                                 crystalsystem =self.objCatalogCrystalSystemSelected,
@@ -6981,133 +7306,7 @@ class Propertiesv2(object):
                 self.read_write_inputs[cpd.name] = 'w'
                 self.catalogPropertyDetail.append(cpd) 
                 del cpd   
-        """        
-            if (self.crystalsystem_name == 'iso') or ( self.crystalsystem_name == 'c') or (self.crystalsystem_name == 'h' ) or ( self.crystalsystem_name == 'o') or ( self.crystalsystem_name == 'tc'  ): 
-                #propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected).order_by('name')
-                
-               
-                
-                propertyDetail = CatalogPropertyDetail.objects.filter(  dataproperty  = self.objDataProperty,
-                                                                                                                        crystalsystem =self.objCatalogCrystalSystemSelected,
-                                                                                                                        type =self.objTypeSelected,
-                                                                                                                        catalogpointgroup =self.objCatalogPointGroupSelected,
-                                                                                                                        puntualgroupnames=self.objPuntualgroupNamesSelected,
-                                                                                                                        catalogaxis=self.objAxisSelected).order_by('name')
-
-                
-                for obj in propertyDetail:
-                    cpd=CatalogPropertyDetail()
-                    cpd = obj
-                    self.read_write_inputs[cpd.name] = 'w'
-                    self.catalogPropertyDetail.append(cpd) 
-                    del cpd   
-             
-            if (self.crystalsystem_name == 'm'):   
-                propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,catalogaxis=self.objAxisSelected).order_by('name')
-                for obj in propertyDetail: 
-                    cpd=CatalogPropertyDetail()
-                    cpd=obj        
-                    self.read_write_inputs[cpd.name] = 'w'        
-                    self.catalogPropertyDetail.append(cpd)        
-
-                return   
-           
-               
-            if(self.crystalsystem_name == 'tg') or (self.crystalsystem_name == 'te'):                                                                                                                                                                                                                    
-                propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,catalogpointgroup=self.objCatalogPointGroupSelected).order_by('name')
-                if not propertyDetail:  
-                    objPuntualGroupGroups=PuntualGroupGroups.objects.filter(catalogpointgroup=self.objCatalogPointGroupSelected)          
-                    for obj in objPuntualGroupGroups:
-                        pgg=  PuntualGroupGroups()
-                        pgg = obj   
-                        propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,puntualgroupnames=pgg.puntualgroupnames).order_by('name')
-                        if  propertyDetail:
-                            for obj in propertyDetail:
-                                cpd=CatalogPropertyDetail()
-                                cpd = obj
-                                self.read_write_inputs[cpd.name] = 'w'
-                                self.catalogPropertyDetail.append(cpd) 
-                                del cpd                 
-                    return  
-                else:                 
-                    for obj in propertyDetail:
-                        cpd=CatalogPropertyDetail()
-                        cpd = obj
-                        self.read_write_inputs[cpd.name] = 'w'
-                        self.catalogPropertyDetail.append(cpd) 
-                        del cpd     
-                    return 
-         
-        if self.catalogproperty_name == 'p':    
-            if  ( self.crystalsystem_name == 'tc'  or self.crystalsystem_name == 'o'  or self.crystalsystem_name == 'te'  or self.crystalsystem_name == 'c' ) or (self.crystalsystem_name == 'tg' and self.puntualgroupselected_name != '3m' ) or (self.crystalsystem_name == 'h' and self.puntualgroupselected_name != '-6m2' ):
-
-                print 'Property:'  + self.objProperty.name 
-                print 'crystalsystem_id=' + str(self.objCatalogCrystalSystemSelected.pk)
-                print 'type_id='  +  str(self.objTypeSelected.pk)                 
-                print  'catalogpointgroup_id=' +  str(self.objCatalogPointGroupSelected.pk)
-                propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,catalogpointgroup=self.objCatalogPointGroupSelected).order_by('name')
-                
-                if not propertyDetail:  
-                    objPuntualGroupGroups=PuntualGroupGroups.objects.filter(catalogpointgroup=self.objCatalogPointGroupSelected)          
-                    for obj in objPuntualGroupGroups:
-                        pgg=  PuntualGroupGroups()
-                        pgg = obj   
-                        propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,puntualgroupnames=pgg.puntualgroupnames).order_by('name')
-                        if  propertyDetail:
-                            for obj in propertyDetail:
-                                cpd=CatalogPropertyDetail()
-                                cpd = obj
-                                self.read_write_inputs[cpd.name] = 'w'
-                                print self.read_write_inputs[cpd.name]
-                                self.catalogPropertyDetail.append(cpd) 
-                                del cpd                 
-                    return  
-                else:                 
-                    for obj in propertyDetail:
-                        cpd=CatalogPropertyDetail()
-                        cpd = obj
-                        self.read_write_inputs[cpd.name] = 'w'
-                        print cpd.name + "="+self.read_write_inputs[cpd.name]
-                        self.catalogPropertyDetail.append(cpd) 
-                        del cpd     
-                    return 
-                
-            if  ( self.crystalsystem_name == 'm' ) or (self.crystalsystem_name == 'tg' and self.puntualgroupselected_name == '3m' ) or (self.crystalsystem_name == 'h' and self.puntualgroupselected_name == '-6m2' ):
-                propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected, crystalsystem=self.objCatalogCrystalSystemSelected, catalogaxis=self.objAxisSelected, catalogpointgroup=self.objCatalogPointGroupSelected).order_by('name')
-                for obj in propertyDetail: 
-                    cpd=CatalogPropertyDetail()
-                    cpd=obj  
-                    self.read_write_inputs[cpd.name] = 'w'           
-                    self.catalogPropertyDetail.append(cpd)       
-                    del cpd       
-                return    
         
-        if self.catalogproperty_name == '2nd':                                                                                                                                                                                                          
-            propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,dataproperty=self.objDataProperty,catalogpointgroup=self.objCatalogPointGroupSelected).order_by('name')
-            if not propertyDetail:  
-                objPuntualGroupGroups=PuntualGroupGroups.objects.filter(catalogpointgroup=self.objCatalogPointGroupSelected)          
-                for obj in objPuntualGroupGroups:
-                    pgg=  PuntualGroupGroups()
-                    pgg = obj   
-                    propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected,dataproperty=self.objDataProperty,puntualgroupnames=pgg.puntualgroupnames).order_by('name')
-                    if  propertyDetail:
-                        for obj in propertyDetail:
-                            cpd=CatalogPropertyDetail()
-                            cpd = obj
-                            self.read_write_inputs[cpd.name] = 'w'
-                            self.catalogPropertyDetail.append(cpd) 
-                            del cpd                 
-                return  
-            else:                 
-                for obj in propertyDetail:
-                    cpd=CatalogPropertyDetail()
-                    cpd = obj
-                    self.read_write_inputs[cpd.name] = 'w'
-                    self.catalogPropertyDetail.append(cpd) 
-                    del cpd     
-                return 
-           
-        """
     #end setCatalogPropertyDetail    
         
                 
@@ -7123,7 +7322,7 @@ class Propertiesv2(object):
                     cpg=CatalogPointGroup()
                     cpg=obj        
                     
-                    if self.puntualgroupselected_name == '' or self.puntualgroupselected_name == None:
+                    if self.puntualgroupselected_name == None or self.puntualgroupselected_name == '' or self.puntualgroupselected_name == None:
                         self.puntualgroupselected_name=cpg.name
                         self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name) 
                     elif self.puntualgroupselected_name != '' or self.puntualgroupselected_name != None:  
@@ -7140,35 +7339,23 @@ class Propertiesv2(object):
                 self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualGroupList[0])         
       
                 
-       
-       
+        
+        
         propertyDetail = CatalogPropertyDetail.objects.filter(type=self.objTypeSelected,crystalsystem=self.objCatalogCrystalSystemSelected).values('puntualgroupnames').annotate(total=Count('puntualgroupnames'))
         for d in propertyDetail:
             if d['puntualgroupnames'] != 21:   
-                #print d['puntualgroupnames']              
-                
                 objPuntualgroupNames=PuntualGroupNames.objects.get(id__exact=d['puntualgroupnames']) 
-                #objPuntualgroupNamesList.append(objPuntualgroupNames)
-                """for pgn in objPuntualgroupNames:
-                    self.objPuntualgroupNamesSelected.append(pgn.id)
-                """
-                    
                 objPuntualGroupGroups = PuntualGroupGroups.objects.filter(puntualgroupnames=objPuntualgroupNames)    
- 
-                    
-                    
-                for obj in objPuntualGroupGroups:
-                    pgg=PuntualGroupGroups()
-                    pgg=obj
-                    #print pgg.catalogpointgroup.name
+
+                for i,obj in enumerate(objPuntualGroupGroups):
                     if self.puntualgroupselected_name == '':
-                        self.puntualgroupselected_name=pgg.catalogpointgroup.name
-                        self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(name__exact=self.puntualgroupselected_name) 
+                        self.puntualgroupselected_name=objPuntualGroupGroups[i].catalogpointgroup.name
                     
-                    if pgg.catalogpointgroup.name == self.puntualgroupselected_name:
-                        self.objPuntualgroupNamesSelected = pgg.puntualgroupnames
+                    if objPuntualGroupGroups[i].catalogpointgroup.name == self.puntualgroupselected_name:
+                        self.objPuntualgroupNamesSelected = objPuntualGroupGroups[i].puntualgroupnames
              
-                    self.puntualGroupList.append(pgg.catalogpointgroup)
+                    self.puntualGroupList.append(objPuntualGroupGroups[i].catalogpointgroup)
+                    
                     
                 if self.objPuntualgroupNamesSelected ==None:
                     self.objPuntualgroupNamesSelected = objPuntualgroupNames
@@ -7306,11 +7493,16 @@ class Propertiesv2(object):
                         self.coefficientspartssplit.append( letters[0] )
                         self.coefficientspartssplit.append( letters[1] )
                     
-                    if (letters[0] +col + letters[1]) not in read_write_inputs_temp:
-                        self.read_write_inputs[letters[0] +col + letters[1]] =   "r"  
-                        
+                    if catalogPropertyDetail:
+                        if (letters[0] +col + letters[1]) not in read_write_inputs_temp:
+                            self.read_write_inputs[letters[0] +col + letters[1]] =   "r"  
+                            
+                        else:
+                            self.coefficientsparts.append(letters[0] +col + letters[1] )  
                     else:
+                        self.read_write_inputs[letters[0] +col + letters[1]] =   "w"  
                         self.coefficientsparts.append(letters[0] +col + letters[1] )  
+                        
         
                     row.append(letters[0] +col + letters[1] )
                     y= y + 1 

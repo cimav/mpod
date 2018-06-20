@@ -6,8 +6,7 @@ from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 
- 
- 
+
  
  
  
@@ -33,6 +32,7 @@ class Path(models.Model):
     cifs_dir_output = models.CharField(max_length=511)
     stl_dir = models.CharField(max_length=511)
     datafiles_path = models.CharField(max_length=511)
+    so_dir = models.CharField(max_length=511)
     devmode = models.IntegerField(max_length=1)
 
 
@@ -305,6 +305,7 @@ class CatalogProperty(models.Model):
         return str(self.description)
     
     
+    
 class CatalogCrystalSystem(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=511)   
@@ -351,15 +352,7 @@ class CatalogPointGroup(models.Model):
         return str(self.name)   
         
 
-class CrystalSystemPointGroup(models.Model): 
-    crystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
-    catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
-        
-    class Meta:
-        db_table = 'crystalsystem_point_group'    
-        app_label = string_with_title("Properties", "Properties Settings")
-        #verbose_name = _('Crystal System')
-        #verbose_name_plural = _('CrystalSystem')     
+
        
           
         
@@ -378,30 +371,37 @@ class CatalogAxis(models.Model):
         return str(self.name)
         
        
+
+     
+class PuntualGroupNames(models.Model): 
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=511,blank=True)   
+      
+    
+   
+    class Meta:
+        db_table = 'puntual_group_names'    
+        app_label = string_with_title("Properties", "Properties Settings")
+        """verbose_name = _('Group')
+        verbose_name_plural = _('Groups')"""
+        
+    def __unicode__(self):
+        return str(self.name)   
+    
 class CrystalSystemAxis(models.Model): 
-    crystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
-    catalogaxis= models.ForeignKey(CatalogAxis,verbose_name="Axis")       
+    catalogcrystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
+    axis= models.ForeignKey(CatalogAxis,verbose_name="Axis")      
+    type =  models.ForeignKey(Type,verbose_name="Type")     
+    active = models.BooleanField(_(u'Active'),default=False)
+    catalogpointgroup= models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
+    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")   
+    
     class Meta:
         db_table = 'crystalsystem_axis'  
         app_label = string_with_title("Properties", "Properties Settings")
         #verbose_name = _('Crystal System')
         #verbose_name_plural = _('CrystalSystem')
         
-                
-class PuntualGroupNames(models.Model): 
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=511,blank=True)   
-   
-    class Meta:
-        db_table = 'puntual_group_names'    
-        """app_label = string_with_title("Properties", "Properties Settings")
-        verbose_name = _('Group')
-        verbose_name_plural = _('Groups')"""
-        
-    def __unicode__(self):
-        return str(self.name)   
-    
-
         
 class PuntualGroupGroups(models.Model): 
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group") 
@@ -418,7 +418,29 @@ class PuntualGroupGroups(models.Model):
         return  str(self.puntualgroupnames)    
     
     
- 
+class CrystalSystemPointGroup(models.Model): 
+    catalogcrystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
+    catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
+    type =  models.ForeignKey(Type,verbose_name="Type")    
+    active = models.BooleanField(_(u'Active'),default=False)
+        
+    class Meta:
+        db_table = 'crystalsystem_point_group'    
+        app_label = string_with_title("Properties", "Properties Settings")
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')        
+        
+        
+class CrystalSystemPuntualGroupNames(models.Model): 
+    catalogcrystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
+    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")   
+    type =  models.ForeignKey(Type,verbose_name="Type")    
+    active = models.BooleanField(_(u'Active'),default=False)
+        
+    class Meta:
+        db_table = 'crystalsystem_puntualgroupnames'    
+        app_label = string_with_title("Properties", "Properties Settings")
+         
     
  
           
@@ -433,6 +455,7 @@ class CatalogPropertyDetail(models.Model):
     dataproperty = models.ForeignKey(Property,verbose_name="Tag",blank=True)  
     class Meta:
         db_table = 'catalog_property_detail'       
+        #db_table = 'catalog_property_detail_testing'  
         
         app_label = string_with_title("Properties", "Properties Settings")
         verbose_name = _('Tensor Coefficient')
@@ -681,7 +704,16 @@ class Dictionary(models.Model):
          
         #verbose_name_plural = _('Uploaded files')
         
+class OtherTags(models.Model):
+    tag = models.CharField(_(u'tag'),max_length=100)
+    active= models.BooleanField(_(u'Active'),max_length=1,default=True)
     
+    class Meta:
+        db_table = 'other_tags'
+        
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.tag)
+        
         
 class PropTags(models.Model):
     tag = models.CharField(_(u'tag'),max_length=100)

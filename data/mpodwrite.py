@@ -38,7 +38,8 @@ class MPODUtil():
         self.__prop_elastic_compliance = False
         self.__prop_elastic_stiffness = False
         self.__prop_piezoelectric= False
-        self.__magnetoelectricity = False
+        self.__magnetoelectricity_n = False
+        self.__magnetoelectricity_y = False
         self.__loop_tag = False
         self.__loop_article_info = False
         self.__section_title = False
@@ -48,6 +49,8 @@ class MPODUtil():
         self.__cij = ''
         self.__dij = ''
         self.__kij = ''
+        self.__yij = ''
+         
         self.__propertylist = None
         self.__cif_dir=''
         self.cifs_dir_valids=''
@@ -319,11 +322,20 @@ class MPODUtil():
                     self.__prop_piezoelectric= True
                 
             if p.objTypeSelected.name  == "k": 
-                if self.__magnetoelectricity == False:
+                if self.__magnetoelectricity_n == False:
                     self.__kij= self.getTag(p.objDataProperty.tag)
                     self.__line =  p.objDataProperty.tag +" '"+self.__kij+"'" + "\n"
                     self.addline(self.__line)
-                    self.__magnetoelectricity= True
+                    self.__magnetoelectricity_n= True
+                    
+            if p.objTypeSelected.name  == "y": 
+                if self.__magnetoelectricity_y == False:
+                    self.__yij= self.getTag(p.objDataProperty.tag)
+                    self.__line =  p.objDataProperty.tag +" '"+self.__yij+"'" + "\n"
+                    self.addline(self.__line)
+                    self.__magnetoelectricity_y= True
+                    
+                    
                           
              
             if self.__loop_tag==False:  
@@ -402,7 +414,7 @@ class MPODUtil():
                         self.addline(self.__line)
                 
                 
-            if self.__magnetoelectricity == True:    
+            if self.__magnetoelectricity_n == True:    
                 y = 0
                 x= 0       
                 for r in p.coefficientsmatrix:
@@ -416,6 +428,21 @@ class MPODUtil():
                         index = indexx + indexy
                         self.__line= self.__kij +" " + index + " "+ str(c) +"\n"
                         self.addline(self.__line)
+                        
+            if self.__magnetoelectricity_y == True:    
+                y = 0
+                x= 0       
+                for r in p.coefficientsmatrix:
+                    x = x + 1
+                    y= 0
+                    for c in r:
+                        y= y + 1
+                        indexx = str(x)
+                        indexy = str(y)
+                        index = ''
+                        index = indexx + indexy
+                        self.__line= self.__yij +" " + index + " "+ str(c) +"\n"
+                        self.addline(self.__line)              
         
         
             

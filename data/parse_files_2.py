@@ -2,6 +2,8 @@ import os
 import re
 import string
 import numpy as np
+from django.db import models
+from data.models import *
 
 
 cifs_dir='/home/pepponi/work/physdata/mpod/data_files'
@@ -131,8 +133,18 @@ def divide_loop_secs(loop):
 
 def get_non_looped_props(non_looped_lines):
     btg="_prop"
-    otgs = ["phase", "symmetry", "structure"]
-    ntgs = ['conditions', 'measurement', 'frame', 'symmetry' ]
+    #otgs = ["phase", "symmetry", "structure"]#otras etiquetas
+    #ntgs = ['conditions', 'measurement', 'frame', 'symmetry' ]
+    otgs =[]
+    othertagList=OtherTags.objects.filter(active=1)      
+    for i, pt in enumerate(othertagList):
+        otgs.append( othertagList[i].tag )
+    
+    ntgs = []
+    proptagList=PropTags.objects.filter(active=1).exclude(tag__exact= 'data')        
+    for i, pt in enumerate(proptagList):
+        ntgs.append( proptagList[i].tag )
+        
     props_desc = {}
     props_tens2 = {}
     props_tens = {}
@@ -177,19 +189,10 @@ def parse_mpod_file(filepath):
     return file_data_blocks
 
 def format_data_blocks(file_data_blocks, props_ids):
-    [tenso_props_dims_dict, tenso_props_ids_dict,
-     lnl_props_ids_dict, tenso_props_units_dict, lnl_props_units_dict] = props_ids
+    [tenso_props_dims_dict, tenso_props_ids_dict, lnl_props_ids_dict, tenso_props_units_dict, lnl_props_units_dict] = props_ids
     formatted_blocks = []
     for db in file_data_blocks:
-        """
-        print
-        print "dbdbdb"
-        print
-        print db
-        print
-        print props_ids
-        print
-        """
+
         print "format_data_blocks"
         block = []
         block_head = []

@@ -432,8 +432,7 @@ def data_item_html(dataitem_id):
         lprp = ExperimentalParCond.objects.get(tag__exact = lp)
         lnl_props_ids_dict[lp] = lprp.id
         lnl_props_units_dict[lp] = lprp.units
-    props_ids = [tenso_props_dims_dict, tenso_props_ids_dict, lnl_props_ids_dict,
-     tenso_props_units_dict, lnl_props_units_dict ]
+    props_ids = [tenso_props_dims_dict, tenso_props_ids_dict, lnl_props_ids_dict,tenso_props_units_dict, lnl_props_units_dict ]
     formatted_data_blocks = format_data_blocks(file_data_blocks, props_ids)
     """
     itemdictionary = []
