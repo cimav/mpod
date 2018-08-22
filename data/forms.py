@@ -36,9 +36,8 @@ from django.utils.encoding import force_unicode
 from data.Utils import *
 
 from  ctypes import *
-import struct
-import platform
-#from data.pydfiles import Hello_f2py
+ 
+ 
  
  
  
@@ -1118,51 +1117,11 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                         #self.fields['axis'].initial =catalogpointgroupSelected
                         #self.fields['axisdetail'].initial = "<strong>axis not assigned</strong>"
                         
-                        
                      
-                    plataform= platform.system()
-    
-                    pathslist=Path.objects.all()      
-                    so_dir=''
-                    for i,sodir in enumerate(pathslist):
-                        if os.path.isdir(pathslist[i].so_dir): 
-                            so_dir= pathslist[i].so_dir + str((struct.calcsize("P") * 8)) + "/"
-                            break
-                 
-                    if plataform =='Windows':
-                        if (struct.calcsize("P") * 8) == 64:
-                            #print Hello_f2py.greet()
-                            
-                            #64 bits
-                            filename1 ="Hello_f2pyw64.so"
-                            filepath=os.path.join(so_dir, filename1)
-                            if os.path.isfile(filepath):
-                                Hello_f2py = cdll.LoadLibrary(filepath)
-                                print Hello_f2py.greet_()
-                                
-                        elif (struct.calcsize("P") * 8) == 32:
-                            #32 bits
-                            filename1 ="mult.so"
-                            filepath=os.path.join(so_dir, filename1)
-                            if os.path.isfile(filepath):
-                                mult = cdll.LoadLibrary(filepath)
-                                a = c_int(2)
-                                b = c_int(4)
-                                print mult.multiply_(byref(a), byref(b))
-                           
-                            filename1="Hello_f2py.so"
-                            filepath=os.path.join(so_dir, filename1)
-                            if os.path.isfile(filepath):
-                                Hello_f2py = cdll.LoadLibrary(filepath)
-                                print Hello_f2py.greet_()
-                    else:
-                        if plataform =='Linux':
-                            if (struct.calcsize("P") * 8) == 64:
-                                filename1 ="Hello_f2pylinuxcentos64.so"
-                                filepath=os.path.join(so_dir, filename1)
-                                if os.path.isfile(filepath):
-                                    Hello_f2py = cdll.LoadLibrary(filepath)
-                                    print Hello_f2py.greet_()   
+                     
+
+
+                    
                     
                     
         else:

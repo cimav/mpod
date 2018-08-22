@@ -31,6 +31,7 @@ urlpatterns = patterns('',
     url(r'^accounts/adddictionaryphase/(?P<pk>-?\d+)$',adddictionaryphase, name='adddictionaryphase'), 
     url(r'^accounts/adddictionaryphasecharacteristic/(?P<pk>-?\d+)$',adddictionaryphasecharacteristic , name='adddictionaryphasecharacteristic'), 
     url(r'^accounts/adddictionarymeasurement/(?P<pk>-?\d+)$',adddictionarymeasurement , name='adddictionarymeasurement'), 
+    
 
       # USER
     #url(r'^signup/$', 'data.views.viewsignup'),
@@ -44,13 +45,17 @@ urlpatterns = patterns('',
     url(r'^logout/$', 'data.views.viewlogout'),
     
     # HOME
+    
     url(r'^$','data.views.home'),
-    url(r'^home/$','data.views.home'),
+    #url(r'^home/$','data.views.home'),
+    url(r'^$',home,name='home'),
+    #url(r'^home/$', home,name='home'),
     # SEARCH BY
     url(r'^sbproperty/$','data.views.sbproperty'),
     url(r'^properties/(\d+)/$','data.views.viewproperty'),
     url(r'^dataitem/\d+/secondranktensor/$','data.views.viewsecondranktensor'),
-    url(r'^dataitem/\d+/thirdranktensor/$','data.views.viewthirdranktensor'),
+    url(r'^dataitem/\d+/thirdranktensordg/$','data.views.viewthirdranktensordg'),
+    url(r'^dataitem/\d+/thirdranktensoreh/$','data.views.viewthirdranktensoreh'),
     url(r'^dataitem/\d+/compliance/$','data.views.viewcompliance'),
     url(r'^dataitem/\d+/stiffness/$','data.views.viewstiffness'),
     url(r'^dataitem/\d+/fourthranktensor/$','data.views.viewfourthranktensor'),
@@ -70,6 +75,8 @@ urlpatterns = patterns('',
 
     url(r'^newcasev2/$', newcasev2 , name='newcasev2'),
     url(r'^addcasev2/$','data.views.addcasev2'),
+    url(r'^dataitem/(\d+)/rotatematrix/(?P<pk>-?\d+)$',rotatematrix, name='rotatematrix'), 
+    
     
     
     # DOCUMENTATION

@@ -43,6 +43,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
 from django.http import Http404
 import json
+import urllib2
+ 
  
 
 
@@ -466,7 +468,7 @@ def viewsecondranktensor(request):
         
     #return render_to_response('secondranktensor.html', context_instance=RequestContext(request))
 
-def viewthirdranktensor(request):
+def viewthirdranktensordg(request):
     value11 = (request.GET.get('value11', ''))
     value12 = (request.GET.get('value12', ''))
     value13 = (request.GET.get('value13', ''))
@@ -510,6 +512,16 @@ def viewthirdranktensor(request):
         filename = re.sub('[\s+]', '', filename)
         filename1 =None
         filename2 =None
+        
+        
+      
+        
+        valuearrayrotated =request.GET.getlist("valuearrayrotated")
+        """for i,item in enumerate(valuearrayrotated):
+            print valuearrayrotated[i]"""
+        
+         
+        
  
         if color == 0:
             colorscale='Jet';
@@ -551,11 +563,20 @@ def viewthirdranktensor(request):
         createdata =  1
       
   
-        tensor.ThirdRankTensor(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename1,res,stl_dir,createstl,createdata)
+        tensor.ThirdRankTensordg(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename1,res,stl_dir,createstl,createdata)
         XEC=tensor.stringValsOfXEC
         YEC = tensor.stringValsOfYEC
         ZEC= tensor.stringValsOfZEC
         surfacecolorThirdRankTensor=tensor.surfacecolorThirdRankTensor
+        
+        if valuearrayrotated:
+            tensor.ThirdRankTensorRotateddg(valuearrayrotated,color,filename1,res,stl_dir,createstl,createdata)
+            XEC2=tensor.stringValsOfXEC2
+            YEC2 = tensor.stringValsOfYEC2
+            ZEC2= tensor.stringValsOfZEC2
+            surfacecolorThirdRankTensorRotated=tensor.surfacecolorThirdRankTensorRotated
+            
+        
         del tensor
        
         filename2 = filename+"R3MidleResolution" + ".stl"
@@ -571,18 +592,193 @@ def viewthirdranktensor(request):
         if createstl == 1:
             createdata =  0     
             tensor = RankTensors()
-            tensor.ThirdRankTensor(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename2,res,stl_dir,createstl,createdata)
+            tensor.ThirdRankTensordg(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename2,res,stl_dir,createstl,createdata)
             del tensor
          
 
         print filename1
         print filename2
-                        
-        return render_to_response('thirdranktensor.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,'colorscale':colorscale,'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor}, context_instance=RequestContext(request))
         
-        '''
-        ThirdRankTensor(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color)
-    return render_to_response('thirdranktensor.html', context_instance=RequestContext(request))'''
+        
+        
+        if valuearrayrotated:               
+            return render_to_response('thirdranktensor.html',{"XEC": XEC,
+                                                                                                        "YEC":YEC,
+                                                                                                        "ZEC": ZEC,
+                                                                                                        "LowResolutionFileName":filename1,
+                                                                                                        "MiddleResolutionFileName":filename2,
+                                                                                                        'colorscale':colorscale,
+                                                                                                        'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor,
+                                                                                                        "XEC2": XEC2,
+                                                                                                        "YEC2":YEC2,
+                                                                                                        "ZEC2": ZEC2,
+                                                                                                        'surfacecolorThirdRankTensorRotated':surfacecolorThirdRankTensorRotated,}, context_instance=RequestContext(request))
+        else:
+            return render_to_response('thirdranktensor.html',{"XEC": XEC,
+                                                                                                        "YEC":YEC,
+                                                                                                        "ZEC": ZEC,
+                                                                                                        "LowResolutionFileName":filename1,
+                                                                                                        "MiddleResolutionFileName":filename2,
+                                                                                                        'colorscale':colorscale,
+                                                                                                        'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor,}, context_instance=RequestContext(request))
+
+
+def viewthirdranktensoreh(request):
+    value11 = (request.GET.get('value11', ''))
+    value12 = (request.GET.get('value12', ''))
+    value13 = (request.GET.get('value13', ''))
+    value14 = (request.GET.get('value14', ''))
+    value15 = (request.GET.get('value15', ''))
+    value16 = (request.GET.get('value16', ''))
+    value21 = (request.GET.get('value21', ''))
+    value22 = (request.GET.get('value22', ''))
+    value23 = (request.GET.get('value23', ''))
+    value24 = (request.GET.get('value24', ''))
+    value25 = (request.GET.get('value25', ''))
+    value26 = (request.GET.get('value26', ''))
+    value31 = (request.GET.get('value31', ''))
+    value32 = (request.GET.get('value32', ''))
+    value33 = (request.GET.get('value33', ''))
+    value34 = (request.GET.get('value34', ''))
+    value35 = (request.GET.get('value35', ''))
+    value36 = (request.GET.get('value36', ''))
+    color = (request.GET.get('color', ''))
+    filename = (request.GET.get('filename', ''))
+    if(value11 and value12 and value13 and value14 and value15 and value16 and value21 and value22 and value23 and value24 and value25 and value26 and value31 and value32 and value33 and value34 and value35 and value36 and color):
+        val11 = float(value11)
+        val12 = float(value12)
+        val13 = float(value13)
+        val14 = float(value14)
+        val15 = float(value15)
+        val16 = float(value16)
+        val21 = float(value21)
+        val22 = float(value22)
+        val23 = float(value23)
+        val24 = float(value24)
+        val25 = float(value25)
+        val26 = float(value26)
+        val31 = float(value31)
+        val32 = float(value32)
+        val33 = float(value33)
+        val34 = float(value34)
+        val35 = float(value35)
+        val36 = float(value36)
+        color = int(color)
+        filename = re.sub('[\s+]', '', filename)
+        filename1 =None
+        filename2 =None
+        
+        
+      
+        
+        valuearrayrotated =request.GET.getlist("valuearrayrotated")
+        """for i,item in enumerate(valuearrayrotated):
+            print valuearrayrotated[i]"""
+        
+         
+        
+ 
+        if color == 0:
+            colorscale='Jet';
+        elif color == 1:
+            colorscale='Hot';
+        elif color == 2:
+            colorscale='Cool'
+        elif color == 3:
+            colorscale='Greys';
+            
+        tensor = RankTensors()    
+        
+        pathslist=Path.objects.all()      
+        pathexist = 0
+        stl_dir=''
+        for stldir in pathslist:
+            path=Path() 
+            path = stldir
+            if os.path.isdir(path.stl_dir): 
+                pathexist = 1
+                stl_dir= path.stl_dir
+                break
+      
+      
+        #stl_dir=".\\media\\stlfiles\\"
+        #stl_dir="/var/www/MPOD/media/stlfile/"
+    
+        filename1 = filename+"R3LowResolution" + ".stl"
+        filepath=os.path.join(stl_dir, filename1)
+        
+        res=1;
+        createstl = 0;
+        if pathexist == 1:
+            if os.path.isfile(filepath):
+                createstl = 0          
+            else:
+                createstl = 1
+       
+        createdata =  1
+      
+  
+        tensor.ThirdRankTensoreh(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename1,res,stl_dir,createstl,createdata)
+        XEC=tensor.stringValsOfXEC
+        YEC = tensor.stringValsOfYEC
+        ZEC= tensor.stringValsOfZEC
+        surfacecolorThirdRankTensor=tensor.surfacecolorThirdRankTensor
+        
+        if valuearrayrotated:
+            tensor.ThirdRankTensorRotateddg(valuearrayrotated,color,filename1,res,stl_dir,createstl,createdata)
+            XEC2=tensor.stringValsOfXEC2
+            YEC2 = tensor.stringValsOfYEC2
+            ZEC2= tensor.stringValsOfZEC2
+            surfacecolorThirdRankTensorRotated=tensor.surfacecolorThirdRankTensorRotated
+            
+        
+        del tensor
+       
+        filename2 = filename+"R3MidleResolution" + ".stl"
+        res=2;
+        filepath=os.path.join(stl_dir, filename2)       
+        createstl = 0;
+        if pathexist == 1:
+            if os.path.isfile(filepath):
+                createstl = 0          
+            else:
+                createstl = 1
+   
+        if createstl == 1:
+            createdata =  0     
+            tensor = RankTensors()
+            tensor.ThirdRankTensoreh(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename2,res,stl_dir,createstl,createdata)
+            del tensor
+         
+
+        print filename1
+        print filename2
+        
+        
+        
+        if valuearrayrotated:               
+            return render_to_response('thirdranktensor.html',{"XEC": XEC,
+                                                                                                        "YEC":YEC,
+                                                                                                        "ZEC": ZEC,
+                                                                                                        "LowResolutionFileName":filename1,
+                                                                                                        "MiddleResolutionFileName":filename2,
+                                                                                                        'colorscale':colorscale,
+                                                                                                        'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor,
+                                                                                                        "XEC2": XEC2,
+                                                                                                        "YEC2":YEC2,
+                                                                                                        "ZEC2": ZEC2,
+                                                                                                        'surfacecolorThirdRankTensorRotated':surfacecolorThirdRankTensorRotated,}, context_instance=RequestContext(request))
+        else:
+            return render_to_response('thirdranktensor.html',{"XEC": XEC,
+                                                                                                        "YEC":YEC,
+                                                                                                        "ZEC": ZEC,
+                                                                                                        "LowResolutionFileName":filename1,
+                                                                                                        "MiddleResolutionFileName":filename2,
+                                                                                                        'colorscale':colorscale,
+                                                                                                        'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor,}, context_instance=RequestContext(request))
+
+ 
+ 
 
 def viewcompliance(request):
     value11 = (request.GET.get('value11', ''))
@@ -2089,6 +2285,77 @@ def adddictionaryphase(request,pk):
         'error':error,
 
     }
+    
+    return HttpResponse(json.dumps(data), content_type="application/json")   
+
+@csrf_exempt 
+def rotatematrix(request,pk): 
+ 
+    
+    omeg =  request.POST.get('omeg', False)   
+    mh =  request.POST.get('mh', False)   
+    mk =  request.POST.get('mk', False)   
+    ml =  request.POST.get('ml', False)   
+    mat =  request.POST.get('mat', False)   
+    tensor =  request.POST.get('url', False)   
+    #url ='http://supercomputo.cimav.edu.mx:8080/mpod/finpiezo?'
+    
+
+    values2= "mh="+ mh + "&mk=" + mk +"&ml="+ ml
+    mat = "&mat=" +mat
+    ome="&omeg=" + omeg;
+    
+    urlcluster = "http://supercomputo.cimav.edu.mx:8080/mpod/" + tensor+"?" + values2 + ome + mat
+    print urlcluster
+    response = urllib2.urlopen(urlcluster)
+    
+     
+     
+    
+    resultado = json.loads(response.read())
+    
+    rotated = resultado['resultado']
+     
+     
+    #values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18;
+    rotatedparameters =""
+    valuearrayrotated =""
+    ampersand = "&"
+    html= """<div class='container-fluid'><table class='table table-striped table-condensed table-hover sm_table' >
+                <tbody>"""
+    
+    lastindex = len( rotated ) * len( rotated[0])     
+    counterindex = 0
+    for i,row in enumerate(rotated):
+        rowrotated=rotated[i]
+        print len(rowrotated)  
+        html=  html+ "<tr>" 
+        for j,row in enumerate(rowrotated):
+            #print rowrotated[j]
+            #valuearrayrotated.append("'" + str(float(rowrotated[j])) +"'")
+            
+            counterindex = counterindex + 1 
+            html=  html+  "<td>" + str(float(rowrotated[j]) )+ "</td>"
+            if  counterindex <  lastindex:
+                rotatedparameters =  rotatedparameters + "value"+str(i+1)+str(j+1)  +"="+ str(float(rowrotated[j]) ) + ampersand
+                valuearrayrotated = valuearrayrotated +"valuearrayrotated=" + str(float(rowrotated[j])) + ampersand 
+            else:
+                rotatedparameters =  rotatedparameters + "value"+str(i+1)+str(j+1)  +"="+ str(float(rowrotated[j]) ) 
+                valuearrayrotated = valuearrayrotated + "valuearrayrotated=" + str(float(rowrotated[j])) 
+                
+            
+            
+        html=  html+ "</tr>" 
+             
+    html=  html+  "</tbody></table></div>"      
+            
+ 
+        
+     
+    data = {'html': html,
+                 'rotatedparameters': rotatedparameters,
+                 'valuearrayrotated': valuearrayrotated
+                 }
     
     return HttpResponse(json.dumps(data), content_type="application/json")   
 
