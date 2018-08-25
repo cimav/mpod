@@ -120,6 +120,7 @@
 							    	    //filename = filename + "rotated"
 										var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
 									    urlGraph = "/dataitem/" + pathname[2] + "/stiffness/" + url;
+									   
 							    	   window.open(urlGraph,"",optionscs);
 							    	}
 							}
@@ -239,7 +240,7 @@
                                         else if (tensor == 'compliance')
                                         	$( "#" + spanid ).append('<button class="btn btn-warning" onclick="compliance(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotatedid+'">Graph</button>' );
                                         else if (tensor == 'stiffness')
-                                        	$( "#" + spanid ).append('<button class="btn btn-warning" onclick="stiffness(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotatedid+'">Graph</button>' );
+                                        	 $( "#" + spanid ).append('<button class="btn btn-warning" onclick="stiffness(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotatedid+'">Graph</button>' );
                                         else if (tensor == 'fourthranktensor')
                                         	$( "#" + spanid ).append('<button class="btn btn-warning" onclick="fourthranktensor(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotatedid+'">Graph</button>' );
                                         else if (tensor == 'magnetic')
@@ -729,7 +730,8 @@
 									    spanid='span' + file_name.replace(/\s/g,'');
 									    spangraphid='spangraph' + file_name.replace(/\s/g,'');
 									    tensor = 'compliance'
-									    document.write('<span  id="'+ spanid + '" style="display: none;" ><button class="btn btn-warning"  onclick="callajax(this.id,\'' + file_name.replace(/\s/g,'') + '\',\''  +sendatacounter +'\',\'' +spangraphid +'\',\'' + type2filename + '\',\'' + values + '\',\'' + tensor + '\')" id="'+  file_name.replace(/\s/g,'')+ '">Apply Texture</button></span>');
+									    file_namerotated = file_name  +"rotated" 
+									    document.write('<span  id="'+ spanid + '" style="display: none;" ><button class="btn btn-warning"  onclick="callajax(this.id,\'' + file_name + '\',\''  +sendatacounter +'\',\'' +spangraphid +'\',\'' + type2filename + '\',\'' + values + '\',\'' + tensor + '\')" id="'+  file_name+ '">Apply Texture</button></span>');
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
@@ -741,7 +743,7 @@
 																'ml':1,
 																'omeg':0,
 																'mat':  val1+","+val2+","+val3+","+val4+","+val5+","+val6+","+val7+","+val8+","+val9+","+val10+","+val11+","+val12+","+val13+","+val14+","+val15+","+val16+","+val17+","+val18+","+val19+","+val20+","+val21+","+val22+","+val23+","+val24+","+val25+","+val26+","+val27+","+val28+","+val29+","+val30+","+val31+","+val32+","+val33+","+val34+","+val35+","+val36,
-																'url':'compliance'  //parameter for urlcluster
+																'url':'selasfib'  //parameter for urlcluster
 																}
 										
 										 
@@ -776,7 +778,9 @@
 									    spanid='span' + file_name.replace(/\s/g,'');
 									    spangraphid='spangraph' + file_name.replace(/\s/g,'');
 									    tensor = 'stiffness'
-									    document.write('<span  id="'+ spanid + '" style="display: none;" ><button class="btn btn-warning"  onclick="callajax(this.id,\'' + file_name.replace(/\s/g,'') + '\',\''  +sendatacounter +'\',\'' +spangraphid +'\',\'' + type3filename + '\',\'' + values + '\',\'' + tensor + '\')" id="'+  file_name.replace(/\s/g,'')+ '">Apply Texture</button></span>');
+									    file_namerotated = file_name  +"rotated" 
+							
+									    document.write('<span  id="'+ spanid + '" style="display: none;" ><button class="btn btn-warning"  onclick="callajax(this.id,\'' + file_name + '\',\''  +sendatacounter +'\',\'' +spangraphid +'\',\'' + type3filename + '\',\'' + values + '\',\'' + tensor + '\')" id="'+  file_name+ '">Apply Texture</button></span>');
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
@@ -787,7 +791,7 @@
 																'ml':1,
 																'omeg':0,
 																'mat':  val1+","+val2+","+val3+","+val4+","+val5+","+val6+","+val7+","+val8+","+val9+","+val10+","+val11+","+val12+","+val13+","+val14+","+val15+","+val16+","+val17+","+val18+","+val19+","+val20+","+val21+","+val22+","+val23+","+val24+","+val25+","+val26+","+val27+","+val28+","+val29+","+val30+","+val31+","+val32+","+val33+","+val34+","+val35+","+val36,
-																'url':'stiffness'  //parameter for urlcluster
+																'url':'celasfib'  //parameter for urlcluster
 																}
 										
 										 
