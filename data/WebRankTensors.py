@@ -16,6 +16,9 @@ from smtpd import parseargs
 from stlwrite import *
 import os.path
 import math
+import time
+import threading
+
 
  
 class RankTensors():
@@ -35,9 +38,28 @@ class RankTensors():
       self.surfacecolorThirdRankTensor=''
       self.surfacecolorThirdRankTensorRotated=''
       self.surfacecolorFourthRankTensor=''
+      self.lock = threading.Lock()    
        
    def dist_origin(self,x, y, z):
-         return math.sqrt((1.0 * x)**2 + (1.0 * y)**2 + (1.0 * z)**2)
+        return math.sqrt((1.0 * x)**2 + (1.0 * y)**2 + (1.0 * z)**2)
+     
+     
+   def stlCreator(self,createstl,filename,stldir,XEC,YEC,ZEC):
+        start = int(time.time())
+        self.lock.acquire()  
+        
+        scale = 100
+        if createstl == 1: 
+            fl= filename 
+            #stl_dir = ".\\media\\stlfiles\\"      
+            filepath=os.path.join(stldir, fl)
+            stlw = STLUtil()
+            tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
+            stlw
+          
+        self.lock.release()  
+        end = str(int(time.time()) - start)
+        print filename + " created in "+ end + " seconds"
                                            
    def SecondRankTensor(self,d11, d12, d13, d21, d22, d23, d31, d32, d33, Color,filename,res,stl_dir,createstl,createdata):
         filename= filename
@@ -65,14 +87,17 @@ class RankTensors():
         YEC=E*y
         ZEC=E*z
     
-        scale = 100
+        """scale = 100
         if createstl == 1: 
               fl= filename 
               #stl_dir = ".\\media\\stlfiles\\"      
               filepath=os.path.join(stldir, fl)
               stlw = STLUtil()
               tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-              del stlw
+              del stlw"""
+              
+        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+        t.start()
           
         if createdata == 1:
               b=0
@@ -235,14 +260,17 @@ class RankTensors():
         YEC=E*y
         ZEC=E*z
     
-        scale = 100
+        """scale = 100
         if createstl == 1: 
           fl= filename 
           #stl_dir = ".\\media\\stlfiles\\"      
           filepath=os.path.join(stldir, fl)
           stlw = STLUtil()
           tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-          del stlw
+          del stlw"""
+          
+        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+        t.start()
       
         if createdata == 1:
            b=0
@@ -375,14 +403,17 @@ class RankTensors():
         YEC=E*y
         ZEC=E*z
     
-        scale = 100
+        """scale = 100
         if createstl == 1: 
           fl= filename 
           #stl_dir = ".\\media\\stlfiles\\"      
           filepath=os.path.join(stldir, fl)
           stlw = STLUtil()
           tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-          del stlw
+          del stlw"""
+          
+        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+        t.start()
       
         if createdata == 1:
            b=0
@@ -535,7 +566,7 @@ class RankTensors():
         YEC=E*y
         ZEC=E*z
     
-        scale = 100
+        """scale = 100
         if createstl == 1: 
           fl= filename 
           #stl_dir = ".\\media\\stlfiles\\"      
@@ -543,6 +574,9 @@ class RankTensors():
           stlw = STLUtil()
           tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
           del stlw
+          """
+        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+        t.start()
       
         if createdata == 1:
            b=0
@@ -694,14 +728,16 @@ class RankTensors():
         YEC=E*y
         ZEC=E*z
     
-        scale = 100
+        """scale = 100
         if createstl == 1: 
           fl= filename 
           #stl_dir = ".\\media\\stlfiles\\"      
           filepath=os.path.join(stldir, fl)
           stlw = STLUtil()
           tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-          del stlw
+          del stlw"""
+        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+        t.start()
       
         if createdata == 1:
            b=0
@@ -848,14 +884,17 @@ class RankTensors():
         
         
     
-        scale = 100
+        """scale = 100
         if createstl == 1: 
               fl= filename 
               #stl_dir = ".\\media\\stlfiles\\"      
               filepath=os.path.join(stldir, fl)
               stlw = STLUtil()
               tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-              del stlw
+              del stlw"""
+              
+        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+        t.start()
               
         if createdata == 1:  
             b=0

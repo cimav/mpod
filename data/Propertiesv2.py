@@ -210,7 +210,10 @@ class Propertiesv2(object):
                             
                 if not self.objPuntualgroupNamesSelected:
                     self.puntualgroupselected_name = objPuntualGroupGroups[0].catalogpointgroup.name
-                    self.objPuntualgroupNamesSelected  = puntualgroupnamesQuerySet[0]
+                    for i,pgn in enumerate(puntualgroupnamesQuerySet):
+                        if self.puntualgroupselected_name  in puntualgroupnamesParse(puntualgroupnamesQuerySet[i].name):
+                            self.objPuntualgroupNamesSelected  = puntualgroupnamesQuerySet[i]
+                     
                             
                             
                         
@@ -253,16 +256,7 @@ class Propertiesv2(object):
             print "Message({0}): {1}".format(99, error.message)   
             self.message= "Message({0}): {1}".format(99, error.message)  
                         
-                        
-        """if pgn != '':
-            self.puntualgroupselected_name =pgn 
-        else:
-            self.objCatalogPointGroupSelected = CatalogPointGroup.objects.get(id=45)
 
-        if aname != '':
-            self.axisselected_name =aname
-        else:
-            self.objAxisSelected = CatalogAxis.objects.get(id=4)"""
             
         
         if self.catalogproperty_name == 'e':
@@ -2160,7 +2154,7 @@ class Propertiesv2(object):
                                                                      /*
                                                                      $('#""" +self.type+ """66').focusout(function ()
                                                                     {*/
-                                                                  $('#""" +self.coefficientsparts[6]+ """').focusout(function (){
+                                                                  $('#""" +self.coefficientsparts[5]+ """').focusout(function (){
                                                                         if(Number($(this).val()).toPrecision() != 'NaN'){
                                                                             inputpop($(this));
                                                                         }else
@@ -2178,7 +2172,7 @@ class Propertiesv2(object):
                                                                     
                                                                      /*$('#""" +self.type+ """66').keyup(function ()
                                                                     {*/
-                                                                  $('#""" +self.coefficientsparts[6]+ """').keyup(function (){
+                                                                  $('#""" +self.coefficientsparts[5]+ """').keyup(function (){
                                                                         inputpop($(this));
                                                                     });
                                                                      
@@ -3170,12 +3164,12 @@ class Propertiesv2(object):
                         if self.type=="s" :                                              
                             self.jquery= self.jquery + """
                                                                            
-                                                                            v =2* ($(this).val()-$('#""" +self.coefficientspartssplit[0]+ """12"""+self.coefficientspartssplit[1]+"""').val());
+                                                                            v =2* ($(this).val()-$('#""" +self.coefficientsparts[1]+ """').val());
                                                                             """
                         if self.type=="c" : 
                             self.jquery= self.jquery + """
                                                                             
-                                                                            v =($(this).val()-$('#""" +self.coefficientspartssplit[0]+ """12"""+self.coefficientspartssplit[1]+"""').val()) / 2; 
+                                                                            v =($(this).val()-$('#""" +self.coefficientsparts[1]+ """').val()) / 2; 
                                                                             
                                                                             """
                                                                                                                        
@@ -3479,15 +3473,23 @@ class Propertiesv2(object):
                                                                         $('#""" +self.coefficientsparts[2]+ """').keyup(function (){
                                                                             if(Number($(this).val()).toPrecision() != 'NaN') {
                                                                             inputpop($(this));
-                                                                            $('#""" +self.type+ """31').val($(this).val() ) ;
+                                                                            /*$('#""" +self.type+ """31').val($(this).val() ) ;
                                                                             $('#""" +self.type+ """32').val($(this).val() ) ;
-                                                                            $('#""" +self.type+ """23').val($(this).val() ) ;
+                                                                            $('#""" +self.type+ """23').val($(this).val() ) ;*/
+                                                                            
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val($(this).val() ) ;
+                                                                            $('#""" +self.coefficientspartssplit[0]+ """23"""+self.coefficientspartssplit[1]+"""').val($(this).val() ) ;
                                                                          
                                                                             }else
                                                                             {
-                                                                               $('#""" +self.type+ """31').val('') ;
+                                                                               /*$('#""" +self.type+ """31').val('') ;
                                                                                $('#""" +self.type+ """32').val('') ;
-                                                                               $('#""" +self.type+ """23').val('') ;
+                                                                               $('#""" +self.type+ """23').val('') ;*/
+                                                                               
+                                                                               $('#""" +self.coefficientspartssplit[0]+ """31"""+self.coefficientspartssplit[1]+"""').val('') ;
+                                                                                $('#""" +self.coefficientspartssplit[0]+ """32"""+self.coefficientspartssplit[1]+"""').val('') ;
+                                                                                $('#""" +self.coefficientspartssplit[0]+ """23"""+self.coefficientspartssplit[1]+"""').val('' ) ;
                                                                                inputpopclear($(this));
                                                                             }
                                                                          });

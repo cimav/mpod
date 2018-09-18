@@ -14,8 +14,9 @@ import sys
 from stlwrite import *
 import os.path
 import math
+import threading
 
-
+import time
 
  
 
@@ -44,9 +45,29 @@ class ComplianceT4():
       self.colorscale = ""
       self.surfacecolorcompliance=''
       self.surfacecolorYoungModulus=''
+      self.lock = threading.Lock()    
       
    def dist_origin(self,x, y, z):
          return math.sqrt((1.0 * x)**2 + (1.0 * y)**2 + (1.0 * z)**2)
+     
+     
+   def stlCreator(self,createstl,filename,stldir,XEC,YEC,ZEC):
+        start = int(time.time())
+        self.lock.acquire()  
+        
+        scale = 100
+        if createstl == 1: 
+            fl= filename 
+            #stl_dir = ".\\media\\stlfiles\\"      
+            filepath=os.path.join(stldir, fl)
+            stlw = STLUtil()
+            tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
+            stlw
+          
+        self.lock.release()  
+        end = str(int(time.time()) - start)
+        print filename + " created in "+ end + " seconds"
+    
       
    def Compliance(self,s11, s12, s13, s14, s15, s16, s21, s22, s23, s24, s25, s26, s31, s32, s33, s34, s35, s36, s41, s42, s43, s44, s45, s46, s51, s52, s53, s54, s55, s56, s61, s62, s63, s64, s65, s66,Color,filename,res,stl_dir,createstl,createdata):
       self.matrixS=np.matrix([[s11,s12,s13,s14,s15,s16],[s21,s22,s23,s24,s25,s26],[s31,s32,s33,s34,s35,s36],[s41,s42,s43,s44,s45,s46],[s51,s52,s53,s54,s55,s56],[s61,s62,s63,s64,s65,s66]])
@@ -89,14 +110,17 @@ class ComplianceT4():
 
 
       
-      scale = 100
+      t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+      t.start()
+    
+      """scale = 100
       if createstl == 1: 
           fl= filename 
           #stl_dir = ".\\media\\stlfiles\\"      
           filepath=os.path.join(stldir, fl)
           stlw = STLUtil()
           tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-          del stlw
+          del stlw"""
       
       
       if createdata == 1:
@@ -218,8 +242,7 @@ class ComplianceT4():
     
 
    def YoungModulus(self,s11, s12, s13, s14, s15, s16, s21, s22, s23, s24, s25, s26, s31, s32, s33, s34, s35, s36, s41, s42, s43, s44, s45, s46, s51, s52, s53, s54, s55, s56, s61, s62, s63, s64, s65, s66,Color,filename,res,stl_dir,createstl,createdata):   
-      #self.matrixS=np.matrix([[s11,s12,s13,s14,s15,s16],[s21,s22,s23,s24,s25,s26],[s31,s32,s33,s34,s35,s36],[s41,s42,s43,s44,s45,s46],[s51,s52,s53,s54,s55,s56],[s61,s62,s63,s64,s65,s66]])
-
+ 
       filename= filename
       #self.Res = res
       stldir=stl_dir
@@ -334,6 +357,17 @@ class ComplianceT4():
                   self.stringValsOfZEC2 =  self.stringValsOfZEC2 + str(val) + ','  
 
 
+      """
+      scale = 100
+      if createstl == 1: 
+          fl= filename 
+          #stl_dir = ".\\media\\stlfiles\\"      
+          filepath=os.path.join(stldir, fl)
+          stlw = STLUtil()
+          tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
+          del stlw"""
+      t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+      t.start()
 
       if createdata == 1:
           lx=len(ZEC)
@@ -383,10 +417,29 @@ class StiffnessT4():
     self.colorscale = ""     
     self.surfacecolorstiffness=''
     self.surfacecolorYoungModulus=''
-      
+    self.lock = threading.Lock()    
 
    def dist_origin(self,x, y, z):
          return math.sqrt((1.0 * x)**2 + (1.0 * y)**2 + (1.0 * z)**2)
+     
+     
+   def stlCreator(self,createstl,filename,stldir,XEC,YEC,ZEC):
+        start = int(time.time())
+        self.lock.acquire()  
+        
+        scale = 100
+        if createstl == 1: 
+          fl= filename 
+          #stl_dir = ".\\media\\stlfiles\\"      
+          filepath=os.path.join(stldir, fl)
+          stlw = STLUtil()
+          tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
+          stlw
+          
+        self.lock.release()  
+        end = str(int(time.time()) - start)
+        print filename + " created in "+ end + " seconds"
+        
        
    def Stiffness(self,c11, c12, c13, c14, c15, c16, c21, c22, c23, c24, c25, c26, c31, c32, c33, c34, c35, c36, c41, c42, c43, c44, c45, c46, c51, c52, c53, c54, c55, c56, c61, c62, c63, c64, c65, c66,Color,filename,res,stl_dir,createstl,createdata):  
 
@@ -449,14 +502,17 @@ class StiffnessT4():
       ZEC=S*z
             
             
-      scale = 100
+      """scale = 100
       if createstl == 1: 
               fl= filename 
               #stl_dir = ".\\media\\stlfiles\\"      
               filepath=os.path.join(stldir, fl)
               stlw = STLUtil()
               tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-              del stlw
+              del stlw"""
+              
+      t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+      t.start()
           
       if createdata == 1:
               b=0
@@ -621,7 +677,7 @@ class StiffnessT4():
       
       #stlw = STLUtil()
       #tri = stlw.stlwrite("ejemplo7StiffnessYoung.stl",XEC,YEC,ZEC,scale)
-          
+     
      
       b=0
       for itemX in XEC:                      
@@ -693,7 +749,24 @@ class StiffnessT4():
                   self.stringValsOfZEC2 =   self.stringValsOfZEC2 + str(val) +'],'       
             else:    
                   self.stringValsOfZEC2 =  self.stringValsOfZEC2 + str(val) + ','                    
-        
+       
+       
+       
+       
+       
+      """scale = 100
+      if createstl == 1: 
+          fl= filename 
+          #stl_dir = ".\\media\\stlfiles\\"      
+          filepath=os.path.join(stldir, fl)
+          stlw = STLUtil()
+          tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
+          del stlw"""
+          
+          
+      t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+      t.start()
+           
       if createdata == 1:
           lx=len(ZEC)
           ly=len(ZEC[0])
@@ -718,5 +791,8 @@ class StiffnessT4():
           sc= sc + ']'     
          
           self.surfacecolorYoungModulus =sc
+          
+
+   
 
         

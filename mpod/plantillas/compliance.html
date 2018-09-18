@@ -22,12 +22,29 @@
     <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{LowResolutionFileName}}';">Download 3D Low Resolution File</button>
      </br>
     <button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{MiddleResolutionFileName}}';">Download 3D Middle Resolution File</button></td> 
+    
+    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{LowResolutionFilenameYoungModulus}}';">Download 3D Low Resolution File</button>
+     </br>
+   </td> 
     </tr>
 
     </table>
 
 
 
+	  {% if poly == '1' %}  
+		<script>
+		    title1= '4th Rank Tensor - Compliance Poly-crystal'
+			title2=  'Young Modulus, Poly-crystal';
+		</script>
+		{% else %}
+		
+	<script>
+	    title1= '4th Rank Tensor - Compliance'
+	    title2=  'Young Modulus, Single-crystal';
+	      
+	</script>
+	{% endif %}    
     
   <script>
      
@@ -50,7 +67,7 @@
             ];
   
             var layout = {
-                    title: '4th Rank Tensor - Compliance',
+                    title: title1,
                     autosize: false,
                     width: 500,
                     height: 500,
@@ -116,7 +133,7 @@
             
             
             var layout1 = {
-                    title: 'Young Modulus, Single-crystal',
+                    title:title2,
                     autosize: false,
                     width: 500,
                     height: 500,

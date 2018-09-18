@@ -725,7 +725,7 @@ def viewthirdranktensoreh(request):
         surfacecolorThirdRankTensor=tensor.surfacecolorThirdRankTensor
         
         if valuearrayrotated:
-            tensor.ThirdRankTensorRotateddg(valuearrayrotated,color,filename1,res,stl_dir,createstl,createdata)
+            tensor.ThirdRankTensorRotatedeh(valuearrayrotated,color,filename1,res,stl_dir,createstl,createdata)
             XEC2=tensor.stringValsOfXEC2
             YEC2 = tensor.stringValsOfYEC2
             ZEC2= tensor.stringValsOfZEC2
@@ -749,11 +749,7 @@ def viewthirdranktensoreh(request):
             tensor = RankTensors()
             tensor.ThirdRankTensoreh(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename2,res,stl_dir,createstl,createdata)
             del tensor
-         
-
-        print filename1
-        print filename2
-        
+ 
         
         
         if valuearrayrotated:               
@@ -781,237 +777,266 @@ def viewthirdranktensoreh(request):
  
 
 def viewcompliance(request):
-    value11 = (request.GET.get('value11', ''))
-    value12 = (request.GET.get('value12', ''))
-    value13 = (request.GET.get('value13', ''))
-    value14 = (request.GET.get('value14', ''))
-    value15 = (request.GET.get('value15', ''))
-    value16 = (request.GET.get('value16', ''))
-    value21 = (request.GET.get('value21', ''))
-    value22 = (request.GET.get('value22', ''))
-    value23 = (request.GET.get('value23', ''))
-    value24 = (request.GET.get('value24', ''))
-    value25 = (request.GET.get('value25', ''))
-    value26 = (request.GET.get('value26', ''))
-    value31 = (request.GET.get('value31', ''))
-    value32 = (request.GET.get('value32', ''))
-    value33 = (request.GET.get('value33', ''))
-    value34 = (request.GET.get('value34', ''))
-    value35 = (request.GET.get('value35', ''))
-    value36 = (request.GET.get('value36', ''))
-    value41 = (request.GET.get('value41', ''))
-    value42 = (request.GET.get('value42', ''))
-    value43 = (request.GET.get('value43', ''))
-    value44 = (request.GET.get('value44', ''))
-    value45 = (request.GET.get('value45', ''))
-    value46 = (request.GET.get('value46', ''))
-    value51 = (request.GET.get('value51', ''))
-    value52 = (request.GET.get('value52', ''))
-    value53 = (request.GET.get('value53', ''))
-    value54 = (request.GET.get('value54', ''))
-    value55 = (request.GET.get('value55', ''))
-    value56 = (request.GET.get('value56', ''))
-    value61 = (request.GET.get('value61', ''))
-    value62 = (request.GET.get('value62', ''))
-    value63 = (request.GET.get('value63', ''))
-    value64 = (request.GET.get('value64', ''))
-    value65 = (request.GET.get('value65', ''))
-    value66 = (request.GET.get('value66', ''))
-    color = (request.GET.get('color', ''))
-    filename = (request.GET.get('filename', ''))
-    if(value11 and value12 and value13 and value14 and value15 and value16 and value21 and value22 and value23 and value24 and value25 and value26 and value31 and value32 and value33 and value34 and value35 and value36 and value41 and value42 and value43 and value44 and value45 and value46 and value51 and value52 and value53 and value54 and value55 and value56 and value61 and value62 and value63 and value64 and value65 and value66 and color):
-        val11 = float(value11)
-        val12 = float(value12)
-        val13 = float(value13)
-        val14 = float(value14)
-        val15 = float(value15)
-        val16 = float(value16)
-        val21 = float(value21)
-        val22 = float(value22)
-        val23 = float(value23)
-        val24 = float(value24)
-        val25 = float(value25)
-        val26 = float(value26)
-        val31 = float(value31)
-        val32 = float(value32)
-        val33 = float(value33)
-        val34 = float(value34)
-        val35 = float(value35)
-        val36 = float(value36)
-        val41 = float(value41)
-        val42 = float(value42)
-        val43 = float(value43)
-        val44 = float(value44)
-        val45 = float(value45)
-        val46 = float(value46)
-        val51 = float(value51)
-        val52 = float(value52)
-        val53 = float(value53)
-        val54 = float(value54)
-        val55 = float(value55)
-        val56 = float(value56)
-        val61 = float(value61)
-        val62 = float(value62)
-        val63 = float(value63)
-        val64 = float(value64)
-        val65 = float(value65)
-        val66 = float(value66)
-        color = int(color)
-        filename = (request.GET.get('filename', ''))
+
+    valuearrayrotated =request.GET.getlist("valuearrayrotated")
+    poly ="0"
+    if not valuearrayrotated:
+    
+        val11 = float(request.GET.get('value11', ''))
+        val12 = float(request.GET.get('value12', ''))
+        val13 = float(request.GET.get('value13', ''))
+        val14 = float(request.GET.get('value14', ''))
+        val15 = float(request.GET.get('value15', ''))
+        val16 = float(request.GET.get('value16', ''))
+        val21 = float(request.GET.get('value21', ''))
+        val22 = float(request.GET.get('value22', ''))
+        val23 = float(request.GET.get('value23', ''))
+        val24 = float(request.GET.get('value24', ''))
+        val25 = float(request.GET.get('value25', ''))
+        val26 = float(request.GET.get('value26', ''))
+        val31 = float(request.GET.get('value31', ''))
+        val32 = float(request.GET.get('value32', ''))
+        val33 = float(request.GET.get('value33', ''))
+        val34 = float(request.GET.get('value34', ''))
+        val35 = float(request.GET.get('value35', ''))
+        val36 = float(request.GET.get('value36', ''))
+        val41 = float(request.GET.get('value41', ''))
+        val42 = float(request.GET.get('value42', ''))
+        val43 = float(request.GET.get('value43', ''))
+        val44 = float(request.GET.get('value44', ''))
+        val45 = float(request.GET.get('value45', ''))
+        val46 = float(request.GET.get('value46', ''))
+        val51 = float(request.GET.get('value51', ''))
+        val52 = float(request.GET.get('value52', ''))
+        val53 = float(request.GET.get('value53', ''))
+        val54 = float(request.GET.get('value54', ''))
+        val55 = float(request.GET.get('value55', ''))
+        val56 = float(request.GET.get('value56', ''))
+        val61 = float(request.GET.get('value61', ''))
+        val62 = float(request.GET.get('value62', ''))
+        val63 = float(request.GET.get('value63', ''))
+        val64 = float(request.GET.get('value64', ''))
+        val65 = float(request.GET.get('value65', ''))
+        val66 = float(request.GET.get('value66', ''))
+        filename = (request.GET.get('filename', ''))    
         filename = re.sub('[\s+]', '', filename)   
-        
-        
-        if color == 0:
-            colorscale='Jet';
-        elif color == 1:
-            colorscale='Hot';
-        elif color == 2:
-            colorscale='Cool'
-        elif color == 3:
-            colorscale='Greys';
  
-        pathslist=Path.objects.all()      
-        pathexist = 0
-        stl_dir=''
-        for stldir in pathslist:
-            path=Path() 
-            path = stldir
-            if os.path.isdir(path.stl_dir): 
-                pathexist = 1
-                stl_dir= path.stl_dir
-                break
-             
-        #stl_dir=".\\media\\stlfiles\\"      
-        filename1 = filename + "LowResolution" + ".stl"
-        print filename1
-        filepath=os.path.join(stl_dir, filename1)
-        res=1;
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-       
-        createdata =  1
-        compliance = ComplianceT4()
-        compliance.Compliance(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename1,res,stl_dir,createstl,createdata) 
-        XEC=compliance.stringValsOfXEC
-        YEC = compliance.stringValsOfYEC
-        ZEC= compliance.stringValsOfZEC
+    else:
+        val11 = float(valuearrayrotated[0])
+        val12 = float(valuearrayrotated[1])
+        val13 = float(valuearrayrotated[2])
+        val14 = float(valuearrayrotated[3])
+        val15 = float(valuearrayrotated[4])
+        val16 = float(valuearrayrotated[5])
+        val21 = float(valuearrayrotated[6])
+        val22 = float(valuearrayrotated[7])
+        val23 = float(valuearrayrotated[8])
+        val24 = float(valuearrayrotated[9])
+        val25 = float(valuearrayrotated[10])
+        val26 = float(valuearrayrotated[11])
+        val31 = float(valuearrayrotated[12])
+        val32 = float(valuearrayrotated[13])
+        val33 = float(valuearrayrotated[14])
+        val34 = float(valuearrayrotated[15])
+        val35 = float(valuearrayrotated[16])
+        val36 = float(valuearrayrotated[17])
+        val41 = float(valuearrayrotated[18])
+        val42 = float(valuearrayrotated[19])
+        val43 = float(valuearrayrotated[20])
+        val44 = float(valuearrayrotated[21])
+        val45 = float(valuearrayrotated[22])
+        val46 = float(valuearrayrotated[23])
+        val51 = float(valuearrayrotated[24])
+        val52 = float(valuearrayrotated[25])
+        val53 = float(valuearrayrotated[26])
+        val54 = float(valuearrayrotated[27])
+        val55 = float(valuearrayrotated[28])
+        val56 = float(valuearrayrotated[29])
+        val61 = float(valuearrayrotated[30])
+        val62 = float(valuearrayrotated[31])
+        val63 = float(valuearrayrotated[32])
+        val64 = float(valuearrayrotated[33])
+        val65 = float(valuearrayrotated[34])
+        val66 = float(valuearrayrotated[35])
+        filename = (request.GET.get('filename', ''))
+        filename = re.sub('[\s+]', '', filename) + "policrystal"
+        poly = "1"
         
-        surfacecolorcompliance=   compliance.surfacecolorcompliance
-        #colorscale=compliance.colorscale
+        
+    color = int(request.GET.get('color', ''))
 
-       
-        compliance.YoungModulus(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,"",res,stl_dir,createstl,createdata)
-        youngModulusXEC=compliance.stringValsOfXEC2
-        youngModulusYEC = compliance.stringValsOfYEC2
-        youngModulusZEC= compliance.stringValsOfZEC2    
-        surfacecolorYoungModulus=   compliance.surfacecolorYoungModulus 
+        
+        
+    if color == 0:
+        colorscale='Jet';
+    elif color == 1:
+        colorscale='Hot';
+    elif color == 2:
+        colorscale='Cool'
+    elif color == 3:
+        colorscale='Greys';
+
+    pathslist=Path.objects.all()      
+    pathexist = 0
+    stl_dir=''
+    for stldir in pathslist:
+        path=Path() 
+        path = stldir
+        if os.path.isdir(path.stl_dir): 
+            pathexist = 1
+            stl_dir= path.stl_dir
+            break
+        
+    
+    filename1 = filename + "LowResolution" + ".stl"
+    print filename1
+    filepath=os.path.join(stl_dir, filename1)
+    res=1;
+    createstl = 0;
+    if pathexist == 1:
+        if os.path.isfile(filepath):
+            createstl = 0          
+        else:
+            createstl = 1
+  
+    createdata =  1
+    compliance = ComplianceT4()
+    compliance.Compliance(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename1,res,stl_dir,createstl,createdata) 
+    XEC=compliance.stringValsOfXEC
+    YEC = compliance.stringValsOfYEC
+    ZEC= compliance.stringValsOfZEC
+   
+    surfacecolorcompliance=   compliance.surfacecolorcompliance
+    #colorscale=compliance.colorscale
+
+    filenameYoungModulus = filename + "YoungModulusLowResolution" + ".stl"
+    print filenameYoungModulus
+    filepath=os.path.join(stl_dir, filenameYoungModulus)
+    res=1;
+    createstl = 0;
+    if pathexist == 1:
+        if os.path.isfile(filepath):
+            createstl = 0          
+        else:
+            createstl = 1
+  
+    compliance.YoungModulus(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filenameYoungModulus,res,stl_dir,createstl,createdata)
+    youngModulusXEC=compliance.stringValsOfXEC2
+    youngModulusYEC = compliance.stringValsOfYEC2
+    youngModulusZEC= compliance.stringValsOfZEC2    
+    surfacecolorYoungModulus=   compliance.surfacecolorYoungModulus 
+    del compliance
+
+  
+    filename2 = filename + "MidleResolution" + ".stl"
+    print filename2
+    res=2;
+    filepath=os.path.join(stl_dir, filename2)       
+    createstl = 0;
+    if pathexist == 1:
+        if os.path.isfile(filepath):
+            createstl = 0          
+        else:
+            createstl = 1
+  
+    if createstl == 1:
+        createdata =  0     
+        compliance = ComplianceT4()
+        compliance.Compliance(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename2,res,stl_dir,createstl,createdata)        
         del compliance
-     
-       
-        filename2 = filename + "MidleResolution" + ".stl"
-        print filename2
-        res=2;
-        filepath=os.path.join(stl_dir, filename2)       
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-       
-        if createstl == 1:
-            createdata =  0     
-            compliance = ComplianceT4()
-            compliance.Compliance(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename2,res,stl_dir,createstl,createdata)        
-            del compliance
 
 
-                       
-        return render_to_response('compliance.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"youngModulusXEC": youngModulusXEC,"youngModulusYEC": youngModulusYEC,"youngModulusZEC": youngModulusZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,"surfacecolorcompliance":surfacecolorcompliance,"surfacecolorYoungModulus":surfacecolorYoungModulus,"colorscale":colorscale}, context_instance=RequestContext(request))
+                  
+    return render_to_response('compliance.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"youngModulusXEC": youngModulusXEC,"youngModulusYEC": youngModulusYEC,"youngModulusZEC": youngModulusZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,"LowResolutionFilenameYoungModulus":filenameYoungModulus,"surfacecolorcompliance":surfacecolorcompliance,"surfacecolorYoungModulus":surfacecolorYoungModulus,"colorscale":colorscale,"poly":poly}, context_instance=RequestContext(request))
         #return render_to_response('compliance.html', context_instance=RequestContext(request))
 
 def viewstiffness(request):
-    value11 = (request.GET.get('value11', ''))
-    value12 = (request.GET.get('value12', ''))
-    value13 = (request.GET.get('value13', ''))
-    value14 = (request.GET.get('value14', ''))
-    value15 = (request.GET.get('value15', ''))
-    value16 = (request.GET.get('value16', ''))
-    value21 = (request.GET.get('value21', ''))
-    value22 = (request.GET.get('value22', ''))
-    value23 = (request.GET.get('value23', ''))
-    value24 = (request.GET.get('value24', ''))
-    value25 = (request.GET.get('value25', ''))
-    value26 = (request.GET.get('value26', ''))
-    value31 = (request.GET.get('value31', ''))
-    value32 = (request.GET.get('value32', ''))
-    value33 = (request.GET.get('value33', ''))
-    value34 = (request.GET.get('value34', ''))
-    value35 = (request.GET.get('value35', ''))
-    value36 = (request.GET.get('value36', ''))
-    value41 = (request.GET.get('value41', ''))
-    value42 = (request.GET.get('value42', ''))
-    value43 = (request.GET.get('value43', ''))
-    value44 = (request.GET.get('value44', ''))
-    value45 = (request.GET.get('value45', ''))
-    value46 = (request.GET.get('value46', ''))
-    value51 = (request.GET.get('value51', ''))
-    value52 = (request.GET.get('value52', ''))
-    value53 = (request.GET.get('value53', ''))
-    value54 = (request.GET.get('value54', ''))
-    value55 = (request.GET.get('value55', ''))
-    value56 = (request.GET.get('value56', ''))
-    value61 = (request.GET.get('value61', ''))
-    value62 = (request.GET.get('value62', ''))
-    value63 = (request.GET.get('value63', ''))
-    value64 = (request.GET.get('value64', ''))
-    value65 = (request.GET.get('value65', ''))
-    value66 = (request.GET.get('value66', ''))
-    color = (request.GET.get('color', ''))
-    filename = (request.GET.get('filename', ''))        
-    val11 = float(value11)
-    val12 = float(value12)
-    val13 = float(value13)
-    val14 = float(value14)
-    val15 = float(value15)
-    val16 = float(value16)
-    val21 = float(value21)
-    val22 = float(value22)
-    val23 = float(value23)
-    val24 = float(value24)
-    val25 = float(value25)
-    val26 = float(value26)
-    val31 = float(value31)
-    val32 = float(value32)
-    val33 = float(value33)
-    val34 = float(value34)
-    val35 = float(value35)
-    val36 = float(value36)
-    val41 = float(value41)
-    val42 = float(value42)
-    val43 = float(value43)
-    val44 = float(value44)
-    val45 = float(value45)
-    val46 = float(value46)
-    val51 = float(value51)
-    val52 = float(value52)
-    val53 = float(value53)
-    val54 = float(value54)
-    val55 = float(value55)
-    val56 = float(value56)
-    val61 = float(value61)
-    val62 = float(value62)
-    val63 = float(value63)
-    val64 = float(value64)
-    val65 = float(value65)
-    val66 = float(value66)
-    color = int(color)
-    filename = (request.GET.get('filename', ''))
-    filename = re.sub('[\s+]', '', filename)
+    valuearrayrotated =request.GET.getlist("valuearrayrotated")
+    poly = "0"
+    if not valuearrayrotated:
+        val11 = float(request.GET.get('value11', ''))
+        val12 = float(request.GET.get('value12', ''))
+        val13 = float(request.GET.get('value13', ''))
+        val14 = float(request.GET.get('value14', ''))
+        val15 = float(request.GET.get('value15', ''))
+        val16 = float(request.GET.get('value16', ''))
+        val21 = float(request.GET.get('value21', ''))
+        val22 = float(request.GET.get('value22', ''))
+        val23 = float(request.GET.get('value23', ''))
+        val24 = float(request.GET.get('value24', ''))
+        val25 = float(request.GET.get('value25', ''))
+        val26 = float(request.GET.get('value26', ''))
+        val31 = float(request.GET.get('value31', ''))
+        val32 = float(request.GET.get('value32', ''))
+        val33 = float(request.GET.get('value33', ''))
+        val34 = float(request.GET.get('value34', ''))
+        val35 = float(request.GET.get('value35', ''))
+        val36 = float(request.GET.get('value36', ''))
+        val41 = float(request.GET.get('value41', ''))
+        val42 = float(request.GET.get('value42', ''))
+        val43 = float(request.GET.get('value43', ''))
+        val44 = float(request.GET.get('value44', ''))
+        val45 = float(request.GET.get('value45', ''))
+        val46 = float(request.GET.get('value46', ''))
+        val51 = float(request.GET.get('value51', ''))
+        val52 = float(request.GET.get('value52', ''))
+        val53 = float(request.GET.get('value53', ''))
+        val54 = float(request.GET.get('value54', ''))
+        val55 = float(request.GET.get('value55', ''))
+        val56 = float(request.GET.get('value56', ''))
+        val61 = float(request.GET.get('value61', ''))
+        val62 = float(request.GET.get('value62', ''))
+        val63 = float(request.GET.get('value63', ''))
+        val64 = float(request.GET.get('value64', ''))
+        val65 = float(request.GET.get('value65', ''))
+        val66 = float(request.GET.get('value66', ''))
+        filename = (request.GET.get('filename', ''))
+        filename = re.sub('[\s+]', '', filename)
+        
+    else:
+        val11 = float(valuearrayrotated[0])
+        val12 = float(valuearrayrotated[1])
+        val13 = float(valuearrayrotated[2])
+        val14 = float(valuearrayrotated[3])
+        val15 = float(valuearrayrotated[4])
+        val16 = float(valuearrayrotated[5])
+        val21 = float(valuearrayrotated[6])
+        val22 = float(valuearrayrotated[7])
+        val23 = float(valuearrayrotated[8])
+        val24 = float(valuearrayrotated[9])
+        val25 = float(valuearrayrotated[10])
+        val26 = float(valuearrayrotated[11])
+        val31 = float(valuearrayrotated[12])
+        val32 = float(valuearrayrotated[13])
+        val33 = float(valuearrayrotated[14])
+        val34 = float(valuearrayrotated[15])
+        val35 = float(valuearrayrotated[16])
+        val36 = float(valuearrayrotated[17])
+        val41 = float(valuearrayrotated[18])
+        val42 = float(valuearrayrotated[19])
+        val43 = float(valuearrayrotated[20])
+        val44 = float(valuearrayrotated[21])
+        val45 = float(valuearrayrotated[22])
+        val46 = float(valuearrayrotated[23])
+        val51 = float(valuearrayrotated[24])
+        val52 = float(valuearrayrotated[25])
+        val53 = float(valuearrayrotated[26])
+        val54 = float(valuearrayrotated[27])
+        val55 = float(valuearrayrotated[28])
+        val56 = float(valuearrayrotated[29])
+        val61 = float(valuearrayrotated[30])
+        val62 = float(valuearrayrotated[31])
+        val63 = float(valuearrayrotated[32])
+        val64 = float(valuearrayrotated[33])
+        val65 = float(valuearrayrotated[34])
+        val66 = float(valuearrayrotated[35])
+        filename = (request.GET.get('filename', ''))
+        filename = re.sub('[\s+]', '', filename) + "polycrystal"
+        poly = "1"
+    
+    
+    color = int(request.GET.get('color', ''))
+    
                             
     if color == 0:
         colorscale='Jet'
@@ -1057,8 +1082,19 @@ def viewstiffness(request):
     surfacecolorstiffness=   stiffness.surfacecolorstiffness
     
     
-
-    stiffness.YoungModulus(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,"",res,stl_dir,createstl,createdata)
+    filenameYoungModulus = filename + "YoungModulusLowResolution" + ".stl"
+    print filenameYoungModulus
+    filepath=os.path.join(stl_dir, filenameYoungModulus)
+    res=1;
+    createstl = 0;
+    if pathexist == 1:
+        if os.path.isfile(filepath):
+            createstl = 0          
+        else:
+            createstl = 1 
+            
+            
+    stiffness.YoungModulus(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filenameYoungModulus,res,stl_dir,createstl,createdata)
     youngModulusXEC=stiffness.stringValsOfXEC2
     youngModulusYEC = stiffness.stringValsOfYEC2
     youngModulusZEC= stiffness.stringValsOfZEC2    
@@ -1082,8 +1118,10 @@ def viewstiffness(request):
         stiffness = StiffnessT4()
         stiffness.Stiffness (val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename2,res,stl_dir,createstl,createdata)        
         del stiffness
-             
-    return render_to_response('stiffness.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"youngModulusXEC": youngModulusXEC,"youngModulusYEC": youngModulusYEC,"youngModulusZEC": youngModulusZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,"surfacecolorstiffness":surfacecolorstiffness,"surfacecolorYoungModulus":surfacecolorYoungModulus,"colorscale":colorscale}, context_instance=RequestContext(request))
+    
+    
+  
+    return render_to_response('stiffness.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"youngModulusXEC": youngModulusXEC,"youngModulusYEC": youngModulusYEC,"youngModulusZEC": youngModulusZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,"LowResolutionFilenameYoungModulus":filenameYoungModulus,"surfacecolorstiffness":surfacecolorstiffness,"surfacecolorYoungModulus":surfacecolorYoungModulus,"colorscale":colorscale,"poly":poly}, context_instance=RequestContext(request))
         
 
 def viewfourthranktensor(request):

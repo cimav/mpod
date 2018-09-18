@@ -61,6 +61,16 @@ class MPODUtil():
         self.cif_created=''
         self.valid = False
         self.reportValidation=''
+        
+        self.maskmatrix6x6 =   [[1, 1, 1, 1, 1, 1],
+                                                    [0, 1, 1, 1, 1, 1],
+                                                    [0, 0, 1, 1, 1, 1],
+                                                    [0, 0, 0, 1, 1, 1],
+                                                    [0, 0, 0, 0, 1, 1],
+                                                    [0, 0, 0, 0, 0, 1]]
+        
+        
+        self.maxmatrixnonceros = None
  
 
 
@@ -188,22 +198,7 @@ class MPODUtil():
             if p.puntualgroupselected_name  != "":
                 if self.__symmetry_point_group_name == False:         
                     self.__line =  "_symmetry_point_group_name_H-M" + " " + p.puntualgroupselected_name+"\n"      
-                    self.addline(self.__line)   
-                
-                    """
-                    if isnumeric(p.puntualgroupselected_name):
-                     
-                        self.__line =  "_symmetry_point_group_name_H-M" + " " + p.puntualgroupselected_name+"\n"      
-                        self.addline(self.__line)   
-                   else: 
- 
-                        print "_symmetry_point_group_name_H-M " +  unicode(p.puntualgroupselected_name).encode('utf-8')
-                        enco =unicode(p.puntualgroupselected_name).encode('utf-8')
-                        denco = enco.decode('utf-8')
-                        print  denco
-                        self.__line =  "_symmetry_point_group_name_H-M" + " '" + p.puntualgroupselected_name+"'\n"      
-                        self.addline(self.__line)   
-                     '"""   
+                    self.addline(self.__line)    
                         
                     self.__symmetry_point_group_name = True
             else:
@@ -213,11 +208,7 @@ class MPODUtil():
                     
                     self.__symmetry_point_group_name = True
                 
-                
-                
-                 
-            ''' if p.axis  != "":
-               p.axis '''
+ 
 
             if self.__loop_article_info==False:  
                 self.__line =  "loop_" +"\n"
@@ -274,30 +265,7 @@ class MPODUtil():
                     
                 self.__condition=True
                
-            
-            
-            """if p.objTypeSelected.name  == "c": 
-                if self.__prop_elastic_stiffness == False:
-                    self.__line =  "_prop_elastic_stiffness_cij '"+self.__cij+"'"+ "\n"
-                    self.addline(self.__line)
-                    self.__prop_elastic_stiffness = True
-              
-            elif p.objTypeSelected.name == "s":  
-                if self.__prop_elastic_compliance == False:
-                    self.__line =   "_prop_elastic_compliance_sij '"+self.__sij+"'" + "\n"
-                    self.addline(self.__line)
-                    self.__prop_elastic_compliance= True
-            elif p.objTypeSelected.name == "d":
-                if self.__prop_piezoelectric == False:
-                    self.__line =    "_prop_piezoelectric_dij '"+self.__dij+"'" + "\n"
-                    self.addline(self.__line)
-                    self.__prop_piezoelectric= True
-            elif p.objTypeSelected.name == "k":
-                if self.__magnetoelectricity == False:
-                    self.__kij= self.getTag(p.objDataProperty.tag)
-                    self.__line =  p.objDataProperty.tag +" '"+self.__kij+"'" + "\n"
-                    self.addline(self.__line)
-                    self.__magnetoelectricity= True"""
+
                     
                     
             if p.objTypeSelected.name  == "c": 
@@ -369,6 +337,7 @@ class MPODUtil():
             if self.__prop_elastic_stiffness == True:
                 y = 0
                 x= 0
+                self.maxmatrixnonceros = (p.coefficientsmatrix != 0) 
                 for r in p.coefficientsmatrix:
                     x = x + 1
                     y= 0
@@ -378,13 +347,15 @@ class MPODUtil():
                         indexy = str(y)
                         index = ''
                         index = indexx + indexy
-                        self.__line= self.__cij +" " + index + " "+ str(c) +"\n"
-                        self.addline(self.__line)   
+                        if self.maskmatrix6x6[x -1][y -1] and self.maxmatrixnonceros[x -1][y -1]:
+                            self.__line= self.__cij +" " + index + " "+ str(c) +"\n"
+                            self.addline(self.__line)   
                  
            
             if self.__prop_elastic_compliance == True:
                 y = 0
                 x= 0       
+                self.maxmatrixnonceros = (p.coefficientsmatrix != 0) 
                 for r in p.coefficientsmatrix:
                     x = x + 1
                     y= 0
@@ -394,8 +365,9 @@ class MPODUtil():
                         indexy = str(y)
                         index = ''
                         index = indexx + indexy
-                        self.__line= self.__sij +" " + index + " "+ str(c) +"\n"
-                        self.addline(self.__line)   
+                        if self.maskmatrix6x6[x -1][y -1] and self.maxmatrixnonceros[x -1][y -1]:
+                            self.__line= self.__sij +" " + index + " "+ str(c) +"\n"
+                            self.addline(self.__line)   
             
                    
             if self.__prop_piezoelectric == True:    

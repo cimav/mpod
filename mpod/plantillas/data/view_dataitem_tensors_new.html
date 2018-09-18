@@ -5,6 +5,7 @@
 			<div class="table-responsive">
 				<table class="table table-striped table-condensed table-hover sm_table" >
 					<tbody>
+			 
 						{% for nlp in block.0 %}
 							<tr>
 								<td><a href="/exparcond/{{nlp.1}}">{{nlp.0}}</a></td>
@@ -13,6 +14,7 @@
 								<td>{{nlp.3}} </td>
 							</tr>
 						{% endfor %}
+ 
 					</tbody>
 				</table>
 			</div>
@@ -30,6 +32,8 @@
 							var promertyname="";
 							var value = "";
 							var type = "";
+							var tdbuttonpaddingleft = 100;
+							var tdseparatorpaddingleft = 50;
 							
 							function thirdranktensordg(clicked_id, values, selectedid, filename,valuearrayrotated) {
 								// alert(valuearrayrotated);
@@ -92,7 +96,7 @@
 							
 							function compliance(clicked_id, values, selectedid, filename,valuearrayrotated) {
 							    selectedColor = document.getElementById(selectedid).selectedIndex;
-							    if (valuearrayrotated ==  'undefined')
+							   /* if (valuearrayrotated ==  'undefined')
 							    	{
 										var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
 									    urlGraph = "/dataitem/" + pathname[2] + "/compliance/" + url;
@@ -104,12 +108,16 @@
 										var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
 									    urlGraph = "/dataitem/" + pathname[2] + "/compliance/" + url;
 							    	   window.open(urlGraph,"",optionscs);
-							    	}
-							}
+							    	}*/
+							    
+							    var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+							    urlGraph = "/dataitem/" + pathname[2] + "/compliance/" + url;
+					    	    window.open(urlGraph,"",optionscs);
+							} 
 							
 							function stiffness(clicked_id, values, selectedid, filename,valuearrayrotated) {
 							    selectedColor = document.getElementById(selectedid).selectedIndex;
-							    if (valuearrayrotated ==  'undefined')
+							   /* if (valuearrayrotated ==  'undefined')
 							    	{
 										var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
 									    urlGraph = "/dataitem/" + pathname[2] + "/stiffness/" + url;
@@ -120,9 +128,15 @@
 							    	    //filename = filename + "rotated"
 										var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
 									    urlGraph = "/dataitem/" + pathname[2] + "/stiffness/" + url;
-									   
 							    	   window.open(urlGraph,"",optionscs);
-							    	}
+							    	}*/
+							    
+							    var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+							    urlGraph = "/dataitem/" + pathname[2] + "/stiffness/" + url;
+					    	   window.open(urlGraph,"",optionscs);
+					    	   //alert(urlGraph);
+							    
+							    
 							}
 							
 							function fourthranktensor(clicked_id, values, selectedid, filename,valuearrayrotated) {
@@ -538,7 +552,12 @@
 									</td> 
 										
 										<script type="text/javascript">
-											document.write(" <td id='td"+  file_name +"' ></td>" );
+										  /***********test
+										    document.write(" <td bgcolor='#00FF00' style='padding: 0px 0px 0px 150px;'  id='tdseparator"+  file_name +"' > </td>" );
+										    document.write(" <td bgcolor='#FF0000' id='td"+  file_name +"' ></td>" );
+										*/
+										    document.write(" <td  style='padding: 0px 0px 0px "+ tdseparatorpaddingleft + "px;'  id='tdseparator"+  file_name +"' > </td>" );
+											document.write(" <td  id='td"+  file_name +"' ></td>" );
 								       </script>
 								 
 									</tr>
@@ -546,8 +565,10 @@
 									 
 								</div>
 							<br />
-							 <div>
-							  
+							 <div style="border:0px solid black;">
+							   <table border="0" >
+							   <tr > 
+							   <td >
 								<script type="text/javascript">
 									var pathname = window.location.pathname.split( '/' );
 									var w = (window.innerWidth/2)-255;
@@ -560,23 +581,30 @@
 										type0filename=file_name;
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value21="+val4+"&value22="+val5+"&value23="+val6+"&value31="+val7+"&value32="+val8+"&value33="+val9 ;
 										selectid= "color" + file_name.replace(/\s/g,'');
-										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type0filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name.replace(/\s/g,'')+'">Polycrystalline</button>');
-										   
+										
+										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="secondranktensor(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type0filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> ');
+										
+										document.write('</td>');  
+										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");  
+										document.write('</td>');  
+										document.write('<td>');  
+																		 
+										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
 										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
 										
-										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >H: </label>');
-										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >&nbsp;H: </label>');
+										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>');
 										
-										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >K: </label>');
-										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="4"  disabled>');
+										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >&nbsp;K: </label>');
+										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>');
 										
-										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >L: </label>');
-										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >&nbsp;L: </label>');
+										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>');
 										
 										
-										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >Omega: </label>');
-										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="6">');
+										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >&nbsp;Omega: </label>');
+										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">');
 										 
 										
 										btnid='btn' + file_name.replace(/\s/g,'');
@@ -587,7 +615,7 @@
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
-									    document.write('<br/><br/>');
+									   
 	
 										datasend = {'mh':0,
 																'mk':0,
@@ -602,7 +630,7 @@
 										
 										sendatacounter++;
 										totalProperties++;
-	
+										document.write('</td>');  
 	
 									}
 	
@@ -612,22 +640,29 @@
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18;
 										 
 										selectid= "color" + file_name.replace(/\s/g,'');
-										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="thirdranktensordg(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type1filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name.replace(/\s/g,'')+'">Polycrystalline</button>');
-	
+										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="thirdranktensordg(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type1filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button>');
+	 
+										document.write('</td>');  
+										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");   
+										document.write('</td>');  
+										document.write('<td>');  
+																		 
+										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
+										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
 	
-										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >H: </label>');
-										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >&nbsp;H: </label>');
+										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>');
 										
-										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >K: </label>');
-										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="4"  disabled>');
+										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >&nbsp;K: </label>');
+										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>');
 										
-										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >L: </label>');
-										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >&nbsp;L: </label>');
+										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>');
 										
 										
-										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >Omega: </label>');
-										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="6">');
+										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >&nbsp;Omega: </label>');
+										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">');
 										 
 										
 										btnid='btn' + file_name.replace(/\s/g,'');
@@ -638,7 +673,7 @@
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
-									    document.write('<br/><br/>');
+									    
 	
 										datasend = {'mh':0,
 																'mk':0,
@@ -653,6 +688,8 @@
 										
 										sendatacounter++;
 										totalProperties++;
+										
+										document.write('</td>');  
 									}
 									
 
@@ -662,22 +699,29 @@
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18;
 										 
 										selectid= "color" + file_name.replace(/\s/g,'');
-										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="thirdranktensoreh(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type8filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name.replace(/\s/g,'')+'">Polycrystalline</button>');
+										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="thirdranktensoreh(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type8filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button>');
 	
+										document.write('</td>');  
+										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");  
+										document.write('</td>');  
+										document.write('<td>');  
+																		 
+										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
+										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
 	
-										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >H: </label>');
-										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >&nbsp;H: </label>');
+										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>');
 										
-										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >K: </label>');
-										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="4"  disabled>');
+										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >&nbsp;K: </label>');
+										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>');
 										
-										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >L: </label>');
-										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >&nbsp;L: </label>');
+										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>');
 										
 										
-										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >Omega: </label>');
-										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="6">');
+										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >&nbsp;Omega: </label>');
+										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">');
 										 
 										
 										btnid='btn' + file_name.replace(/\s/g,'');
@@ -688,7 +732,7 @@
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
-									    document.write('<br/><br/>');
+								 
 	
 										datasend = {'mh':0,
 																'mk':0,
@@ -703,27 +747,37 @@
 										
 										sendatacounter++;
 										totalProperties++;
+										
+										document.write('</td>');  
 									}
 	                                
 									if(type == 2){
 										type2filename=file_name;
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18+"&value41="+val19+"&value42="+val20+"&value43="+val21+"&value44="+val22+"&value45="+val23+"&value46="+val24+"&value51="+val25+"&value52="+val26+"&value53="+val27+"&value54="+val28+"&value55="+val29+"&value56="+val30+"&value61="+val31+"&value62="+val32+"&value63="+val33+"&value64="+val34+"&value65="+val35+"&value66="+val36;
 										selectid= "color" + file_name.replace(/\s/g,'');
-										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="compliance(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type2filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name.replace(/\s/g,'')+'">Polycrystalline</button>');
+										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="compliance(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type2filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button>');
+										
+										document.write('</td>');  
+										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");  
+										document.write('</td>');  
+										document.write('<td >');  
+										
+										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
+										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
 										
-										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >H: </label>');
-										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="4" disabled>');
+										document.write('<label    id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" > &nbsp; H: </label>');
+										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>');
 										
-										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >K: </label>');
-										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="4"  disabled>');
+										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >&nbsp;K: </label>');
+										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>');
 										
-										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >L: </label>');
-										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >&nbsp;L: </label>');
+										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>');
 										
 										
-										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >Omega: </label>');
-										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="6">');
+										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >&nbsp;Omega: </label>');
+										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">');
 										 
 										
 										btnid='btn' + file_name.replace(/\s/g,'');
@@ -735,7 +789,7 @@
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
-									    document.write('<br/><br/>');
+							 
 	
  
 										datasend = {'mh':0,
@@ -751,27 +805,37 @@
 										
 										sendatacounter++;
 										totalProperties++;
+										
+										document.write('</td>');  
 									}
 	
 									if(type == 3){
 										type3filename=file_name;
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18+"&value41="+val19+"&value42="+val20+"&value43="+val21+"&value44="+val22+"&value45="+val23+"&value46="+val24+"&value51="+val25+"&value52="+val26+"&value53="+val27+"&value54="+val28+"&value55="+val29+"&value56="+val30+"&value61="+val31+"&value62="+val32+"&value63="+val33+"&value64="+val34+"&value65="+val35+"&value66="+val36;
 										selectid= "color" + file_name.replace(/\s/g,'');
-										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="stiffness(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type3filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name.replace(/\s/g,'')+'">Polycrystalline</button>');
+										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="stiffness(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type3filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button>');
+										
+										document.write('</td>');  
+										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");  
+										document.write('</td>');  
+										document.write('<td>');  
+										
+										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
+										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
 										
-										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >H: </label>');
-										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >&nbsp;H: </label>');
+										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>');
 										
-										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >K: </label>');
-										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="4"  disabled>');
+										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >&nbsp;K: </label>');
+										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>');
 										
-										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >L: </label>');
-										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >&nbsp;L: </label>');
+										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>');
 										
 										
-										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >Omega: </label>');
-										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="6">');
+										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >&nbsp;Omega: </label>');
+										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">');
 										 
 										
 										btnid='btn' + file_name.replace(/\s/g,'');
@@ -784,7 +848,7 @@
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
-									    document.write('<br/><br/>');
+									   
 	
 										datasend = {'mh':0,
 																'mk':0,
@@ -798,6 +862,8 @@
 										datasendarray[sendatacounter] = datasend ;
 										sendatacounter++;
 										totalProperties++;
+										
+										document.write('</td>');  
 	
 									}
 	
@@ -805,24 +871,32 @@
 										type4filename=file_name;
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18+"&value41="+val19+"&value42="+val20+"&value43="+val21+"&value44="+val22+"&value45="+val23+"&value46="+val24+"&value51="+val25+"&value52="+val26+"&value53="+val27+"&value54="+val28+"&value55="+val29+"&value56="+val30+"&value61="+val31+"&value62="+val32+"&value63="+val33+"&value64="+val34+"&value65="+val35+"&value66="+val36;
 										selectid= "color" + file_name.replace(/\s/g,'');
-										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="fourthranktensor(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type4filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name.replace(/\s/g,'')+'">Polycrystalline</button>');
+										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="fourthranktensor(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type4filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button>');
 									  
+										document.write('</td>');  
+										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");   
+										document.write('</td>');  
+										document.write('<td>');  
+																		 
+										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
+										
+										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
 										//alert(inlineFormInput);
 										 
 										
-										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >H: </label>');
-										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >&nbsp;H: </label>');
+										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>');
 										
-										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >K: </label>');
-										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="4"  disabled>');
+										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >&nbsp;K: </label>');
+										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>');
 										
-										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >L: </label>');
-										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >&nbsp;L: </label>');
+										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>');
 										
 										
-										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >Omega: </label>');
-										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="6">');
+										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >&nbsp;Omega: </label>');
+										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">');
 										 
 										
 										btnid='btn' + file_name.replace(/\s/g,'');
@@ -833,7 +907,7 @@
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
-									    document.write('<br/><br/>');
+								 
 	
 										datasend = {'mh':0,
 																'mk':0,
@@ -847,6 +921,8 @@
 										datasendarray[sendatacounter] = datasend ;
 										sendatacounter++;
 										totalProperties++;
+										
+										document.write('</td>');  
 									}
 									
 									if(type == 5){
@@ -855,22 +931,29 @@
 										
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4;
 										selectid= "color" + file_name.replace(/\s/g,'');
-										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="magnetic(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type5filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name.replace(/\s/g,'')+'">Polycrystalline</button>');
+										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="magnetic(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type5filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> ');
 										 
+										document.write('</td>');  
+										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");  
+										document.write('</td>');  
+										document.write('<td>');  
+																		 
+										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
+										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
 										 
-										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >H: </label>');
-										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >&nbsp;H: </label>');
+										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>');
 										
-										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >K: </label>');
-										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="4"  disabled>');
+										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >&nbsp;K: </label>');
+										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>');
 										
-										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >L: </label>');
-										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >&nbsp;L: </label>');
+										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>');
 										
 										
-										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >Omega: </label>');
-										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="6">');
+										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >&nbsp;Omega: </label>');
+										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">');
 										 
 										
 										btnid='btn' + file_name.replace(/\s/g,'');
@@ -881,7 +964,7 @@
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
-									    document.write('<br/><br/>');
+									  
 	
 										datasend = {'mh':0,
 																'mk':0,
@@ -896,6 +979,8 @@
 										
 										sendatacounter++;
 										totalProperties++;
+										
+										document.write('</td>');  
 	
 									}
 									if(type == 6){
@@ -904,22 +989,28 @@
 	
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4;
 										selectid= "color" + file_name.replace(/\s/g,'');
-										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="magneto(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type6filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name.replace(/\s/g,'')+'">Polycrystalline</button>');
-										 
+										document.write('<select id="'+selectid+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="magneto(this.id,\'' + values + '\',\'' + selectid + '\',\'' + type6filename + '\',\'' + valuearray + '\')" id="'+totalProperties+'">Graph</button> ');
+										document.write('</td>');  
+										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");  
+										document.write('</td>');  
+										document.write('<td>');  
+																		 
+										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
+										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
 										
-										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >H: </label>');
-										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblH'+ inlineFormInput+'"  for="H'+ inlineFormInput+'" style="display: none;" >&nbsp;H: </label>');
+										document.write('<input id="H'+ inlineFormInput+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>');
 										
-										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >K: </label>');
-										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="4"  disabled>');
+										document.write('<label  id="lblK'+ inlineFormInput+'"  for="K'+ inlineFormInput+'" style="display: none;" >&nbsp;K: </label>');
+										document.write('<input id="K'+ inlineFormInput+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>');
 										
-										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >L: </label>');
-										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="4" disabled>');
+										document.write('<label  id="lblL'+ inlineFormInput+'"  for="L'+ inlineFormInput+'" style="display: none;" >&nbsp;L: </label>');
+										document.write('<input id="L'+ inlineFormInput+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>');
 										
 										
-										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >Omega: </label>');
-										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="6">');
+										document.write('<label  id="lbl'+ inlineFormInput+'"  for="'+ inlineFormInput+'" style="display: none;"  >&nbsp;Omega: </label>');
+										document.write('<input id="omega'+ inlineFormInput+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">');
 										 
 										
 										btnid='btn' + file_name.replace(/\s/g,'');
@@ -930,7 +1021,7 @@
 	
 									    document.write('<span  id="'+ spangraphid + '"  ></span>');
 								  
-									    document.write('<br/><br/>');
+									 
 	
 										datasend = {'mh':0,
 																'mk':0,
@@ -945,12 +1036,16 @@
 										
 										sendatacounter++;
 										totalProperties++;
+										document.write('</td>');  
 	
 									}
 	
 								</script>
-	 
-	
+								
+								  
+								  
+	                              </tr>
+	                             </table>
 								</div>
 						{% endfor %}
 					{% endif %}

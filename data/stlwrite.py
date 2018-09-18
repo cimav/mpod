@@ -126,8 +126,8 @@ class STLUtil:
 
             
 
-      print   str( nfacets  )    
-      print  np.asarray(self.vertices).shape   
+      #print   str( nfacets  )    
+     # print  np.asarray(self.vertices).shape   
              
       
       if  mode=='ascii':       

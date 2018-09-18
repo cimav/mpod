@@ -9,6 +9,7 @@ from data.models import *
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 import numpy as N
+ 
 
 
 
@@ -345,3 +346,16 @@ def checkCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataPro
         return True
     else:
         return False
+    
+    
+def puntualgroupnamesParse(puntualgroupname):    
+    line =  puntualgroupname
+    line = line.replace('(',"")   
+    line = line.replace(')',"")   
+    line = line.strip()
+    line=line.split(",")
+    return line
+    
+    
+    
+    

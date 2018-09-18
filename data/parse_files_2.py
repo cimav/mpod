@@ -4,6 +4,7 @@ import string
 import numpy as np
 from django.db import models
 from data.models import *
+from data.UtilParserFile import *
 
 
 cifs_dir='/home/pepponi/work/physdata/mpod/data_files'
@@ -156,7 +157,18 @@ def get_non_looped_props(non_looped_lines):
         if lin.startswith('_'):
             first = lin.split('_')[1]
         if lin.startswith(btg):
-            lcs=lin.split()
+            print lin.split()  
+            print  lin.split()[0].strip()[6:]#).length)
+            print lin[len(lin.split()[0].strip()[6:]) + 6:]
+            #print lin.split()[0].strip()[6:].split('_')
+            
+            if lin.split()[0].strip()[6:] != 'symmetry_point_group_name_H-M':
+                lcs=lin.split()
+            else:
+                lcs[0]= lin.split()[0]            
+                lcs[1]= lin[len(lin.split()[0].strip()[6:]) + 6:]
+               
+            ##lcs=lin.split()    
             pr_str=lcs[0].strip()[6:]
             parts=pr_str.split('_')
             if parts[0] in ntgs:
@@ -166,7 +178,12 @@ def get_non_looped_props(non_looped_lines):
                 if pr_str not in props_tens:
                     props_tens2[pr_str] = lcs[1].strip().strip("'").strip()
         if first in otgs:
-            olcs=lin.split()
+            if lin.split()[0].strip() != '_symmetry_point_group_name_H-M':
+                olcs=lin.split()
+            else:
+                olcs[0]= lin.split()[0]            
+                olcs[1]= lin[len(lin.split()[0].strip()[6:]) + 6:]
+                
             opr_str=olcs[0].strip()
             opr_val=olcs[1].strip().strip("'").strip()
             other_props[opr_str] = opr_val
@@ -188,7 +205,7 @@ def parse_mpod_file(filepath):
             file_data_blocks.append([non_looped_props, loop_structs])
     return file_data_blocks
 
-def format_data_blocks(file_data_blocks, props_ids):
+def format_data_blocks(file_data_blocks, props_ids,dictitems):
     [tenso_props_dims_dict, tenso_props_ids_dict, lnl_props_ids_dict, tenso_props_units_dict, lnl_props_units_dict] = props_ids
     formatted_blocks = []
     for db in file_data_blocks:
@@ -233,7 +250,7 @@ def format_data_blocks(file_data_blocks, props_ids):
                     print tenso_props_dims_dict
                     print tenso_props_ids_dict
                     print tenso_props_units_dict
-                    sec = format_tensor_sec(sec_v, db[0][1],tenso_props_dims_dict, tenso_props_ids_dict, tenso_props_units_dict)
+                    sec = format_tensor_sec(sec_v, db[0][1],tenso_props_dims_dict, tenso_props_ids_dict, tenso_props_units_dict,dictitems)
                     block.append([sec_head, sec])
             else:
                 if db[1][0] is not None:
@@ -272,11 +289,15 @@ def get_dimension(tensor_vals):
         dims.append(np.max(ind))
     return dims
 
-def format_tensor_sec(tensor_loop_data_sec, props_tags,
-                      tenso_props_dims_dict, tenso_props_ids_dict, tenso_props_units_dict):
+def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, tenso_props_ids_dict, tenso_props_units_dict,dictitems):
     n_sec = []
+    coefficientsList = []
     print "tlds", tensor_loop_data_sec
     for tag, vals in tensor_loop_data_sec.iteritems():
+        """for elem in vals:
+            coeff = tag.replace('ij',elem[0])   
+            coefficientsList.append(coeff)"""
+            
         dim1 = 0
         dim2 = 0
         dim3 = 0
@@ -317,14 +338,33 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,
                         tenso[i1][i2].append("-")
         elif len(dims)==2:
             dim2 = dims[1]
-            for i in range(dim1):
-                tenso.append([])
-                for j in range(dim2):
-                    tenso[i].append("-")
+            debug = 1;
+            
+            if debug ==1:
+                if "elastic" in prop_name:
+                    if dim1 == 6 and dim2==6:
+                        #n="simetrica"
+                        name = '_prop_' + prop_name.replace(' ',"_")  
+                        #tenso_props_ids = tenso_props_ids_dict[name]
+                        
+                        puntualgroup =  PuntualGroup("e",prop_name,dims,vals,dictitems,prop_id)
+                        tenso=puntualgroup.coefficientsmatrix2
+                        
+                else:        
+                    for i in range(dim1):
+                        tenso.append([])
+                        for j in range(dim2):
+                            tenso[i].append("0")
+            else:
+                for i in range(dim1):
+                        tenso.append([])
+                        for j in range(dim2):
+                            tenso[i].append("0")
+                
         else:
             tenso=[[]]
             for i in range(dim1):
-                tenso[0].append("-")
+                tenso[0].append("0")
         print "vals", vals
         for ele in vals:
             val = ele[1]
@@ -334,9 +374,18 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,
                 ind3 = int(ele[0][2])-1
                 tenso[ind1][ind2][ind3] = val
             elif dim2:
-                ind1 = int(ele[0][0])-1
-                ind2 = int(ele[0][1])-1
-                tenso[ind1][ind2] = val
+                if debug ==1:
+                    if "elastic" in prop_name:
+                        if dim1 == 6 and dim2==6:
+                            pass
+                    else:
+                        ind1 = int(ele[0][0])-1
+                        ind2 = int(ele[0][1])-1
+                        tenso[ind1][ind2] = val
+                else:
+                    ind1 = int(ele[0][0])-1
+                    ind2 = int(ele[0][1])-1
+                    tenso[ind1][ind2] = val
             else:
                 ind1 = int(ele[0])-1
                 if tenso[0]!=[]:
@@ -344,6 +393,7 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,
                 else:
                     tenso[0]=[ele[1]]
         n_sec.append([prop_name, prop_id, prop_unit, tenso])
+        coefficientsList = []
     return n_sec
 
 def format_non_tensor_sec(sec_tag, sec_vals, props_tags, other_props,
@@ -409,6 +459,8 @@ def all_props_list(file_data_blocks):
             for ls in loop_structs[0]:
                 lps.append("_prop_"+ls)
     return tlps, nlps, lps, itemdictionary
+
+
 
 
 

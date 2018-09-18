@@ -1115,9 +1115,6 @@
 						            </div>
 						            <div class="panel-body">
 						            
-						        
-						
-						
 														  
 												      {% if inputListReadOnly %}  
 														<div class="form-group searches"> 
@@ -1132,7 +1129,7 @@
 																		               	              {% if   field.errors  %}
 																						         			   {% for error in field.errors %}
 																										         <label for="journal" style="color: red;">{{col}}</label>	
-																										         <input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" >	
+																										         <input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 53px;" >	
 																										        {% endfor %}
 																										 {% else %}   
 																										           <label for="journal" >{{col}}</label>		
@@ -1142,7 +1139,7 @@
 																			               {% endfor %} 
 																		                  	 	{%for key,value in inputListValues.items%} 
 														                  		            	        {% if col == key%}   
-																		                  		            	     <input type="text" id="{{col}}" name="{{col}}" value="{{value}}" class="form-control" placeholder=""  style="width: 50px;" >
+																		                  		            	     <input type="text" id="{{col}}" name="{{col}}" value="{{value}}" class="form-control" placeholder=""  style="width: 53px;" >
 																		                  		                          
 																		                  		         {% endif %} 
 																		                  		         
@@ -1155,7 +1152,7 @@
 										                  		            	 
 												                  		            	 
 																				<label for="journal">{{col}}</label>		
-																				<input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 50px;" autocomplete="off"  data-toggle="popover" data-trigger="focus" data-placement="top" data-content="" >
+																				<input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 53px;" autocomplete="off"  data-toggle="popover" data-trigger="focus" data-placement="top" data-content="" >
 																			{% endif %} 
 														      			 </td>	
 																   {% endfor %}
@@ -1200,7 +1197,7 @@
 																					{% for col  in row %}  
 																				   <td>
 																				      
-																					<input type="text" id="{{col}}onhold" name="{{col}}onhold" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >	
+																					<input type="text" id="{{col}}onhold" name="{{col}}onhold" value="{{col}}" class="form-control" placeholder=""  style="width: 53px;" readonly="readonly" >	
 																				   </td>	
 																				 {% endfor %}
 																		      
