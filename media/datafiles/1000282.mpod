@@ -16,7 +16,7 @@ _structure_refined 'no'
 _phase_name 'PZN-PT'
 _phase_formula 'Pb(Zn1/3Nb2/3)O3-PbTiO3(0.08)'
 _chemical_formula_sum 'Pb Nb0.613 Zn0.307 Ti0.08 O3'
-_symmetry_point_group_name_H-M '3 m'
+_symmetry_point_group_name_H-M '4 m m'
 _cell_length_a  ?
 _cell_length_b  ?
 _cell_length_c  ?

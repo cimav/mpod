@@ -319,7 +319,8 @@
 														<script type="text/javascript">
 															
 															value = "{{tens_val}}";
-															 
+															
+															//alert(isNaN(value));
 
 															if(isNaN(value))
 															{ 
@@ -328,11 +329,18 @@
 																if(end > 0)
 																{
 																	valueTen = value.slice(0,end);
+																	
+																	 
 																	//valuearray[counterElements] = value.slice(0,end);
 																}
 																else
 																{
+																	 
+																 
+																 
 																	valueTen = 0;
+															 
+																	
 																	//valuearray[counterElements] = 0
 																}
 						
@@ -340,6 +348,7 @@
 															else
 															{ 
 																valueTen = "{{tens_val}}"
+																	
 																//valuearray[counterElements] =  "{{tens_val}}";
 																 
 															}
@@ -513,12 +522,12 @@
 															else if("{{tens_prop.0}}" == "electrostriction Dij" || 
 															"{{tens_prop.0}}" == "electrostriction Dprimeij" || 
 															"{{tens_prop.0}}" == "internal friction Qij-1" || 
-															"{{tens_prop.0}}" == "photoelastic pij" || 
+															"{{tens_prop.0}}" == "photoelastic pij" || 															
 															"{{tens_prop.0}}" == "piezooptic piij" || 
 															"{{tens_prop.0}}" == "thermal expansion Tij"){
 																type = 4;
 																file_name =codefile + "{{tens_prop.0}}".replace(/\s/g,'').replace(/,/g , '') + totalProperties.toString();
-																
+														
 																 
 																
 															}															

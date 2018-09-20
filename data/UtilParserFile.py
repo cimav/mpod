@@ -26,56 +26,59 @@ class PuntualGroup(object):
         self.coefficientsmatrix = None
         self.__inputList = inputList
         self.objDataProperty = None
-        self.objCatalogPointGroupSelected =None            
+        self.catalogPointGroupSelected =str(dictitems['_symmetry_point_group_name_H-M']).replace(' ',"")                
         self.objProperty  =None
         self.objTypeSelected  =None
         self.objCatalogCrystalSystemSelected  =None
         self.objAxisSelected=None
         self.objPuntualgroupNamesSelected = None
+        self.objCatalogPointGroupSelected = None
         self.dataproperty = tenso_props_ids
         self.coefficientsmatrix2 = None
+ 
         
         
         
         self.setDimension(dimensions)
-        self.objProperty = CatalogProperty.objects.get(name__exact=self.catalogproperty_name)
-        self.objDataProperty = Property.objects.get(id=int(self.dataproperty))  
+        #self.objProperty = CatalogProperty.objects.get(name__exact=self.catalogproperty_name)
+        """dself.objDataProperty = Property.objects.get(id=int(self.dataproperty))  
         type_ids=TypeDataProperty.objects.filter(dataproperty=self.objDataProperty).values_list('type_id',flat=True)   
-        if type_ids: #type_ids estara vacio en fourthranktensor  pues no le he asignado tipo
-            self.objTypeSelected = Type.objects.get(id__in=type_ids)   
+        if type_ids and self.catalogPointGroupSelected !="": #type_ids estara vacio en fourthranktensor  pues no le he asignado tipo
+            self.objTypeSelected = Type.objects.get(id__in=type_ids) 
            
-        #tetragonal
-        """SELECT * FROM mpod.puntual_group_names
+            if self.catalogPointGroupSelected =="mm2":
+                self.catalogPointGroupSelected ="2mm"
+         
+            self.objCatalogPointGroupSelected=CatalogPointGroup.objects.get(name__exact = self.catalogPointGroupSelected)
+      
+            
+           
+           
+           SELECT * FROM mpod.puntual_group_names
+                where id in (SELECT puntualgroupnames_id FROM mpod.catalog_property_detail
+                                    where puntualgroupnames_id in (SELECT id FROM mpod.puntual_group_names
+                                                                    where id in (SELECT puntualgroupnames_id FROM mpod.puntual_group_groups
+                                                                                    where catalogpointgroup_id in (SELECT id FROM mpod.catalog_point_group
+                                                                                                                    where name ='4')))
+                                    and type_id = 2
+                                    and dataproperty_id =8
+                                    group by puntualgroupnames_id)
+           
+            #ortorombica mm2 o 2mm
+     
+            SELECT * FROM mpod.puntual_group_names
             where id in (SELECT puntualgroupnames_id FROM mpod.catalog_property_detail
-                                where puntualgroupnames_id in (SELECT id FROM mpod.puntual_group_names
-                                                                where id in (SELECT puntualgroupnames_id FROM mpod.puntual_group_groups
-                                                                                where catalogpointgroup_id in (SELECT id FROM mpod.catalog_point_group
-                                                                                                                where name ='4')))
-                                and type_id = 2
-                                and dataproperty_id =8
-                                group by puntualgroupnames_id)
+                                    where puntualgroupnames_id in (SELECT id FROM mpod.puntual_group_names
+                                                    where id in (SELECT puntualgroupnames_id FROM mpod.puntual_group_groups
+                                                                    where catalogpointgroup_id in (SELECT id FROM mpod.catalog_point_group
+                                                                                                    where name ='2mm')))
+                                    and type_id = 1
+                                    and dataproperty_id =10
+                                    group by puntualgroupnames_id)
         """
-        #ortorombica mm2 o 2mm
-        """
-        SELECT * FROM mpod.puntual_group_names
-        where id in (SELECT puntualgroupnames_id FROM mpod.catalog_property_detail
-                                where puntualgroupnames_id in (SELECT id FROM mpod.puntual_group_names
-                                                where id in (SELECT puntualgroupnames_id FROM mpod.puntual_group_groups
-                                                                where catalogpointgroup_id in (SELECT id FROM mpod.catalog_point_group
-                                                                                                where name ='2mm')))
-                                and type_id = 1
-                                and dataproperty_id =10
-                                group by puntualgroupnames_id)
-        """
-
-                
-        for cursor, p in enumerate(self.__inputList):
-            """extravalue = None
-        
-            if p[1].find('(') != -1:
-                extravalue = p[1][p[1].find('('):]"""
-                
-                
+    
+                    
+        for cursor, p in enumerate(self.__inputList):   
             index=self.getIndex(p[0]) 
             i = index[0]
             j= index[1]

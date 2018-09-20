@@ -291,7 +291,7 @@ def get_dimension(tensor_vals):
 
 def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, tenso_props_ids_dict, tenso_props_units_dict,dictitems):
     n_sec = []
-    coefficientsList = []
+    #coefficientsList = []
     print "tlds", tensor_loop_data_sec
     for tag, vals in tensor_loop_data_sec.iteritems():
         """for elem in vals:
@@ -339,22 +339,47 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
         elif len(dims)==2:
             dim2 = dims[1]
             debug = 1;
-            
+            objTypeSelected = None
+            elasticity = False
+            fourthrank = False
             if debug ==1:
-                if "elastic" in prop_name:
-                    if dim1 == 6 and dim2==6:
-                        #n="simetrica"
-                        name = '_prop_' + prop_name.replace(' ',"_")  
-                        #tenso_props_ids = tenso_props_ids_dict[name]
-                        
+                objDataProperty = Property.objects.get(id=int(prop_id))  
+                #objTypeDataProperty =TypeDataProperty.objects.get(dataproperty=objDataProperty)
+                type_ids=TypeDataProperty.objects.filter(dataproperty=objDataProperty).values_list('type_id',flat=True)   
+                
+                if  type_ids:  
+                    objTypeSelectedList = Type.objects.filter(id__in=type_ids) 
+                    objTypeSelected = objTypeSelectedList[0]
+                    if objTypeSelected.catalogproperty.description == "Elasticity":
                         puntualgroup =  PuntualGroup("e",prop_name,dims,vals,dictitems,prop_id)
                         tenso=puntualgroup.coefficientsmatrix2
+                        elasticity=True
+ 
+                    elif objTypeSelected.catalogproperty.description == "4th-rank ranktensor":   
+                        if objTypeSelected.description == "simetric yes":
+                            puntualgroup =  PuntualGroup("4y",prop_name,dims,vals,dictitems,prop_id)
+                            tenso=puntualgroup.coefficientsmatrix2
+                            fourthrank = True
+                        else:        
+                            for i in range(dim1):
+                                tenso.append([])
+                                for j in range(dim2):
+                                    tenso[i].append("0")
+                            
                         
+                     
+                        
+                    else:        
+                        for i in range(dim1):
+                            tenso.append([])
+                            for j in range(dim2):
+                                tenso[i].append("0")
                 else:        
-                    for i in range(dim1):
-                        tenso.append([])
-                        for j in range(dim2):
-                            tenso[i].append("0")
+                        for i in range(dim1):
+                            tenso.append([])
+                            for j in range(dim2):
+                                tenso[i].append("0")
+                                
             else:
                 for i in range(dim1):
                         tenso.append([])
@@ -375,13 +400,14 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
                 tenso[ind1][ind2][ind3] = val
             elif dim2:
                 if debug ==1:
-                    if "elastic" in prop_name:
-                        if dim1 == 6 and dim2==6:
-                            pass
+                    
+                    if elasticity or fourthrank:
+                        pass
                     else:
                         ind1 = int(ele[0][0])-1
                         ind2 = int(ele[0][1])-1
                         tenso[ind1][ind2] = val
+                 
                 else:
                     ind1 = int(ele[0][0])-1
                     ind2 = int(ele[0][1])-1
@@ -393,7 +419,9 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
                 else:
                     tenso[0]=[ele[1]]
         n_sec.append([prop_name, prop_id, prop_unit, tenso])
-        coefficientsList = []
+        #coefficientsList = []
+        elasticity = False
+        fourthrank = False
     return n_sec
 
 def format_non_tensor_sec(sec_tag, sec_vals, props_tags, other_props,

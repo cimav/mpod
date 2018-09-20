@@ -16,7 +16,7 @@ _structure_refined 'no'
 _phase_name 'Sodium trisilicate glass'
 _phase_formula Na2O-3SiO2
 _chemical_formula_sum 'Na2 Si3 O7'
-_symmetry_point_group_name_H-M '??/m'
+_symmetry_point_group_name_H-M 'inf/m'
 loop_
 _publ_author_name
 'Sun, Y.'
