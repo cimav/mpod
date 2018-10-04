@@ -137,12 +137,14 @@ def get_non_looped_props(non_looped_lines):
     #otgs = ["phase", "symmetry", "structure"]#otras etiquetas
     #ntgs = ['conditions', 'measurement', 'frame', 'symmetry' ]
     otgs =[]
-    othertagList=OtherTags.objects.filter(active=1)      
+    #othertagList=OtherTags.objects.filter(active=1)      #categorytag_id=4
+    othertagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=4))
     for i, pt in enumerate(othertagList):
         otgs.append( othertagList[i].tag )
     
     ntgs = []
-    proptagList=PropTags.objects.filter(active=1).exclude(tag__exact= 'data')        
+    #proptagList=PropTags.objects.filter(active=1).exclude(tag__exact= 'data')      #categorytag_id=1  
+    proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=1))
     for i, pt in enumerate(proptagList):
         ntgs.append( proptagList[i].tag )
         
@@ -161,7 +163,7 @@ def get_non_looped_props(non_looped_lines):
             print  lin.split()[0].strip()[6:]#).length)
             print lin[len(lin.split()[0].strip()[6:]) + 6:]
             #print lin.split()[0].strip()[6:].split('_')
-            
+            lcs ={}
             if lin.split()[0].strip()[6:] != 'symmetry_point_group_name_H-M':
                 lcs=lin.split()
             else:
@@ -178,6 +180,7 @@ def get_non_looped_props(non_looped_lines):
                 if pr_str not in props_tens:
                     props_tens2[pr_str] = lcs[1].strip().strip("'").strip()
         if first in otgs:
+            olcs ={}
             if lin.split()[0].strip() != '_symmetry_point_group_name_H-M':
                 olcs=lin.split()
             else:

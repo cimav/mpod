@@ -35,6 +35,7 @@ class RankTensors():
       self.stringValsOfZEC2 = ''
       self.colorscale = ""
       self.surfacecolorSecondRankTensor=''
+      self.surfacecolorSecondRankTensorRotated =""
       self.surfacecolorThirdRankTensor=''
       self.surfacecolorThirdRankTensorRotated=''
       self.surfacecolorFourthRankTensor=''
@@ -226,6 +227,182 @@ class RankTensors():
                
               sc= sc + ']'           
               self.surfacecolorSecondRankTensor =sc 
+              
+   def SecondRankTensorRotated(self,valuearrayrotated, Color,filename,res,stl_dir,createstl,createdata):
+        d11=float(valuearrayrotated[0])
+        d12=float(valuearrayrotated[1])
+        d13=float(valuearrayrotated[2])
+        d21=float(valuearrayrotated[3])
+        d22=float(valuearrayrotated[4])
+        d23=float(valuearrayrotated[5])
+        d31=float(valuearrayrotated[6])
+        d32=float(valuearrayrotated[7])
+        d33=float(valuearrayrotated[8])
+        
+        filename= filename
+        #self.Res = res
+        stldir=stl_dir
+        createstl= createstl
+        createdata = createdata
+        color = Color 
+        phi=None
+        beta=None
+        if res == 1:
+            phi, beta = np.mgrid[0:np.pi:45j,0:2*np.pi:90j]
+        elif res == 2:
+            phi, beta = np.mgrid[0:np.pi:90j,0:2*np.pi:180j] 
+        elif res == 3:
+            phi, beta = np.mgrid[0:np.pi:180j,0:2*np.pi:360j]
+    
+        x= np.sin(phi) * np.cos(beta)
+        y= np.sin(phi) * np.sin(beta)
+        z= np.cos(phi) * np.ones((np.shape(beta)))
+         
+        E=d11*(x**2) + d22*(y**2) + d33*(z**2) + (x*y)*(d12+d21) + (x*z)*(d13+d31) + (y*z)*(d23+d32)
+    
+        XEC=E*x
+        YEC=E*y
+        ZEC=E*z
+    
+        """scale = 100
+        if createstl == 1: 
+              fl= filename 
+              #stl_dir = ".\\media\\stlfiles\\"      
+              filepath=os.path.join(stldir, fl)
+              stlw = STLUtil()
+              tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
+              del stlw"""
+              
+        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
+        t.start()
+          
+        if createdata == 1:
+              b=0
+              for itemX in XEC:                      
+                b = b + 1  
+                if  b ==  len(XEC):                
+                  c = 0 
+                  self.stringValsOfXEC2 =  self.stringValsOfXEC2 + '['                 
+                  for val in itemX:  
+                    c = c + 1               
+                    if c == len(itemX):                
+                          self.stringValsOfXEC2 =   self.stringValsOfXEC2 + str(val) +']'       
+                    else:    
+                          self.stringValsOfXEC2 =  self.stringValsOfXEC2 + str(val) + ','       
+                          
+                else:
+                  c = 0 
+                  self.stringValsOfXEC2 =  self.stringValsOfXEC2 + '['                           
+                  for val in itemX: 
+                    c = c + 1
+                    if c == len(itemX):                
+                          self.stringValsOfXEC2 =   self.stringValsOfXEC2 + str(val) +'],'       
+                    else:    
+                          self.stringValsOfXEC2 =  self.stringValsOfXEC2 + str(val) + ',' 
+              
+              b=0            
+              for itemY in YEC:                      
+                b = b + 1  
+                if  b ==  len(YEC):                 
+                  c = 0 
+                  self.stringValsOfYEC2 =  self.stringValsOfYEC2 + '['                 
+                  for val in itemY:  
+                    c = c + 1               
+                    if c == len(itemY):                
+                          self.stringValsOfYEC2 =   self.stringValsOfYEC2 + str(val) +']'       
+                    else:    
+                          self.stringValsOfYEC2 =  self.stringValsOfYEC2 + str(val) + ','       
+                          
+                else:
+                  c = 0 
+                  self.stringValsOfYEC2 =  self.stringValsOfYEC2 + '['                           
+                  for val in itemY: 
+                    c = c + 1
+                    if c == len(itemY):                
+                          self.stringValsOfYEC2 =   self.stringValsOfYEC2 + str(val) +'],'       
+                    else:    
+                          self.stringValsOfYEC2 =  self.stringValsOfYEC2 + str(val) + ','             
+                          
+              b = 0
+              for itemZ in ZEC:                      
+               # if (itemZ ==  ZEC[-1:]).all():   
+                b = b + 1   
+                t = len(ZEC)    
+                if  b ==  len(ZEC):      
+                  c = 0 
+                  self.stringValsOfZEC2 =  self.stringValsOfZEC2 + '['                 
+                  for val in itemZ:  
+                    c = c + 1               
+                    if c == len(itemZ):                
+                          self.stringValsOfZEC2 =   self.stringValsOfZEC2 + str(val) +']'       
+                    else:    
+                          self.stringValsOfZEC2 =  self.stringValsOfZEC2 + str(val) + ','       
+                          
+                else:
+                  c = 0 
+                  self.stringValsOfZEC2 =  self.stringValsOfZEC2 + '['                           
+                  for val in itemZ: 
+                    c = c + 1
+                    if c == len(itemZ):                
+                          self.stringValsOfZEC2 =   self.stringValsOfZEC2 + str(val) +'],'       
+                    else:    
+                          self.stringValsOfZEC2 =  self.stringValsOfZEC2 + str(val) + ','                    
+     
+        
+        if createdata == 1:
+          if "magnetoelectric" in filename or 'thermalexpansion' in filename:
+             SC = []
+             SC= E
+             b = 0
+             
+             for itemSC in SC:                      
+                b = b + 1   
+                t = len(E)    
+                if  b ==  len(E):      
+                  c = 0 
+                  self.surfacecolorSecondRankTensor =  self.surfacecolorSecondRankTensor + '['                 
+                  for val in itemSC:  
+                    c = c + 1               
+                    if c == len(itemSC):                
+                          self.surfacecolorSecondRankTensor =   self.surfacecolorSecondRankTensor + str(val) +']'       
+                    else:    
+                          self.surfacecolorSecondRankTensor =  self.surfacecolorSecondRankTensor + str(val) + ','       
+                else:
+                  c = 0 
+                  self.surfacecolorSecondRankTensor =  self.surfacecolorSecondRankTensor + '['                           
+                  for val in itemSC: 
+                    c = c + 1
+                    if c == len(itemSC):                
+                          self.surfacecolorSecondRankTensor =   self.surfacecolorSecondRankTensor + str(val) +'],'       
+                    else:    
+                          self.surfacecolorSecondRankTensor =  self.surfacecolorSecondRankTensor + str(val) + ','   
+             
+             self.surfacecolorSecondRankTensor =  '['  + self.surfacecolorSecondRankTensor + ']' 
+             
+             
+          else:          
+              lx=len(ZEC)
+              ly=len(ZEC[0])
+              sc='['
+              out=[]
+              for i in xrange(lx):
+                temp = []
+                sc= sc + '['
+                for j in xrange( ly):
+                    res= self.dist_origin(XEC[i][j], YEC[i][j], ZEC[i][j])
+                    #print res
+                    if j ==( ly -1): 
+                        if i == ( lx -1): 
+                            sc= sc + str(res) + ']'  
+                        else:
+                            sc= sc + str(res) + '],'  
+                        #print sc
+                    else:
+                        sc= sc + str(res) + ','  
+            
+               
+              sc= sc + ']'           
+              self.surfacecolorSecondRankTensorRotated =sc
      
    def ThirdRankTensordg (self,d11,d12,d13,d14,d15,d16,d21,d22,d23,d24,d25,d26,d31,d32,d33,d34,d35,d36,Color,filename,res,stl_dir,createstl,createdata):
         filename= filename

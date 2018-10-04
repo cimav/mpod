@@ -346,7 +346,7 @@ class GroupNamesDetailAdminForm(forms.ModelForm):
             if args:
                 puntualgroupnamesSelected=PuntualGroupNames.objects.get(id=self.instance.id)
                 puntualgroupnamesQuerySet =  PuntualGroupGroups.objects.filter(puntualgroupnames=self.instance)
-                catalogpointgroup_ids = argsListToIntList(args[0].getlist('catalogpointgroup'))
+                catalogpointgroup_ids = argsListToIntList(args,'catalogpointgroup')
                 catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
                 name = "("
                 for i,cpg in enumerate(catalogpointgroupQuerySet):
@@ -498,7 +498,7 @@ class TensorAdminForm(forms.ModelForm):
             catalogpointgroup_id = argsToInt(args,'catalogpointgroup',45)
             puntualgroupnames_id  =  argsToInt(args,'puntualgroupnames',21)
             axis_id  = argsToInt(args,'axis',4)
-            coefficients_ids = argsListToIntList(args[0].getlist('coefficients'))
+            coefficients_ids = argsListToIntList(args,'coefficients')
   
              
             
@@ -538,10 +538,11 @@ class TensorAdminForm(forms.ModelForm):
         )
 
         
-        self.fields['pointgroupdetail'] = forms.CharField(label='Point Group Detail',widget = DetailFieldWidget,required=False)
-        self.fields['puntualgroupnamesdetail'] = forms.CharField(label='Groups Detail',widget = DetailFieldWidget,required=False)
-        self.fields['axisdetail'] = forms.CharField(label='Axis Detail',widget = DetailFieldWidget,required=False)
-        
+        self.fields['pointgroupdetail'] = forms.CharField(label='Point Group Detail',widget = DetailFieldWidget, required=False)
+        self.fields['puntualgroupnamesdetail'] = forms.CharField(label='Groups Detail',widget = DetailFieldWidget, required=False)
+        self.fields['axisdetail'] = forms.CharField(label='Axis Detail',widget = DetailFieldWidget, required=False)
+        self.fields['errormessage'] = forms.CharField(widget = DetailFieldWidget, required=False)
+         
   
         typeSelected = None
         datapropertySelected = None
@@ -551,6 +552,15 @@ class TensorAdminForm(forms.ModelForm):
         axisSelected = None
         if self.instance.pk: 
             typeQuerySet=Type.objects.filter(active=True,catalogproperty= self.instance)   
+            if not typeQuerySet:
+                typeQuerySet=Type.objects.filter(active=False,catalogproperty= self.instance)                  
+                self.fields['errormessage'].label='Error Message'
+                self.fields['errormessage'].initial = "<strong><font color='red'>" + self.instance.description +" is disabled</font></strong>"
+                #raise  forms.ValidationError("the 'Point Group' field are not selected, you must select one of the two")
+            else:
+                self.fields['errormessage'].label='' 
+                
+       
             type_ids = getIdsFromQuerySet(typeQuerySet)
             self.fields['type'].queryset= typeQuerySet
             if args:
@@ -749,9 +759,14 @@ class TensorAdminForm(forms.ModelForm):
                     catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance)   
                     
                     #*******************************catalogcrystalsystem*************************************
-                    self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet
-                    catalogcrystalsystemSelected = catalogcrystalsystemQuerySet[0]
-                    self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
+                    if catalogcrystalsystemQuerySet:
+                        self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet
+                        catalogcrystalsystemSelected = catalogcrystalsystemQuerySet[0]
+                        self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
+                    else:
+                        self.fields['catalogcrystalsystem'].queryset=CatalogCrystalSystem.objects.all()
+                        catalogcrystalsystemSelected = CatalogCrystalSystem.objects.all()[0]
+                        self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
 
                     #*******************************catalogpointgroup*************************************
                     
@@ -919,7 +934,7 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
             catalogpointgroup_id = argsToInt(args,'catalogpointgroup',45)
             puntualgroupnames_id  =  argsToInt(args,'puntualgroupnames',21)
             #axis_id =  argsToInt(args,'axis',4)
-            axis_ids= argsListToIntList(args[0].getlist('axis'))  
+            axis_ids= argsListToIntList(args, 'axis')  
             if not args[0].has_key('_save') and not args[0].has_key('_addanother') and not args[0].has_key('_continue'):    
                 args ={}
                 onchange = True
@@ -1174,5 +1189,299 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                 self.fields['axisdetail'].initial = "<strong>Axis  not assigned</strong>"
         
         
+  
+class FileUserAdminForm(forms.ModelForm):  
+    
+    class Meta:
+        model = FileUser
+        
+        
+    #for validation 
+    def clean(self,*args,**kwargs):
+         
+        reportvalidation=self.cleaned_data.get("reportvalidation")
+        
+        if not reportvalidation:
+            pass
+            #raise forms.ValidationError("the 'Point Group' or 'Groups' fields are not selected, you must select one of the two!")
+        
+ 
 
+        return super(FileUserAdminForm,self).clean(*args,**kwargs)
+    
+    
+    #for validation 
+    def clean_reportvalidation(self):
+        reportvalidation = self.cleaned_data['reportvalidation']
+        return reportvalidation
+    
+        
+    def __init__(self, *args, **kwargs):   
+        # initialice local fields
+        #user_id = None
+        datepublished = None
+        properties_ids = None
+        experimentalcon_ids = None
+        phase_name = None
+        reference = None
+        title = None
+        phase_generic = None
+        pages_number = None
+        journal = None
+        year = None
+        volume = None
+        first_page = None
+        last_page = None
+        authors = None
+        issue = None
+        cod_code = None
+        chemical_formula = None
+        published = None
+ 
+        onchange = False
+        if args: #(true if edit and save or save an existing instance, when form was changed), false when instance was selected from change list
+            #receive values from form page and asing to local field
+            #user_id =  argsToInt(args,'authuser_id')
+            datepublished =  argsToDateTime(args,'datepublished')
+            properties_ids= argsListToIntList(args,'properties')  
+            experimentalcond_ids= argsListToIntList(args,'experimentalcon')
+            phase_name = argsCheck(args,'phase_name')  
+            reference = argsCheck(args,'reference')  
+            title = argsCheck(args,'title')  
+            phase_generic = argsCheck(args,'phase_generic')  
+            pages_number = argsToInt(args,'pages_number') 
+            journal = argsCheck(args,'journal') 
+            year = argsToInt(args,'year')
+            volume = argsToInt(args,'volume')
+            first_page = argsToInt(args,'first_page')
+            last_page = argsToInt(args,'last_page') 
+            authors = argsCheck(args,'authors')  
+            issue = argsCheck(args,'issue')  
+            cod_code = argsToInt(args,'cod_code') 
+            chemical_formula = argsCheck(args,'chemical_formula')  
+            published = argsCheck(args,'published') 
+            
+            
+            if not args[0].has_key('_save') and not args[0].has_key('_addanother') and not args[0].has_key('_continue'):    
+                args ={}
+                onchange = True
+                
+        super(FileUserAdminForm, self).__init__(*args, **kwargs)
+        
+        #define field to form page
+         
+        self.fields['fileuserid']  = forms.CharField(label="")
+        self.fields['fileuserid'].widget = forms.HiddenInput()
+        #self.fields['fileuserid'].empty_label = None
+        
+
+        
+        self.fields['properties'] = forms.ModelMultipleChoiceField(
+            queryset=None,
+            required=False,
+            label="Properties",
+            widget=FilteredSelectMultiple(
+                verbose_name='Property',
+                is_stacked=False,
+                attrs={"ondblclick":"getProperty(this)"}
+            )
+
+        )
+        
+        
+ 
+ 
+        self.fields['reportvalidationcustom'] = forms.CharField(widget = DetailFieldWidget, required=False)
+        self.fields['reportvalidationcustom'].label='Report Validation'
+       
+        
+      
+        #self.fields['filenamepublished'].label = mark_safe(_("File name published <a href='#'>Terms and Conditions</a>"))
+       
+        self.fields['filenamepublished'] = forms.CharField(widget = DetailFieldWidget, required=False)
+        self.fields['filenamepublished'].label='File name published'      
+        
+               
+            
+            
+                                                                                                                                             
+        self.fields['phase_generic']  = forms.CharField(label='Phase generic', required=False)
+        self.fields['phase_generic'].widget = forms.TextInput() 
+        
+        self.fields['phase_name']  = forms.CharField(label='Phase name', required=False)
+        self.fields['phase_name'].widget = forms.TextInput() 
+        
+        self.fields['chemical_formula']  = forms.CharField(label='Chemical formula', required=False)
+        self.fields['chemical_formula'].widget = forms.TextInput() 
+        
+        
+        
+         
+        #self.fields['title']  = forms.CharField(label='Title', required=False)
+        self.fields['title']  = forms.CharField(label='Title')
+        self.fields['title'].widget = forms.TextInput() 
+        
+        self.fields['authors']  = forms.CharField(label='Authors')
+        self.fields['authors'].widget = forms.TextInput() 
+        
+        self.fields['journal']  = forms.CharField(label='Journal')
+        self.fields['journal'].widget = forms.TextInput() 
+        
+        self.fields['year']  = forms.CharField(label='Year')
+        self.fields['year'].widget = forms.TextInput() 
+        
+        self.fields['volume']  = forms.CharField(label='Volume')
+        self.fields['volume'].widget = forms.TextInput() 
+        
+        self.fields['issue']  = forms.CharField(label='Issue')
+        self.fields['issue'].widget = forms.TextInput() 
+        
+        self.fields['first_page']  = forms.CharField(label='First page')
+        self.fields['first_page'].widget = forms.TextInput() 
+        
+        self.fields['last_page']  = forms.CharField(label='Last page')
+        self.fields['last_page'].widget = forms.TextInput() 
+        
+        self.fields['reference']  = forms.CharField(label='Reference')
+        self.fields['reference'].widget = forms.TextInput() 
+        
+        self.fields['pages_number']  = forms.CharField(label='Pages number')
+        self.fields['pages_number'].widget = forms.TextInput() 
+        
+        self.fields['cod_code']  = forms.CharField(label='Code', required=False)
+        self.fields['cod_code'].widget = forms.TextInput() 
+      
+        self.fields['experimentalcon'] = forms.ModelMultipleChoiceField(queryset=None,
+                                                                                                                required=False,
+                                                                                                                label="Experimental conditions",
+                                                                                                                widget=FilteredSelectMultiple(
+                                                                                                                    verbose_name='Experimental conditions',
+                                                                                                                    is_stacked=False
+                                                                                                                ))
+        
+        
+ 
+        """self.fields['experimentalcon']  =forms.ModelChoiceField(queryset=None,label="Experimental conditions")
+        self.fields['experimentalcon'].widget=forms.SelectMultiple()
+        self.fields['experimentalcon'].empty_label = None
+        """
+        
+        
+        
+        if self.instance.pk: 
+            if args:
+                    if published:
+                        if datepublished:
+                            self.instance.datepublished = datetime.datetime.strptime(datepublished, '%Y-%m-%d %H:%M:%S')
+                            if  self.instance.datafile:
+                                self.fields['filenamepublished'].initial = "<a href='/datafiles/" + self.instance.datafile.filename  +"' target='_blank'>"  + self.instance.datafile.filename  +"</a>"
+                            else:
+                                self.fields['filenamepublished'].initial = ""
+                    else:
+                        #self.instance.datafile = None
+                        self.fields['filenamepublished'].initial = ""
+                         
+                        
+                        
+                    self.fields['reportvalidation'].initial= self.instance.reportvalidation
+                        
+
+                    
+                    
+                    objDataFileTemp = DataFileTemp.objects.get(filename__exact=self.instance.filename)
+                    objPublArticleTemp = objDataFileTemp.publication
+                    propertyTempQuerySet= PropertyTemp.objects.filter(id__in=properties_ids)
+
+                    experimentalcondQuerySet = ExperimentalParCondTemp.objects.filter(id__in=experimentalcond_ids)
+                    self.fields['experimentalcon'].queryset= ExperimentalParCondTemp.objects.all()
+                    self.fields['experimentalcon'].initial= experimentalcondQuerySet
+
+                    self.fields['properties'].queryset = PropertyTemp.objects.all() 
+                    self.fields['properties'].initial = propertyTempQuerySet
+                    
+                    self.fields['reportvalidationcustom'].initial = "<strong><font color='black'>" + self.instance.reportvalidation +" </font></strong>" 
+
+                    self.fields['phase_generic'].initial = phase_generic
+                    self.fields['phase_name'].initial = phase_name
+                    self.fields['chemical_formula'].initial = chemical_formula
+                    self.fields['cod_code'].initial = cod_code
+                    self.fields['title'].initial = title
+                    self.fields['authors'].initial = authors
+                    self.fields['journal'].initial = journal
+                    self.fields['year'].initial = year
+                    self.fields['volume'].initial = volume
+                    self.fields['issue'].initial = issue
+                    self.fields['first_page'].initial = first_page
+                    self.fields['last_page'].initial = last_page
+                    self.fields['reference'].initial = reference
+                    self.fields['pages_number'].initial = pages_number
+
+            else:
+                if onchange:
+                    pass
+                else:#select from list for change
+                    fields1  = []
+                    self.fields['fileuserid'].initial = self.instance.pk
+                    """for item in self.instance.__dict__.items():
+                            for field in item[1]:
+                                fields1.append(field)
+                    """
+                    #fn=reverse('get_datafile', args=['1000377.mpod'])  
+                    
+                    
+                    #self.instance.datafile
+                    if  self.instance.datafile:
+                        #self.fields['filenamepublished'].label = mark_safe("<a href='%s'>File name published </a>") % (reverse('get_datafile', args=[self.instance.datafile.filename]))
+                        self.fields['filenamepublished'].initial = "<a href='/datafiles/" + self.instance.datafile.filename  +"' target='_blank'>"  + self.instance.datafile.filename  +"</a>"
+                    else:
+                        self.fields['filenamepublished'].initial = ""
+                        
+                        
+                        
+
+                  
+                    
+                        
+                    
+                    objDataFileTemp = DataFileTemp.objects.get(filename__exact=self.instance.filename)
+                    objPublArticleTemp = objDataFileTemp.publication
+                    propertyTempQuerySet= objDataFileTemp.properties.all()
+                    experimentalcond_ids = ExperimentalfilecontempDatafiletemp.objects.filter(datafiletemp=objDataFileTemp).values_list('experimentalfilecontemp_id',flat=True)  
+                   
+                    self.fields['reportvalidationcustom'].initial = "<strong><font color='black'>" + self.instance.reportvalidation +" </font></strong>" 
+                   
+                    experimentalcondQuerySet = ExperimentalParCondTemp.objects.filter(id__in=experimentalcond_ids)
+                    """self.fields['experimentalcon'].queryset= experimentalcondQuerySet
+                    self.fields['experimentalcon'].initial= experimentalcond_ids
+                    """
+                    
+                    self.fields['experimentalcon'].queryset= ExperimentalParCondTemp.objects.all()
+                    self.fields['experimentalcon'].initial= experimentalcondQuerySet
+                    
+                     
+                    self.fields['properties'].queryset = PropertyTemp.objects.all() 
+                    self.fields['properties'].initial = propertyTempQuerySet
+                    
+                    self.fields['phase_generic'].initial = objDataFileTemp.phase_generic
+                    self.fields['phase_name'].initial = objDataFileTemp.phase_name
+                    self.fields['chemical_formula'].initial = objDataFileTemp.chemical_formula
+                    
+                    if objDataFileTemp.cod_code:
+                        self.fields['cod_code'] = objDataFileTemp.cod_code
+                    
+                    self.fields['title'].initial = objPublArticleTemp.title
+                    self.fields['authors'].initial = objPublArticleTemp.authors
+                    self.fields['journal'].initial = objPublArticleTemp.journal
+                    self.fields['year'].initial = objPublArticleTemp.year
+                    self.fields['volume'].initial = objPublArticleTemp.volume
+                    self.fields['issue'].initial = objPublArticleTemp.issue
+                    self.fields['first_page'].initial = objPublArticleTemp.first_page
+                    self.fields['last_page'].initial = objPublArticleTemp.last_page
+                    self.fields['reference'].initial = objPublArticleTemp.reference
+                    self.fields['pages_number'].initial = objPublArticleTemp.pages_number
+        else:
+            if args:#save  new
+                pass
+            else:#add new
+                pass
         

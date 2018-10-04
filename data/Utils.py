@@ -54,18 +54,58 @@ def requestPostToIntList(POST,key=None,value=[]):
             pass
     return result
        
-    
+def requestPostCheck(POST,key=None,value=None):
+    result = None
+    if key:
+        if POST.has_key(key):
+            try:
+                result= POST.get(key,False)
+            except ValueError:
+                result = value
+        else:
+            pass
+    return result  
 
-def argsListToIntList(argsList):
+def argsListToIntList(args,field=None):
+    #args[0].getlist('properties')
     listInt= []
     try: 
-        for id in argsList:
+        for id in args[0].getlist(field):
             listInt.append(int(id))
     except ValueError:
         pass
       
     return listInt
 
+#datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+def argsToDateTime(args,field=None,value=None):
+    result = None
+    if field:
+        if args[0].has_key(field+'_0'):
+            try:
+                if args[0][field +'_0' ]  != None and args[0][field +'_1']  != None :
+                    if args[0][field +'_0' ]  != '' and args[0][field +'_1']  != '' :
+                        result = args[0][field +'_0' ] +" "+ args[0][field +'_1']
+                    else:
+                        result= datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+                   
+            except ValueError:
+                result = value
+        else:
+            pass
+    return result
+
+def argsCheck(args,field=None,value=None):
+    result = None
+    if field:
+        if args[0].has_key(field):
+            try:
+                result= args[0][field]
+            except ValueError:
+                result = value
+        else:
+            pass
+    return result
 
 def getIdsFromQuerySet(queryset):
     listInt = []
@@ -354,7 +394,8 @@ def puntualgroupnamesParse(puntualgroupname):
     line = line.replace(')',"")   
     line = line.strip()
     line=line.split(",")
-    return line
+    result = [x.strip(' ') for x in line]
+    return result
     
     
     

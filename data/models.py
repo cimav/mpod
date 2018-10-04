@@ -604,20 +604,21 @@ class ConfigurationMessage(models.Model):
 class FileUser(models.Model):
     filename = models.CharField(_(u'File Name'),max_length=100)
     authuser=models.ForeignKey(User,verbose_name="User Name")  
-    #authuser=models.ForeignKey(to=User, related_name="pk", null=True, blank=True)
     date = models.DateTimeField(_(u'Registration Date'),default=datetime.datetime.now(), blank=True)
-    reportvalidation =  models.TextField(_(u'Report Validation'))
+    reportvalidation =  models.TextField(_(u'Report Validation'), blank=True)
     datafile  = models.ForeignKey(DataFile,verbose_name="File",null=True,blank=True)   
-    published= models.BooleanField(_(u'Publish'),max_length=1)
+    published= models.BooleanField(_(u'Published'),max_length=1)
     datepublished = models.DateTimeField(_(u'Published Date'),default=None, blank=True)
    
      
      
     class Meta:
         db_table = 'file_user'
-        app_label = string_with_title("Users", "Users Files")
-        verbose_name = _('Publish file')
-        verbose_name_plural = _('Publish files') 
+        app_label = string_with_title("Files", "Files")
+        verbose_name = _('publish file')
+        verbose_name_plural = _('publish files') 
+ 
+                
     """     
     def get_absolute_url(self):
         #from django.urls import reverse
@@ -625,6 +626,7 @@ class FileUser(models.Model):
         form_url =""
         return form_url
     """
+
      
     def user_name(self):
         return   self.authuser.username
@@ -724,6 +726,32 @@ class PropTags(models.Model):
         
     def __unicode__(self): # __str__ on Python 3
         return str(self.tag)
+    
+    
+    
+class CategoryTag(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
+    
+    class Meta:
+        db_table = 'category_tag'
+        
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.description)
+
+class Tags(models.Model):
+    tag = models.CharField(_(u'tag'),max_length=100)
+    active= models.BooleanField(_(u'Active'),max_length=1,default=True)
+    categorytag = models.ForeignKey(CategoryTag, on_delete=models.CASCADE)
+    
+    class Meta:
+        db_table = 'tags'
+        
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.tag)
+    
+    
+    
     
 class CatalogpropertyDictionary(models.Model):
     catalogproperty = models.ForeignKey(CatalogProperty,related_name="CatalogProperty", verbose_name="Catalog Properties")

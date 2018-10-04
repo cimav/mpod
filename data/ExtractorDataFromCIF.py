@@ -14,6 +14,7 @@ from django.db.models import Count
 from data.models import *
 from parse_files_2 import *
 from django.core.exceptions import ObjectDoesNotExist
+from data.Utils import *
 
 
 
@@ -23,6 +24,8 @@ class Extractor (object):
         self.core_dic_filepath=core_dic_filepath
         self.mpod_dic_filepath=mpod_dic_filepath
         self.experimentalParCondList=[]
+        self.code = 0
+        self.dataFile= None
         
         
         if len(filelist) > 0:
@@ -44,15 +47,16 @@ class Extractor (object):
     
     def get_data_code(self, texto):
         lins = map(lambda x: x.strip(), texto.strip().split("\n"))
-        code=0
+        #self.code=0
         for li in lins:
-            code = self.get_data_code_lin(li)
-            if code>0:
-                return code
-        if code==0:
+             
+            self.code = self.get_data_code_lin(li)
+            if self.code>0:
+                break
+        if self.code==0:
             raise Exception('Cid data_ code', 'missing')
-        else:
-            return code
+        """else:
+            return self.code"""
 
     @classmethod
     def get_data_code_lin(self, lin):
@@ -64,10 +68,10 @@ class Extractor (object):
                 print("get last code from database")
                 "Get last value of Code from database, and increment"
                 top = DataFile.objects.order_by('-code')[0]
-                code = top.code + 1
-                return code
+                #self.code = int(top.code) + 1
+                return  int(top.code) + 1
         else:
-            return 0
+            return  int(0)
 
     def get_info_1(self, texto,  tags):
         vals=[]
@@ -281,16 +285,18 @@ class Extractor (object):
         
         
     
-    def extractConditions(self,approved):
-        tg="_prop"
+    def extractConditions(self,approved, *args):
+        if args:
+            properties_ids= argsListToIntList(args,'experimentalcon')  
+         
+        tg = '_prop'   
         conds = []
         inds=[]
         ntgs=[]
-        proptagList=PropTags.objects.filter(active=1).exclude(tag__exact= 'data')        
-        for pt in proptagList:
-            proptag = PropTags()
-            proptag = pt
-            ntgs.append( proptag.tag )
+        #proptagList=PropTags.objects.filter(active=1).exclude(tag__exact= 'data')        #categorytag_id=1
+        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=1))
+        for i, pt in enumerate(proptagList):
+            ntgs.append( proptagList[i].tag )
             
             
         for i, fil in enumerate(self.filets):
@@ -368,12 +374,10 @@ class Extractor (object):
                         experimentalParCond.name=' '.join(na.split('_')) 
                         experimentalParCond.units=un
                         experimentalParCond.units_detail=ud
-                        experimentalParCond.active=0
                         experimentalParCond.save()    
                         self.experimentalParCondList.append(experimentalParCond)
                     else:
                         print 'propiedad existe' 
-                        #experimentalParCondExist.update(name=' '.join(na.split('_')),units=un,units_detail=ud) 
                         self.experimentalParCondList.append(experimentalParCondExist)
                
                     
@@ -385,12 +389,11 @@ class Extractor (object):
                         experimentalParCondExist = None
                  
                     if not experimentalParCondExist:
+                        experimentalParCondExistTemp=ExperimentalParCondTemp.objects.get(tag__exact=experimentalParCond.tag)
                         print 'propiedad nueva'
-                        experimentalParCond.name=' '.join(na.split('_')) 
-                        experimentalParCond.units=un
-                        experimentalParCond.units_detail=ud
-                        experimentalParCond.active=0
-                         
+                        experimentalParCond.name= experimentalParCondExistTemp.name
+                        experimentalParCond.units=experimentalParCondExistTemp.units
+                        experimentalParCond.units_detail=experimentalParCondExistTemp.units_detail
                         experimentalParCond.save()    
                         self.experimentalParCondList.append(experimentalParCond)
                     else:
@@ -409,7 +412,7 @@ class Extractor (object):
          
         
         
-    def extractProperties(self,approved):
+    def extractProperties(self,approved, *args):
         propertyList =[]
         dataFilePropertyList=[]
         
@@ -419,17 +422,16 @@ class Extractor (object):
             props = []
             data_props={}
             ntgs=[]
-            proptagList=PropTags.objects.filter(active=1)        
-            for pt in proptagList:
-                proptag = PropTags()
-                proptag = pt
-                ntgs.append( proptag.tag )
-                del proptag
+            #proptagList=PropTags.objects.filter(active=1)        #categorytag_id=2
+            proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=2))
+            for i, pt in enumerate(proptagList):
+                ntgs.append( proptagList[i].tag )
+ 
             
             for i, fil in enumerate(self.filets):
                 filepath=os.path.join(self.cifs_dir, fil)
                 texto = self.read_file_1(filepath)
-                code = self.get_data_code(texto)          
+                #code = self.get_data_code(texto)          
                 this_props,props_agg,propsStructure = self.get_props(texto,ntgs)
                 for pr in this_props:
                     if not pr in props:
@@ -440,21 +442,58 @@ class Extractor (object):
                 aa = self.props_info_in_dic(props)
     
                 for i_pr, pr in enumerate(propsStructure):     
-    
+                    
+                    if bool(aa):         
+                        try:       
+                            na = aa[pr._prop_name]['_name'][6:]
+                            try:
+                                un = aa[pr._prop_name]['_units']
+                            except:
+                                un = 'n.a.'
+                            try:
+                                ud = aa[pr._prop_name]['_units_detail']
+                            except:
+                                ud = 'n.a.'
+                        except:
+                            dictionary=Dictionary.objects.get(tag__exact=tg+pr._prop_name)                 
+                            na=dictionary.name  
+                            un=dictionary.units  
+                            ud=dictionary.units_detail 
+                        
+                   
+                    else:
+                        dictionary=Dictionary.objects.get(tag__exact=tg+pr._prop_name)                 
+                        #print dictionary.tag
+                        na=dictionary.name  
+                        #dictionary.description  
+                        un=dictionary.units  
+                        ud=dictionary.units_detail 
+                        #dictionary.active 
+                        #dictionary.definition 
+                        #dictionary.deploy 
+                        #dictionary.type  
+                        #dictionary.category
+
                     try:
-                        propertyExist=PropertyTemp.objects.get(tag__exact=tg+pr._prop_name)
+                        if approved:
+                            propertyExist=Property.objects.get(tag__exact=tg+pr._prop_name)
+                        else:
+                            propertyExist=PropertyTemp.objects.get(tag__exact=tg+pr._prop_name)
+  
                     except ObjectDoesNotExist as error:
                         print "Message({0}): {1}".format(99, error.message)   
                         propertyExist = None
-
-                    na = aa[pr._prop_name ]['_name']
-                    un = aa[pr._prop_name ]['_units']
-                    ud = aa[pr._prop_name ]['_units_detail']
-
-                
-                    dataFileProperty=DataFilePropertyTemp()
+    
+                        
+                    dataFilePropertyExist = None    
+                    
+                    dataFileProperty = None
                     if not propertyExist:        
-                        objProperty=PropertyTemp()
+                        if approved:
+                            objProperty=Property()
+                        else:
+                            objProperty=PropertyTemp()
+                        
                         objProperty.tag=tg+pr._prop_name
                         objProperty.description=pr._prop_name     
                         formatedname = ' '.join(na.split('_')) 
@@ -465,37 +504,135 @@ class Extractor (object):
                         objProperty.units_detail = ud
                         objProperty.save()
                         
-                        dataFileProperty.propertytemp=objProperty
-                        del objProperty
-                    else:                     
-                        dataFileProperty.propertytemp=propertyExist
-                        del propertyExist
-           
-                    try:
-                        dataFileTemp=DataFileTemp.objects.get(filename__exact=fil) 
-                        dataFileProperty.datafiletemp=dataFileTemp
-                        dataFileProperty.save()
-                    except ObjectDoesNotExist as error:
-                        print "Error({0}): {1}".format(99, error.message)   
-    
+ 
+                        try:
+                            if approved:
+                                self.dataFile=DataFile.objects.get(filename__exact=str(self.code) + '.mpod') 
+                            else:
+                                self.dataFile=DataFileTemp.objects.get(filename__exact=fil) 
+                                
+                        except ObjectDoesNotExist as error:
+                            print "Message({0}): {1}".format(99, error.message)   
+                            
+                            
+                        if not self.dataFile:     
+                            if approved: 
+                                self.dataFile=DataFile()
+                            else:
+                                self.dataFile=DataFileTemp()    
+                        else:
+                            try:
+                                if approved:
+                                    dataFileProperty = DataFileProperty.objects.get(property=objProperty, datafile=self.dataFile)
+                                else:
+                                    dataFileProperty=  DataFilePropertyTemp.objects.get(propertytemp=objProperty,datafiletemp=self.dataFile)
+                                
+                            except ObjectDoesNotExist as error:
+                                print "Message({0}): {1}".format(99, error.message)     
+                                
+ 
+
+                        
+                        if not dataFileProperty:  
+                            if approved:
+                                dataFileProperty=DataFileProperty()
+                                dataFileProperty.property=objProperty
+                            else:
+                                dataFileProperty=DataFilePropertyTemp()
+                                dataFileProperty.propertytemp=objProperty
+                        else:
+                            if approved:
+                                dataFileProperty.property=objProperty
+                            else:
+                                dataFileProperty.propertytemp=objProperty
+
+                    else:     
+                        try:
+                            if approved:
+                                self.dataFile=DataFile.objects.get(filename__exact=str(self.code) + '.mpod') 
+                            else:
+                                self.dataFile=DataFileTemp.objects.get(filename__exact=fil) 
+                                
+                        except ObjectDoesNotExist as error:
+                            print "Message({0}): {1}".format(99, error.message)  
+                            
+                            
+                        if not self.dataFile:     
+                            if approved: 
+                                self.dataFile=DataFile()
+                                dataFileTemp  =DataFileTemp.objects.get(filename__exact=fil) 
+                                self.dataFile.code =  dataFileTemp.code
+                                self.dataFile.filename =  str(self.code) + '.mpod'
+                                self.dataFile.cod_code =  dataFileTemp.cod_code 
+                                self.dataFile.phase_generic =  dataFileTemp.phase_generic 
+                                self.dataFile.phase_name =  dataFileTemp.phase_name
+                                self.dataFile.chemical_formula =  dataFileTemp.chemical_formula
+                        
+                                
+                            else:
+                                pass
+                            
+                        else:
+                            try:
+                                if approved:
+                                    dataFileProperty = DataFileProperty.objects.get(property=propertyExist, datafile=self.dataFile)
+                                else:
+                                    dataFileProperty=  DataFilePropertyTemp.objects.get(propertytemp=propertyExist,datafiletemp=self.dataFile)
+                                
+                            except ObjectDoesNotExist as error:
+                                print "Message({0}): {1}".format(99, error.message)     
+                            
+                            
+                        if not dataFileProperty:  
+                            if approved:
+                                dataFileProperty=DataFileProperty()
+                                dataFileProperty.property=propertyExist
+                                dataFileProperty.datafile=self.dataFile
+                                dataFileProperty.save()
+                            else:
+                                dataFileProperty=DataFilePropertyTemp()
+                                dataFileProperty.propertytemp=propertyExist
+                                dataFileProperty.datafiletemp=self.dataFile
+                                dataFileProperty.save()
+                        else:
+                            pass
+                            
+                    
+                        """if approved:
+                            fileUser=FileUser.objects.get(filename__exact=fil)
+                            fileUser.datafile=self.dataFile
+                            fileUser.save()"""
 
                     
             
-        except  Exception, e:
-                #print "Error({0}): {1}".format(e.errno, e.strerror) 
-                pass
+        except  Exception as e:
+            print "Error: {1}".format( e.message, e.args) 
   
  
             
 
             
             
-    def extractPublarticleAndDataFile_Data(self,approved): 
-        gen_tags = ['_cod_database_code', '_phase_generic', '_phase_name', '_chemical_formula']
+    def extractPublarticleAndDataFile_Data(self,approved, *args): 
+        """gen_tags = ['_cod_database_code', '_phase_generic', '_phase_name', '_chemical_formula'] #categorytag_id=5
         publi_tags = ['_journal_name_full', '_journal_year', '_journal_volume',
                                   '_journal_issue', '_journal_page_first', '_journal_page_last',
-                                  '_journal_article_reference', '_journal_pages_number' ]
+                                  '_journal_article_reference', '_journal_pages_number' ]  #categorytag_id=3
         
+        """
+        gen_tags = []
+        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=5))
+
+            
+        for i, pt in enumerate(proptagList):
+            gen_tags.append( proptagList[i].tag )
+        
+        publi_tags = []
+        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=3))
+
+            
+        for i, pt in enumerate(proptagList):
+            publi_tags.append( proptagList[i].tag )
         
         if approved == False:   
             publicArticle=PublArticleTemp()
@@ -584,35 +721,103 @@ class Extractor (object):
                     except  Exception as e:
                         print "Error: {1}".format( e.message, e.args) 
                         
-                """ 
-                if not publArticleExist:
-                        publicArticle.save()
-                """
-                publicArticle.save()
                 
+                publArticle = None 
+                
+
+                try:
+                        if approved == False:   
+                            publArticle=PublArticleTemp.objects.get(  title = publicArticle.title,
+                                                                                                                     authors = publicArticle.authors,
+                                                                                                                     journal = publicArticle.journal,
+                                                                                                                     year = publicArticle.year,
+                                                                                                                     volume = publicArticle.volume,
+                                                                                                                     issue = publicArticle.issue,
+                                                                                                                     first_page = publicArticle.first_page,
+                                                                                                                     last_page = publicArticle.last_page,
+                                                                                                                     reference = publicArticle.reference,
+                                                                                                                     pages_number = publicArticle.pages_number)
+                            
+
+                        else: 
+                            publArticle=PublArticle.objects.get(  title = publicArticle.title,
+                                                                                         authors = publicArticle.authors,
+                                                                                         journal = publicArticle.journal,
+                                                                                         year = publicArticle.year,
+                                                                                         volume = publicArticle.volume,
+                                                                                         issue = publicArticle.issue,
+                                                                                         first_page = publicArticle.first_page,
+                                                                                         last_page = publicArticle.last_page,
+                                                                                         reference = publicArticle.reference,
+                                                                                         pages_number = publicArticle.pages_number)        
+                            
+                except ObjectDoesNotExist as error:
+                    print "Message({0}): {1}".format(99, error.message)   
+                    
+ 
+                
+             
+                if not publArticle:
+                    publicArticle.save()
+                else:
+                    pass
+                    """publArticleExist.title = publicArticle.title
+                    publArticleExist.authors = publicArticle.authors
+                    publArticleExist.journal = publicArticle.journal
+                    publArticleExist.year = publicArticle.year
+                    publArticleExist.volume = publicArticle.volume
+                    publArticleExist.issue = publicArticle.issue
+                    publArticleExist.first_page = publicArticle.first_page
+                    publArticleExist.last_page = publicArticle.last_page
+                    publArticleExist.reference = publicArticle.reference
+                    publArticleExist.pages_number = publicArticle.pages_number                    
+                    publArticleExist.save()
+                    """
+                    
+                self.get_data_code(texto) 
+                datafileExist = None
+                realfil = None 
+                datafile = None
+                try:
                         
+                        if approved == False:   
+                            datafile=DataFileTemp.objects.get(filename__exact=str(fil))
+                            self.code = datafile.code
+                        else: 
+                            datafileTemp=DataFileTemp.objects.get(filename__exact=str(fil))
+                            self.code = datafileTemp.code
+                            fil=str(self.code) + ".mpod"
+                            datafile=DataFile.objects.get(filename__exact=fil)          
+                            
+                except ObjectDoesNotExist as error:
+                    print "Message({0}): {1}".format(99, error.message)   
+
                         
-                #checar articulo no exista si existe actualizar
+   
                
                 ind = ii
                 ii = ii+1         
                 
-
-
-                code = self.get_data_code(texto)
-                gen_vals=[code, fil]
+                 
+                    
+                
+              
+                gen_vals=[self.code, fil]
                 publi_vals=[ii]
 
                 gen_vals = gen_vals + self.get_info_1(texto, gen_tags)
                 
-                if approved == False:
-                    datafile=DataFileTemp()
-                else: 
-                    datafile=DataFile()
-                    
+                if not datafile:
+                    if approved == False:
+                        datafile=DataFileTemp()
+                    else: 
+                        datafile=DataFile()
+                else:
+                    pass
+                        
  
                     
-                datafile.code=code 
+                datafile.code=self.code 
   
     
                 #list: [1000378L, 'zaydsfjtrglkmmhup.mpod', '?', '', '', '', 1]
@@ -645,27 +850,77 @@ class Extractor (object):
                                 datafile.phase_name=vv 
                             elif i == 5:
                                 datafile.chemical_formula=vv 
-                            elif i == 6:                                                                  
-                                datafile.publication= publicArticle
+                            """elif i == 6:                                                                  
+                                datafile.publication= publicArticle"""
 
                     except  Exception as e:
                         print "Error: {1}".format( e.message, e.args)       
                         
                 try:
-                       
+                    if not publArticle:
+                        datafile.publication = publicArticle     
+                    else:    
+                        datafile.publication = publArticle
+                        
                     datafile.save()
-                    del publicArticle
+                        
+                    """if not datafile: 
+                        if not publArticle:
+                            datafile.publication = publicArticle     
+                        else:    
+                            datafile.publication = publArticle 
+
+                        datafile.save()
+
+                    else:
+                        if not publArticle:
+                            datafile.publication = publicArticle     
+                        else:    
+                            datafile.publication = publArticle
+                        datafile.save()
+                    """
+                        
+                        
+ 
+                                  
+                    #filename= datafile.filename
+        
+                            
+            
+                    for i,obj in enumerate(self.experimentalParCondList):
+                        #print type(obj) # <class 'project.app.models.Car'>
+                        #print str(isinstance(obj, ExperimentalParCondTemp))
+
+                        if approved == False:
+                            dataFileTemp=DataFileTemp.objects.get(filename__exact=datafile.filename)
+                            #por si en un futuro se registran nuevas ExperimentalCon para este archivo
+                            experimentalfilecontempDatafiletempQuerySet = ExperimentalfilecontempDatafiletemp.objects.filter(experimentalfilecontemp=obj,datafiletemp=dataFileTemp)
+                            if experimentalfilecontempDatafiletempQuerySet:
+                                pass
+                            else:            
+                                experimentalfilecontempDatafiletemp = ExperimentalfilecontempDatafiletemp()
+                                experimentalfilecontempDatafiletemp.experimentalfilecontemp = obj
+                                experimentalfilecontempDatafiletemp.datafiletemp = dataFileTemp
+                                experimentalfilecontempDatafiletemp.save()
     
-                    for obj in self.experimentalParCondList:
-                        print type(obj) # <class 'project.app.models.Car'>
-                        print str(isinstance(obj, ExperimentalParCondTemp))
-                        experimentalfilecontempDatafiletemp = ExperimentalfilecontempDatafiletemp()
-                        experimentalfilecontempDatafiletemp.experimentalfilecontemp = obj
-                        experimentalfilecontempDatafiletemp.datafiletemp = datafile
-                     
-                        experimentalfilecontempDatafiletemp.save()
-                        del datafile
-                    
+                        else: 
+                            pass                           
+                            """experimentalParCond = ExperimentalParCond()
+                            for efct in experimentalfilecontempDatafiletempQuerySet:
+                                try:
+                                    experimentalParCond = ExperimentalParCond.objects.get(tag__exact=efct.experimentalfilecontemp.tag)
+                                    #experimentalParCond= None
+                                except ObjectDoesNotExist as error:
+                                    print "Error({0}): {1}".format(99, error.message) 
+                                     
+                                    experimentalParCond.tag = efct.experimentalfilecontemp.tag
+                                    experimentalParCond.name =  efct.experimentalfilecontemp.name
+                                    experimentalParCond.description =  efct.experimentalfilecontemp.description
+                                    experimentalParCond.units =  efct.experimentalfilecontemp.units
+                                    experimentalParCond.units_detail =  efct.experimentalfilecontemp.units_detail
+                                    experimentalParCond.save()
+                            """
+
                 except  Exception as e:
                         print "Error: {1}".format( e.message, e.args)       
 

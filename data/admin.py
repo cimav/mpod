@@ -62,6 +62,10 @@ from django.db.models import Count
 import decimal
 from data.Utils import requestPostToIntList
 
+from CifMpodValidator import *
+from data.ExtractorDataFromCIF import *
+from django.http import QueryDict
+
 """
 class UserAdmin(admin.ModelAdmin):
 
@@ -259,334 +263,32 @@ admin.site.register(MessageCategoryDetail, MessageCategoryDetailAdmin)
 
 
 class FileUserAdmin(admin.ModelAdmin):
-        list_display =('filename','date','user_name')  
+        list_display =('filename','date','user_name','published')  
         search_fields = ['filename', ]
- 
-    
-        def get_fieldsets(self, request, obj=None):
-            fieldsets = super(FileUserAdmin, self).get_fieldsets(request, obj)
-            print #
-            print fieldsets[0][1]['fields']
-            
-            #fieldsets[0][1]['fields'] += ['foo'] 
-
-            fieldsets = (
-                  ('Standard info', {
-                       #'classes': ('collapse',),
-                      'fields': ('filename','authuser','date','datepublished','published')
-                  }),
-                  ('Validation info', {
+        
+        
+        form=FileUserAdminForm
+        readonly_fields=['authuser','filename','date','user_name']
+       
+        
+        def get_fieldsets(self, *args, **kwargs):
+            return  (
+                ('File', {
+                    'fields': ('fileuserid','authuser','filename','filenamepublished','cod_code','date','datepublished','reportvalidationcustom','published','experimentalcon','properties','phase_generic','phase_name','chemical_formula',)
+                }),
+                ('Publication info', {
                       'classes': ('collapse',),
-                      'fields': ( ( 'reportvalidation','datafile'))
+                      'fields': (  'title','authors','journal','year','volume','issue','first_page','last_page','reference','pages_number',),
                   }),
-                    
-               )
+         
+
+                 
+              
+            )
             
-            return fieldsets
-                
-        #al dar click en unaocion del menu preincipal
-        def changelist_view(self, request, extra_context=None):
-            print 'FileUser changelist_view'
-            extra_context = extra_context or {}
-            extra_context['some_var'] = 'This is what I want to show'
-            return super(FileUserAdmin, self).changelist_view(request, extra_context=extra_context)
-
-            #alseleccionar un elemento de menu
-        def selectlist_view(self, request, extra_context=None):
-            print 'FileUser selectlist_view'
-            temp_list_display_links = self.list_display_links
-            self.list_display_links = (None, )
-            response = self.changelist_view(request, extra_context)
-            self.list_display_links = temp_list_display_links
-            return response
-
-        #al seleccionar un elemento de change_list_results.html
-        def change_view(self, request, object_id, extra_context=None):
-            print extra_context
-            print object_id
-            fileuser = FileUser.objects.get(id__exact=object_id)
-            print fileuser.filename
-            objModel=DataFileTemp.objects.get(filename__exact=fileuser.filename)
-       
-
-    
-            custom_admin_formsets = {}
-            custom_admin_formsets['contentmaintitlepublicationtext']= "Publication"
-            custom_admin_formsets['formrowpublicationtext']= "Publication info"
             
-            custom_admin_formsets['contentmaintitledatafiletext']= "File"
-            custom_admin_formsets['formrowdatafiletext']= "File info"
- 
-            custom_admin_formfields = {}
-            custom_admin_formfields_foreignkey = {}
-
-          
-            for f in DataFileTemp._meta.fields:
-                #print f.name
-                if f.get_internal_type() == 'ForeignKey':
-                    field_name_obj = getattr(objModel, f.name)
-                    for f2 in field_name_obj._meta.fields:
-                        #print f2.name
-                        field_name_val = getattr(field_name_obj, f2.name)
-                        if field_name_val != None:
-                            custom_admin_formfields_foreignkey[f2.name.replace('_', ' '),f2.name,''] =field_name_val
-                        else:
-                            custom_admin_formfields_foreignkey[f2.name.replace('_', ' '),f2.name,''] =""
-                        
-                    custom_admin_formfields[f.name.replace('_', ' '),f.name,'publication'] = custom_admin_formfields_foreignkey
-                    #print custom_admin_formfields
-                else:
-                    single_field_name_val = getattr(objModel, f.name)
-                    #print field_name_val
-                    custom_admin_formfields[f.name.replace('_', ' '),f.name,'datafile'] = single_field_name_val
-
-            #print custom_admin_formfields
-            contentmaintitle = 1
-            formrow = 1
-            
-            extra = {
-                'title': 'Publish file',
-                'original':'Property',
-                'objModel':objModel,
-                'contentmaintitle':contentmaintitle,
-                'formrow':formrow,
-                "custom_admin_formsets":custom_admin_formsets,
-                'custom_admin_formfields':custom_admin_formfields
-                
-            }
-            
-
-            result = super(FileUserAdmin, self).change_view(request, object_id, extra_context=extra)
-            print "FileUser change_view"    
-            return result
-        
-        
-        actions = ['delete_selected']
-        def delete_selected(self, request, queryset):
-            if request.POST.get('post'):
-                counter = 0
-                for obj in queryset:
-                    if obj.published != True:
-                        objDataFileTemp=DataFileTemp.objects.get(filename__exact=obj.filename)
-                        pat=PublArticleTemp.objects.get(id=objDataFileTemp.publication.id)
-                        #objDataFileTemp.delete()
-                        #pat.delete() 
-                        dataFilePropertyTempDataSet=DataFilePropertyTemp.objects.filter(datafiletemp=objDataFileTemp)
-                        for dfptds in dataFilePropertyTempDataSet:
-                            print dfptds.propertytemp.tag
-                            dfpt=DataFilePropertyTemp()
-                            dfpt=dfptds
-                            dfpt.delete()
-           
-                        objDataFileTemp.delete()
-                        pat.delete() 
-                        
-                        
-                        #pat.delete() 
-                        experimentalfilecontempDatafiletempDataSet=ExperimentalfilecontempDatafiletemp.objects.filter(datafiletemp=objDataFileTemp)
-                        
-                        for efctdf in experimentalfilecontempDatafiletempDataSet:
-                            print efctdf.experimentalfilecontemp.tag
-                            efctdf.delete()
-                        
-                        
-                        pathslist=Path.objects.all()   
-                        path=Path() 
-                        for cifdir in pathslist:
-                            path = cifdir
-                            if os.path.isdir(path.cifs_dir):
-                                break
-                                            
-                        ciffilein =os.path.join(path.cifs_dir_valids, obj.filename)
-                        ciffileout = os.path.join(path.cifs_dir,objDataFileTemp.filename)
-                        print "archivo a borrar"
-                        print ciffileout
-                        try:
-                            if os.path.isfile(ciffilein):
-                                os.remove(ciffilein)                    
-                        except Exception as e:
-                            raise Http404('%s object no published yet.' % (force_unicode(e)))
-                
-                        obj.delete()  
-                        counter = counter + 1
-                        self.message_user(request, "%s file(s) successfully deleted.." % counter  )
-                        
-                    else:
-                        #pass
-                        self.message_user(request, ""  )
-                        #messages.debug(request, '%s SQL statements were executed.' % count)
-                        #messages.info(request, 'Three credits remain in your account.')
-                        #messages.success(request, 'Profile details updated.')
-                        messages.warning(request, 'The file currently unpublished.')
-                        messages.error(request, 'The file was not deleted.')
-                    
-                    
-                    
-                    
-            else:
-                return delete_selected_(self, request, queryset)
-        
-        delete_selected.short_description = "Delete selected files unpublished"
-        
-        
-        def delete_model(self, request, obj):
-            obj.delete()
-            
-        def get_actions(self, request):
-            actions = super(FileUserAdmin, self).get_actions(request)
+        def save_model(self, request, obj, form, change):    
             try:
-               
-                #print actions
-                if 'delete_selected' in actions:
-                    #del actions['delete_selected']
-                    #del actions['delete_selected'] #disable
-                    pass
-            except KeyError:
-                pass
-            return actions
-
-        def delete_view(self, request, object_id, extra_context=None):
-            
-            opts = self.model._meta
-            app_label = opts.app_label
-             
-            try:
-                obj = self.model._default_manager.get(pk=object_id)
-            except self.model.DoesNotExist:
-                obj = None
-                  
-            if not self.has_delete_permission(request, obj):
-                raise PermissionDenied
-  
-            if obj is None:
-                raise Http404('%s object with primary key %r does not exist.' % (force_unicode(opts.verbose_name), escape(object_id)))
- 
-            if obj.published == False:
-                raise Http404('can not carry out the operation because the object %s  is unpublished' % (force_unicode(opts.verbose_name)))
-            
-                       
-            
-            using = router.db_for_write(self.model)  
- 
- 
-            (deleted_objects, perms_needed, protected) = get_deleted_objects([obj], opts, request.user, self.admin_site, using)
-            
-       
-
-            #if request.POST is set, the user already confirmed deletion
-            if not request.POST:
-                print 'not request.POST'
-            else:
-                print 'request.POST'
-                if perms_needed:
-                    raise PermissionDenied
-                
-                dataFileTemp=DataFileTemp.objects.get(filename__exact=obj.filename)
-
-                publication= None
-                try: 
-                    dataFile=DataFile.objects.get(code__exact = dataFileTemp.code )    
-                    publication = dataFile.publication
-                except ObjectDoesNotExist as error:
-                    print "Message({0}): {1}".format(99, error.message) 
-                    dataFile = None                 
-                    
-                if dataFile is None:
-                    raise Http404('%s object no published yet.' % (force_unicode(dataFileTemp.filename)))
-  
-                dataFilePropertyQuerySet = None
-                try: 
-                    dataFilePropertyQuerySet=DataFileProperty.objects.filter(datafile = dataFile )    
-                except ObjectDoesNotExist as error:
-                    print "Message({0}): {1}".format(99, error.message) 
-                    dataFilePropertyQuerySet = None        
-                    
-                if dataFilePropertyQuerySet is None:
-                    raise Http404('%s object no published yet.' % (force_unicode(dataFile.code)))
-
-                for dfp in dataFilePropertyQuerySet:
-                    dataFilePropertyObj = DataFileProperty()
-                    dataFilePropertyObj = dfp
-                    
-                    print "dataFilePropertyObj.delete()"
-                    print dataFilePropertyObj.datafile.filename
-                    dataFilePropertyObj.delete()
- 
-                pathslist=Path.objects.all()   
-                path=Path() 
-                for cifdir in pathslist:
-                    path = cifdir
-                    if os.path.isdir(path.cifs_dir):
-                        break
-                                    
-                ciffilein =os.path.join(path.cifs_dir_valids, obj.filename)
-                ciffileout = os.path.join(path.cifs_dir,dataFile.filename)
-                print "archivo a borrar"
-                print ciffileout
-                try:
-                    if os.path.isfile(ciffileout):
-                        os.remove(ciffileout)                    
-                except Exception as e:
-                    raise Http404('%s object no published yet.' % (force_unicode(e)))
-
-
-                dataFile.delete() 
-                publication.delete()
-      
-                obj_display = str(obj)
-                #self.delete_model(request, obj)
-                obj.published = False
-                obj.save()  
- 
-                  
-                self.log_deletion(request, obj, obj_display)
-                self.message_user(request, ('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})
-             
-                if not self.has_change_permission(request, None):
-                    return HttpResponseRedirect(reverse('admin:index',
-                                                        current_app=self.admin_site.name))
-                return HttpResponseRedirect(reverse('admin:%s_%s_changelist' %
-                                            (opts.app_label, opts.module_name),
-                                            current_app=self.admin_site.name))
-                
-            
-            object_name = force_unicode(opts.verbose_name)
-            if perms_needed or protected:
-                title = "Cannot delete %(name)s" % {"name": object_name}
-            else:
-                title = "Are you sure?"
-            
-            context = {
-                  "title": title,
-                  "object_name": object_name,
-                  "object": obj,
-                  "deleted_objects": deleted_objects,
-                  "perms_lacking": perms_needed,
-                  "opts": opts,
-                  "root_path": self.admin_site,
-                  "app_label": app_label,
-              }
-            
-            context.update(extra_context or {})
-            
-            return render_to_response(self.delete_confirmation_template or [
-              "admin/%s/%s/delete_confirmation.html" % (app_label, opts.object_name.lower()),
-              "admin/%s/delete_confirmation.html" % app_label,
-              "admin/delete_confirmation.html"
-              ], context, context_instance=template.RequestContext(request))
-            
-            #todo lo anterior + self.delete_model(request, obj)
-            #super(FileUserAdmin, self).delete_view(request, obj, extra_context)
- 
-        def save_model(self, request, obj, form, change):
-            try:
-
-                #print request.POST
-                message_bit = "" 
-                #print form.changed_data # list name of field was changed
-                #print change #True or False
-                
-               
                 if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
                     print "pass"
                 elif  request.POST.has_key('_addanother'): 
@@ -595,106 +297,73 @@ class FileUserAdmin(admin.ModelAdmin):
                     print request.POST.get('_continue',False)
                 elif request.POST.has_key('_save'):
                     print request.POST.get('_save',False)
-                    if request.POST.get('published',False)  != False:
-                        try:
-                            
-          
+                    if (request.POST.get('published',False)  != False):
+
+                        
+                        properties_ids= requestPostToIntList(request.POST,'properties')  
+                        phase_name = requestPostCheck(request.POST,'phase_name')  
+                        reference = requestPostCheck(request.POST,'reference')  
+                        title = requestPostCheck(request.POST,'title')  
+                        phase_generic = requestPostCheck(request.POST,'phase_generic')  
+                        pages_number = requestPostToInt(request.POST,'pages_number') 
+                        journal = requestPostCheck(request.POST,'journal') 
+                        year = requestPostToInt(request.POST,'year')
+                        volume = requestPostToInt(request.POST,'volume')
+                        first_page = requestPostToInt(request.POST,'first_page')
+                        last_page = requestPostToInt(request.POST,'last_page') 
+                        authors = requestPostCheck(request.POST,'authors')  
+                        issue = requestPostCheck(request.POST,'issue')  
+                        cod_code = requestPostToInt(request.POST,'cod_code') 
+                        chemical_formula = requestPostCheck(request.POST,'chemical_formula')  
+                        published = requestPostCheck(request.POST,'published') 
+                        experimentalcon = requestPostCheck(request.POST,'experimentalcon') 
+
+                        pathslist=Path.objects.all()      
+                        pathexist = 0
+                        cifs_dir=''    
+                        for cifdir in pathslist:
+                            paths=Path() 
+                            paths = cifdir
+                            if os.path.isdir(paths.cifs_dir_valids): 
+                                pathexist = 1
+                                cifs_dir= paths.cifs_dir_valids
+                                break
+ 
+                    
+                    
+                        filelist = []    
+                        filelist.append(obj.filename ) 
+                        estr = Extractor(str(paths.cifs_dir_valids),str(paths.core_dic_filepath),str(paths.mpod_dic_filepath),str(paths.cifs_dir_output),filelist);
+                        estr.extractConditions(True,request.POST)
+                        estr.extractPublarticleAndDataFile_Data(True,request.POST)
+                        estr.extractProperties(True,request.POST)
+                        
+                        print 'fecha'
+                        #obj.published = True
+                        if not obj.datepublished:
                             obj.datepublished = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-                            dataFileTemp=DataFileTemp.objects.get(filename__exact=obj.filename)
-             
-                            experimentalfilecontempDatafiletempQuerySet = ExperimentalfilecontempDatafiletemp.objects.filter(datafiletemp=dataFileTemp)
-                            experimentalParCond = ExperimentalParCond()
-                            for efct in experimentalfilecontempDatafiletempQuerySet:
-                                try:
-                                    experimentalParCond = ExperimentalParCond.objects.get(tag__exact=efct.experimentalfilecontemp.tag)
-                                    #experimentalParCond= None
-                                except ObjectDoesNotExist as error:
-                                    print "Error({0}): {1}".format(99, error.message) 
-                                     
-                                    experimentalParCond.tag = efct.experimentalfilecontemp.tag
-                                    experimentalParCond.name =  efct.experimentalfilecontemp.name
-                                    experimentalParCond.description =  efct.experimentalfilecontemp.description
-                                    experimentalParCond.units =  efct.experimentalfilecontemp.units
-                                    experimentalParCond.units_detail =  efct.experimentalfilecontemp.units_detail
-                                    experimentalParCond.save()
-    
-                            publicArticle=PublArticle()                      
-                            publicArticle.title =  dataFileTemp.publication.title
-                            publicArticle.authors =  dataFileTemp.publication.authors
-                            publicArticle.journal =  dataFileTemp.publication.journal
-                            publicArticle.year =  dataFileTemp.publication.year
-                            publicArticle.volume =  dataFileTemp.publication.volume
-                            publicArticle.issue =  dataFileTemp.publication.issue
-                            publicArticle.first_page =  dataFileTemp.publication.first_page
-                            publicArticle.last_page =  dataFileTemp.publication.last_page
-                            publicArticle.reference =  dataFileTemp.publication.reference
-                            publicArticle.pages_number =  dataFileTemp.publication.pages_number
-                            publicArticle.save()
                             
-          
-                            
-                            dataFile=DataFile()
-                            top = DataFile.objects.order_by('-code')[0]
-                            code = top.code + 1
-                            dataFile.code = code 
-                            dataFile.filename = str(code) + ".mpod"
-                            dataFile.cod_code = dataFileTemp.cod_code
-                            dataFile.phase_generic =  dataFileTemp.phase_generic
-                            dataFile.phase_name =  dataFileTemp.phase_name
-                            dataFile.chemical_formula = dataFileTemp.chemical_formula
-                            dataFile.publication = publicArticle
-                  
-                            dataFile.save()
-              
-                            obj.datafile =dataFile
-                            
-                            dataFileTemp.code = dataFile.code
-                            dataFileTemp.save()
-                     
-                            
-                                                        
-                            dataFilePropertyTemp = DataFilePropertyTemp.objects.get(datafiletemp = dataFileTemp)
-                            dataFileProperty=DataFileProperty()
-                            property=Property()
-                            
-                            try:
-                                property = Property.objects.get(tag__exact=dataFilePropertyTemp.propertytemp.tag)
-                            except ObjectDoesNotExist as error:
-                                #print "Error({0}): {1}".format(99, error.message) 
-                                 
-                                property.tag = dataFilePropertyTemp.propertytemp.tag
-                                property.name =  dataFilePropertyTemp.propertytemp.name
-                                property.description =  dataFilePropertyTemp.propertytemp.description
-                                property.tensor_dimensions =  dataFilePropertyTemp.propertytemp.tensor_dimensions
-                                property.units =  dataFilePropertyTemp.propertytemp.units
-                                property.units_detail =  dataFilePropertyTemp.propertytemp.units_detail
-                                property.save()
-    
-                            dataFileProperty.property=property
-                            dataFileProperty.datafile = dataFile
-                            dataFileProperty.save()
-   
-                            
-                            obj.save()  
-                          
-                            
+                        obj.published = True
+                        obj.datafile = estr.dataFile
+                        obj.save()  
+                        
+                        try:
                             pathslist=Path.objects.all()      
-                            pathexist = 0
-                            
-                            filepath = ""
                             path=Path() 
                             for cifdir in pathslist:
                                 path = cifdir
                                 if os.path.isdir(path.cifs_dir):
                                     break
-                            
+                           
+                      
+                             
                             ciffilein =os.path.join(path.cifs_dir_valids, obj.filename)
-                            ciffileout = os.path.join(path.cifs_dir,dataFile.filename)
-                            print dataFile.filename
+                            ciffileout = os.path.join(path.cifs_dir,str(estr.code) + ".mpod")
+                             
             
                             #line.replace("data_" + obj.filename, "data_" +dataFile.code ), end='')
                             datacode = "data_"+ obj.filename.replace('.mpod', ' ')
-                            newdatacode =   "data_" + str(dataFile.code)
+                            newdatacode =   "data_" + str(cod_code)
                             print datacode
                             print newdatacode
            
@@ -739,7 +408,7 @@ class FileUserAdmin(admin.ModelAdmin):
                                                                                     'email_message':  messageMail.email_message,
                                                                                     'user': obj.authuser,
                                                                                     'domain': current_site.domain,
-                                                                                    'code':  dataFile.code,
+                                                                                    'code':  str(estr.code),
                                                                                     'dataitem': dataitem,
                                                                                     'forwardslash': forwardslash,
                                                                                     
@@ -754,28 +423,67 @@ class FileUserAdmin(admin.ModelAdmin):
                                                     [obj.authuser.email],
                                                     connection=connection
                                                 )
-                            
-    
+                        
+
                         except ObjectDoesNotExist as error:
-                                    #print "Error({0}): {1}".format(99, error.message)  
                                     messages.add_message(request, messages.ERROR, "Error %s " % error.message)
                     else:
-                          
-                        opts = self.model._meta
-                        obj_display = force_unicode(obj)
-                        """   
-                        self.log_change(request, obj, message)
-                        self.log_addition(request, obj)
-                        self.log_deletion(request, obj, obj_display)
-                        """
-                        #self.message_user(request, ('The %(name)s "%(obj)s" was changed  successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})
+                        if obj.datafile:
+                            dataFilePropertyToDeleteQuerySet = DataFileProperty.objects.filter(datafile=obj.datafile)
+     
                             
-                      
-             
-             
+                            objDataFile = DataFile.objects.get(code=obj.datafile.code)
+                            objPublArticle= objDataFile.publication
                             
+                            publArticleQuerySet= PublArticle.objects.filter(id=objPublArticle.id)
+    
+                            for i,df in enumerate(dataFilePropertyToDeleteQuerySet):
+                                dataFilePropertyToDeleteQuerySet[i].delete()
+                                
+                            filename = objDataFile.filename       
+                            objDataFile.delete()
+    
+                            #objPublArticle.delete() 
+                             
+                            if publArticleQuerySet:
+                                if len(publArticleQuerySet) == 1:
+                                    for i,pa in enumerate(publArticleQuerySet):
+                                        publArticleQuerySet[i].delete()
+                                        
+                                        
+                             
+                            obj.datafile = None       
+                            obj.datepublished = None
+                            obj.published = False      
+                            obj.save()  
+                            
+                            pathslist=Path.objects.all()   
+                            path=Path() 
+                            for cifdir in pathslist:
+                                path = cifdir
+                                if os.path.isdir(path.cifs_dir):
+                                    break
+                                                
+                       
+                            ciffileout = os.path.join(path.cifs_dir,filename)
+                            print "archivo a borrar"
+                            print ciffileout
+                            try:
+                                if os.path.isfile(ciffileout):
+                                    os.remove(ciffileout)                    
+                            except Exception as e:
+                                raise Http404('%s object no deleted yet.' % (force_unicode(e)))
+                                
+                        else:
+                            messages.add_message(request, messages.ERROR, "An unexpected error occurred, consult technical support.")
+     
+                        
+                        
+                        
             except  Exception, e:
-                    messages.add_message(request, messages.ERROR, "Error %s " % e.message)
+                        messages.add_message(request, messages.ERROR, "Error %s " % e.message)
+ 
+    
 
 admin.site.register(FileUser, FileUserAdmin)
 
@@ -1875,7 +1583,7 @@ class TensorAdmin(admin.ModelAdmin):
     def get_fieldsets(self, *args, **kwargs):
         return  (
             ('Tensor', {
-                'fields': ('name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup','pointgroupdetail','puntualgroupnames','puntualgroupnamesdetail','axis','axisdetail','coefficients',),
+                'fields': ('errormessage','name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup','pointgroupdetail','puntualgroupnames','puntualgroupnamesdetail','axis','axisdetail','coefficients',),
             }),
         )
  
@@ -2133,3 +1841,9 @@ class TensorAdmin(admin.ModelAdmin):
         #return super(TensorAdmin, self).get_queryset().all().exclude(id=21)
  
 admin.site.register(Tensor,TensorAdmin)
+
+
+
+
+#Modul for permissions
+admin.site.register(Permission)

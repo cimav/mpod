@@ -393,8 +393,14 @@ def viewsecondranktensor(request):
         val32 = float(value32)
         val33 = float(value33)
         color = int(color)
-        #filename = filename.Trim()
         filename = re.sub('[\s+]', '', filename)
+        filename1 =None
+        filename2 =None
+        
+        surfacecolorSecondRankTensor= None
+        surfacecolorSecondRankTensorRotated= None
+       
+        valuearrayrotated =request.GET.getlist("valuearrayrotated")
        
         if color == 0:
             colorscale='Jet';
@@ -407,7 +413,7 @@ def viewsecondranktensor(request):
         
     
         
-        tensor = RankTensors()
+        
         pathslist=Path.objects.all()      
         pathexist = 0
         stl_dir=''
@@ -425,7 +431,7 @@ def viewsecondranktensor(request):
         #stl_dir=".\\media\\stlfiles\\"
         #stl_dir="/var/www/MPOD/media/stlfiles/"
         
-      
+       
         filename1 = filename +"R2LowResolution" + ".stl"
         filepath=os.path.join(stl_dir, filename1)
         res=1;
@@ -438,11 +444,20 @@ def viewsecondranktensor(request):
        
         createdata =  1
       
+        tensor = RankTensors()
         tensor.SecondRankTensor(val11,val12,val13,val21,val22,val23,val31,val32,val33,color,filename1,res,stl_dir,createstl,createdata)
         XEC=tensor.stringValsOfXEC
         YEC = tensor.stringValsOfYEC
         ZEC= tensor.stringValsOfZEC
         surfacecolorSecondRankTensor=tensor.surfacecolorSecondRankTensor
+        
+        if valuearrayrotated:
+            tensor.SecondRankTensorRotated(valuearrayrotated,color,filename1,res,stl_dir,createstl,createdata)
+            XEC2=tensor.stringValsOfXEC2
+            YEC2 = tensor.stringValsOfYEC2
+            ZEC2= tensor.stringValsOfZEC2
+            surfacecolorSecondRankTensorRotated=tensor.surfacecolorSecondRankTensorRotated
+            
         del tensor
        
         filename2 = filename+"R2MidleResolution" + ".stl"
@@ -462,8 +477,20 @@ def viewsecondranktensor(request):
             del tensor
 
 
-                        
-        return render_to_response('secondranktensor.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,'colorscale':colorscale,'surfacecolorSecondRankTensor':surfacecolorSecondRankTensor}, context_instance=RequestContext(request))
+        if valuearrayrotated:               
+            return render_to_response('secondranktensor.html',{"XEC": XEC,
+                                                                                                        "YEC":YEC,
+                                                                                                        "ZEC": ZEC,
+                                                                                                        "LowResolutionFileName":filename1,
+                                                                                                        "MiddleResolutionFileName":filename2,
+                                                                                                        'colorscale':colorscale,
+                                                                                                        'surfacecolorSecondRankTensor':surfacecolorSecondRankTensor,                    
+                                                                                                        "XEC2": XEC2,
+                                                                                                        "YEC2":YEC2,
+                                                                                                        "ZEC2": ZEC2,
+                                                                                                        'surfacecolorSecondRankTensorRotated':surfacecolorSecondRankTensorRotated,}, context_instance=RequestContext(request))
+        else:             
+            return render_to_response('secondranktensor.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,'colorscale':colorscale,'surfacecolorSecondRankTensor':surfacecolorSecondRankTensor}, context_instance=RequestContext(request))
 
         
     #return render_to_response('secondranktensor.html', context_instance=RequestContext(request))
@@ -1989,7 +2016,7 @@ def onhold(request,todo,index):
                                     lcs=d.tag.split()
                                     prstr=lcs[0].strip()[5:]
                                     parts=prstr.split('_')                                
-                                    proptag=PropTags.objects.get(tag__exact=parts[1])
+                                    #proptag=PropTags.objects.get(tag__exact=parts[1])
                                 except ObjectDoesNotExist as error:
                                     print "Message({0}): {1}".format(99, error.message)  
                                     pt=PropTags()
