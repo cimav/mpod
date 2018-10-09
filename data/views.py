@@ -2686,6 +2686,7 @@ def addcasev2(request):
             typeselected =''   
         
         #initialisation
+        piezoelectricitydgeh = 0
         magnetoelectricity = 0
         chkBoxMagnetoelectricity = 0
         questiontype =''
@@ -2700,7 +2701,17 @@ def addcasev2(request):
                 if typeselected == '':
                     typeselected = 's'
             if catalogproperty_name == "p":
-                typeselected='d'
+                print  len(typeselected)  == int(0)
+               
+                if typeselected != "dg" and typeselected != "eh" and (len(typeselected)  == int(0)) != True:
+                    typeselected='dg'
+                else:
+                    objDataProperty = Property.objects.get(id=int(datapropertytagselected))  
+                    objTypeDataProperty=TypeDataProperty.objects.get(dataproperty=objDataProperty)
+                    typeselected=objTypeDataProperty.type.name
+                  
+                typeselecteddg='dg'
+                typeselectedeh='eh'
             if catalogproperty_name == "2nd":
                 chkBoxMagnetoelectricity = 1
                 questiontype = "Magnetoelectricity?"  
@@ -2755,9 +2766,17 @@ def addcasev2(request):
         else:
             del request.session['dataPropertyListOnSession']
             
-         
         ids=CatalogProperty.objects.filter(name=catalogproperty_name,active=True).values_list('id', flat=True)    
-        type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
+        if catalogproperty_name == "p":
+            type_ids1=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselecteddg).values_list('id',flat=True)    
+            type_ids2=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselectedeh).values_list('id',flat=True)    
+        
+            type_ids = list(set(type_ids1) | set(type_ids2)) 
+        else:
+            
+            type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
+ 
+        
         data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
         dataPropertyList=Property.objects.filter(id__in=data_property_ids)
         request.session['dataPropertyListOnSession']=dataPropertyList
