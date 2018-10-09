@@ -282,7 +282,7 @@ class MPODUtil():
                     self.addline(self.__line)
                     self.__prop_elastic_compliance= True
                 
-            if p.objTypeSelected.name  == "d": 
+            if p.objTypeSelected.name  == "dg" or p.objTypeSelected.name  == "eh": 
                 if self.__prop_piezoelectric == False:
                     self.__dij= self.getTag(p.objDataProperty.tag)
                     self.__line =  p.objDataProperty.tag +" '"+self.__dij+"'" + "\n"

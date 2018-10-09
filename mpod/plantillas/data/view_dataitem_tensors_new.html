@@ -1,3 +1,27 @@
+
+   <script type="text/javascript">	
+  /*var list_tensor_tags = new Array()
+  var list_tensor_tags_counter = 0;
+  var list_tensor_filename_counter = 0;
+  var type_id= null;
+  var select_color_id = null;
+  var inline_form_input_id = null;
+  
+  var lblHinline_form_input_id = null;
+  var lblKinline_form_input_id = null;
+  var lblLinline_form_input_id = null;
+  var inputHinline_form_input_id = null;
+  var inputKinline_form_input_id = null;
+  var inputLinline_form_input_id = null;*/
+  </script>
+   {% for t in listtensortags %}	
+		
+		<script type="text/javascript">
+		  
+		  parseTensorTag('{{t}}');
+		  </script>
+{% endfor %}
+
 {% if formatted_data_blocks %}
 	{% for block in formatted_data_blocks %}
 		{% if block.0 %}
@@ -34,6 +58,8 @@
 							var type = "";
 							var tdbuttonpaddingleft = 100;
 							var tdseparatorpaddingleft = 50;
+							var propertyid= [];
+							var propertycounter= 0;
 							
 							function thirdranktensordg(clicked_id, values, selectedid, filename,valuearrayrotated) {
 								// alert(valuearrayrotated);
@@ -79,6 +105,7 @@
 
 							function secondranktensor(clicked_id, values, selectedid, filename,valuearrayrotated) {			    
 							    selectedColor = document.getElementById(selectedid).selectedIndex;
+							    
 							    if (valuearrayrotated ==  'undefined')
 							    	{
 										var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
@@ -213,8 +240,9 @@
 							}
 							
 							function callajax(clicked_id,idtd,arrayindex,spanid, filename,values,tensor) {
-							 
+								 
 								$( "#td" + idtd ).html("");
+								
 								//alert($( "#td" + idtd ).attr('id'));
 								inlineFormInput= "inlineFormInput" + idtd;
 								selectid= "color" + idtd;
@@ -222,7 +250,10 @@
 								$( "#" + spanid ).html("");
 								
 								omeg=  $( "#omega" + inlineFormInput ).val();
+								 
 								data =datasendarray[arrayindex]
+								 
+								//alert(datasendarray[arrayindex]);
 								datasend = {'mh':data.mh,
 														'mk':data.mk,
 														'ml':data.ml,
@@ -230,12 +261,12 @@
 														'mat': data.mat,
 														'url':data.url
 														}
-
+								
 								url = "{% url rotatematrix 0000000 -1%}";
 								url = url.replace(/0/, codefile.toString());
 								
 								btngraphrotatedid='btngraphrotated' + idtd;
-								 
+								
 								$.ajax({
 					            	type: "POST",
 					                url: url,
@@ -297,9 +328,37 @@
 							<br />
 					{% endif %}
 					{% if sec.1 %}
+
 					
 						<h6>Properties' values</h6>
-						{% for tens_prop in sec.1 %}						   
+						{% for tens_prop in sec.1 %}			
+							<script type="text/javascript">
+									   var counterElements = 0;
+									   parseTensorValue("{{tens_prop.1}}","{{tens_prop.0}}","{{tens_prop.3}}",codefile);
+									   console.log("id: " + property_id);
+									   console.log("tag: " + property_tag);
+									   console.log("tensor_category: " + tensor_category);
+									   console.log("url: " + jsondatasend.url);
+									   console.log("values:" + res);
+									   console.log("type: " + type_id); 
+									   console.log(tensor_file_name);
+									   console.log(select_color_id);
+									   console.log(inline_form_input_id);
+									   console.log(lblHinline_form_input_id);
+									   console.log(lblKinline_form_input_id);
+									   console.log(lblLinline_form_input_id);
+									   console.log(lblOmegainline_form_input_id);
+									   console.log(inputHinline_form_input_id);
+									   console.log(inputKinline_form_input_id);
+									   console.log(inputLinline_form_input_id);
+									   console.log(inputOmegainline_form_input_id);
+									   console.log(btnid);
+									   console.log(spanid);
+									   console.log(spangraphid);
+
+									   
+							</script>
+														   
 							<a href="/properties/{{tens_prop.1}}">{{tens_prop.0}}</a> {{tens_prop.2}}
 								<div class="table-responsive">
 								<table >
@@ -309,17 +368,15 @@
 										<tbody>
 											<script type="text/javascript">
 												var counterElements = 0;
-												
-
-											 
 											</script>
 											{% for tens_row in tens_prop.3 %}
+						
 												<tr>
 													{% for tens_val in tens_row %}
 														<script type="text/javascript">
 															
 															value = "{{tens_val}}";
-															
+															 
 															//alert(isNaN(value));
 
 															if(isNaN(value))
@@ -473,7 +530,9 @@
 																"{{tens_prop.0}}" == "thermal conductivity kappaij" || 
 																"{{tens_prop.0}}" == "thermal diffusivity kappadij" || 
 																"{{tens_prop.0}}" == "thermal expansion alphaij" || 
-																"{{tens_prop.0}}" == "thermoelectric Seebeck Seij"){
+																"{{tens_prop.0}}" == "thermoelectric Seebeck Seij" || 
+																"{{tens_prop.0}}" == "thermal expansion alphaijT0" || 
+																"{{tens_prop.0}}" == "thermal expansion alphaijT" ){
 																//"|| {{tens_prop.0}}" == "magnetoelectric MEalphaij"){
 																type = 0;
 																file_name =codefile + "{{tens_prop.0}}".replace(/\s/g,'').replace(/,/g , '') + totalProperties.toString();
@@ -527,7 +586,7 @@
 															"{{tens_prop.0}}" == "thermal expansion Tij"){
 																type = 4;
 																file_name =codefile + "{{tens_prop.0}}".replace(/\s/g,'').replace(/,/g , '') + totalProperties.toString();
-														
+																
 																 
 																
 															}															
@@ -561,10 +620,7 @@
 									</td> 
 										
 										<script type="text/javascript">
-										  /***********test
-										    document.write(" <td bgcolor='#00FF00' style='padding: 0px 0px 0px 150px;'  id='tdseparator"+  file_name +"' > </td>" );
-										    document.write(" <td bgcolor='#FF0000' id='td"+  file_name +"' ></td>" );
-										*/
+			
 										    document.write(" <td  style='padding: 0px 0px 0px "+ tdseparatorpaddingleft + "px;'  id='tdseparator"+  file_name +"' > </td>" );
 											document.write(" <td  id='td"+  file_name +"' ></td>" );
 								       </script>
@@ -597,7 +653,7 @@
 										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");  
 										document.write('</td>');  
 										document.write('<td>');  
-																		 
+									 											 
 										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
 										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');
@@ -646,6 +702,7 @@
 									if(type == 1){
 										
 										type1filename=file_name;
+										 
 										values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18;
 										 
 										selectid= "color" + file_name.replace(/\s/g,'');
@@ -655,7 +712,7 @@
 										document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");   
 										document.write('</td>');  
 										document.write('<td>');  
-																		 
+														 
 										document.write(' <button class="btn btn-warning" onclick="showfields(this.id)" id="'+file_name+'">Polycrystalline</button>');
 										
 										inlineFormInput= "inlineFormInput" + file_name.replace(/\s/g,'');

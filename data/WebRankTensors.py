@@ -238,6 +238,7 @@ class RankTensors():
         d31=float(valuearrayrotated[6])
         d32=float(valuearrayrotated[7])
         d33=float(valuearrayrotated[8])
+        self.surfacecolorSecondRankTensor =""
         
         filename= filename
         #self.Res = res
@@ -377,7 +378,7 @@ class RankTensors():
                     else:    
                           self.surfacecolorSecondRankTensor =  self.surfacecolorSecondRankTensor + str(val) + ','   
              
-             self.surfacecolorSecondRankTensor =  '['  + self.surfacecolorSecondRankTensor + ']' 
+             self.surfacecolorSecondRankTensorRotated =  '['  + self.surfacecolorSecondRankTensor + ']' 
              
              
           else:          

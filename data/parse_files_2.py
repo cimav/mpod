@@ -134,7 +134,7 @@ def divide_loop_secs(loop):
 
 def get_non_looped_props(non_looped_lines):
     btg="_prop"
-    #otgs = ["phase", "symmetry", "structure"]#otras etiquetas
+    #otgs = ["phase", "symmetry", "structure"] 
     #ntgs = ['conditions', 'measurement', 'frame', 'symmetry' ]
     otgs =[]
     #othertagList=OtherTags.objects.filter(active=1)      #categorytag_id=4
@@ -162,10 +162,25 @@ def get_non_looped_props(non_looped_lines):
             print lin.split()  
             print  lin.split()[0].strip()[6:]#).length)
             print lin[len(lin.split()[0].strip()[6:]) + 6:]
+            tagfind = ""
+            objExperimentalParCond = None
+            objProperty = None
             #print lin.split()[0].strip()[6:].split('_')
             lcs ={}
             if lin.split()[0].strip()[6:] != 'symmetry_point_group_name_H-M':
                 lcs=lin.split()
+                tagfind = lcs[0]
+                try:
+                    objExperimentalParCond=ExperimentalParCond.objects.get(tag=tagfind)
+                except ObjectDoesNotExist as error:
+                    print "Message({0}): {1}".format(99, error.message)   
+               
+                 
+                try:
+                    objProperty=Property.objects.get(tag=tagfind)
+                except ObjectDoesNotExist as error:      
+                    print "Message({0}): {1}".format(99, error.message)   
+
             else:
                 lcs[0]= lin.split()[0]            
                 lcs[1]= lin[len(lin.split()[0].strip()[6:]) + 6:]
@@ -173,11 +188,11 @@ def get_non_looped_props(non_looped_lines):
             ##lcs=lin.split()    
             pr_str=lcs[0].strip()[6:]
             parts=pr_str.split('_')
-            if parts[0] in ntgs:
+            if parts[0] in ntgs and objExperimentalParCond != None:
                 if pr_str not in props_desc:
                         props_desc[pr_str] = lcs[1].strip().strip("'").strip()
             else:
-                if pr_str not in props_tens:
+                if pr_str not in props_tens and objProperty != None:
                     props_tens2[pr_str] = lcs[1].strip().strip("'").strip()
         if first in otgs:
             olcs ={}
@@ -297,10 +312,7 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
     #coefficientsList = []
     print "tlds", tensor_loop_data_sec
     for tag, vals in tensor_loop_data_sec.iteritems():
-        """for elem in vals:
-            coeff = tag.replace('ij',elem[0])   
-            coefficientsList.append(coeff)"""
-            
+
         dim1 = 0
         dim2 = 0
         dim3 = 0
@@ -347,10 +359,9 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
             fourthrank = False
             if debug ==1:
                 objDataProperty = Property.objects.get(id=int(prop_id))  
-                #objTypeDataProperty =TypeDataProperty.objects.get(dataproperty=objDataProperty)
                 type_ids=TypeDataProperty.objects.filter(dataproperty=objDataProperty).values_list('type_id',flat=True)   
                 
-                if  type_ids:  
+                if  type_ids:  #this block code make simetric the matrix coefficients from file.mpod
                     objTypeSelectedList = Type.objects.filter(id__in=type_ids) 
                     objTypeSelected = objTypeSelectedList[0]
                     if objTypeSelected.catalogproperty.description == "Elasticity":
@@ -368,10 +379,7 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
                                 tenso.append([])
                                 for j in range(dim2):
                                     tenso[i].append("0")
-                            
-                        
-                     
-                        
+   
                     else:        
                         for i in range(dim1):
                             tenso.append([])
@@ -468,6 +476,8 @@ def format_tensor(tensor_loop_data, props_tags):
         all_secs.append(n_sec)
     return all_secs
 
+
+
 def all_props_list(file_data_blocks):
     tlps = []
     nlps = []
@@ -482,7 +492,7 @@ def all_props_list(file_data_blocks):
         for k,v in non_looped_props[2].iteritems():
             if  k.startswith("_symmetry"):
                 itemdictionary[k] = v
-                
+        #conditions inside   loop_   see example in file 1000066.mpod    
         if type(loop_structs[0]) == type(""):
             if not loop_structs[0].startswith("_"):
                 lps.append(loop_structs[0])
@@ -492,6 +502,7 @@ def all_props_list(file_data_blocks):
     return tlps, nlps, lps, itemdictionary
 
 
+ 
 
 
 
@@ -620,32 +631,10 @@ def make_tables(props_struct, props_dict, specific_props_keys, props_dims_dict, 
     for k,v in props_dict2.iteritems():
         if k not in rem_props:
             non_looped_props[v]=k
-##    print "props_struct"
-##    print specific_props
-##    print sections
-##    print "fatto"
-##    print new_sections
+ 
     return new_sections, non_looped_props
 
 
-
-
-
-if __name__ == "__main__":
-    tg="_prop"
-    props = []
-    fil = "1000201.mpod"
-#    fil = "1000097.mpod"
-#    fil = "1000272.mpod"
-    fil = "1000196.mpod"
-    filepath=os.path.join(cifs_dir, fil)
-
-    file_data_blocks = parse_mpod_file(filepath)
-    bb = all_props_list(file_data_blocks)
-#    aa = format_data_blocks(file_data_blocks)
-
-    print bb
-#    print aa
-    print "fatto"
+ 
 
 

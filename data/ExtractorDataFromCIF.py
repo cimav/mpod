@@ -177,10 +177,17 @@ class Extractor (object):
             if lin.find(tg)>-1:
                 lcs=lin.split()
                 prstr=lcs[0].strip()[5:]
+                objProperty = None
+                try:
+                    tag=lcs[0]
+                    objProperty=Property.objects.get(tag=tag)
+                except ObjectDoesNotExist as error:      
+                    print "Message({0}): {1}".format(99, error.message)   
+                    
                 
                 parts=prstr.split('_')
                 if parts[1] in ntgs:
-                    if prstr not in props_agg:
+                    if prstr not in props_agg and objProperty != None:
                         props_agg.append(prstr)
                 else:
                     if prstr not in props:
@@ -220,7 +227,6 @@ class Extractor (object):
         #ntgs= ['conditions','measurement','frame','symmetry']
         
         ntgs = tags
-        props=[]
         props_agg=[]
         lins = map(lambda x: x.strip(), texto.strip().split("\n"))
         ind=0
@@ -231,10 +237,16 @@ class Extractor (object):
                 parts=prstr.split('_')
                 if parts[1] in ntgs:
                     if prstr not in props_agg:
-                        props_agg.append(prstr)
-                """else:
-                    if prstr not in props:
-                        props.append(prstr)"""
+                        try:
+                            tag = lcs[0]
+                            objExperimentalParCond=ExperimentalParCond.objects.get(tag=tag)
+                            props_agg.append(prstr)
+                        except ObjectDoesNotExist as error:
+                            print "Message({0}): {1}".format(99, error.message)   
+
+                    
+                        
+
         return props_agg
     
     #search in dictionary

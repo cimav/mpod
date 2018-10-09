@@ -11,6 +11,8 @@ from django.core.mail import send_mail, EmailMessage
 
 
 from parse_files_2 import *
+import json
+
 
 #datafiles_path = os.path.join(os.path.dirname(__file__),'../media/datafiles').replace('\\','/')
 #uploads_path = os.path.join(datafiles_path, "uploaded")
@@ -326,7 +328,7 @@ def view_obj_as_2cols_table(modello, oggetto=None, cap=None, esc=True, header=No
     html_out=t.render(c)
     return html_out
 
-def html_linked_dataitem(dataitem=None,item=None):
+def html_linked_dataitem(dataitem=None,item=None,arraylist=None):
     """
     prints the model header and or instance as a 2 cols table
     """
@@ -365,6 +367,7 @@ def html_linked_dataitem(dataitem=None,item=None):
     c=Context({
     'header': "Datafile info",
     'data_links_list': data_links_list,
+    
     })
     html_out=t.render(c)
     return html_out
@@ -405,12 +408,12 @@ def data_item_html(dataitem_id):
             break
     
     mpod_filepath = os.path.join(datafiles_path, dataitem_id+".mpod")
-    file_data_blocks = parse_mpod_file(mpod_filepath)
+    file_data_blocks = parse_mpod_file(mpod_filepath)#extract properties, condition and no looped tags from file
     print 'file_data_blocks', file_data_blocks
     tenso_props, nl_props, l_props,dictitems = all_props_list(file_data_blocks)
-    print 'tenso_props', tenso_props
-    print 'nl_props', nl_props
-    print 'l_props', l_props
+    print 'tenso_props', tenso_props #properties from data_property
+    print 'nl_props', nl_props #no looped properties  from data_experimentalparcond
+    print 'l_props', l_props #looped propeties  from data_experimentalparcond
     print 'dictitems', dictitems
     
     
@@ -434,28 +437,86 @@ def data_item_html(dataitem_id):
         lnl_props_units_dict[lp] = lprp.units
     props_ids = [tenso_props_dims_dict, tenso_props_ids_dict, lnl_props_ids_dict,tenso_props_units_dict, lnl_props_units_dict ]
     formatted_data_blocks = format_data_blocks(file_data_blocks, props_ids,dictitems)
-    """
-    itemdictionary = []
-    for db in file_data_blocks:
-        non_looped_props, loop_structs = db
-        print "non_looped_props"
-        for k,v in non_looped_props[2].iteritems():
-            if  k.startswith("_symmetry"):
-                print k
-    """
+
+
     dictionaryitems = {}
     for k,v in dictitems.iteritems():
         dictionary = Dictionary.objects.get(tag__exact= k)
         print 'dictionary'
         dictionaryitems[k,dictionary.pk] = v
         print dictionaryitems
+        
+    
+    
+    catalogproperty_ids=CatalogProperty.objects.all().values_list('id',flat=True)   
+    arraylist=Type.objects.filter(catalogproperty_id__in=catalogproperty_ids).values('catalogproperty_id').annotate(total=Count('id'))
+    g = globals()
+    ap = []
+ 
+    #print arraylist[0]['catalogproperty_id']
+    #print arraylist 
+    arraylisttypes_ids=Type.objects.filter(catalogproperty_id__in=catalogproperty_ids).values('id','catalogproperty_id',) 
+    #print arraylisttypes_ids
+    
+    listtensortags = []
+    tensortags = {}#catalogproperty_id: 1 type id: 2
+    tags = []     
+    tensor_dimensions = []   
+    jsontags =""
+    jtags = ""
+    jdim = ""
+    jsontagslist =[]
+    dim = []
+  
+    for j, p2, in enumerate(arraylisttypes_ids):
+        tensortags['catalogproperty_id'] = int(arraylisttypes_ids[j]['catalogproperty_id'])
+        tensortags['type_id'] = int(arraylisttypes_ids[j]['id'])
+        jsontags = jsontags + '{"catalogproperty_id":' + str(int(arraylisttypes_ids[j]['catalogproperty_id']) ) +', "type_id": ' + str(int(arraylisttypes_ids[j]['id']))
+        
+        typeDataPropertyQuerySet=TypeDataProperty.objects.filter(type_id=arraylisttypes_ids[j]['id'])
+        if typeDataPropertyQuerySet:
+            d = None 
+            for i, item in enumerate(typeDataPropertyQuerySet):
+                tags.append(int(typeDataPropertyQuerySet[i].dataproperty.id))
+                d=typeDataPropertyQuerySet[i].dataproperty.tensor_dimensions.split(',')
+                if d and len(d) == 2 and not dim :
+                    dim = [int(d[0]), int(d[1])]
+                    tensor_dimensions.append(dim)
+                else:
+                    pass
+                    
 
-      
+            jtensor_dimensions = str(dim)
+            jtags = str(tags) 
+            
+            if j > len(arraylisttypes_ids):
+                jsontags = jsontags + ', "dataproperty_ids": '   + str(jtags) +  ', "tensor_dimensions": '   + str(jtensor_dimensions) +  '},'
+            else:
+                jsontags = jsontags + ', "dataproperty_ids": '   + str(jtags) +  ', "tensor_dimensions": '   + str(jtensor_dimensions) +  '}'
+                
+            
+            print "************************** " + jsontags
+            dim = []
+            jtensor_dimensions =""
+            jtags =""
+           
+
+            jsontagslist.append(jsontags)
+            jsontags = ""
+
+        tags = []     
+
+    print "*************************************************************"
+    print jsontagslist
+    print "*************************************************************"
+    
+    
     t_tables = get_template('data/view_dataitem_tensors_new.html')
     html_datafile = html_linked_dataitem(datafile_item,dictionaryitems)
     c_tables=Context({
     'header': "Property values",
     'formatted_data_blocks' : formatted_data_blocks,
+    'listtensortags':jsontagslist,
     })
     html_tables = t_tables.render(c_tables)
     return html_datafile, html_tables
