@@ -14,14 +14,60 @@
   var lblOmegainline_form_input_id = null;
   var inputOmegainline_form_input_id = null;
   var btnid = null;
-  var spanid = null;
-  var spangraphid = null;
+  var ohklspanid = null;
+  var spangraph = null;
+  var span_btn = null
   var tensor_category = null;
   var jsondatasend = null;
+  var array_jsondatasend = [];
   var jsonurl= null;
   var property_tag = null;
   var property_id = null;
   var res = "";
+  var valuesGET =""
+  var btngraphrotated_id = null;
+  
+  var html_colorandbtngraph = ''
+  var html_btnpolycrystalline = ''
+  var html_input_h = ''
+  var html_lbl_h = ''
+  var html_lbl_k = ''
+  var html_input_k = ''
+  var html_lbl_l = ''
+  var html_input_l = ''
+  var html_lbl_omega = ''
+  var html_input_omega = ''
+  var html_tdseparatorpaddingleft = "";
+  var html_tdrotated_matrix = "";
+  var html_spangraph = null;
+  var html_spanbnt = null
+	  
+  var btnPolycrystallinelbl ="Polycrystalline";
+  var btnpolycrystalline = null;
+	  
+  var totalProperties = 0;
+  var sendatacounter =0;
+  var datasendarray = [];
+  var valuearray;
+  var valuearrayrotated;
+  var file_name ="";
+  var valueTen = "";
+  var promertyname="";
+  var value = "";
+  var type = "";
+  var tdbuttonpaddingleft = 100;
+  var tdseparatorpaddingleft = 50;
+  var propertyid= [];
+  var propertycounter= 0;
+  var counterElements = 0;
+  
+  var pathname = window.location.pathname.split( '/' );
+  var w = (window.innerWidth/2)-255;
+  var wcs = (window.innerWidth/2)-525;
+  var h = (window.innerHeight/2)-255;
+  var options="toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=false,width=525,height=700,top="+h+",left="+w+"";
+  var optionscs="toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=false,width=1070,height=700,top="+h+",left="+wcs+"";
+  
   
   function parseTensorTag(tags)
   {
@@ -37,12 +83,13 @@
   }
   
   
-   function parseTensorValue(propertyid, propertytag,matrixString,codefile)
+   function parseTensorValue(propertyid, propertytag,matrixString,codefile,url)
 	{
-	   
+	    
 	   property_id = propertyid;
 	   property_tag= propertytag
 	   var coeffi = null
+	   var found = false;
 	   for (var i = 0; i < list_tensor_tags.length; i++)
 		{
          
@@ -57,52 +104,64 @@
 				      {
 						case 1:
 							tensor_category = "stiffness";
-							jsonurl = 'celasfib'
+							jsonurl = 'celasfib';
+							found = true;
 							break;
 						case 2:
 							tensor_category = "compliance";
-							jsonurl = 'selasfib'
+							jsonurl = 'selasfib';
+							found = true;
 							break;
 						case 3:
 							tensor_category = "thirdranktensordg";
-							jsonurl = 'dpiezofib' 
+							jsonurl = 'dpiezofib'; 
+							found = true;	
 							break;
 						case 7:
 							tensor_category = "thirdranktensoreh";
-							jsonurl = 'epiezofib' 
+							jsonurl = 'epiezofib' ;
+							found = true;
 							break;
 						case 4:
 							tensor_category = "secondranktensor";
-							jsonurl = 'dielecfib'
+							jsonurl = 'dielecfib';
+							found = true;								
 							break;
 						case 11:
 							tensor_category = "secondranktensor";
-							jsonurl = 'dielecfib'
+							jsonurl = 'dielecfib';
+							found = true;								
 							break;
 							
 						case 5:
 							tensor_category = "fourthranktensor";
-							jsonurl = 'fourthranktensor'
+							jsonurl = 'fourthranktensor';
+							found = true;								
 							break;
 						case 6:
 							tensor_category = "fourthranktensor";
-							jsonurl =  'fourthranktensor'
+							jsonurl =  'fourthranktensor';
+							found = true;
 							break;
-						
-					
- 
-
-							
 				      }
 				      
+                      if(found)
+                      {
+                    	  dim = Array.from ( list_tensor_tags[i].tensor_dimensions);
+    				      coeffi= dim[0] * dim[1];
+    				      break;
+                      }
 
-				      dim = Array.from ( list_tensor_tags[i].tensor_dimensions)
-				      coeffi= dim[0] * dim[1]
-
-				      
 				      
 				   }
+			      
+			    
 			}
+		   
+		   if(found)
+           {
+		    	  break;
+           }
 	    }
 	   
 	   
@@ -127,10 +186,13 @@
 	   	  
        
 	   
-	   list_tensor_filename_counter++;
+		
 	   var decodedtext =htmlentities.decode(matrixString);
-	   var res= linkgen(decodedtext,coeffi);
-	    
+	   //var res= linkgen(decodedtext,coeffi);
+	   valuesGET = linkgen(decodedtext,coeffi);
+	   
+	   array_jsondatasend[list_tensor_filename_counter] = jsondatasend
+	   console.log(array_jsondatasend[list_tensor_filename_counter] );
 	   
 
 	   select_color_id= "color" + tensor_file_name;
@@ -144,41 +206,216 @@
 	   lblOmegainline_form_input_id= 'lblOmega'+ inline_form_input_id;
 	   
 	   inputHinline_form_input_id= 'inputH'+ inline_form_input_id;
-	   inputKinline_form_input_id= 'inputH'+ inline_form_input_id;
-	   inputLinline_form_input_id= 'inputH'+ inline_form_input_id;
+	   inputKinline_form_input_id= 'inputK'+ inline_form_input_id;
+	   inputLinline_form_input_id= 'inputL'+ inline_form_input_id;
 	   inputOmegainline_form_input_id= 'inputOmega'+ inline_form_input_id;
 	   
 		btnid='btn' + inline_form_input_id;
-	    spanid='span' + inline_form_input_id;
-	    spangraphid='spangraph' + inline_form_input_id;
-	   
-	   /*
-	   console.log("id: " + property_id);
-	   console.log("tag: " + property_tag);
-	   console.log("tensor_category: " + tensor_category);
-	   console.log("url: " + jsondatasend.url);
-	   console.log("values:" + res);
-	   console.log("type: " + type_id); 
-	   console.log(tensor_file_name);
-	   console.log(inline_form_input_id);
-	   console.log(lblHinline_form_input_id);
-	   console.log(lblKinline_form_input_id);
-	   console.log(lblLinline_form_input_id);
-	   console.log(lblOmegainline_form_input_id);
-	   console.log(inputHinline_form_input_id);
-	   console.log(inputKinline_form_input_id);
-	   console.log(inputLinline_form_input_id);
-	   console.log(inputOmegainline_form_input_id);
-	   console.log(btnid);
-	   console.log(spanid);
-	   console.log(spangraphid);
-       */
- 
+		ohklspanid='span' + inline_form_input_id;
+	    spangraph='spangraph' + tensor_file_name;
+	    span_btn='span_btn' + tensor_file_name;
+	    btnpolycrystalline = 'btnpolycrystalline' + tensor_file_name;
+	    tdrotated_matrix_id = 'td' + tensor_file_name;
+	    tdseparatorpaddingleft_id = 'tdseparator' + tensor_file_name;
+	    btngraphrotated_id='btngraphrotated' + tensor_file_name;
+	    
+       
+	    html_colorandbtngraph = '<select id="'+select_color_id+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="' + tensor_category + '(this.id,\'' + valuesGET + '\',\'' + select_color_id + '\',\'' + tensor_file_name + '\',\'' + valuearray + '\')" id="'+list_tensor_tags_counter+'">Graph</button> ';
+	    //console.log(html_colorandbtngraph);
+	    
+	    html_btnpolycrystalline = '<button class="btn btn-warning" onclick="showfields(this.id)" id="'+tensor_file_name+'">' + btnPolycrystallinelbl + '</button>';
+
+
+		html_lbl_h = '<label  id="'+ lblHinline_form_input_id +'"  for="'+ inputHinline_form_input_id+'" style="display: none;" >&nbsp;H: </label>';
+		html_input_h = '<input id="'+ inputHinline_form_input_id+'"  type="text" name="h" style="display: none;" value="0" maxlength="4" size="2" disabled>';
 		
+		html_lbl_k = '<label  id="'+ lblKinline_form_input_id+'"  for="'+ inputKinline_form_input_id+'" style="display: none;" >&nbsp;K: </label>';
+		html_input_k = '<input id="'+ inputKinline_form_input_id+'"  type="text" name="k" style="display: none;"  value="0" maxlength="4" size="2"  disabled>';
+		
+		html_lbl_l = '<label  id="'+ lblLinline_form_input_id+'"  for="'+ inputLinline_form_input_id+'" style="display: none;" >&nbsp;L: </label>';
+		html_input_l = '<input id="'+ inputLinline_form_input_id+'"  type="text" name="l" style="display: none;"  value="1" maxlength="4" size="2" disabled>';
+		
+		
+		html_lbl_omega = '<label  id="'+ lblOmegainline_form_input_id+'"  for="'+ inputOmegainline_form_input_id+'" style="display: none;"  >&nbsp;Omega: </label>';
+		html_input_omega = '<input id="'+ inputOmegainline_form_input_id+'"  type="text" name="omega" style="display: none;" maxlength="4" size="4">';
+		
+		
+		html_tdseparatorpaddingleft = " <td  style='padding: 0px 0px 0px "+ tdseparatorpaddingleft + "px;'  id='"+  tdseparatorpaddingleft_id +"' > </td>" ;
+		html_tdrotated_matrix = " <td  id='"+  tdrotated_matrix_id +"' ></td>" ;
+		
+		html_spanbnt = '<span  id="'+ span_btn + '" style="display: none;" ><button class="btn btn-warning"  onclick="callajax(this.id,\'' + tdseparatorpaddingleft_id + '\',\''  +list_tensor_filename_counter +'\',\'' +spangraph +'\',\'' + tensor_file_name + '\',\'' + valuesGET + '\',\'' + tensor_category + '\',\'' + inputOmegainline_form_input_id + '\',\'' + select_color_id + '\',\'' + btngraphrotated_id + '\',\'' + url + '\')" id="'+ btnpolycrystalline + '">Apply Texture</button></span>';
+
+		html_spangraph = '<span  id="'+ spangraph + '"  ></span>';
+		
+		
+		list_tensor_filename_counter++;
+	}
+   
+   function thirdranktensordg(clicked_id, values, selectedid, filename,valuearrayrotated) {
+		 selectedColor = document.getElementById(selectedid).selectedIndex;
+		 var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+	     urlGraph = "/dataitem/" + pathname[2] + "/thirdranktensordg/" + url;
+
+		    if (valuearrayrotated == 'undefined' )
+        window.open(urlGraph,"",options);
+     else
+  	  window.open(urlGraph,"",optionscs);
+	}
+	
+	
+	function thirdranktensoreh(clicked_id, values, selectedid, filename,valuearrayrotated) {
+		  selectedColor = document.getElementById(selectedid).selectedIndex;
+		  var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+		  urlGraph = "/dataitem/" + pathname[2] + "/thirdranktensoreh/" + url;
+
+	      if (valuearrayrotated == 'undefined' )
+	          window.open(urlGraph,"",options);
+	       else
+	    	  window.open(urlGraph,"",optionscs);
+	}
+	
+
+	function secondranktensor(clicked_id, values, selectedid, filename,valuearrayrotated) {			    
+	    selectedColor = document.getElementById(selectedid).selectedIndex;	  
+		var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+	    urlGraph = "/dataitem/" + pathname[2] + "/secondranktensor/" + url;
+	    
+	    if (valuearrayrotated == 'undefined' )
+	       window.open(urlGraph,"",options);
+	    else
+	    	window.open(urlGraph,"",optionscs);
+
+	}
+	
+	function compliance(clicked_id, values, selectedid, filename,valuearrayrotated) {
+	    selectedColor = document.getElementById(selectedid).selectedIndex;							    
+	    var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+	    urlGraph = "/dataitem/" + pathname[2] + "/compliance/" + url;
+	    
+		 window.open(urlGraph,"",optionscs);
+	    
+	} 
+	
+	function stiffness(clicked_id, values, selectedid, filename,valuearrayrotated) {
+	    selectedColor = document.getElementById(selectedid).selectedIndex;							    
+	    var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+	    urlGraph = "/dataitem/" + pathname[2] + "/stiffness/" + url;
+	    
+	    window.open(urlGraph,"",optionscs);
+
+	}
+	
+	function fourthranktensor(clicked_id, values, selectedid, filename,valuearrayrotated) {
+	    selectedColor = document.getElementById(selectedid).selectedIndex;
+		var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+		urlGraph = "/dataitem/" + pathname[2] + "/fourthranktensor/" + url;
+
+	    if (valuearrayrotated == 'undefined' )
+  	       window.open(urlGraph,"",options);
+		    else
+		    	window.open(urlGraph,"",optionscs);
+		
+	}
+	
+	function magnetic(clicked_id, values, selectedid, filename,valuearrayrotated) {
+	    selectedColor = document.getElementById(selectedid).selectedIndex;					
+		var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+	    urlGraph = "/dataitem/" + pathname[2] + "/magnetocrystallineanisotropy/" + url;
+	    
+	    if (valuearrayrotated == 'undefined' )
+  	       window.open(urlGraph,"",options);
+		 else
+		    	window.open(urlGraph,"",optionscs);
+
+	}
+	
+	function magneto(clicked_id, values, selectedid, filename,valuearrayrotated) {
+	    selectedColor = document.getElementById(selectedid).selectedIndex;
+		var url = values + "&color=" + selectedColor+"&filename="+ filename + "&"+ valuearrayrotated; 
+	    urlGraph = "/dataitem/" + pathname[2] + "/magnetostriction/" + url;
+	    if (valuearrayrotated == 'undefined' )
+  	       window.open(urlGraph,"",options);
+		 else
+		    	window.open(urlGraph,"",optionscs);
+
+	}
+	
+	
+   function showfields(clicked_id) {
+	   
+		$( "#inputOmegainlineforminput" + clicked_id ).show();
+		$( "#lblOmegainlineforminput" + clicked_id ).show();
+		
+		$( "#inputHinlineforminput" + clicked_id ).show();
+		$( "#lblHinlineforminput" + clicked_id ).show();
+		
+		$( "#inputKinlineforminput" + clicked_id ).show();
+		$( "#lblKinlineforminput" + clicked_id ).show();
+		
+		$( "#inputLinlineforminput" + clicked_id ).show();
+		$( "#lblLinlineforminput" + clicked_id ).show();
+	   
+		$( "#span_btn" + clicked_id ).show();
 	   
 
-	  return;
+	}
+   
+   function callajax(clicked_id,idtd,arrayindex,spanid, filename,values,tensor,omegid,selectid,btngraphrotated_id,url) {
+		 
+		$( "#" + idtd ).html("");
 
+		$( "#" + spanid ).html("");
+		
+		omeg=  $("#" + omegid ).val();
+
+		data =array_jsondatasend[arrayindex]
+
+		datasend = {'mh':data.mh,
+								'mk':data.mk,
+								'ml':data.ml,
+								'omeg':omeg,
+								'mat': data.mat,
+								'url':data.url
+								}
+		
+		/*url = "{% url rotatematrix 0000000 -1%}";
+		url = url.replace(/0/, codefile.toString());
+		
+		alert(url);*/
+		
+		$.ajax({
+       	type: "POST",
+           url: url,
+           data: datasend,
+           dataType: 'json',
+           success: function (data) {
+           	 
+           	$( "#" + idtd ).append(data.html);
+           	
+               if (tensor == 'thirdranktensordg')
+           	    $( "#" + spanid ).append('<button class="btn btn-warning" onclick="thirdranktensordg(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+               else if (tensor == 'thirdranktensoreh')
+           	    $( "#" + spanid ).append('<button class="btn btn-warning" onclick="thirdranktensoreh(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+               else if (tensor == 'secondranktensor')
+               	$( "#" + spanid ).append('<button class="btn btn-warning" onclick="secondranktensor(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+               else if (tensor == 'compliance')
+               	$( "#" + spanid ).append('<button class="btn btn-warning" onclick="compliance(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+               else if (tensor == 'stiffness')
+               	 $( "#" + spanid ).append('<button class="btn btn-warning" onclick="stiffness(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+               else if (tensor == 'fourthranktensor')
+               	$( "#" + spanid ).append('<button class="btn btn-warning" onclick="fourthranktensor(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+               else if (tensor == 'magnetic')
+               	$( "#" + spanid ).append('<button class="btn btn-warning" onclick="magnetic(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+               else if (tensor == 'magneto')
+               	$( "#" + spanid ).append('<button class="btn btn-warning" onclick="magneto(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+
+           	
+        	 },
+		 	error: function (data) {
+       		if(data.status == 500)
+       			alert("Resource not found");
+          	 },
+       }); 
 	}
    
  
@@ -238,27 +475,28 @@
    function linkgen(string,coeffi) 
    {
 	  
-	   
+	   valuesGET = "";
 	   var  length = string.length;
-	  
 	   for (var i=0; i < length; i++) 
 	   {
 		   s= string[i];
 		   first_char=s.charAt(0);
 			   if ((first_char == '[') || (first_char  == ']' ) || (first_char  == "'" )  )
 		      {
-				   //
+				   //pass
 		      }
 			  else
 			  {
 				   
-				   res = res + string[i];
+				  valuesGET = valuesGET + string[i];
 			 }
+		   
+	 
 		     
 	   }
        
 	   var counterElements=0;
-	   var partsOfStr = res.split(',');
+	   var partsOfStr = valuesGET.split(',');
 	   //alert(partsOfStr);
 	   for (var i=0; i < partsOfStr.length; i++) 
 		   {
