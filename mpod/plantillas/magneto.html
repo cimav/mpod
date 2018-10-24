@@ -6,114 +6,231 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MPOD - Magneto</title>
 
-  <!-- Plotly.js -->        
-         <script src="{{STATIC_URL}}js/plotly-latest.js"></script>
-         
-         
-  <!-- Favicon -->
- -<link rel='shortcut icon' href='{{STATIC_URL}}img/icono.png'>
+     
+  <script src="{{STATIC_URL}}js/plotly-latest.js"></script>
+ <link rel='shortcut icon' href='{{STATIC_URL}}img/icono.png'>
 
 
 
   <body>
-     <!--  <iframe width="510" height="450" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~mpod/35/_4th-rank-tensor-general/"></iframe>
-   -->
-   
-     <!-- Plotly chart will be drawn inside this DIV -->
-     <table border="0" style="height: 700px">
+ 
+     <table border="0" style="{{tableWidthHeight}}">
     <tr>
-    <td  ><div id="myDiv" style="width:480px; height:400px;"></div></td><td> <div id="myDiv1" style="width:480px; height:400px;"></div></td>
+		    <td><div id="myDiv" style="{{divWidthHeight}}"></div></td>
+		    {% if filename1p %}
+		    <td> <div id="myDiv1" style="{{divWidthHeight}}"></div></td>
+		    {% endif %}  
     </tr>
-    <tr>
-    <td align="center">
-    <button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{LowResolutionFileName}}';">Download 3D Low Resolution File</button>
-     </br>
-    <button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{MiddleResolutionFileName}}';">Download 3D Middle Resolution File</button></td>
+     <tr>
+		    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{filename1}}';">Download 3D  {{resolutionTag}}  Resolution File</button> </td> 
+		     
+		      {% if filename1p %}
+		    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{filename1p}}';">Download 3D  {{resolutionTag}} Resolution File</button>  </td> 
+		    {% endif %}  
     </tr>
-
     </table>
      
      <script>
 
-            
-     var data = [
-                 {
-                     z: [{{ZEC}}],
-                     x: [{{XEC}}],
-                     y: [{{YEC}}],  
-                     {% if colorscale == 'Cool' %}                   
-                     colorscale: [[0.0, 'rgb(255,0,255)'],[0.1111111111111111, 'rgb(229,26,255)'],[0.2222222222222222, 'rgb(203,52,255)'],[0.3333333333333333, 'rgb(178,77,255)'],[0.4444444444444444, 'rgb(152,103,255)'],[0.5555555555555556, 'rgb(126,129,255)'],[0.6666666666666666, 'rgb(100,155,255)'],[0.7777777777777778, 'rgb(75,180,255)'],[0.8888888888888888, 'rgb(49,206,255)'],[1.0, 'rgb(23,232,255)']],
-                     {% else %}
-                     colorscale: '{{colorscale}}',
-                     {% endif %}  
-                     surfacecolor: {{surfacecolorMagnetic}},
-      			      type: 'surface',
-                     hoverinfo: 'none',
-                     showscale: true
-                 }
-               ];  
+     var expr = "Firefox";
      
-               var layout = {
-                       title: ' {{promertyname}}', 
-                       autosize: false,
-                       width: 500,
-                       height: 500,
-                       margin: {
-                         l: 65,
-                         r: 50,
-                         b: 65,
-                         t: 90
-                       },
-                         scene: {
-                                 /*xaxis: {
-                                         title: '',
-                                         autorange:      true,
-                                         showgrid:       false,
-                                         zeroline:       false,
-                                         showline:       false,
-                                         ticks:          '',
-                                         showticklabels: false
-                                 },
-                                 yaxis: {
-                                         title: '',
-                                         autorange:      true,
-                                         showgrid:       false,
-                                         zeroline:       false,
-                                         showline:       false,
-                                         ticks:          '',
-                                         showticklabels: false
-                                 },
-                                 zaxis: {
-                                         title: '',
-                                         autorange:      true,
-                                         showgrid:       false,
-                                         zeroline:       false,
-                                         showline:       false,
-                                         ticks:          '',
-                                         showticklabels: false
-                                 },*/
-                                 camera: {
-                                         up: { x: 0, y: 0, z: 1 },
-                                         center: { x:0, y: 0, z: 0 },
-                                         eye: { x: 2, y: 2, z: 0.1}
-                                 }
-                         }
-                     };
-            
+     navigator.sayswho= (function(){
+       var ua= navigator.userAgent, tem, 
+       M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+       if(/trident/i.test(M[1])){
+           tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
+           return 'IE '+(tem[1] || '');
+       }
+       if(M[1]=== 'Chrome'){
+           tem= ua.match(/\b(OPR|Edge)\/(\d+)/);
+           if(tem!= null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+       }
+       M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+       if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+       return M.join(' ');
+   })();
+     
+     function load() {
 
+        //alert(window.innerWidth);tableHeight
+        if('{{surfacecolorp}}' == 'None')
+        {
+       	 if (navigator.sayswho.includes(expr) == true )
+            {
+           	 window.resizeBy(-1 * ( {{tableWidth}}  ),- 180 );
+            }
+            else
+            {
+           	  
+           	 window.resizeBy((-1 * ( {{tableWidth}} ) + 80) , -180 );
+            }
+        }
+        else
+      	 {
+       	 if (navigator.sayswho.includes(expr) == true )
+            {
+           	 window.resizeBy(0,- 180 );
+            }
+            else
+            {
+           	  
+           	 window.resizeBy(0 , -180 );
+            }
+      	 }
+        
+         
+       }
+       window.onload = load;
             
-            
-            
-
- //Plotly.newPlot('myDiv', data, layout);
- //Plotly.newPlot('myDiv1', data1, layout1);
-   // alert();
-  </script>
+  var data = [
+              {
+                  z: [{{ZEC}}],
+                  x: [{{XEC}}],
+                  y: [{{YEC}}],  
+                  {% if colorscale == 'Cool' %}                   
+                  colorscale: [[0.0, 'rgb(255,0,255)'],[0.1111111111111111, 'rgb(229,26,255)'],[0.2222222222222222, 'rgb(203,52,255)'],[0.3333333333333333, 'rgb(178,77,255)'],[0.4444444444444444, 'rgb(152,103,255)'],[0.5555555555555556, 'rgb(126,129,255)'],[0.6666666666666666, 'rgb(100,155,255)'],[0.7777777777777778, 'rgb(75,180,255)'],[0.8888888888888888, 'rgb(49,206,255)'],[1.0, 'rgb(23,232,255)']],
+                  {% else %}
+                  colorscale: '{{colorscale}}',
+                  {% endif %}  
+                  surfacecolor: {{surfacecolor}},
+   			      type: 'surface',
+                  hoverinfo: 'none',
+                  showscale: true
+              }
+            ];  
   
-  <script>
-   Plotly.newPlot('myDiv', data, layout);
- //Plotly.newPlot('myDiv1', data1, layout1);
-   // alert();
+            var layout = {
+                    title: 'Magneto Crystalline Anisotropy, Single-crystal',
+                    autosize: false,
+                    width: {{layoutHeight}},
+                    height: {{layoutWeight}},
+                    margin: {
+                      l: 65,
+                      r: 50,
+                      b: 65,
+                      t: 90
+                    },
+                      scene: {
+                              /*xaxis: {
+                                      title: '',
+                                      autorange:      true,
+                                      showgrid:       false,
+                                      zeroline:       false,
+                                      showline:       false,
+                                      ticks:          '',
+                                      showticklabels: false
+                              },
+                              yaxis: {
+                                      title: '',
+                                      autorange:      true,
+                                      showgrid:       false,
+                                      zeroline:       false,
+                                      showline:       false,
+                                      ticks:          '',
+                                      showticklabels: false
+                              },
+                              zaxis: {
+                                      title: '',
+                                      autorange:      true,
+                                      showgrid:       false,
+                                      zeroline:       false,
+                                      showline:       false,
+                                      ticks:          '',
+                                      showticklabels: false
+                              },*/
+                              camera: {
+                                      up: { x: 0, y: 0, z: 1 },
+                                      center: { x:0, y: 0, z: 0 },
+                                      eye: { x: 2, y: 2, z: 0.1}
+                              }
+                      }
+                  };
+  
+            </script>
+              {% if surfacecolorp %}  
+            <script>        
+            var data1 = [
+                         {
+                             z: [{{ZECp}}],
+                             x: [{{XECp}}],
+                             y: [{{YECp}}],  
+                           {% if colorscale == 'Cool' %}                   
+                           colorscale: [[0.0, 'rgb(255,0,255)'],[0.1111111111111111, 'rgb(229,26,255)'],[0.2222222222222222, 'rgb(203,52,255)'],[0.3333333333333333, 'rgb(178,77,255)'],[0.4444444444444444, 'rgb(152,103,255)'],[0.5555555555555556, 'rgb(126,129,255)'],[0.6666666666666666, 'rgb(100,155,255)'],[0.7777777777777778, 'rgb(75,180,255)'],[0.8888888888888888, 'rgb(49,206,255)'],[1.0, 'rgb(23,232,255)']],
+                           {% else %}
+                           colorscale: '{{colorscale}}',
+                           {% endif %} 
+                           surfacecolor: {{surfacecolorp}},
+            			   type: 'surface',
+                           hoverinfo: 'none',
+                           showscale: true
+                         }
+                       ];
+             
+             
+             var layout1 = {
+                     title: 'Magneto Crystalline Anisotropy, Poly-crystal',
+                     autosize: false,
+                     width: {{layoutHeight}},
+                     height: {{layoutWeight}},
+                     margin: {
+                       l: 65,
+                       r: 50,
+                       b: 65,
+                       t: 90
+                     },
+             scene: {
+ 			                    /*xaxis: {
+ 			                            title: '',
+ 			                            autorange:      true,
+ 			                            showgrid:       false,
+ 			                            zeroline:       false,
+ 			                            showline:       false,
+ 			                            ticks:          '',
+ 			                            showticklabels: false
+ 			                    },
+ 			                    yaxis: {
+ 			                            title: '',
+ 			                            autorange:      true,
+ 			                            showgrid:       false,
+ 			                            zeroline:       false,
+ 			                            showline:       false,
+ 			                            ticks:          '',
+ 			                            showticklabels: false
+ 			                    },
+ 			                    zaxis: {
+ 			                            title: '',
+ 			                            autorange:      true,
+ 			                            showgrid:       false,
+ 			                            zeroline:       false,
+ 			                            showline:       false,
+ 			                            ticks:          '',
+ 			                            showticklabels: false
+ 			                    },*/
+ 			                    camera: {
+ 			                            up: { x: 0, y: 0, z: 1 },
+ 			                            center: { x:0, y: 0, z: 0 },
+ 			                            eye: { x: 2, y: 2, z: 0.1}
+ 			                    }
+ 			            }
+
+                   };
+             </script>
+            {% endif %}
+
+            
+            
+
+ 
+ <script>
+ Plotly.newPlot('myDiv', data, layout);
+
+ </script>
+{% if surfacecolorp %}  
+ <script>
+ 	   Plotly.newPlot('myDiv1', data1, layout1);
+ </script>
+  {% endif %}
+
   </script>
    
   </body>

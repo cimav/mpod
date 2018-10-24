@@ -268,13 +268,13 @@ class FileUserAdmin(admin.ModelAdmin):
         
         
         form=FileUserAdminForm
-        readonly_fields=['authuser','filename','date','user_name']
+        readonly_fields=['authuser','filename','date','user_name','reportvalidation']
        
         
         def get_fieldsets(self, *args, **kwargs):
             return  (
                 ('File', {
-                    'fields': ('fileuserid','authuser','filename','filenamepublished','cod_code','date','datepublished','reportvalidationcustom','published','experimentalcon','properties','phase_generic','phase_name','chemical_formula',)
+                    'fields': ('fileuserid','authuser','filename','filenamepublished','cod_code','date','datepublished','reportvalidation','published','experimentalcon','properties','phase_generic','phase_name','chemical_formula',)
                 }),
                 ('Publication info', {
                       'classes': ('collapse',),
@@ -317,6 +317,7 @@ class FileUserAdmin(admin.ModelAdmin):
                         chemical_formula = requestPostCheck(request.POST,'chemical_formula')  
                         published = requestPostCheck(request.POST,'published') 
                         experimentalcon = requestPostCheck(request.POST,'experimentalcon') 
+            
 
                         pathslist=Path.objects.all()      
                         pathexist = 0
@@ -343,6 +344,7 @@ class FileUserAdmin(admin.ModelAdmin):
                         if not obj.datepublished:
                             obj.datepublished = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
                             
+                        #obj.reportvalidation = reportvalidation
                         obj.published = True
                         obj.datafile = estr.dataFile
                         obj.save()  
@@ -865,7 +867,7 @@ class TypeAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Type Information', {
-            'fields': ('name','description','catalogproperty','active',)
+            'fields': ('name','description','catalogproperty','active','tensor','clusterurl',)
         }),
       
             
@@ -1846,4 +1848,4 @@ admin.site.register(Tensor,TensorAdmin)
 
 
 #Modul for permissions
-admin.site.register(Permission)
+#admin.site.register(Permission)

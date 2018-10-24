@@ -328,7 +328,7 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
         print "prop_name", prop_name, prop_tag, prop_id, prop_unit, dimensions
 
         try:
-            dimensions = tenso_props_dims_dict[prop_tag]
+            #dimensions = tenso_props_dims_dict[prop_tag]
             if dimensions.find(',')>-1:
                 dims = map(lambda x: int(x.strip()), dimensions.strip().split(","))
                 dim1 = dims[0]
@@ -350,7 +350,7 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
                 for i2 in range(dim2):
                     tenso[i1].append([])
                     for i3 in range(dim3):
-                        tenso[i1][i2].append("-")
+                        tenso[i1][i2].append(int(0)) #before "-"
         elif len(dims)==2:
             dim2 = dims[1]
             debug = 1;
@@ -411,7 +411,6 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
                 tenso[ind1][ind2][ind3] = val
             elif dim2:
                 if debug ==1:
-                    
                     if elasticity or fourthrank:
                         pass
                     else:
@@ -636,5 +635,4 @@ def make_tables(props_struct, props_dict, specific_props_keys, props_dims_dict, 
 
 
  
-
 

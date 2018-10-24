@@ -537,7 +537,7 @@ class TensorAdminForm(forms.ModelForm):
             )
         )
 
-        
+        #self.fields['crysralsystemdetail'] = forms.CharField(label='Crystal System Detail',widget = DetailFieldWidget, required=False)
         self.fields['pointgroupdetail'] = forms.CharField(label='Point Group Detail',widget = DetailFieldWidget, required=False)
         self.fields['puntualgroupnamesdetail'] = forms.CharField(label='Groups Detail',widget = DetailFieldWidget, required=False)
         self.fields['axisdetail'] = forms.CharField(label='Axis Detail',widget = DetailFieldWidget, required=False)
@@ -624,13 +624,18 @@ class TensorAdminForm(forms.ModelForm):
                         
                         #*******************************catalogcrystalsystem*************************************
                         catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance)   
-                        catalogcrystalsystem_ids=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance).values_list('id',flat=True) 
-                        self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet                          
-                        if catalogcrystalsystem_id in catalogcrystalsystem_ids:
-                            catalogcrystalsystemSelected = CatalogCrystalSystem.objects.get(id=int(catalogcrystalsystem_id)) 
+                        if catalogcrystalsystemQuerySet:
+                            catalogcrystalsystem_ids=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance).values_list('id',flat=True) 
+                            self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet                          
+                            if catalogcrystalsystem_id in catalogcrystalsystem_ids:
+                                catalogcrystalsystemSelected = CatalogCrystalSystem.objects.get(id=int(catalogcrystalsystem_id)) 
+                            else:
+                                catalogcrystalsystemSelected = catalogcrystalsystemQuerySet[0]
                         else:
-                            catalogcrystalsystemSelected = catalogcrystalsystemQuerySet[0]
- 
+                            catalogcrystalsystemSelected = CatalogCrystalSystem()
+                            self.fields['catalogcrystalsystem'].help_text = "crystal system not assigned" 
+                            #self.fields['crysralsystemdetail'].initial = html
+  
                       
                         self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
                         
@@ -1291,9 +1296,9 @@ class FileUserAdminForm(forms.ModelForm):
         
  
  
-        self.fields['reportvalidationcustom'] = forms.CharField(widget = DetailFieldWidget, required=False)
+        """self.fields['reportvalidationcustom'] = forms.CharField(widget = DetailFieldWidget, required=False)
         self.fields['reportvalidationcustom'].label='Report Validation'
-       
+       """
         
       
         #self.fields['filenamepublished'].label = mark_safe(_("File name published <a href='#'>Terms and Conditions</a>"))
@@ -1314,6 +1319,8 @@ class FileUserAdminForm(forms.ModelForm):
         self.fields['chemical_formula']  = forms.CharField(label='Chemical formula', required=False)
         self.fields['chemical_formula'].widget = forms.TextInput() 
         
+        #self.fields['reportvalidation']  = forms.CharField(label='Report validation', required=False)
+        #self.fields['reportvalidation'].widget = forms.TextInput() 
         
         
          
@@ -1381,12 +1388,7 @@ class FileUserAdminForm(forms.ModelForm):
                         #self.instance.datafile = None
                         self.fields['filenamepublished'].initial = ""
                          
-                        
-                        
-                    self.fields['reportvalidation'].initial= self.instance.reportvalidation
-                        
-
-                    
+    
                     
                     objDataFileTemp = DataFileTemp.objects.get(filename__exact=self.instance.filename)
                     objPublArticleTemp = objDataFileTemp.publication
@@ -1399,7 +1401,7 @@ class FileUserAdminForm(forms.ModelForm):
                     self.fields['properties'].queryset = PropertyTemp.objects.all() 
                     self.fields['properties'].initial = propertyTempQuerySet
                     
-                    self.fields['reportvalidationcustom'].initial = "<strong><font color='black'>" + self.instance.reportvalidation +" </font></strong>" 
+                    #self.fields['reportvalidationcustom'].initial = "<strong><font color='black'>" + self.instance.reportvalidation +" </font></strong>" 
 
                     self.fields['phase_generic'].initial = phase_generic
                     self.fields['phase_name'].initial = phase_name
@@ -1448,7 +1450,8 @@ class FileUserAdminForm(forms.ModelForm):
                     propertyTempQuerySet= objDataFileTemp.properties.all()
                     experimentalcond_ids = ExperimentalfilecontempDatafiletemp.objects.filter(datafiletemp=objDataFileTemp).values_list('experimentalfilecontemp_id',flat=True)  
                    
-                    self.fields['reportvalidationcustom'].initial = "<strong><font color='black'>" + self.instance.reportvalidation +" </font></strong>" 
+                    #self.fields['reportvalidationcustom'].initial = "<strong><font color='black'>" + self.instance.reportvalidation +" </font></strong>" 
+                    #self.fields['reportvalidation'].initial= self.instance.reportvalidation
                    
                     experimentalcondQuerySet = ExperimentalParCondTemp.objects.filter(id__in=experimentalcond_ids)
                     """self.fields['experimentalcon'].queryset= experimentalcondQuerySet

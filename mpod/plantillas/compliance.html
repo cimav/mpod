@@ -14,41 +14,59 @@
 
     
     <!-- Plotly chart will be drawn inside this DIV -->
-    <table border="0" style="height: 700px">
+    {% if surfacecolorYoungModulusp %}
+    <table border="0" style="height: 1000px;  width: 900px">
+    {% else %}
+     <table border="0" style="height: 500px;  width: 900px">
+    {% endif %}  
     <tr>
-    <td  ><div id="myDiv" style="width:480px; height:400px;"></div></td><td> <div id="myDiv1" style="width:480px; height:400px;"></div></td>
+    <td  ><div  id="myDiv" style="width:450px; height:450px; border: 0px solid black;"></div></td>
+    <td> <div id="myDiv1" style="width:450px; height:450px;  border: 0px solid black;"></div></td>
     </tr>
     <tr>
-    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{LowResolutionFileName}}';">Download 3D Low Resolution File</button>
-     </br>
-    <button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{MiddleResolutionFileName}}';">Download 3D Middle Resolution File</button></td> 
-    
-    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{LowResolutionFilenameYoungModulus}}';">Download 3D Low Resolution File</button>
-     </br>
-   </td> 
+    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{resolutionFileName}}';">Download 3D  {{resolutionTag}}  Resolution File</button> </td> 
+    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{filenameYoungModulus}}';">Download 3D  {{resolutionTag}} Resolution File</button>  </td> 
     </tr>
-
+    {% if surfacecolorYoungModulusp %}
+   <tr>
+    <td  ><div id="myDiv3" style="width:450px; height:450px;  border: 0px solid black;"></div></td>
+    <td> <div id="myDiv4" style="width:450px; height:450px;  border: 0px solid black;"></div></td>
+    </tr>
+    <tr>
+    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{resolutionFileNamep}}';">Download 3D  {{resolutionTag}}  Resolution File</button> </td> 
+    <td align="center"><button class="btn btn-warning" onclick="location.href='/../../stlfiles/{{filenameYoungModulusp}}';">Download 3D  {{resolutionTag}} Resolution File</button></td> 
+    </tr>
+    {% endif %}  
     </table>
 
 
-
-	  {% if poly == '1' %}  
-		<script>
-		    title1= '4th Rank Tensor - Compliance Poly-crystal'
-			title2=  'Young Modulus, Poly-crystal';
-		</script>
+  
+  
+       {% if surfacecolorYoungModulusp %}
+            <script>
+			    title1= '4th Rank Tensor - Compliance'
+			    title2=  'Young Modulus, Single-crystal';
+			    
+			     title3= '4th Rank Tensor - Compliance Poly-crystal'
+				 title4=  'Young Modulus, Poly-crystal';
+			</script>
+													
 		{% else %}
-		
-	<script>
-	    title1= '4th Rank Tensor - Compliance'
-	    title2=  'Young Modulus, Single-crystal';
-	      
-	</script>
-	{% endif %}    
+									
+			  <script>
+			    title1= '4th Rank Tensor - Compliance'
+			    title2=  'Young Modulus, Single-crystal';
+ 
+			</script>			   
+		{% endif %}  
+	
+
+ 
     
   <script>
      
-            
+		  
+    
             var data = [
               {
                 z: [{{ZEC}}],
@@ -59,7 +77,7 @@
                 {% else %}
                 colorscale: '{{colorscale}}',
                 {% endif %} 
-                surfacecolor: {{surfacecolorcompliance}},
+                surfacecolor: {{surfacecolor}},
  			    type: 'surface',
                 hoverinfo: 'none',
                 showscale: true
@@ -69,8 +87,8 @@
             var layout = {
                     title: title1,
                     autosize: false,
-                    width: 500,
-                    height: 500,
+                    width: 450,
+                    height: 450,
                     margin: {
                       l: 65,
                       r: 50,
@@ -135,8 +153,8 @@
             var layout1 = {
                     title:title2,
                     autosize: false,
-                    width: 500,
-                    height: 500,
+                    width: 450,
+                    height: 450,
                     margin: {
                       l: 65,
                       r: 50,
@@ -179,13 +197,159 @@
 			            }
 
                   };
+            </script>
+             
+     {% if surfacecolorYoungModulusp %}
+     <script>
                    
- //alert();
+		 var data3 = [
+		              {
+		                z: [{{ZECp}}],
+		                x: [{{XECp}}],
+		                y: [{{YECp}}],  
+		                {% if colorscale == 'Cool' %}                   
+		                colorscale: [[0.0, 'rgb(255,0,255)'],[0.1111111111111111, 'rgb(229,26,255)'],[0.2222222222222222, 'rgb(203,52,255)'],[0.3333333333333333, 'rgb(178,77,255)'],[0.4444444444444444, 'rgb(152,103,255)'],[0.5555555555555556, 'rgb(126,129,255)'],[0.6666666666666666, 'rgb(100,155,255)'],[0.7777777777777778, 'rgb(75,180,255)'],[0.8888888888888888, 'rgb(49,206,255)'],[1.0, 'rgb(23,232,255)']],
+		                {% else %}
+		                colorscale: '{{colorscale}}',
+		                {% endif %} 
+		                surfacecolor: {{surfacecolorp}},
+		 			    type: 'surface',
+		                hoverinfo: 'none',
+		                showscale: true
+		              }
+		            ];
+		  
+		            var layout3 = {
+		                    title: title3,
+		                    autosize: false,
+		                    width: 450,
+		                    height: 450,
+		                    margin: {
+		                      l: 65,
+		                      r: 50,
+		                      b: 65,
+		                      t: 90
+		                    },
+		                      scene: {
+		                              /*xaxis: {
+		                                      title: '',
+		                                      autorange:      true,
+		                                      showgrid:       false,
+		                                      zeroline:       false,
+		                                      showline:       false,
+		                                      ticks:          '',
+		                                      showticklabels: false
+		                              },
+		                              yaxis: {
+		                                      title: '',
+		                                      autorange:      true,
+		                                      showgrid:       false,
+		                                      zeroline:       false,
+		                                      showline:       false,
+		                                      ticks:          '',
+		                                      showticklabels: false
+		                              },
+		                              zaxis: {
+		                                      title: '',
+		                                      autorange:      true,
+		                                      showgrid:       false,
+		                                      zeroline:       false,
+		                                      showline:       false,
+		                                      ticks:          '',
+		                                      showticklabels: false
+		                              },*/
+		                              camera: {
+		                                      up: { x: 0, y: 0, z: 1 },
+		                                      center: { x:0, y: 0, z: 0 },
+		                                      eye: { x: 2, y: 2, z: 0.1}
+		                              }
+		                      }
+		                  };
+		                  
+		               var data4 = [
+		              {
+		                z: [{{youngModulusZECp}}],
+		                x: [{{youngModulusXECp}}],
+		                y: [{{youngModulusYECp}}],  
+		                {% if colorscale == 'Cool' %}                   
+		                colorscale: [[0.0, 'rgb(255,0,255)'],[0.1111111111111111, 'rgb(229,26,255)'],[0.2222222222222222, 'rgb(203,52,255)'],[0.3333333333333333, 'rgb(178,77,255)'],[0.4444444444444444, 'rgb(152,103,255)'],[0.5555555555555556, 'rgb(126,129,255)'],[0.6666666666666666, 'rgb(100,155,255)'],[0.7777777777777778, 'rgb(75,180,255)'],[0.8888888888888888, 'rgb(49,206,255)'],[1.0, 'rgb(23,232,255)']],
+		                {% else %}
+		                colorscale: '{{colorscale}}',
+		                {% endif %} 
+		                surfacecolor: {{surfacecolorYoungModulusp}},
+		 			    type: 'surface',
+		                hoverinfo: 'none',
+		                showscale: true
+		              }
+		            ];
+		  
+		            var layout4 = {
+		                    title: title4,
+		                    autosize: false,
+		                    width: 450,
+		                    height: 450,
+		                    margin: {
+		                      l: 65,
+		                      r: 50,
+		                      b: 65,
+		                      t: 90
+		                    },
+		                      scene: {
+		                              /*xaxis: {
+		                                      title: '',
+		                                      autorange:      true,
+		                                      showgrid:       false,
+		                                      zeroline:       false,
+		                                      showline:       false,
+		                                      ticks:          '',
+		                                      showticklabels: false
+		                              },
+		                              yaxis: {
+		                                      title: '',
+		                                      autorange:      true,
+		                                      showgrid:       false,
+		                                      zeroline:       false,
+		                                      showline:       false,
+		                                      ticks:          '',
+		                                      showticklabels: false
+		                              },
+		                              zaxis: {
+		                                      title: '',
+		                                      autorange:      true,
+		                                      showgrid:       false,
+		                                      zeroline:       false,
+		                                      showline:       false,
+		                                      ticks:          '',
+		                                      showticklabels: false
+		                              },*/
+		                              camera: {
+		                                      up: { x: 0, y: 0, z: 1 },
+		                                      center: { x:0, y: 0, z: 0 },
+		                                      eye: { x: 2, y: 2, z: 0.1}
+		                              }
+		                      }
+		                  };
+            </script>
+            {% endif %}  
  
- Plotly.newPlot('myDiv', data, layout);
- Plotly.newPlot('myDiv1', data1, layout1);
-   // alert();
-  </script>
+ 
+  
+         {% if surfacecolorYoungModulusp %}
+            <script>
+            Plotly.newPlot('myDiv', data, layout);
+            Plotly.newPlot('myDiv1', data1, layout1);
+            Plotly.newPlot('myDiv3', data3, layout3);
+            Plotly.newPlot('myDiv4', data4, layout4);
+			</script>
+													
+		{% else %}
+									
+			  <script>
+			  Plotly.newPlot('myDiv', data, layout);
+			  Plotly.newPlot('myDiv1', data1, layout1);
+ 
+			</script>			   
+		{% endif %}  
     
   </body>
 </html>

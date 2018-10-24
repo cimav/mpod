@@ -1,15 +1,17 @@
 
-   <script type="text/javascript">	
+  	  {% if listvalues%}
 
-	
-  </script>
-   {% for t in listtensortags %}	
-		
-		<script type="text/javascript">
-		  
-		  parseTensorTag('{{t}}');
-		  </script>
-{% endfor %}
+	   <script type="text/javascript">	
+	    url = "{% url rotatematrix 0000000 -1%}";
+	    url = url.replace(/0/, codefile.toString());
+	   
+	    setValuesGET("{{listvalues}}",url);
+	  </script>
+
+  	{% endif %}
+  	
+  	
+
 
 {% if formatted_data_blocks %}
 	{% for block in formatted_data_blocks %}
@@ -33,8 +35,8 @@
 			</div>
 			<br />
 		{% endif %}
+		
 		{% if block.1 %}
-
 			{% for sec in block.1 %}
 				{% if sec.0 %}
 					{% if sec.0.0 %}
@@ -55,17 +57,16 @@
 							</div>
 							<br />
 					{% endif %}
-					{% if sec.1 %}
-
 					
+					{% if sec.1 %}
 						<h6>Properties' values</h6>
 						{% for tens_prop in sec.1 %}			
 							<script type="text/javascript">
-							    url = "{% url rotatematrix 0000000 -1%}";
+							    /*url = "{% url rotatematrix 0000000 -1%}";
 							    url = url.replace(/0/, codefile.toString());
 
 							    parseTensorValue("{{tens_prop.1}}","{{tens_prop.0}}","{{tens_prop.3}}",codefile,url);
-
+								*/
 
 							</script>
 														   
@@ -76,12 +77,11 @@
 								<td>
 									<table class="table table-striped table-condensed table-hover sm_table" >
 										<tbody>
-											 
+
 											{% for tens_row in tens_prop.3 %}
-						
 												<tr>
 													{% for tens_val in tens_row %}
-						 
+						 						 
 														<td> {{tens_val}} </td>
 													{% endfor %}
 													
@@ -92,8 +92,13 @@
 									</td> 
 										
 										<script type="text/javascript">
-											document.write(html_tdseparatorpaddingleft);
-											document.write(html_tdrotated_matrix);											
+											/*document.write(html_tdseparatorpaddingleft);
+											document.write(html_tdrotated_matrix);		*/	
+											
+											document.write(html_tds_separatorpaddingleft[propertycounter]);
+											document.write(html_tds_rotated_matrix[propertycounter]);	
+								 
+											 
 								       </script>
 								 
 									</tr>
@@ -107,37 +112,40 @@
 							   <td >
 								<script type="text/javascript">
 
-									
-								    document.write(html_colorandbtngraph);
+								    
+								    document.write(html_select_colorb_btngraph[propertycounter]);
+								    
+								    
+								    
 									document.write('</td>');  
 									document.write("<td  style='padding: 0px 0px 0px "+ tdbuttonpaddingleft +"px;' >");  
 									document.write('</td>');  
 									document.write('<td>');  
 									
-									document.write(html_btnpolycrystalline);		
 									
-									document.write(html_lbl_h);
-									document.write(html_input_h);
+									document.write(html_btn_polycrystalline[propertycounter]);	
+			
 									
-									document.write(html_lbl_k );
-									document.write(html_input_k);
+									
+									document.write(html_lbls_h[propertycounter]);
+									document.write(html_inputs_h[propertycounter]);
+									
+									document.write(html_lbls_k[propertycounter]);
+									document.write(html_inputs_k[propertycounter]);
 											
-									document.write(html_lbl_l);
-									document.write(html_input_l );
+									document.write(html_lbls_l[propertycounter]);
+									document.write(html_inputs_l[propertycounter] );
 									
-									document.write(html_lbl_omega );
-									document.write(html_input_omega );
-								
-									document.write(html_spanbnt );
-									document.write(html_spangraph );
+									document.write(html_lbls_omega[propertycounter] );
+									document.write(html_inputs_omega[propertycounter] );
+									
+									document.write(html_spans_graph[propertycounter] );
+									document.write(html_spans_bnt[propertycounter] );
 
-									//console.log(html_input_omega);
-									
-									
 									document.write('</td>');  
 	
 									 
-	
+									propertycounter++;
 								</script>
 								
 								  

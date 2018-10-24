@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 import numpy as N
  
-
+import string
 
 
 def argsToInt(args,field=None,value=None):
@@ -31,6 +31,21 @@ def requestPostToInt(POST,key=None,value=None):
         if POST.has_key(key):
             try:
                 result= int(POST.get(key,False))
+            except ValueError:
+                result = value
+        else:
+            pass
+    return result
+
+def requestPostFilterToFloat(POST,key=None,value=None,filterfield=None):
+    result = None
+    if key:
+        if POST.has_key(key):
+            try:
+                if filterfield in key:
+                    result= float(POST.get(key,False))
+                else:
+                    pass
             except ValueError:
                 result = value
         else:
@@ -398,5 +413,23 @@ def puntualgroupnamesParse(puntualgroupname):
     return result
     
     
+def remove_all(substr, str):
+    index = 0
+    length = len(str)
+    while string.find(str, substr) != -1:
+        index = string.find(str, substr)
+        str = str[0:index] + str[index+length:]
+    return str
+
+def get_coefficents_total(dimension):
+   dim =dimension.split(',')
+   coefficents_total = 1;
+   for j, item in enumerate(dim):
+      coefficents_total = int(coefficents_total) * int(dim[j]);
+
+   return coefficents_total;
     
-    
+def get_dimensions(dimension):
+   dim =dimension.split(',')
+
+   return len(dim)

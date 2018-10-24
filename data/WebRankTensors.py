@@ -23,23 +23,23 @@ import threading
  
 class RankTensors():
    def __init__(self):
-      self.A = 1
-      self.color = None 
-      self.dataS = None
-      self.layoutS = None
-      self.stringValsOfXEC = ''
-      self.stringValsOfYEC = ''
-      self.stringValsOfZEC = ''
-      self.stringValsOfXEC2 = ''
-      self.stringValsOfYEC2 = ''
-      self.stringValsOfZEC2 = ''
-      self.colorscale = ""
-      self.surfacecolorSecondRankTensor=''
-      self.surfacecolorSecondRankTensorRotated =""
-      self.surfacecolorThirdRankTensor=''
-      self.surfacecolorThirdRankTensorRotated=''
-      self.surfacecolorFourthRankTensor=''
-      self.lock = threading.Lock()    
+    self.A = 1
+    self.color = None 
+    self.dataS = None
+    self.layoutS = None
+    self.stringValsOfXEC = ''
+    self.stringValsOfYEC = ''
+    self.stringValsOfZEC = ''
+    self.stringValsOfXEC2 = ''
+    self.stringValsOfYEC2 = ''
+    self.stringValsOfZEC2 = ''
+    self.colorscale = ""
+    self.surfacecolorSecondRankTensor=''
+    self.surfacecolorSecondRankTensorRotated =""
+    self.surfacecolorThirdRankTensor=''
+    self.surfacecolorThirdRankTensorRotated=''
+    self.surfacecolorFourthRankTensor=''
+    self.lock = threading.Lock()    
        
    def dist_origin(self,x, y, z):
         return math.sqrt((1.0 * x)**2 + (1.0 * y)**2 + (1.0 * z)**2)
@@ -101,76 +101,76 @@ class RankTensors():
         t.start()
           
         if createdata == 1:
-              b=0
-              for itemX in XEC:                      
-                b = b + 1  
-                if  b ==  len(XEC):                
-                  c = 0 
-                  self.stringValsOfXEC =  self.stringValsOfXEC + '['                 
-                  for val in itemX:  
-                    c = c + 1               
-                    if c == len(itemX):                
-                          self.stringValsOfXEC =   self.stringValsOfXEC + str(val) +']'       
-                    else:    
-                          self.stringValsOfXEC =  self.stringValsOfXEC + str(val) + ','       
-                          
-                else:
-                  c = 0 
-                  self.stringValsOfXEC =  self.stringValsOfXEC + '['                           
-                  for val in itemX: 
-                    c = c + 1
-                    if c == len(itemX):                
-                          self.stringValsOfXEC =   self.stringValsOfXEC + str(val) +'],'       
-                    else:    
-                          self.stringValsOfXEC =  self.stringValsOfXEC + str(val) + ',' 
-              
-              b=0            
-              for itemY in YEC:                      
-                b = b + 1  
-                if  b ==  len(YEC):                 
-                  c = 0 
-                  self.stringValsOfYEC =  self.stringValsOfYEC + '['                 
-                  for val in itemY:  
-                    c = c + 1               
-                    if c == len(itemY):                
-                          self.stringValsOfYEC =   self.stringValsOfYEC + str(val) +']'       
-                    else:    
-                          self.stringValsOfYEC =  self.stringValsOfYEC + str(val) + ','       
-                          
-                else:
-                  c = 0 
-                  self.stringValsOfYEC =  self.stringValsOfYEC + '['                           
-                  for val in itemY: 
-                    c = c + 1
-                    if c == len(itemY):                
-                          self.stringValsOfYEC =   self.stringValsOfYEC + str(val) +'],'       
-                    else:    
-                          self.stringValsOfYEC =  self.stringValsOfYEC + str(val) + ','             
-                          
-              b = 0
-              for itemZ in ZEC:                      
-               # if (itemZ ==  ZEC[-1:]).all():   
-                b = b + 1   
-                t = len(ZEC)    
-                if  b ==  len(ZEC):      
-                  c = 0 
-                  self.stringValsOfZEC =  self.stringValsOfZEC + '['                 
-                  for val in itemZ:  
-                    c = c + 1               
-                    if c == len(itemZ):                
-                          self.stringValsOfZEC =   self.stringValsOfZEC + str(val) +']'       
-                    else:    
-                          self.stringValsOfZEC =  self.stringValsOfZEC + str(val) + ','       
-                          
-                else:
-                  c = 0 
-                  self.stringValsOfZEC =  self.stringValsOfZEC + '['                           
-                  for val in itemZ: 
-                    c = c + 1
-                    if c == len(itemZ):                
-                          self.stringValsOfZEC =   self.stringValsOfZEC + str(val) +'],'       
-                    else:    
-                          self.stringValsOfZEC =  self.stringValsOfZEC + str(val) + ','                    
+          b=0
+          for itemX in XEC:                      
+            b = b + 1  
+            if  b ==  len(XEC):                
+              c = 0 
+              self.stringValsOfXEC =  self.stringValsOfXEC + '['                 
+              for val in itemX:  
+                c = c + 1               
+                if c == len(itemX):                
+                      self.stringValsOfXEC =   self.stringValsOfXEC + str(val) +']'       
+                else:    
+                      self.stringValsOfXEC =  self.stringValsOfXEC + str(val) + ','       
+                      
+            else:
+              c = 0 
+              self.stringValsOfXEC =  self.stringValsOfXEC + '['                           
+              for val in itemX: 
+                c = c + 1
+                if c == len(itemX):                
+                      self.stringValsOfXEC =   self.stringValsOfXEC + str(val) +'],'       
+                else:    
+                      self.stringValsOfXEC =  self.stringValsOfXEC + str(val) + ',' 
+          
+          b=0            
+          for itemY in YEC:                      
+            b = b + 1  
+            if  b ==  len(YEC):                 
+              c = 0 
+              self.stringValsOfYEC =  self.stringValsOfYEC + '['                 
+              for val in itemY:  
+                c = c + 1               
+                if c == len(itemY):                
+                      self.stringValsOfYEC =   self.stringValsOfYEC + str(val) +']'       
+                else:    
+                      self.stringValsOfYEC =  self.stringValsOfYEC + str(val) + ','       
+                      
+            else:
+              c = 0 
+              self.stringValsOfYEC =  self.stringValsOfYEC + '['                           
+              for val in itemY: 
+                c = c + 1
+                if c == len(itemY):                
+                      self.stringValsOfYEC =   self.stringValsOfYEC + str(val) +'],'       
+                else:    
+                      self.stringValsOfYEC =  self.stringValsOfYEC + str(val) + ','             
+                      
+          b = 0
+          for itemZ in ZEC:                      
+           # if (itemZ ==  ZEC[-1:]).all():   
+            b = b + 1   
+            t = len(ZEC)    
+            if  b ==  len(ZEC):      
+              c = 0 
+              self.stringValsOfZEC =  self.stringValsOfZEC + '['                 
+              for val in itemZ:  
+                c = c + 1               
+                if c == len(itemZ):                
+                      self.stringValsOfZEC =   self.stringValsOfZEC + str(val) +']'       
+                else:    
+                      self.stringValsOfZEC =  self.stringValsOfZEC + str(val) + ','       
+                      
+            else:
+              c = 0 
+              self.stringValsOfZEC =  self.stringValsOfZEC + '['                           
+              for val in itemZ: 
+                c = c + 1
+                if c == len(itemZ):                
+                      self.stringValsOfZEC =   self.stringValsOfZEC + str(val) +'],'       
+                else:    
+                      self.stringValsOfZEC =  self.stringValsOfZEC + str(val) + ','                    
      
         
         if createdata == 1:
@@ -691,330 +691,7 @@ class RankTensors():
           sc= sc + ']'     
           self.surfacecolorThirdRankTensor =sc 
           
-             
-   def ThirdRankTensorRotateddg (self,valuearrayrotated,Color,filename,res,stl_dir,createstl,createdata):
-        d11=float(valuearrayrotated[0])
-        d12=float(valuearrayrotated[1])
-        d13=float(valuearrayrotated[2])
-        d14=float(valuearrayrotated[3])
-        d15=float(valuearrayrotated[4])
-        d16=float(valuearrayrotated[5])
-        d21=float(valuearrayrotated[6])
-        d22=float(valuearrayrotated[7])
-        d23=float(valuearrayrotated[8])
-        d24=float(valuearrayrotated[9])
-        d25=float(valuearrayrotated[10])
-        d26=float(valuearrayrotated[11])
-        d31=float(valuearrayrotated[12])
-        d32=float(valuearrayrotated[13])
-        d33=float(valuearrayrotated[14])
-        d34=float(valuearrayrotated[15])
-        d35=float(valuearrayrotated[16])
-        d36=float(valuearrayrotated[17])
-        
-        filename= filename
-        #self.Res = res
-        stldir=stl_dir
-        createstl= createstl
-        createdata = createdata
-        color = Color 
-        
-        phi=None
-        beta=None
-        if res == 1:
-          phi, beta = np.mgrid[0:np.pi:45j,0:np.pi:90j]
-        elif res == 2:
-          phi, beta = np.mgrid[0:np.pi:90j,0:np.pi:180j] 
-        elif res == 3:
-          phi, beta = np.mgrid[0:np.pi:180j,0:np.pi:360j]
-              
-              
-    
-        x = np.sin(phi)*np.cos(beta)
-        y = np.sin(phi)*np.sin(beta)
-        z = np.cos(phi)
-    
-        E1=d11*x*x*x + (d12+d26)*x*y*y + (d13+d35)*x*z*z + (d14+d25+d36)*x*y*z + (d15+d31)*x*x*z + (d16+d21)*x*x*y
-        E2=d22*y*y*y + (d23+d34)*y*z*z + (d24+d32)*y*y*z
-        E3=d33*z*z*z 
-    
-        E=E1+E2+E3
-    
-        XEC=E*x
-        YEC=E*y
-        ZEC=E*z
-    
-        """scale = 100
-        if createstl == 1: 
-          fl= filename 
-          #stl_dir = ".\\media\\stlfiles\\"      
-          filepath=os.path.join(stldir, fl)
-          stlw = STLUtil()
-          tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-          del stlw
-          """
-        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
-        t.start()
-      
-        if createdata == 1:
-           b=0
-           for itemX in XEC:                      
-                b = b + 1  
-                if  b ==  len(XEC):                
-                  c = 0 
-                  self.stringValsOfXEC2 =  self.stringValsOfXEC2 + '['                 
-                  for val in itemX:  
-                    c = c + 1               
-                    if c == len(itemX):                
-                          self.stringValsOfXEC2 =   self.stringValsOfXEC2 + str(val) +']'       
-                    else:    
-                          self.stringValsOfXEC2 =  self.stringValsOfXEC2 + str(val) + ','       
-                          
-                else:
-                  c = 0 
-                  self.stringValsOfXEC2 =  self.stringValsOfXEC2 + '['                           
-                  for val in itemX: 
-                    c = c + 1
-                    if c == len(itemX):                
-                          self.stringValsOfXEC2 =   self.stringValsOfXEC2 + str(val) +'],'       
-                    else:    
-                          self.stringValsOfXEC2 =  self.stringValsOfXEC2 + str(val) + ',' 
-              
-           b=0            
-           for itemY in YEC:                      
-            b = b + 1  
-            if  b ==  len(YEC):                 
-              c = 0 
-              self.stringValsOfYEC2 =  self.stringValsOfYEC2 + '['                 
-              for val in itemY:  
-                c = c + 1               
-                if c == len(itemY):                
-                      self.stringValsOfYEC2 =   self.stringValsOfYEC2 + str(val) +']'       
-                else:    
-                      self.stringValsOfYEC2 =  self.stringValsOfYEC2 + str(val) + ','       
-                              
-            else:
-              c = 0 
-              self.stringValsOfYEC2 =  self.stringValsOfYEC2 + '['                           
-              for val in itemY: 
-                c = c + 1
-                if c == len(itemY):                
-                      self.stringValsOfYEC2 =   self.stringValsOfYEC2 + str(val) +'],'       
-                else:    
-                      self.stringValsOfYEC2 =  self.stringValsOfYEC2 + str(val) + ','             
-                              
-           b = 0
-           for itemZ in ZEC:                      
-           # if (itemZ ==  ZEC[-1:]).all():   
-            b = b + 1   
-            t = len(ZEC)    
-            if  b ==  len(ZEC):      
-              c = 0 
-              self.stringValsOfZEC2 =  self.stringValsOfZEC2 + '['                 
-              for val in itemZ:  
-                c = c + 1               
-                if c == len(itemZ):                
-                      self.stringValsOfZEC2 =   self.stringValsOfZEC2 + str(val) +']'       
-                else:    
-                      self.stringValsOfZEC2 =  self.stringValsOfZEC2 + str(val) + ','       
-                      
-            else:
-              c = 0 
-              self.stringValsOfZEC2 =  self.stringValsOfZEC2 + '['                           
-              for val in itemZ: 
-                c = c + 1
-                if c == len(itemZ):                
-                      self.stringValsOfZEC2 =   self.stringValsOfZEC2 + str(val) +'],'       
-                else:    
-                      self.stringValsOfZEC2 =  self.stringValsOfZEC2 + str(val) + ','    
-            
-            
-            
-        if createdata == 1:
-          lx=len(ZEC)
-          ly=len(ZEC[0])
-          sc='['
-          out=[]
-          for i in xrange(lx):
-                temp = []
-                sc= sc + '['
-                for j in xrange( ly):
-                    res= self.dist_origin(XEC[i][j], YEC[i][j], ZEC[i][j])
-                    #print res
-                    if j ==( ly -1): 
-                        if i == ( lx -1): 
-                            sc= sc + str(res) + ']'  
-                        else:
-                            sc= sc + str(res) + '],'  
-                        #print sc
-                    else:
-                          sc= sc + str(res) + ','  
-        
-           
-          sc= sc + ']'     
-          self.surfacecolorThirdRankTensorRotated =sc               
-                  
-   def ThirdRankTensorRotatedeh (self,valuearrayrotated,Color,filename,res,stl_dir,createstl,createdata):
-        d11=float(valuearrayrotated[0])
-        d12=float(valuearrayrotated[1])
-        d13=float(valuearrayrotated[2])
-        d14=float(valuearrayrotated[3])
-        d15=float(valuearrayrotated[4])
-        d16=float(valuearrayrotated[5])
-        d21=float(valuearrayrotated[6])
-        d22=float(valuearrayrotated[7])
-        d23=float(valuearrayrotated[8])
-        d24=float(valuearrayrotated[9])
-        d25=float(valuearrayrotated[10])
-        d26=float(valuearrayrotated[11])
-        d31=float(valuearrayrotated[12])
-        d32=float(valuearrayrotated[13])
-        d33=float(valuearrayrotated[14])
-        d34=float(valuearrayrotated[15])
-        d35=float(valuearrayrotated[16])
-        d36=float(valuearrayrotated[17])
-        
-        filename= filename
-        #self.Res = res
-        stldir=stl_dir
-        createstl= createstl
-        createdata = createdata
-        color = Color 
-        
-        phi=None
-        beta=None
-        if res == 1:
-          phi, beta = np.mgrid[0:np.pi:45j,0:np.pi:90j]
-        elif res == 2:
-          phi, beta = np.mgrid[0:np.pi:90j,0:np.pi:180j] 
-        elif res == 3:
-          phi, beta = np.mgrid[0:np.pi:180j,0:np.pi:360j]
-              
-              
-    
-        x = np.sin(phi)*np.cos(beta)
-        y = np.sin(phi)*np.sin(beta)
-        z = np.cos(phi)
-    
-        E1=d11*x*x*x + (d12+d26)*x*y*y + (d13+d35)*x*z*z + (d14+d25+d36)*x*y*z + (d15+d31)*x*x*z + (d16+d21)*x*x*y
-        E2=d22*y*y*y + (d23+d34)*y*z*z + (d24+d32)*y*y*z
-        E3=d33*z*z*z 
-    
-        E=E1+E2+E3
-    
-        XEC=E*x
-        YEC=E*y
-        ZEC=E*z
-    
-        """scale = 100
-        if createstl == 1: 
-          fl= filename 
-          #stl_dir = ".\\media\\stlfiles\\"      
-          filepath=os.path.join(stldir, fl)
-          stlw = STLUtil()
-          tri = stlw.stlwrite(filepath,XEC,YEC,ZEC,scale)
-          del stlw"""
-        t = threading.Thread(target=self.stlCreator,args=(createstl,filename,stldir,XEC,YEC,ZEC))
-        t.start()
-      
-        if createdata == 1:
-           b=0
-           for itemX in XEC:                      
-                b = b + 1  
-                if  b ==  len(XEC):                
-                  c = 0 
-                  self.stringValsOfXEC2 =  self.stringValsOfXEC2 + '['                 
-                  for val in itemX:  
-                    c = c + 1               
-                    if c == len(itemX):                
-                          self.stringValsOfXEC2 =   self.stringValsOfXEC2 + str(val) +']'       
-                    else:    
-                          self.stringValsOfXEC2 =  self.stringValsOfXEC2 + str(val) + ','       
-                          
-                else:
-                  c = 0 
-                  self.stringValsOfXEC2 =  self.stringValsOfXEC2 + '['                           
-                  for val in itemX: 
-                    c = c + 1
-                    if c == len(itemX):                
-                          self.stringValsOfXEC2 =   self.stringValsOfXEC2 + str(val) +'],'       
-                    else:    
-                          self.stringValsOfXEC2 =  self.stringValsOfXEC2 + str(val) + ',' 
-              
-           b=0            
-           for itemY in YEC:                      
-            b = b + 1  
-            if  b ==  len(YEC):                 
-              c = 0 
-              self.stringValsOfYEC2 =  self.stringValsOfYEC2 + '['                 
-              for val in itemY:  
-                c = c + 1               
-                if c == len(itemY):                
-                      self.stringValsOfYEC2 =   self.stringValsOfYEC2 + str(val) +']'       
-                else:    
-                      self.stringValsOfYEC2 =  self.stringValsOfYEC2 + str(val) + ','       
-                              
-            else:
-              c = 0 
-              self.stringValsOfYEC2 =  self.stringValsOfYEC2 + '['                           
-              for val in itemY: 
-                c = c + 1
-                if c == len(itemY):                
-                      self.stringValsOfYEC2 =   self.stringValsOfYEC2 + str(val) +'],'       
-                else:    
-                      self.stringValsOfYEC2 =  self.stringValsOfYEC2 + str(val) + ','             
-                              
-           b = 0
-           for itemZ in ZEC:                      
-           # if (itemZ ==  ZEC[-1:]).all():   
-            b = b + 1   
-            t = len(ZEC)    
-            if  b ==  len(ZEC):      
-              c = 0 
-              self.stringValsOfZEC2 =  self.stringValsOfZEC2 + '['                 
-              for val in itemZ:  
-                c = c + 1               
-                if c == len(itemZ):                
-                      self.stringValsOfZEC2 =   self.stringValsOfZEC2 + str(val) +']'       
-                else:    
-                      self.stringValsOfZEC2 =  self.stringValsOfZEC2 + str(val) + ','       
-                      
-            else:
-              c = 0 
-              self.stringValsOfZEC2 =  self.stringValsOfZEC2 + '['                           
-              for val in itemZ: 
-                c = c + 1
-                if c == len(itemZ):                
-                      self.stringValsOfZEC2 =   self.stringValsOfZEC2 + str(val) +'],'       
-                else:    
-                      self.stringValsOfZEC2 =  self.stringValsOfZEC2 + str(val) + ','    
-            
-            
-            
-        if createdata == 1:
-          lx=len(ZEC)
-          ly=len(ZEC[0])
-          sc='['
-          out=[]
-          for i in xrange(lx):
-                temp = []
-                sc= sc + '['
-                for j in xrange( ly):
-                    res= self.dist_origin(XEC[i][j], YEC[i][j], ZEC[i][j])
-                    #print res
-                    if j ==( ly -1): 
-                        if i == ( lx -1): 
-                            sc= sc + str(res) + ']'  
-                        else:
-                            sc= sc + str(res) + '],'  
-                        #print sc
-                    else:
-                          sc= sc + str(res) + ','  
-        
-           
-          sc= sc + ']'     
-          self.surfacecolorThirdRankTensorRotated =sc 
-                                          
+                                 
    def FourthRankTensor (self,s11, s12, s13, s14, s15, s16, s21, s22, s23, s24, s25, s26, s31, s32, s33, s34, s35, s36, s41, s42, s43, s44, s45, s46, s51, s52, s53, s54, s55, s56, s61, s62, s63, s64, s65, s66, Color,filename,res,stl_dir,createstl,createdata):
     
         filename= filename

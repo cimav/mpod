@@ -328,6 +328,8 @@ class Type(models.Model):
     description = models.CharField(max_length=511)   
     catalogproperty=  models.ForeignKey(CatalogProperty,verbose_name="Property")
     active = models.BooleanField(_(u'Active'),default=False)
+    tensor = models.CharField(max_length=100)
+    clusterurl = models.CharField(max_length=100)
     
     class Meta:
         db_table = 'type'     

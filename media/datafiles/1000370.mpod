@@ -34,20 +34,20 @@ _journal_pages_number            43001
 _journal_year                    2011
 
 data_1000370a
-_prop_magnetocrystalline_anisotropy_k1,_k2 'kij'
+_prop_magnetocrystalline_anisotropy_k1,_k2 'ki'
 loop_
 _prop_data_label
 _prop_data_tensorial_index
 _prop_data_value
-kij 11 -0.12
-kij 12 0.5
+ki 1 -0.12
+ki 2 0.5
 
 data_1000370b
-_prop_magnetostriction_lambda_100,_lambda_111 'kij'
+_prop_magnetostriction_lambda_100,_lambda_111 'ki'
 loop_
 _prop_data_label
 _prop_data_tensorial_index
 _prop_data_value
-kij 11 206.66
-kij 12 36.66
+ki 1 206.66
+ki 2 36.66
 

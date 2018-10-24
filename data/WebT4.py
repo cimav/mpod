@@ -15,7 +15,7 @@ from stlwrite import *
 import os.path
 import math
 import threading
-
+from django.utils.text import force_unicode
 import time
 
  
@@ -25,7 +25,7 @@ import time
 class ComplianceT4():
    def __init__(self):
    
-      
+       
       self.A = 1
       self.matrixS=None
       self.dataS = None
@@ -399,6 +399,7 @@ class ComplianceT4():
 
 class StiffnessT4():
    def __init__(self):
+    self.error = None
     self.A = 1
     self.matrixS=None
     self.dataS = None
@@ -459,15 +460,31 @@ class StiffnessT4():
       elif res == 3:
           phi, beta = np.mgrid[0:np.pi:180j,0:2*np.pi:360j]
 
- 
+      
       c = [[c11,c12,c13,c14,c15,c16],
       [c12,c22,c23,c24,c25,c26],
       [c13,c23,c33,c34,c35,c36],
       [c14,c24,c34,c44,c45,c46],
       [c15,c25,c35,c45,c55,c56],
       [c16,c26,c36,c46,c56,c66]]
+      
+      """
+      c = [[223.0, 109.0, 102.0, 0.0, 0.0, 0.0], 
+            [109.0, 223.0, 102.0, 0.0, 0.0, 0.0], 
+            [102.0, 102.0, 240.0, 0.0, 0.0, 0.0], 
+            [0.0, 0.0, 0.0, 121.0, 0.0, 0.0], 
+            [0.0, 0.0, 0.0, 0.0, 121.0, 0.0], 
+            [0.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
+      """
+      
 
-      s = np.linalg.inv(c)
+      #fordisplay=np.matrix([[c11,c12,c13,c14,c15,c16],[c21,c22,c23,c24,c25,c26],[c31,c32,c33,c34,c35,c36],[c41,c42,c43,c44,c45,c46],[c51,c52,c53,c54,c55,c56],[c61,c62,c63,c64,c65,c66]])
+      s = None
+      try:
+        s = np.linalg.inv(c)
+      except Exception as e:
+        self.error = 'Internal error occurred, consult technical support (when calculating the inverse of a matrix of Single-crystal)'
+        return
 
       s11=s[0,0]; s12=s[0,1]; s13=s[0,2]; s14=s[0,3]; s15=s[0,4]; s16=s[0,5]
       s22=s[1,1]; s23=s[1,2]; s24=s[1,3]; s25=s[1,4]; s26=s[1,5]

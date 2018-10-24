@@ -45,7 +45,7 @@ from django.http import Http404
 import json
 import urllib2
  
- 
+from UtilPlot  import *
 
 
 
@@ -371,941 +371,644 @@ def viewdataitem(request, dataitem_id):
     return render_to_response('viewdataitem.html', {"html_dataitem":html_dataitem, "html_tables":html_tables}, context_instance=RequestContext(request))
 
 def viewsecondranktensor(request):
-    value11 = (request.GET.get('value11', ''))
-    value12 = (request.GET.get('value12', ''))
-    value13 = (request.GET.get('value13', ''))
-    value21 = (request.GET.get('value21', ''))
-    value22 = (request.GET.get('value22', ''))
-    value23 = (request.GET.get('value23', ''))
-    value31 = (request.GET.get('value31', ''))
-    value32 = (request.GET.get('value32', ''))
-    value33 = (request.GET.get('value33', ''))
-    color = (request.GET.get('color', ''))
-    filename = (request.GET.get('filename', ''))
-    if(value11 and value12 and value13 and value21 and value22 and value23 and value31 and value32 and value33 and color):
-        val11 = float(value11)
-        val12 = float(value12)
-        val13 = float(value13)
-        val21 = float(value21)
-        val22 = float(value22)
-        val23 = float(value23)
-        val31 = float(value31)
-        val32 = float(value32)
-        val33 = float(value33)
-        color = int(color)
-        filename = re.sub('[\s+]', '', filename)
-        filename1 =None
-        filename2 =None
-        
-        surfacecolorSecondRankTensor= None
-        surfacecolorSecondRankTensorRotated= None
-       
-        valuearrayrotated =request.GET.getlist("valuearrayrotated")
-       
-        if color == 0:
-            colorscale='Jet';
-        elif color == 1:
-            colorscale='Hot';
-        elif color == 2:
-            colorscale='Cool'
-        elif color == 3:
-            colorscale='Greys'; 
-        
     
-        
-        
-        pathslist=Path.objects.all()      
-        pathexist = 0
-        stl_dir=''
-        for stldir in pathslist:
-            path=Path() 
-            path = stldir
-            if os.path.isdir(path.stl_dir): 
-                pathexist = 1
-                stl_dir= path.stl_dir
-                break
+    secondRankTensor = SecondRankTensor(request.GET)
 
+    XEC = None
+    YEC = None
+    ZEC = None
+    filename1 = None
+    surfacecolor = None
+    colorscale = None
+    colorscalep = None
+    surfacecolorp = None
+    XECp = None
+    YECp = None
+    ZECp = None
+    filename1p = None
+  
+    tableWidth = 450
+    tableHeight = 500
+    divWidth = 450
+    divHeight = 450 
+    layoutHeight = 450
+    layoutWeight = 450
+    tableWidthHeight = ""
+    divWidthHeight = ""
+ 
+    resolutionTag = ""
+    if secondRankTensor.valuearrayrotated == None:
+        secondRankTensor.SingleCrystal()        
+        XEC = secondRankTensor.jason_data['XEC']
+        YEC = secondRankTensor.jason_data['YEC']
+        ZEC = secondRankTensor.jason_data['ZEC']
+        filename1 = secondRankTensor.jason_data['filename1']
+        surfacecolor = secondRankTensor.jason_data['surfacecolor']
 
-           
-        
-        #stl_dir=".\\media\\stlfiles\\"
-        #stl_dir="/var/www/MPOD/media/stlfiles/"
-        
-       
-        filename1 = filename +"R2LowResolution" + ".stl"
-        filepath=os.path.join(stl_dir, filename1)
-        res=1;
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-       
-        createdata =  1
-      
-        tensor = RankTensors()
-        tensor.SecondRankTensor(val11,val12,val13,val21,val22,val23,val31,val32,val33,color,filename1,res,stl_dir,createstl,createdata)
-        XEC=tensor.stringValsOfXEC
-        YEC = tensor.stringValsOfYEC
-        ZEC= tensor.stringValsOfZEC
-        surfacecolorSecondRankTensor=tensor.surfacecolorSecondRankTensor
-        
-        if valuearrayrotated:
-            tensor.SecondRankTensorRotated(valuearrayrotated,color,filename1,res,stl_dir,createstl,createdata)
-            XEC2=tensor.stringValsOfXEC2
-            YEC2 = tensor.stringValsOfYEC2
-            ZEC2= tensor.stringValsOfZEC2
-            surfacecolorSecondRankTensorRotated=tensor.surfacecolorSecondRankTensorRotated
-            
-        del tensor
-       
-        filename2 = filename+"R2MidleResolution" + ".stl"
-        res=2;
-        filepath=os.path.join(stl_dir, filename2)       
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-       
-        if createstl == 1:
-            createdata =  0     
-            tensor = RankTensors()
-            tensor.SecondRankTensor(val11,val12,val13,val21,val22,val23,val31,val32,val33,color,filename2,res,stl_dir,createstl,createdata)         
-            del tensor
+    else:
+        secondRankTensor.SingleCrystalAndPoly()
+        XEC = secondRankTensor.jason_data['XEC']
+        YEC = secondRankTensor.jason_data['YEC']
+        ZEC = secondRankTensor.jason_data['ZEC']
+        filename1 = secondRankTensor.jason_data['filename1'] 
+        surfacecolor = secondRankTensor.jason_data['surfacecolor']
 
+        XECp = secondRankTensor.jason_data_poly['XEC']
+        YECp = secondRankTensor.jason_data_poly['YEC']
+        ZECp = secondRankTensor.jason_data_poly['ZEC']
+        filename1p = secondRankTensor.jason_data_poly['filename1'] 
+        surfacecolorp = secondRankTensor.jason_data_poly['surfacecolor']
+        
+        #tableHeight = tableHeight  * 2
+        tableWidth = tableWidth * 2 
+ 
+    
+       
 
-        if valuearrayrotated:               
-            return render_to_response('secondranktensor.html',{"XEC": XEC,
-                                                                                                        "YEC":YEC,
-                                                                                                        "ZEC": ZEC,
-                                                                                                        "LowResolutionFileName":filename1,
-                                                                                                        "MiddleResolutionFileName":filename2,
-                                                                                                        'colorscale':colorscale,
-                                                                                                        'surfacecolorSecondRankTensor':surfacecolorSecondRankTensor,                    
-                                                                                                        "XEC2": XEC2,
-                                                                                                        "YEC2":YEC2,
-                                                                                                        "ZEC2": ZEC2,
-                                                                                                        'surfacecolorSecondRankTensorRotated':surfacecolorSecondRankTensorRotated,}, context_instance=RequestContext(request))
-        else:             
-            return render_to_response('secondranktensor.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,'colorscale':colorscale,'surfacecolorSecondRankTensor':surfacecolorSecondRankTensor}, context_instance=RequestContext(request))
+    tableWidthHeight = 'height:'+  str(tableHeight) +'px;  width:' +  str(tableWidth) + 'px;'
+    divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
+    
+    colorscale = secondRankTensor.colorscale
+ 
+    if secondRankTensor.res == 1:
+        resolutionTag = "Low"
+    elif secondRankTensor.res == 2:
+        resolutionTag = "Middle"
+    elif secondRankTensor.res == 3:
+        resolutionTag = "High"
+        
+
+    return render_to_response('secondranktensor.html',{"XEC": XEC,
+                                                                                                  "YEC": YEC,
+                                                                                                   "ZEC": ZEC,
+                                                                                                   "filename1":filename1,
+                                                                                                   'colorscale':colorscale,
+                                                                                                   'surfacecolor':surfacecolor,
+                                                                                                   "XECp": XECp,
+                                                                                                  "YECp": YECp,
+                                                                                                   "ZECp": ZECp,
+                                                                                                   "filename1p":filename1p, 
+                                                                                                   'surfacecolorp':surfacecolorp,                                                                                          
+                                                                                                   "resolutionTag":resolutionTag,
+                                                                                                    "tableWidth": tableWidth,
+                                                                                                    "tableHeight": tableHeight,
+                                                                                                    "divWidth" : divWidth,
+                                                                                                    "divHeight" : divHeight,          
+                                                                                                    "tableWidthHeight": tableWidthHeight,
+                                                                                                    "divWidthHeight": divWidthHeight,
+                                                                                                    "layoutHeight":layoutHeight,
+                                                                                                      "layoutWeight":layoutWeight,                                                                                 
+                                                                                                  }, context_instance=RequestContext(request))
 
         
     #return render_to_response('secondranktensor.html', context_instance=RequestContext(request))
 
 def viewthirdranktensordg(request):
-    value11 = (request.GET.get('value11', ''))
-    value12 = (request.GET.get('value12', ''))
-    value13 = (request.GET.get('value13', ''))
-    value14 = (request.GET.get('value14', ''))
-    value15 = (request.GET.get('value15', ''))
-    value16 = (request.GET.get('value16', ''))
-    value21 = (request.GET.get('value21', ''))
-    value22 = (request.GET.get('value22', ''))
-    value23 = (request.GET.get('value23', ''))
-    value24 = (request.GET.get('value24', ''))
-    value25 = (request.GET.get('value25', ''))
-    value26 = (request.GET.get('value26', ''))
-    value31 = (request.GET.get('value31', ''))
-    value32 = (request.GET.get('value32', ''))
-    value33 = (request.GET.get('value33', ''))
-    value34 = (request.GET.get('value34', ''))
-    value35 = (request.GET.get('value35', ''))
-    value36 = (request.GET.get('value36', ''))
-    color = (request.GET.get('color', ''))
-    filename = (request.GET.get('filename', ''))
-    if(value11 and value12 and value13 and value14 and value15 and value16 and value21 and value22 and value23 and value24 and value25 and value26 and value31 and value32 and value33 and value34 and value35 and value36 and color):
-        val11 = float(value11)
-        val12 = float(value12)
-        val13 = float(value13)
-        val14 = float(value14)
-        val15 = float(value15)
-        val16 = float(value16)
-        val21 = float(value21)
-        val22 = float(value22)
-        val23 = float(value23)
-        val24 = float(value24)
-        val25 = float(value25)
-        val26 = float(value26)
-        val31 = float(value31)
-        val32 = float(value32)
-        val33 = float(value33)
-        val34 = float(value34)
-        val35 = float(value35)
-        val36 = float(value36)
-        color = int(color)
-        filename = re.sub('[\s+]', '', filename)
-        filename1 =None
-        filename2 =None
-        
-        
-      
-        
-        valuearrayrotated =request.GET.getlist("valuearrayrotated")
-        """for i,item in enumerate(valuearrayrotated):
-            print valuearrayrotated[i]"""
-        
-         
-        
- 
-        if color == 0:
-            colorscale='Jet';
-        elif color == 1:
-            colorscale='Hot';
-        elif color == 2:
-            colorscale='Cool'
-        elif color == 3:
-            colorscale='Greys';
-            
-        tensor = RankTensors()    
-        
-        pathslist=Path.objects.all()      
-        pathexist = 0
-        stl_dir=''
-        for stldir in pathslist:
-            path=Path() 
-            path = stldir
-            if os.path.isdir(path.stl_dir): 
-                pathexist = 1
-                stl_dir= path.stl_dir
-                break
-      
-      
-        #stl_dir=".\\media\\stlfiles\\"
-        #stl_dir="/var/www/MPOD/media/stlfile/"
     
-        filename1 = filename+"R3LowResolution" + ".stl"
-        filepath=os.path.join(stl_dir, filename1)
-        
-        res=1;
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-       
-        createdata =  1
-      
+    thirdRankTensordg = ThirdRankTensordg(request.GET)
+
+    XEC = None
+    YEC = None
+    ZEC = None
+    filename1 = None
+    surfacecolor = None
+    colorscale = None
+    colorscalep = None
+    surfacecolorp = None
+    XECp = None
+    YECp = None
+    ZECp = None
+    filename1p = None
   
-        tensor.ThirdRankTensordg(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename1,res,stl_dir,createstl,createdata)
-        XEC=tensor.stringValsOfXEC
-        YEC = tensor.stringValsOfYEC
-        ZEC= tensor.stringValsOfZEC
-        surfacecolorThirdRankTensor=tensor.surfacecolorThirdRankTensor
+    tableWidth = 450
+    tableHeight = 500
+    divWidth = 450
+    divHeight = 450 
+    layoutHeight = 450
+    layoutWeight = 450
+    tableWidthHeight = ""
+    divWidthHeight = ""
+ 
+    resolutionTag = ""
+    if thirdRankTensordg.valuearrayrotated == None:
+        thirdRankTensordg.SingleCrystal()        
+        XEC = thirdRankTensordg.jason_data['XEC']
+        YEC = thirdRankTensordg.jason_data['YEC']
+        ZEC = thirdRankTensordg.jason_data['ZEC']
+        filename1 = thirdRankTensordg.jason_data['filename1']
+        surfacecolor = thirdRankTensordg.jason_data['surfacecolor']
+
+    else:
+        thirdRankTensordg.SingleCrystalAndPoly()
+        XEC = thirdRankTensordg.jason_data['XEC']
+        YEC = thirdRankTensordg.jason_data['YEC']
+        ZEC = thirdRankTensordg.jason_data['ZEC']
+        filename1 = thirdRankTensordg.jason_data['filename1'] 
+        surfacecolor = thirdRankTensordg.jason_data['surfacecolor']
+
+        XECp = thirdRankTensordg.jason_data_poly['XEC']
+        YECp = thirdRankTensordg.jason_data_poly['YEC']
+        ZECp = thirdRankTensordg.jason_data_poly['ZEC']
+        filename1p = thirdRankTensordg.jason_data_poly['filename1'] 
+        surfacecolorp = thirdRankTensordg.jason_data_poly['surfacecolor']
         
-        if valuearrayrotated:
-            tensor.ThirdRankTensorRotateddg(valuearrayrotated,color,filename1,res,stl_dir,createstl,createdata)
-            XEC2=tensor.stringValsOfXEC2
-            YEC2 = tensor.stringValsOfYEC2
-            ZEC2= tensor.stringValsOfZEC2
-            surfacecolorThirdRankTensorRotated=tensor.surfacecolorThirdRankTensorRotated
-            
-        
-        del tensor
+        #tableHeight = tableHeight  * 2
+        tableWidth = tableWidth * 2 
        
-        filename2 = filename+"R3MidleResolution" + ".stl"
-        res=2;
-        filepath=os.path.join(stl_dir, filename2)       
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-   
-        if createstl == 1:
-            createdata =  0     
-            tensor = RankTensors()
-            tensor.ThirdRankTensordg(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename2,res,stl_dir,createstl,createdata)
-            del tensor
-         
 
-        print filename1
-        print filename2
+    tableWidthHeight = 'height:'+  str(tableHeight) +'px;  width:' +  str(tableWidth) + 'px;'
+    divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
+    
+    colorscale = thirdRankTensordg.colorscale
+ 
+    if thirdRankTensordg.res == 1:
+        resolutionTag = "Low"
+    elif thirdRankTensordg.res == 2:
+        resolutionTag = "Middle"
+    elif thirdRankTensordg.res == 3:
+        resolutionTag = "High"
         
-        
-        
-        if valuearrayrotated:               
-            return render_to_response('thirdranktensor.html',{"XEC": XEC,
-                                                                                                        "YEC":YEC,
-                                                                                                        "ZEC": ZEC,
-                                                                                                        "LowResolutionFileName":filename1,
-                                                                                                        "MiddleResolutionFileName":filename2,
-                                                                                                        'colorscale':colorscale,
-                                                                                                        'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor,
-                                                                                                        "XEC2": XEC2,
-                                                                                                        "YEC2":YEC2,
-                                                                                                        "ZEC2": ZEC2,
-                                                                                                        'surfacecolorThirdRankTensorRotated':surfacecolorThirdRankTensorRotated,}, context_instance=RequestContext(request))
-        else:
-            return render_to_response('thirdranktensor.html',{"XEC": XEC,
-                                                                                                        "YEC":YEC,
-                                                                                                        "ZEC": ZEC,
-                                                                                                        "LowResolutionFileName":filename1,
-                                                                                                        "MiddleResolutionFileName":filename2,
-                                                                                                        'colorscale':colorscale,
-                                                                                                        'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor,}, context_instance=RequestContext(request))
 
-
+    return render_to_response('thirdranktensor.html',{"XEC": XEC,
+                                                                                                  "YEC": YEC,
+                                                                                                   "ZEC": ZEC,
+                                                                                                   "filename1":filename1,
+                                                                                                   'colorscale':colorscale,
+                                                                                                   'surfacecolor':surfacecolor,
+                                                                                                   "XECp": XECp,
+                                                                                                  "YECp": YECp,
+                                                                                                   "ZECp": ZECp,
+                                                                                                   "filename1p":filename1p, 
+                                                                                                   'surfacecolorp':surfacecolorp,                                                                                          
+                                                                                                   "resolutionTag":resolutionTag,
+                                                                                                    "tableWidth": tableWidth,
+                                                                                                    "tableHeight": tableHeight,
+                                                                                                    "divWidth" : divWidth,
+                                                                                                    "divHeight" : divHeight,          
+                                                                                                    "tableWidthHeight": tableWidthHeight,
+                                                                                                    "divWidthHeight": divWidthHeight,
+                                                                                                    "layoutHeight":layoutHeight,
+                                                                                                      "layoutWeight":layoutWeight,                                                                                 
+                                                                                                  }, context_instance=RequestContext(request))
+    
 def viewthirdranktensoreh(request):
-    value11 = (request.GET.get('value11', ''))
-    value12 = (request.GET.get('value12', ''))
-    value13 = (request.GET.get('value13', ''))
-    value14 = (request.GET.get('value14', ''))
-    value15 = (request.GET.get('value15', ''))
-    value16 = (request.GET.get('value16', ''))
-    value21 = (request.GET.get('value21', ''))
-    value22 = (request.GET.get('value22', ''))
-    value23 = (request.GET.get('value23', ''))
-    value24 = (request.GET.get('value24', ''))
-    value25 = (request.GET.get('value25', ''))
-    value26 = (request.GET.get('value26', ''))
-    value31 = (request.GET.get('value31', ''))
-    value32 = (request.GET.get('value32', ''))
-    value33 = (request.GET.get('value33', ''))
-    value34 = (request.GET.get('value34', ''))
-    value35 = (request.GET.get('value35', ''))
-    value36 = (request.GET.get('value36', ''))
-    color = (request.GET.get('color', ''))
-    filename = (request.GET.get('filename', ''))
-    if(value11 and value12 and value13 and value14 and value15 and value16 and value21 and value22 and value23 and value24 and value25 and value26 and value31 and value32 and value33 and value34 and value35 and value36 and color):
-        val11 = float(value11)
-        val12 = float(value12)
-        val13 = float(value13)
-        val14 = float(value14)
-        val15 = float(value15)
-        val16 = float(value16)
-        val21 = float(value21)
-        val22 = float(value22)
-        val23 = float(value23)
-        val24 = float(value24)
-        val25 = float(value25)
-        val26 = float(value26)
-        val31 = float(value31)
-        val32 = float(value32)
-        val33 = float(value33)
-        val34 = float(value34)
-        val35 = float(value35)
-        val36 = float(value36)
-        color = int(color)
-        filename = re.sub('[\s+]', '', filename)
-        filename1 =None
-        filename2 =None
-        
-        
-      
-        
-        valuearrayrotated =request.GET.getlist("valuearrayrotated")
-        """for i,item in enumerate(valuearrayrotated):
-            print valuearrayrotated[i]"""
-        
-         
-        
- 
-        if color == 0:
-            colorscale='Jet';
-        elif color == 1:
-            colorscale='Hot';
-        elif color == 2:
-            colorscale='Cool'
-        elif color == 3:
-            colorscale='Greys';
-            
-        tensor = RankTensors()    
-        
-        pathslist=Path.objects.all()      
-        pathexist = 0
-        stl_dir=''
-        for stldir in pathslist:
-            path=Path() 
-            path = stldir
-            if os.path.isdir(path.stl_dir): 
-                pathexist = 1
-                stl_dir= path.stl_dir
-                break
-      
-      
-        #stl_dir=".\\media\\stlfiles\\"
-        #stl_dir="/var/www/MPOD/media/stlfile/"
-    
-        filename1 = filename+"R3LowResolution" + ".stl"
-        filepath=os.path.join(stl_dir, filename1)
-        
-        res=1;
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-       
-        createdata =  1
-      
   
-        tensor.ThirdRankTensoreh(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename1,res,stl_dir,createstl,createdata)
-        XEC=tensor.stringValsOfXEC
-        YEC = tensor.stringValsOfYEC
-        ZEC= tensor.stringValsOfZEC
-        surfacecolorThirdRankTensor=tensor.surfacecolorThirdRankTensor
-        
-        if valuearrayrotated:
-            tensor.ThirdRankTensorRotatedeh(valuearrayrotated,color,filename1,res,stl_dir,createstl,createdata)
-            XEC2=tensor.stringValsOfXEC2
-            YEC2 = tensor.stringValsOfYEC2
-            ZEC2= tensor.stringValsOfZEC2
-            surfacecolorThirdRankTensorRotated=tensor.surfacecolorThirdRankTensorRotated
-            
-        
-        del tensor
-       
-        filename2 = filename+"R3MidleResolution" + ".stl"
-        res=2;
-        filepath=os.path.join(stl_dir, filename2)       
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-   
-        if createstl == 1:
-            createdata =  0     
-            tensor = RankTensors()
-            tensor.ThirdRankTensoreh(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,color,filename2,res,stl_dir,createstl,createdata)
-            del tensor
- 
-        
-        
-        if valuearrayrotated:               
-            return render_to_response('thirdranktensor.html',{"XEC": XEC,
-                                                                                                        "YEC":YEC,
-                                                                                                        "ZEC": ZEC,
-                                                                                                        "LowResolutionFileName":filename1,
-                                                                                                        "MiddleResolutionFileName":filename2,
-                                                                                                        'colorscale':colorscale,
-                                                                                                        'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor,
-                                                                                                        "XEC2": XEC2,
-                                                                                                        "YEC2":YEC2,
-                                                                                                        "ZEC2": ZEC2,
-                                                                                                        'surfacecolorThirdRankTensorRotated':surfacecolorThirdRankTensorRotated,}, context_instance=RequestContext(request))
-        else:
-            return render_to_response('thirdranktensor.html',{"XEC": XEC,
-                                                                                                        "YEC":YEC,
-                                                                                                        "ZEC": ZEC,
-                                                                                                        "LowResolutionFileName":filename1,
-                                                                                                        "MiddleResolutionFileName":filename2,
-                                                                                                        'colorscale':colorscale,
-                                                                                                        'surfacecolorThirdRankTensor':surfacecolorThirdRankTensor,}, context_instance=RequestContext(request))
+    thirdRankTensoreh = ThirdRankTensoreh(request.GET)
 
+    XEC = None
+    YEC = None
+    ZEC = None
+    filename1 = None
+    surfacecolor = None
+    colorscale = None
+    colorscalep = None
+    surfacecolorp = None
+    XECp = None
+    YECp = None
+    ZECp = None
+    filename1p = None
+  
+    tableWidth = 450
+    tableHeight = 500
+    divWidth = 450
+    divHeight = 450 
+    layoutHeight = 450
+    layoutWeight = 450
+    tableWidthHeight = ""
+    divWidthHeight = ""
  
+    resolutionTag = ""
+    if thirdRankTensoreh.valuearrayrotated == None:
+        thirdRankTensoreh.SingleCrystal()        
+        XEC = thirdRankTensoreh.jason_data['XEC']
+        YEC = thirdRankTensoreh.jason_data['YEC']
+        ZEC = thirdRankTensoreh.jason_data['ZEC']
+        filename1 = thirdRankTensoreh.jason_data['filename1']
+        surfacecolor = thirdRankTensoreh.jason_data['surfacecolor']
+
+    else:
+        thirdRankTensoreh.SingleCrystalAndPoly()
+        XEC = thirdRankTensoreh.jason_data['XEC']
+        YEC = thirdRankTensoreh.jason_data['YEC']
+        ZEC = thirdRankTensoreh.jason_data['ZEC']
+        filename1 = thirdRankTensoreh.jason_data['filename1'] 
+        surfacecolor = thirdRankTensoreh.jason_data['surfacecolor']
+
+        XECp = thirdRankTensoreh.jason_data_poly['XEC']
+        YECp = thirdRankTensoreh.jason_data_poly['YEC']
+        ZECp = thirdRankTensoreh.jason_data_poly['ZEC']
+        filename1p = thirdRankTensoreh.jason_data_poly['filename1'] 
+        surfacecolorp = thirdRankTensoreh.jason_data_poly['surfacecolor']
+        
+        #tableHeight = tableHeight  * 2
+        tableWidth = tableWidth * 2  
+
+      
+
+    tableWidthHeight = 'height:'+  str(tableHeight) +'px;  width:' +  str(tableWidth) + 'px;'
+    divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
+    
+    colorscale = thirdRankTensoreh.colorscale
  
+    if thirdRankTensoreh.res == 1:
+        resolutionTag = "Low"
+    elif thirdRankTensoreh.res == 2:
+        resolutionTag = "Middle"
+    elif thirdRankTensoreh.res == 3:
+        resolutionTag = "High"
+        
+
+    return render_to_response('thirdranktensor.html',{"XEC": XEC,
+                                                                                                  "YEC": YEC,
+                                                                                                   "ZEC": ZEC,
+                                                                                                   "filename1":filename1,
+                                                                                                   'colorscale':colorscale,
+                                                                                                   'surfacecolor':surfacecolor,
+                                                                                                   "XECp": XECp,
+                                                                                                  "YECp": YECp,
+                                                                                                   "ZECp": ZECp,
+                                                                                                   "filename1p":filename1p, 
+                                                                                                   'surfacecolorp':surfacecolorp,                                                                                          
+                                                                                                   "resolutionTag":resolutionTag,
+                                                                                                    "tableWidth": tableWidth,
+                                                                                                    "tableHeight": tableHeight,
+                                                                                                    "divWidth" : divWidth,
+                                                                                                    "divHeight" : divHeight,          
+                                                                                                    "tableWidthHeight": tableWidthHeight,
+                                                                                                    "divWidthHeight": divWidthHeight,
+                                                                                                    "layoutHeight":layoutHeight,
+                                                                                                      "layoutWeight":layoutWeight,                                                                                 
+                                                                                                  }, context_instance=RequestContext(request))
 
 def viewcompliance(request):
-
-    valuearrayrotated =request.GET.getlist("valuearrayrotated")
-    poly ="0"
-    if not valuearrayrotated:
+    elasticity = Elasticity(request.GET)
+     
+    XEC = None
+    YEC = None
+    ZEC = None
+    youngModulusXEC = None
+    youngModulusYEC = None
+    youngModulusZEC = None
+    filename1 = None
+    filenameYoungModulus = None  
+    surfacecolor = None
+    surfacecolorYoungModulus = None
+    colorscale = None
     
-        val11 = float(request.GET.get('value11', ''))
-        val12 = float(request.GET.get('value12', ''))
-        val13 = float(request.GET.get('value13', ''))
-        val14 = float(request.GET.get('value14', ''))
-        val15 = float(request.GET.get('value15', ''))
-        val16 = float(request.GET.get('value16', ''))
-        val21 = float(request.GET.get('value21', ''))
-        val22 = float(request.GET.get('value22', ''))
-        val23 = float(request.GET.get('value23', ''))
-        val24 = float(request.GET.get('value24', ''))
-        val25 = float(request.GET.get('value25', ''))
-        val26 = float(request.GET.get('value26', ''))
-        val31 = float(request.GET.get('value31', ''))
-        val32 = float(request.GET.get('value32', ''))
-        val33 = float(request.GET.get('value33', ''))
-        val34 = float(request.GET.get('value34', ''))
-        val35 = float(request.GET.get('value35', ''))
-        val36 = float(request.GET.get('value36', ''))
-        val41 = float(request.GET.get('value41', ''))
-        val42 = float(request.GET.get('value42', ''))
-        val43 = float(request.GET.get('value43', ''))
-        val44 = float(request.GET.get('value44', ''))
-        val45 = float(request.GET.get('value45', ''))
-        val46 = float(request.GET.get('value46', ''))
-        val51 = float(request.GET.get('value51', ''))
-        val52 = float(request.GET.get('value52', ''))
-        val53 = float(request.GET.get('value53', ''))
-        val54 = float(request.GET.get('value54', ''))
-        val55 = float(request.GET.get('value55', ''))
-        val56 = float(request.GET.get('value56', ''))
-        val61 = float(request.GET.get('value61', ''))
-        val62 = float(request.GET.get('value62', ''))
-        val63 = float(request.GET.get('value63', ''))
-        val64 = float(request.GET.get('value64', ''))
-        val65 = float(request.GET.get('value65', ''))
-        val66 = float(request.GET.get('value66', ''))
-        filename = (request.GET.get('filename', ''))    
-        filename = re.sub('[\s+]', '', filename)   
+    XECp = None
+    YECp = None
+    ZECp = None
+    youngModulusXECp = None
+    youngModulusYECp = None
+    youngModulusZECp = None
+    filename1p = None
+    filenameYoungModulusp = None  
+    surfacecolorp = None
+    surfacecolorYoungModulusp = None
+    resolutionTag = ""
+    tableWidth = 450
+    tableHeight = 500
+    divWidth = 450
+    divHeight = 450 
+    layoutHeight = 450
+    layoutWeight = 450
+    tableWidthHeight = ""
+    divWidthHeight = ""
+ 
+    resolutionTag = ""
+    if elasticity.valuearrayrotated == None:
+        elasticity.ComplianceAndYoungModulus()
+        XEC = elasticity.jason_data['XEC']
+        YEC = elasticity.jason_data['YEC']
+        ZEC = elasticity.jason_data['ZEC']
+        youngModulusXEC = elasticity.jason_data['youngModulusXEC']
+        youngModulusYEC = elasticity.jason_data['youngModulusYEC']
+        youngModulusZEC = elasticity.jason_data['youngModulusZEC']
+        filename1 = elasticity.jason_data['filename1']
+        #filename2 = elasticity.jason_data['filename1']
+        filenameYoungModulus = elasticity.jason_data['filenameYoungModulus']
+        surfacecolor = elasticity.jason_data['surfacecolor']
+        surfacecolorYoungModulus = elasticity.jason_data['surfacecolorYoungModulus']
+        colorscale = elasticity.colorscale
  
     else:
-        val11 = float(valuearrayrotated[0])
-        val12 = float(valuearrayrotated[1])
-        val13 = float(valuearrayrotated[2])
-        val14 = float(valuearrayrotated[3])
-        val15 = float(valuearrayrotated[4])
-        val16 = float(valuearrayrotated[5])
-        val21 = float(valuearrayrotated[6])
-        val22 = float(valuearrayrotated[7])
-        val23 = float(valuearrayrotated[8])
-        val24 = float(valuearrayrotated[9])
-        val25 = float(valuearrayrotated[10])
-        val26 = float(valuearrayrotated[11])
-        val31 = float(valuearrayrotated[12])
-        val32 = float(valuearrayrotated[13])
-        val33 = float(valuearrayrotated[14])
-        val34 = float(valuearrayrotated[15])
-        val35 = float(valuearrayrotated[16])
-        val36 = float(valuearrayrotated[17])
-        val41 = float(valuearrayrotated[18])
-        val42 = float(valuearrayrotated[19])
-        val43 = float(valuearrayrotated[20])
-        val44 = float(valuearrayrotated[21])
-        val45 = float(valuearrayrotated[22])
-        val46 = float(valuearrayrotated[23])
-        val51 = float(valuearrayrotated[24])
-        val52 = float(valuearrayrotated[25])
-        val53 = float(valuearrayrotated[26])
-        val54 = float(valuearrayrotated[27])
-        val55 = float(valuearrayrotated[28])
-        val56 = float(valuearrayrotated[29])
-        val61 = float(valuearrayrotated[30])
-        val62 = float(valuearrayrotated[31])
-        val63 = float(valuearrayrotated[32])
-        val64 = float(valuearrayrotated[33])
-        val65 = float(valuearrayrotated[34])
-        val66 = float(valuearrayrotated[35])
-        filename = (request.GET.get('filename', ''))
-        filename = re.sub('[\s+]', '', filename) + "policrystal"
-        poly = "1"
+        elasticity.ComplianceAndYoungModulusAndPoly()
+        XEC = elasticity.jason_data['XEC']
+        YEC = elasticity.jason_data['YEC']
+        ZEC = elasticity.jason_data['ZEC']
+        youngModulusXEC = elasticity.jason_data['youngModulusXEC']
+        youngModulusYEC = elasticity.jason_data['youngModulusYEC']
+        youngModulusZEC = elasticity.jason_data['youngModulusZEC']
+        filename1 = elasticity.jason_data['filename1']
+        #filename2 = elasticity.jason_data['filename1']
+        filenameYoungModulus = elasticity.jason_data['filenameYoungModulus']
+        surfacecolor = elasticity.jason_data['surfacecolor']
+        surfacecolorYoungModulus = elasticity.jason_data['surfacecolorYoungModulus']
+        
+        XECp = elasticity.jason_data_poly['XEC']
+        YECp = elasticity.jason_data_poly['YEC']
+        ZECp = elasticity.jason_data_poly['ZEC']
+        youngModulusXECp = elasticity.jason_data_poly['youngModulusXEC']
+        youngModulusYECp = elasticity.jason_data_poly['youngModulusYEC']
+        youngModulusZECp = elasticity.jason_data_poly['youngModulusZEC']
+        filename1p = elasticity.jason_data_poly['filename1']
+        #filename2 = elasticity.jason_data['filename1']
+        filenameYoungModulusp = elasticity.jason_data_poly['filenameYoungModulus']
+        surfacecolorp = elasticity.jason_data_poly['surfacecolor']
+        surfacecolorYoungModulusp = elasticity.jason_data_poly['surfacecolorYoungModulus']
         
         
-    color = int(request.GET.get('color', ''))
-
-        
-        
-    if color == 0:
-        colorscale='Jet';
-    elif color == 1:
-        colorscale='Hot';
-    elif color == 2:
-        colorscale='Cool'
-    elif color == 3:
-        colorscale='Greys';
-
-    pathslist=Path.objects.all()      
-    pathexist = 0
-    stl_dir=''
-    for stldir in pathslist:
-        path=Path() 
-        path = stldir
-        if os.path.isdir(path.stl_dir): 
-            pathexist = 1
-            stl_dir= path.stl_dir
-            break
-        
+        tableHeight = tableHeight  * 2
+       
+ 
     
-    filename1 = filename + "LowResolution" + ".stl"
-    print filename1
-    filepath=os.path.join(stl_dir, filename1)
-    res=1;
-    createstl = 0;
-    if pathexist == 1:
-        if os.path.isfile(filepath):
-            createstl = 0          
-        else:
-            createstl = 1
-  
-    createdata =  1
-    compliance = ComplianceT4()
-    compliance.Compliance(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename1,res,stl_dir,createstl,createdata) 
-    XEC=compliance.stringValsOfXEC
-    YEC = compliance.stringValsOfYEC
-    ZEC= compliance.stringValsOfZEC
-   
-    surfacecolorcompliance=   compliance.surfacecolorcompliance
-    #colorscale=compliance.colorscale
+    tableWidth = tableWidth * 2        
+    tableWidthHeight = 'height:'+  str(tableHeight) +'px;  width:' +  str(tableWidth) + 'px;'
+    divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
+        
+    colorscale = elasticity.colorscale
+    if elasticity.res == 1:
+        resolutionTag = "Low"
+    elif elasticity.res == 2:
+        resolutionTag = "Middle"
+    elif elasticity.res == 3:
+        resolutionTag = "High"
+    
 
-    filenameYoungModulus = filename + "YoungModulusLowResolution" + ".stl"
-    print filenameYoungModulus
-    filepath=os.path.join(stl_dir, filenameYoungModulus)
-    res=1;
-    createstl = 0;
-    if pathexist == 1:
-        if os.path.isfile(filepath):
-            createstl = 0          
-        else:
-            createstl = 1
-  
-    compliance.YoungModulus(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filenameYoungModulus,res,stl_dir,createstl,createdata)
-    youngModulusXEC=compliance.stringValsOfXEC2
-    youngModulusYEC = compliance.stringValsOfYEC2
-    youngModulusZEC= compliance.stringValsOfZEC2    
-    surfacecolorYoungModulus=   compliance.surfacecolorYoungModulus 
-    del compliance
-
-  
-    filename2 = filename + "MidleResolution" + ".stl"
-    print filename2
-    res=2;
-    filepath=os.path.join(stl_dir, filename2)       
-    createstl = 0;
-    if pathexist == 1:
-        if os.path.isfile(filepath):
-            createstl = 0          
-        else:
-            createstl = 1
-  
-    if createstl == 1:
-        createdata =  0     
-        compliance = ComplianceT4()
-        compliance.Compliance(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename2,res,stl_dir,createstl,createdata)        
-        del compliance
-
-
-                  
-    return render_to_response('compliance.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"youngModulusXEC": youngModulusXEC,"youngModulusYEC": youngModulusYEC,"youngModulusZEC": youngModulusZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,"LowResolutionFilenameYoungModulus":filenameYoungModulus,"surfacecolorcompliance":surfacecolorcompliance,"surfacecolorYoungModulus":surfacecolorYoungModulus,"colorscale":colorscale,"poly":poly}, context_instance=RequestContext(request))
+    return render_to_response('compliance.html',{"XEC": XEC,
+                                                                                          "YEC":YEC,
+                                                                                          "ZEC": ZEC,
+                                                                                          "youngModulusXEC": youngModulusXEC,
+                                                                                          "youngModulusYEC": youngModulusYEC,
+                                                                                          "youngModulusZEC": youngModulusZEC,
+                                                                                          "resolutionFileName":filename1,
+                                                                                          "filenameYoungModulus":filenameYoungModulus,
+                                                                                          "surfacecolor":surfacecolor,
+                                                                                          "surfacecolorYoungModulus":surfacecolorYoungModulus,
+                                                                                          "XECp": XECp,
+                                                                                          "YECp":YECp,
+                                                                                          "ZECp": ZECp,
+                                                                                          "youngModulusXECp": youngModulusXECp,
+                                                                                          "youngModulusYECp": youngModulusYECp,
+                                                                                          "youngModulusZECp": youngModulusZECp,
+                                                                                          "resolutionFileNamep":filename1p,
+                                                                                          "filenameYoungModulusp":filenameYoungModulusp,
+                                                                                          "surfacecolorp":surfacecolorp,
+                                                                                          "surfacecolorYoungModulusp":surfacecolorYoungModulusp,
+                                                                                          "colorscale":colorscale,
+                                                                                          "resolutionTag":resolutionTag,
+                                                                                          "tableWidth": tableWidth,
+                                                                                          "tableHeight": tableHeight,
+                                                                                          "divWidth" : divWidth,
+                                                                                          "divHeight" : divHeight,          
+                                                                                          "tableWidthHeight": tableWidthHeight,
+                                                                                          "divWidthHeight": divWidthHeight,
+                                                                                          "layoutHeight":layoutHeight,
+                                                                                          "layoutWeight":layoutWeight,      }, context_instance=RequestContext(request))
         #return render_to_response('compliance.html', context_instance=RequestContext(request))
-
 def viewstiffness(request):
-    valuearrayrotated =request.GET.getlist("valuearrayrotated")
-    poly = "0"
-    if not valuearrayrotated:
-        val11 = float(request.GET.get('value11', ''))
-        val12 = float(request.GET.get('value12', ''))
-        val13 = float(request.GET.get('value13', ''))
-        val14 = float(request.GET.get('value14', ''))
-        val15 = float(request.GET.get('value15', ''))
-        val16 = float(request.GET.get('value16', ''))
-        val21 = float(request.GET.get('value21', ''))
-        val22 = float(request.GET.get('value22', ''))
-        val23 = float(request.GET.get('value23', ''))
-        val24 = float(request.GET.get('value24', ''))
-        val25 = float(request.GET.get('value25', ''))
-        val26 = float(request.GET.get('value26', ''))
-        val31 = float(request.GET.get('value31', ''))
-        val32 = float(request.GET.get('value32', ''))
-        val33 = float(request.GET.get('value33', ''))
-        val34 = float(request.GET.get('value34', ''))
-        val35 = float(request.GET.get('value35', ''))
-        val36 = float(request.GET.get('value36', ''))
-        val41 = float(request.GET.get('value41', ''))
-        val42 = float(request.GET.get('value42', ''))
-        val43 = float(request.GET.get('value43', ''))
-        val44 = float(request.GET.get('value44', ''))
-        val45 = float(request.GET.get('value45', ''))
-        val46 = float(request.GET.get('value46', ''))
-        val51 = float(request.GET.get('value51', ''))
-        val52 = float(request.GET.get('value52', ''))
-        val53 = float(request.GET.get('value53', ''))
-        val54 = float(request.GET.get('value54', ''))
-        val55 = float(request.GET.get('value55', ''))
-        val56 = float(request.GET.get('value56', ''))
-        val61 = float(request.GET.get('value61', ''))
-        val62 = float(request.GET.get('value62', ''))
-        val63 = float(request.GET.get('value63', ''))
-        val64 = float(request.GET.get('value64', ''))
-        val65 = float(request.GET.get('value65', ''))
-        val66 = float(request.GET.get('value66', ''))
-        filename = (request.GET.get('filename', ''))
-        filename = re.sub('[\s+]', '', filename)
-        
-    else:
-        val11 = float(valuearrayrotated[0])
-        val12 = float(valuearrayrotated[1])
-        val13 = float(valuearrayrotated[2])
-        val14 = float(valuearrayrotated[3])
-        val15 = float(valuearrayrotated[4])
-        val16 = float(valuearrayrotated[5])
-        val21 = float(valuearrayrotated[6])
-        val22 = float(valuearrayrotated[7])
-        val23 = float(valuearrayrotated[8])
-        val24 = float(valuearrayrotated[9])
-        val25 = float(valuearrayrotated[10])
-        val26 = float(valuearrayrotated[11])
-        val31 = float(valuearrayrotated[12])
-        val32 = float(valuearrayrotated[13])
-        val33 = float(valuearrayrotated[14])
-        val34 = float(valuearrayrotated[15])
-        val35 = float(valuearrayrotated[16])
-        val36 = float(valuearrayrotated[17])
-        val41 = float(valuearrayrotated[18])
-        val42 = float(valuearrayrotated[19])
-        val43 = float(valuearrayrotated[20])
-        val44 = float(valuearrayrotated[21])
-        val45 = float(valuearrayrotated[22])
-        val46 = float(valuearrayrotated[23])
-        val51 = float(valuearrayrotated[24])
-        val52 = float(valuearrayrotated[25])
-        val53 = float(valuearrayrotated[26])
-        val54 = float(valuearrayrotated[27])
-        val55 = float(valuearrayrotated[28])
-        val56 = float(valuearrayrotated[29])
-        val61 = float(valuearrayrotated[30])
-        val62 = float(valuearrayrotated[31])
-        val63 = float(valuearrayrotated[32])
-        val64 = float(valuearrayrotated[33])
-        val65 = float(valuearrayrotated[34])
-        val66 = float(valuearrayrotated[35])
-        filename = (request.GET.get('filename', ''))
-        filename = re.sub('[\s+]', '', filename) + "polycrystal"
-        poly = "1"
+    elasticity = Elasticity(request.GET)
+     
+    XEC = None
+    YEC = None
+    ZEC = None
+    youngModulusXEC = None
+    youngModulusYEC = None
+    youngModulusZEC = None
+    filename1 = None
+    filenameYoungModulus = None  
+    surfacecolor = None
+    surfacecolorYoungModulus = None
+    colorscale = None    
+    XECp = None
+    YECp = None
+    ZECp = None
+    youngModulusXECp = None
+    youngModulusYECp = None
+    youngModulusZECp = None
+    filename1p = None
+    filenameYoungModulusp = None  
+    surfacecolorp = None
+    surfacecolorYoungModulusp = None
+    error = None
+    errorp = None
+    resolutionTag = ""
+    tableWidth = 450
+    tableHeight = 500
+    divWidth = 450
+    divHeight = 450 
+    layoutHeight = 450
+    layoutWeight = 450
+    tableWidthHeight = ""
+    divWidthHeight = ""
     
     
-    color = int(request.GET.get('color', ''))
-    
-                            
-    if color == 0:
-        colorscale='Jet'
-    elif color == 1:
-        colorscale='Hot'
-    elif color == 2:        
-        colorscale='Cool'
-    elif color == 3:
-        colorscale='Greys'
-            
-            
-    pathslist=Path.objects.all()      
-    pathexist = 0
-    stl_dir=''
-    for stldir in pathslist:
-        path=Path() 
-        path = stldir
-        if os.path.isdir(path.stl_dir): 
-            pathexist = 1
-            stl_dir= path.stl_dir
-            break
-           
-                  
-    #stl_dir=".\\media\\stlfiles\\"    
-    
-    
-    filename1 =  filename +"LowResolution" + ".stl"
-    filepath=os.path.join(stl_dir, filename1)
-    res=1;
-    createstl = 0;
-    if pathexist == 1:
-        if os.path.isfile(filepath):
-            createstl = 0          
-        else:
-            createstl = 1
-   
-    createdata =  1
-    stiffness = StiffnessT4()
-    stiffness.Stiffness(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename1,res,stl_dir,createstl,createdata) 
-    XEC=stiffness.stringValsOfXEC
-    YEC = stiffness.stringValsOfYEC
-    ZEC= stiffness.stringValsOfZEC
-    surfacecolorstiffness=   stiffness.surfacecolorstiffness
-    
-    
-    filenameYoungModulus = filename + "YoungModulusLowResolution" + ".stl"
-    print filenameYoungModulus
-    filepath=os.path.join(stl_dir, filenameYoungModulus)
-    res=1;
-    createstl = 0;
-    if pathexist == 1:
-        if os.path.isfile(filepath):
-            createstl = 0          
-        else:
-            createstl = 1 
-            
-            
-    stiffness.YoungModulus(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filenameYoungModulus,res,stl_dir,createstl,createdata)
-    youngModulusXEC=stiffness.stringValsOfXEC2
-    youngModulusYEC = stiffness.stringValsOfYEC2
-    youngModulusZEC= stiffness.stringValsOfZEC2    
-    surfacecolorYoungModulus=   stiffness.surfacecolorYoungModulus 
-    del stiffness
-
+    if elasticity.valuearrayrotated == None:
+        elasticity.StiffnessAndYoungModulus()
+        if elasticity.jason_data['error'] == None:
+            XEC = elasticity.jason_data['XEC']
+            YEC = elasticity.jason_data['YEC']
+            ZEC = elasticity.jason_data['ZEC']
+            youngModulusXEC = elasticity.jason_data['youngModulusXEC']
+            youngModulusYEC = elasticity.jason_data['youngModulusYEC']
+            youngModulusZEC = elasticity.jason_data['youngModulusZEC']
+            filename1 = elasticity.jason_data['filename1']
+            #filename2 = elasticity.jason_data['filename1']
+            filenameYoungModulus = elasticity.jason_data['filenameYoungModulus']
+            surfacecolor = elasticity.jason_data['surfacecolor']
+            surfacecolorYoungModulus = elasticity.jason_data['surfacecolorYoungModulus']
+            colorscale = elasticity.colorscale
  
-    #filename = "ejemplo7StiffnessMidleResolution" + ".stl"
-    filename2=  filename+"MiddleResolution" + ".stl"
-    res=2;
-    filepath=os.path.join(stl_dir, filename2)       
-    createstl = 0;
-    if pathexist == 1:
-        if os.path.isfile(filepath):
-            createstl = 0          
         else:
-            createstl = 1
-   
-    if createstl == 1:
-        createdata =  0     
-        stiffness = StiffnessT4()
-        stiffness.Stiffness (val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename2,res,stl_dir,createstl,createdata)        
-        del stiffness
-    
-    
-  
-    return render_to_response('stiffness.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"youngModulusXEC": youngModulusXEC,"youngModulusYEC": youngModulusYEC,"youngModulusZEC": youngModulusZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,"LowResolutionFilenameYoungModulus":filenameYoungModulus,"surfacecolorstiffness":surfacecolorstiffness,"surfacecolorYoungModulus":surfacecolorYoungModulus,"colorscale":colorscale,"poly":poly}, context_instance=RequestContext(request))
+            error = elasticity.jason_data['error'] 
+
         
+
+                
+    else:
+        elasticity.StiffnessAndYoungModulusAndPoly()
+        if elasticity.jason_data['error'] == None:
+            XEC = elasticity.jason_data['XEC']
+            YEC = elasticity.jason_data['YEC']
+            ZEC = elasticity.jason_data['ZEC']
+            youngModulusXEC = elasticity.jason_data['youngModulusXEC']
+            youngModulusYEC = elasticity.jason_data['youngModulusYEC']
+            youngModulusZEC = elasticity.jason_data['youngModulusZEC']
+            filename1 = elasticity.jason_data['filename1']
+            #filename2 = elasticity.jason_data['filename1']
+            filenameYoungModulus = elasticity.jason_data['filenameYoungModulus']
+            surfacecolor = elasticity.jason_data['surfacecolor']
+            surfacecolorYoungModulus = elasticity.jason_data['surfacecolorYoungModulus']
+ 
+            
+            if elasticity.jason_data_poly['error'] == None:
+                XECp = elasticity.jason_data_poly['XEC']
+                YECp = elasticity.jason_data_poly['YEC']
+                ZECp = elasticity.jason_data_poly['ZEC']
+                youngModulusXECp = elasticity.jason_data_poly['youngModulusXEC']
+                youngModulusYECp = elasticity.jason_data_poly['youngModulusYEC']
+                youngModulusZECp = elasticity.jason_data_poly['youngModulusZEC']
+                filename1p = elasticity.jason_data_poly['filename1']
+                #filename2 = elasticity.jason_data['filename1']
+                filenameYoungModulusp = elasticity.jason_data_poly['filenameYoungModulus']
+                surfacecolorp = elasticity.jason_data_poly['surfacecolor']
+                surfacecolorYoungModulusp = elasticity.jason_data_poly['surfacecolorYoungModulus']
+            else:
+                errorp = elasticity.jason_data['error']     
+        else:
+            error = elasticity.jason_data['error']     
+            
+        tableHeight = tableHeight  * 2
+       
+ 
+    
+    tableWidth = tableWidth * 2        
+    tableWidthHeight = 'height:'+  str(tableHeight) +'px;  width:' +  str(tableWidth) + 'px;'
+    divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
+    
+    colorscale = elasticity.colorscale
+ 
+    if elasticity.res == 1:
+        resolutionTag = "Low"
+    elif elasticity.res == 2:
+        resolutionTag = "Middle"
+    elif elasticity.res == 3:
+        resolutionTag = "High"
+    
+
+    return render_to_response('stiffness.html',{"XEC": XEC,
+                                                                                          "YEC":YEC,
+                                                                                          "ZEC": ZEC,
+                                                                                          "youngModulusXEC": youngModulusXEC,
+                                                                                          "youngModulusYEC": youngModulusYEC,
+                                                                                          "youngModulusZEC": youngModulusZEC,
+                                                                                          "resolutionFileName":filename1,
+                                                                                          "filenameYoungModulus":filenameYoungModulus,
+                                                                                          "surfacecolor":surfacecolor,
+                                                                                          "surfacecolorYoungModulus":surfacecolorYoungModulus,
+                                                                                          "error":error,
+                                                                                          "XECp": XECp,
+                                                                                          "YECp":YECp,
+                                                                                          "ZECp": ZECp,
+                                                                                          "youngModulusXECp": youngModulusXECp,
+                                                                                          "youngModulusYECp": youngModulusYECp,
+                                                                                          "youngModulusZECp": youngModulusZECp,
+                                                                                          "resolutionFileNamep":filename1p,
+                                                                                          "filenameYoungModulusp":filenameYoungModulusp,
+                                                                                          "surfacecolorp":surfacecolorp,
+                                                                                          "surfacecolorYoungModulusp":surfacecolorYoungModulusp,
+                                                                                          "errorp":errorp,
+                                                                                          "colorscale":colorscale,
+                                                                                          "resolutionTag":resolutionTag,
+                                                                                          "tableWidth": tableWidth,
+                                                                                          "tableHeight": tableHeight,
+                                                                                          "divWidth" : divWidth,
+                                                                                          "divHeight" : divHeight,          
+                                                                                          "tableWidthHeight": tableWidthHeight,
+                                                                                          "divWidthHeight": divWidthHeight,
+                                                                                          "layoutHeight":layoutHeight,
+                                                                                          "layoutWeight":layoutWeight,      }, context_instance=RequestContext(request))
+    
+    
+
 
 def viewfourthranktensor(request):
-    value11 = (request.GET.get('value11', ''))
-    value12 = (request.GET.get('value12', ''))
-    value13 = (request.GET.get('value13', ''))
-    value14 = (request.GET.get('value14', ''))
-    value15 = (request.GET.get('value15', ''))
-    value16 = (request.GET.get('value16', ''))
-    value21 = (request.GET.get('value21', ''))
-    value22 = (request.GET.get('value22', ''))
-    value23 = (request.GET.get('value23', ''))
-    value24 = (request.GET.get('value24', ''))
-    value25 = (request.GET.get('value25', ''))
-    value26 = (request.GET.get('value26', ''))
-    value31 = (request.GET.get('value31', ''))
-    value32 = (request.GET.get('value32', ''))
-    value33 = (request.GET.get('value33', ''))
-    value34 = (request.GET.get('value34', ''))
-    value35 = (request.GET.get('value35', ''))
-    value36 = (request.GET.get('value36', ''))
-    value41 = (request.GET.get('value41', ''))
-    value42 = (request.GET.get('value42', ''))
-    value43 = (request.GET.get('value43', ''))
-    value44 = (request.GET.get('value44', ''))
-    value45 = (request.GET.get('value45', ''))
-    value46 = (request.GET.get('value46', ''))
-    value51 = (request.GET.get('value51', ''))
-    value52 = (request.GET.get('value52', ''))
-    value53 = (request.GET.get('value53', ''))
-    value54 = (request.GET.get('value54', ''))
-    value55 = (request.GET.get('value55', ''))
-    value56 = (request.GET.get('value56', ''))
-    value61 = (request.GET.get('value61', ''))
-    value62 = (request.GET.get('value62', ''))
-    value63 = (request.GET.get('value63', ''))
-    value64 = (request.GET.get('value64', ''))
-    value65 = (request.GET.get('value65', ''))
-    value66 = (request.GET.get('value66', ''))
-    color = (request.GET.get('color', ''))
-    filename = (request.GET.get('filename', ''))
-    if(value11 and value12 and value13 and value14 and value15 and value16 and value21 and value22 and value23 and value24 and value25 and value26 and value31 and value32 and value33 and value34 and value35 and value36 and value41 and value42 and value43 and value44 and value45 and value46 and value51 and value52 and value53 and value54 and value55 and value56 and value61 and value62 and value63 and value64 and value65 and value66 and color):
-        val11 = float(value11)
-        val12 = float(value12)
-        val13 = float(value13)
-        val14 = float(value14)
-        val15 = float(value15)
-        val16 = float(value16)
-        val21 = float(value21)
-        val22 = float(value22)
-        val23 = float(value23)
-        val24 = float(value24)
-        val25 = float(value25)
-        val26 = float(value26)
-        val31 = float(value31)
-        val32 = float(value32)
-        val33 = float(value33)
-        val34 = float(value34)
-        val35 = float(value35)
-        val36 = float(value36)
-        val41 = float(value41)
-        val42 = float(value42)
-        val43 = float(value43)
-        val44 = float(value44)
-        val45 = float(value45)
-        val46 = float(value46)
-        val51 = float(value51)
-        val52 = float(value52)
-        val53 = float(value53)
-        val54 = float(value54)
-        val55 = float(value55)
-        val56 = float(value56)
-        val61 = float(value61)
-        val62 = float(value62)
-        val63 = float(value63)
-        val64 = float(value64)
-        val65 = float(value65)
-        val66 = float(value66)
-        color = int(color)
-        filename = re.sub('[\s+]', '', filename)
-        
-        if color == 0:
-            colorscale='Jet';
-        elif color == 1:
-            colorscale='Hot';
-        elif color == 2:
-            colorscale='Cool'
-        elif color == 3:
-            colorscale='Greys';
+    fourthRankTensor = FourthRankTensor(request.GET)
 
-        tensor = RankTensors()
-        
-        pathslist=Path.objects.all()      
-        pathexist = 0
-        stl_dir=''
-        for stldir in pathslist:
-            path=Path() 
-            path = stldir
-            if os.path.isdir(path.stl_dir): 
-                pathexist = 1
-                stl_dir= path.stl_dir
-                break
-           
-        #stl_dir=".\\media\\stlfiles\\"
-       
-        filename1 = filename+"R4LowResolution" + ".stl"
-        filepath=os.path.join(stl_dir, filename1)
-        res=1;
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-      
-        createdata =  1
-        tensor.FourthRankTensor(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename1,res,stl_dir,createstl,createdata)
-          
+    XEC = None
+    YEC = None
+    ZEC = None
+    filename1 = None
+    surfacecolor = None
+    colorscalep = None
+    colorscale = None
+    surfacecolorp = None
+    XECp = None
+    YECp = None
+    ZECp = None
+    filename1p = None
+  
+    tableWidth = 450
+    tableHeight = 500
+    divWidth = 450
+    divHeight = 450 
+    layoutHeight = 450
+    layoutWeight = 450
+    tableWidthHeight = ""
+    divWidthHeight = ""
+ 
+    resolutionTag = ""
+    if fourthRankTensor.valuearrayrotated == None:
+        fourthRankTensor.SingleCrystal()        
+        XEC = fourthRankTensor.jason_data['XEC']
+        YEC = fourthRankTensor.jason_data['YEC']
+        ZEC = fourthRankTensor.jason_data['ZEC']
+        filename1 = fourthRankTensor.jason_data['filename1']
+        surfacecolor = fourthRankTensor.jason_data['surfacecolor']
 
-        XEC=tensor.stringValsOfXEC
-        YEC = tensor.stringValsOfYEC
-        ZEC= tensor.stringValsOfZEC
-        surfacecolorFourthRankTensor= tensor.surfacecolorFourthRankTensor
-      
-        del tensor
+    else:
+        fourthRankTensor.SingleCrystalAndPoly()
+        XEC = fourthRankTensor.jason_data['XEC']
+        YEC = fourthRankTensor.jason_data['YEC']
+        ZEC = fourthRankTensor.jason_data['ZEC']
+        filename1 = fourthRankTensor.jason_data['filename1'] 
+        surfacecolor = fourthRankTensor.jason_data['surfacecolor']
 
-        filename2 = filename+"R4MiddleResolution" + ".stl"
-        #filename = "ejemplo"+str(ejemplo)+"R4MidleResolution" + ".stl"
-        res=2;
-        filepath=os.path.join(stl_dir, filename2)       
-        createstl = 0;
-        if pathexist == 1:
-            if os.path.isfile(filepath):
-                createstl = 0          
-            else:
-                createstl = 1
-       
-        if createstl == 1:
-            createdata =  0     
-            tensor = RankTensors()
-            tensor.FourthRankTensor(val11,val12,val13,val14,val15,val16,val21,val22,val23,val24,val25,val26,val31,val32,val33,val34,val35,val36,val41,val42,val43,val44,val45,val46,val51,val52,val53,val54,val55,val56,val61,val62,val63,val64,val65,val66,color,filename2,res,stl_dir,createstl,createdata)
-            del tensor       
-
-
+        XECp = fourthRankTensor.jason_data_poly['XEC']
+        YECp = fourthRankTensor.jason_data_poly['YEC']
+        ZECp = fourthRankTensor.jason_data_poly['ZEC']
+        filename1p = fourthRankTensor.jason_data_poly['filename1']
+        surfacecolorp = fourthRankTensor.jason_data_poly['surfacecolor']
+        tableWidth = tableWidth * 2 
+    
+    
+    
+    tableWidthHeight = 'height:'+  str(tableHeight) +'px;  width:' +  str(tableWidth) + 'px;'
+    divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
+    
+    colorscale = fourthRankTensor.colorscale
+ 
+    if fourthRankTensor.res == 1:
+        resolutionTag = "Low"
+    elif fourthRankTensor.res == 2:
+        resolutionTag = "Middle"
+    elif fourthRankTensor.res == 3:
+        resolutionTag = "High"
+    
+ 
                         
-        return render_to_response('fourthranktensor.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,'colorscale':colorscale,'surfacecolorFourthRankTensor':surfacecolorFourthRankTensor}, context_instance=RequestContext(request))
+    return render_to_response('fourthranktensor.html',{"XEC": XEC,
+                                                                                                  "YEC": YEC,
+                                                                                                   "ZEC": ZEC,
+                                                                                                   "filename1":filename1,
+                                                                                                   'colorscale':colorscale,
+                                                                                                   'surfacecolor':surfacecolor,
+                                                                                                   "XECp": XECp,
+                                                                                                  "YECp": YECp,
+                                                                                                   "ZECp": ZECp,
+                                                                                                   "filename1p":filename1p,
+                                                                                                   'surfacecolorp':surfacecolorp,
+                                                                                                   "resolutionTag":resolutionTag,
+                                                                                                    "tableWidth": tableWidth,
+                                                                                                    "tableHeight": tableHeight,
+                                                                                                    "divWidth" : divWidth,
+                                                                                                    "divHeight" : divHeight,          
+                                                                                                    "tableWidthHeight": tableWidthHeight,
+                                                                                                    "divWidthHeight": divWidthHeight,
+                                                                                                    "layoutHeight":layoutHeight,
+                                                                                                      "layoutWeight":layoutWeight,                                                                                 
+                                                                                                  }, context_instance=RequestContext(request))
         
 def viewmagnetocrystallineanisotropy(request):
-        value11 = (request.GET.get('value11', ''))
-        value12 = (request.GET.get('value12', ''))
+    """value1 = (request.GET.get('value1', ''))
+        value2 = (request.GET.get('value2', ''))
         filename = (request.GET.get('filename', ''))
         color = (request.GET.get('color', ''))
         filename = (request.GET.get('filename', ''))
         promertyname=(request.GET.get('promertyname', ''))
-        if(value11 and value12 and color):
-            val11 = float(value11)
-            val12 = float(value12)
+        if(value1 and value2 and color):
+            val1 = float(value1)
+            val2 = float(value2)
         
         color = int(color)
         if color == 0:
@@ -1346,7 +1049,7 @@ def viewmagnetocrystallineanisotropy(request):
         createdata =  1
         
 
-        magneto.MagnetocrystallineAnisotropy(val11, val12, color, filename1, res, stl_dir, createstl, createdata);
+        magneto.MagnetocrystallineAnisotropy(val1, val2, color, filename1, res, stl_dir, createstl, createdata);
         
         XEC=magneto.stringValsOfXEC
         YEC = magneto.stringValsOfYEC
@@ -1370,25 +1073,113 @@ def viewmagnetocrystallineanisotropy(request):
         if createstl == 1:
             createdata =  0     
             magneto = Magneto()
-            magneto.MagnetocrystallineAnisotropy(val11, val12, color, filename2, res, stl_dir, createstl, createdata);
+            magneto.MagnetocrystallineAnisotropy(val1, val2, color, filename2, res, stl_dir, createstl, createdata);
             
             del magneto 
     
         return render_to_response('magneto.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,'promertyname':promertyname,'colorscale':colorscale,'surfacecolorMagnetic':surfacecolorMagnetic}, context_instance=RequestContext(request))
+    """
+    magnetoCrystallineAnisotropy = MagnetoCrystallineAnisotropy(request.GET)
 
+    XEC = None
+    YEC = None
+    ZEC = None
+    filename1 = None
+    surfacecolor = None
+    colorscale = None
+    colorscalep = None
+    surfacecolorp = None
+    XECp = None
+    YECp = None
+    ZECp = None
+    filename1p = None
+  
+    tableWidth = 450
+    tableHeight = 500
+    divWidth = 450
+    divHeight = 450 
+    layoutHeight = 450
+    layoutWeight = 450
+    tableWidthHeight = ""
+    divWidthHeight = ""
+ 
+    resolutionTag = ""
+    if magnetoCrystallineAnisotropy.valuearrayrotated == None:
+        magnetoCrystallineAnisotropy.SingleCrystal()        
+        XEC = magnetoCrystallineAnisotropy.jason_data['XEC']
+        YEC = magnetoCrystallineAnisotropy.jason_data['YEC']
+        ZEC = magnetoCrystallineAnisotropy.jason_data['ZEC']
+        filename1 = magnetoCrystallineAnisotropy.jason_data['filename1']
+        surfacecolor = magnetoCrystallineAnisotropy.jason_data['surfacecolor']
+
+    else:
+        magnetoCrystallineAnisotropy.SingleCrystalAndPoly()
+        XEC = magnetoCrystallineAnisotropy.jason_data['XEC']
+        YEC = magnetoCrystallineAnisotropy.jason_data['YEC']
+        ZEC = magnetoCrystallineAnisotropy.jason_data['ZEC']
+        filename1 = magnetoCrystallineAnisotropy.jason_data['filename1'] 
+        surfacecolor = magnetoCrystallineAnisotropy.jason_data['surfacecolor']
+
+        XECp = magnetoCrystallineAnisotropy.jason_data_poly['XEC']
+        YECp = magnetoCrystallineAnisotropy.jason_data_poly['YEC']
+        ZECp = magnetoCrystallineAnisotropy.jason_data_poly['ZEC']
+        filename1p = magnetoCrystallineAnisotropy.jason_data_poly['filename1'] 
+        surfacecolorp = magnetoCrystallineAnisotropy.jason_data_poly['surfacecolor']
+        
+        #tableHeight = tableHeight  * 2
+        tableWidth = tableWidth * 2
+       
+ 
+    
+        
+
+    tableWidthHeight = 'height:'+  str(tableHeight) +'px;  width:' +  str(tableWidth) + 'px;'
+    divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
+    
+    colorscale = magnetoCrystallineAnisotropy.colorscale
+ 
+    if magnetoCrystallineAnisotropy.res == 1:
+        resolutionTag = "Low"
+    elif magnetoCrystallineAnisotropy.res == 2:
+        resolutionTag = "Middle"
+    elif magnetoCrystallineAnisotropy.res == 3:
+        resolutionTag = "High"
+        
+
+    return render_to_response('magneto.html',{"XEC": XEC,
+                                                                                                  "YEC": YEC,
+                                                                                                   "ZEC": ZEC,
+                                                                                                   "filename1":filename1,
+                                                                                                   'colorscale':colorscale,
+                                                                                                   'surfacecolor':surfacecolor,
+                                                                                                   "XECp": XECp,
+                                                                                                  "YECp": YECp,
+                                                                                                   "ZECp": ZECp,
+                                                                                                   "filename1p":filename1p, 
+                                                                                                   'surfacecolorp':surfacecolorp,                                                                                          
+                                                                                                   "resolutionTag":resolutionTag,
+                                                                                                    "tableWidth": tableWidth,
+                                                                                                    "tableHeight": tableHeight,
+                                                                                                    "divWidth" : divWidth,
+                                                                                                    "divHeight" : divHeight,          
+                                                                                                    "tableWidthHeight": tableWidthHeight,
+                                                                                                    "divWidthHeight": divWidthHeight,
+                                                                                                    "layoutHeight":layoutHeight,
+                                                                                                      "layoutWeight":layoutWeight,                                                                                 
+                                                                                                  }, context_instance=RequestContext(request))
     
 def viewmagnetostriction(request):
     
     
-        value11 = (request.GET.get('value11', ''))
-        value12 = (request.GET.get('value12', ''))
+    """value1 = (request.GET.get('value1', ''))
+        value2 = (request.GET.get('value2', ''))
         filename = (request.GET.get('filename', ''))
         color = (request.GET.get('color', ''))
         filename = (request.GET.get('filename', ''))
         promertyname=(request.GET.get('promertyname', ''))
-        if(value11 and value12 and color):
-            val11 = float(value11)
-            val12 = float(value12)
+        if(value1 and value2 and color):
+            val1 = float(value1)
+            val2 = float(value2)
         
         color = int(color)
         if color == 0:
@@ -1434,7 +1225,7 @@ def viewmagnetostriction(request):
         if(promertyname=="Magnetocrystalline Anisotropy")'''
         
 
-        magneto.MagnetoStriction(val11, val12, color, filename1, res, stl_dir, createstl, createdata);
+        magneto.MagnetoStriction(val1, val2, color, filename1, res, stl_dir, createstl, createdata);
         
         XEC=magneto.stringValsOfXEC
         YEC = magneto.stringValsOfYEC
@@ -1456,15 +1247,101 @@ def viewmagnetostriction(request):
         if createstl == 1:
             createdata =  0     
             magneto = Magneto()
-            magneto.MagnetoStriction(val11, val12, color, filename2, res, stl_dir, createstl, createdata);            
+            magneto.MagnetoStriction(val1, val2, color, filename2, res, stl_dir, createstl, createdata);            
             del magneto 
             
             
             
     
         return render_to_response('magneto.html',{"XEC": XEC,"YEC":YEC,"ZEC": ZEC,"LowResolutionFileName":filename1,"MiddleResolutionFileName":filename2,'promertyname':promertyname,'colorscale':colorscale,'surfacecolorMagnetic':surfacecolorMagnetic}, context_instance=RequestContext(request))
+    """
+    magnetostriction = Magnetostriction(request.GET)
 
+    XEC = None
+    YEC = None
+    ZEC = None
+    filename1 = None
+    surfacecolor = None
+    colorscale = None
+    colorscalep = None
+    surfacecolorp = None
+    XECp = None
+    YECp = None
+    ZECp = None
+    filename1p = None
+  
+    tableWidth = 450
+    tableHeight = 500
+    divWidth = 450
+    divHeight = 450 
+    layoutHeight = 450
+    layoutWeight = 450
+    tableWidthHeight = ""
+    divWidthHeight = ""
  
+    resolutionTag = ""
+    if magnetostriction.valuearrayrotated == None:
+        magnetostriction.SingleCrystal()        
+        XEC = magnetostriction.jason_data['XEC']
+        YEC = magnetostriction.jason_data['YEC']
+        ZEC = magnetostriction.jason_data['ZEC']
+        filename1 = magnetostriction.jason_data['filename1']
+        surfacecolor = magnetostriction.jason_data['surfacecolor']
+
+    else:
+        magnetostriction.SingleCrystalAndPoly()
+        XEC = magnetostriction.jason_data['XEC']
+        YEC = magnetostriction.jason_data['YEC']
+        ZEC = magnetostriction.jason_data['ZEC']
+        filename1 = magnetostriction.jason_data['filename1'] 
+        surfacecolor = magnetostriction.jason_data['surfacecolor']
+
+        XECp = magnetostriction.jason_data_poly['XEC']
+        YECp = magnetostriction.jason_data_poly['YEC']
+        ZECp = magnetostriction.jason_data_poly['ZEC']
+        filename1p = magnetostriction.jason_data_poly['filename1'] 
+        surfacecolorp = magnetostriction.jason_data_poly['surfacecolor']
+        
+        #tableHeight = tableHeight  * 2
+        tableWidth = tableWidth * 2 
+ 
+    
+       
+
+    tableWidthHeight = 'height:'+  str(tableHeight) +'px;  width:' +  str(tableWidth) + 'px;'
+    divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
+    
+    colorscale = magnetostriction.colorscale
+ 
+    if magnetostriction.res == 1:
+        resolutionTag = "Low"
+    elif magnetostriction.res == 2:
+        resolutionTag = "Middle"
+    elif magnetostriction.res == 3:
+        resolutionTag = "High"
+        
+
+    return render_to_response('magnetostriction.html',{"XEC": XEC,
+                                                                                                  "YEC": YEC,
+                                                                                                   "ZEC": ZEC,
+                                                                                                   "filename1":filename1,
+                                                                                                   'colorscale':colorscale,
+                                                                                                   'surfacecolor':surfacecolor,
+                                                                                                   "XECp": XECp,
+                                                                                                  "YECp": YECp,
+                                                                                                   "ZECp": ZECp,
+                                                                                                   "filename1p":filename1p, 
+                                                                                                   'surfacecolorp':surfacecolorp,                                                                                          
+                                                                                                   "resolutionTag":resolutionTag,
+                                                                                                    "tableWidth": tableWidth,
+                                                                                                    "tableHeight": tableHeight,
+                                                                                                    "divWidth" : divWidth,
+                                                                                                    "divHeight" : divHeight,          
+                                                                                                    "tableWidthHeight": tableWidthHeight,
+                                                                                                    "divWidthHeight": divWidthHeight,
+                                                                                                    "layoutHeight":layoutHeight,
+                                                                                                      "layoutWeight":layoutWeight,                                                                                 
+                                                                                                  }, context_instance=RequestContext(request))
 
 
 

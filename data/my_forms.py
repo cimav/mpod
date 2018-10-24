@@ -12,7 +12,8 @@ from django.core.mail import send_mail, EmailMessage
 
 from parse_files_2 import *
 import json
-
+from  Utils  import *
+from django.http import *
 
 #datafiles_path = os.path.join(os.path.dirname(__file__),'../media/datafiles').replace('\\','/')
 #uploads_path = os.path.join(datafiles_path, "uploaded")
@@ -446,77 +447,123 @@ def data_item_html(dataitem_id):
         dictionaryitems[k,dictionary.pk] = v
         print dictionaryitems
         
-    
-    
-    catalogproperty_ids=CatalogProperty.objects.all().values_list('id',flat=True)   
-    arraylist=Type.objects.filter(catalogproperty_id__in=catalogproperty_ids).values('catalogproperty_id').annotate(total=Count('id'))
-    g = globals()
-    ap = []
+   
  
-    #print arraylist[0]['catalogproperty_id']
-    #print arraylist 
-    arraylisttypes_ids=Type.objects.filter(catalogproperty_id__in=catalogproperty_ids).values('id','catalogproperty_id',) 
-    #print arraylisttypes_ids
     
-    listtensortags = []
-    tensortags = {}#catalogproperty_id: 1 type id: 2
-    tags = []     
-    tensor_dimensions = []   
-    jsontags =""
-    jtags = ""
-    jdim = ""
-    jsontagslist =[]
-    dim = []
-  
-    for j, p2, in enumerate(arraylisttypes_ids):
-        tensortags['catalogproperty_id'] = int(arraylisttypes_ids[j]['catalogproperty_id'])
-        tensortags['type_id'] = int(arraylisttypes_ids[j]['id'])
-        jsontags = jsontags + '{"catalogproperty_id":' + str(int(arraylisttypes_ids[j]['catalogproperty_id']) ) +', "type_id": ' + str(int(arraylisttypes_ids[j]['id']))
-        
-        typeDataPropertyQuerySet=TypeDataProperty.objects.filter(type_id=arraylisttypes_ids[j]['id'])
-        if typeDataPropertyQuerySet:
-            d = None 
-            for i, item in enumerate(typeDataPropertyQuerySet):
-                tags.append(int(typeDataPropertyQuerySet[i].dataproperty.id))
-                d=typeDataPropertyQuerySet[i].dataproperty.tensor_dimensions.split(',')
-                if d and len(d) == 2 and not dim :
-                    dim = [int(d[0]), int(d[1])]
-                    tensor_dimensions.append(dim)
-                else:
-                    pass
-                    
+    listvalues = []
+    listvalues_jason = []
+    listval = ""
+    values = ""
+    coefficents=0
+    objTypeDataProperty = TypeDataProperty()
+    filename = ""
+    pcounter = 0
+    for block in formatted_data_blocks:
+        if block[1]:
+            for sec in block[1]:
+                if sec[1]:
+                    for y, tens_prop in enumerate(sec[1]): 
+                        print tens_prop[0]
+                        print tens_prop[1]
+                        print tens_prop[2]
+                        filename = str(dataitem_id) + tens_prop[0].replace(',',"")
+                        filename = filename.replace(' ',"")   + str(pcounter)
+                        print filename
+                       
+                        objProperty=Property.objects.get(id=tens_prop[1]) 
+                        try:
+                            objTypeDataProperty= TypeDataProperty.objects.get(dataproperty=objProperty)
+                        except ObjectDoesNotExist as error:
+                            print "Message({0}): {1}".format(99, error.message)   
+                            objTypeDataProperty = None
+                        
+                        
+                        for i,tens_row in enumerate(tens_prop[3]):
+                            #print tens_row
+                            if i ==0:
+                                coefficents = get_coefficents_total(objProperty.tensor_dimensions)
+                                dim = get_dimensions(objProperty.tensor_dimensions)
+                                
+                            for j, tens_val in enumerate(tens_row):  
+                                
+                                if dim==1:
+                                    newtens_val=remove_all("(",str(tens_val))
+                                    if ( coefficents== int(j+1) ):                                    
+                                        if newtens_val == "?":
+                                            values = values + "value" +str(j+1)  +"=" + str(float(0)) 
+                                          
+                                        else:
+                                            values = values + "value" +str(j+1)  +"=" + newtens_val
+                                       
+                                    else:                                        
+                                        if newtens_val == "?":
+                                            values = values + "value" +str(j+1)  +"=" +  str(float(0)) +"&"
+                                    
+                                        else:
+                                            values = values + "value" +str(j+1)  +"=" +  newtens_val +"&"
+                                 
+                                            
+                                     
+                                    
+                                if dim==2:
+                                    newtens_val=remove_all("(",str(tens_val))
+                                    if ( coefficents== int(int(i+1) * int( j+1)) ):               
+                                        if newtens_val == "?":
+                                            values = values + "value" +str(i+1) + str( j+1) +"=" + str(float(0))
+                                         
+                                        else:
+                                            values = values + "value" +str(i+1) + str( j+1) +"=" + newtens_val
+                                        
+                                    else:                                       
+                                        if newtens_val == "?":
+                                            values = values + "value" +str(i+1) + str( j+1) +"=" +  str(float(0)) +"&"
+                                        
+                                        else:
+                                            values = values + "value" +str(i+1) + str( j+1) +"=" +  newtens_val +"&"
+                                        
+         
+                                if dim==3:
+                                    for x, tens_val2 in enumerate(tens_val):  
+                                        newtens_val=remove_all("(",str(tens_val2))
+                                        if ( coefficents== int(int(i+1) * int( j+1) * int( x+1))):      
+                                            if newtens_val == "?":
+                                                values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + str(float(0))
+                                             
+                                            else:
+                                                values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + newtens_val
+                                             
+                                        else:                                            
+                                            if newtens_val == "?":
+                                                values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +   str(float(0))  +"&"
+                                        
+                                            else:
+                                                values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +  newtens_val +"&"
+                                                
+                        
+                        
+                        if objTypeDataProperty:
+                            values = values + '&type_id=' + str(objTypeDataProperty.type.id) + '&tensor=' + str(objTypeDataProperty.type.tensor) + '&clusterurl=' + str(objTypeDataProperty.type.clusterurl)+ '&filename=' + filename  +  '&dataitem_id='  + str(dataitem_id) 
+                        else:
+                            values = values + '&type_id=' + str(0) + '&tensor=undefined&clusterurl=undefined'  + '&filename=' + filename +  '&dataitem_id='  + str(dataitem_id) 
+                        
+                        listvalues.append(values)
+                        pcounter = pcounter + 1
 
-            jtensor_dimensions = str(dim)
-            jtags = str(tags) 
-            
-            if j > len(arraylisttypes_ids):
-                jsontags = jsontags + ', "dataproperty_ids": '   + str(jtags) +  ', "tensor_dimensions": '   + str(jtensor_dimensions) +  '},'
-            else:
-                jsontags = jsontags + ', "dataproperty_ids": '   + str(jtags) +  ', "tensor_dimensions": '   + str(jtensor_dimensions) +  '}'
-                
-            
-            print "************************** " + jsontags
-            dim = []
-            jtensor_dimensions =""
-            jtags =""
-           
+                        #print listval
+                        #print values
+                        values = ""
+                        listval = ""
+                        filename = ""
 
-            jsontagslist.append(jsontags)
-            jsontags = ""
-
-        tags = []     
-
-    print "*************************************************************"
-    print jsontagslist
-    print "*************************************************************"
-    
     
     t_tables = get_template('data/view_dataitem_tensors_new.html')
     html_datafile = html_linked_dataitem(datafile_item,dictionaryitems)
     c_tables=Context({
     'header': "Property values",
-    'formatted_data_blocks' : formatted_data_blocks,
-    'listtensortags':jsontagslist,
+    'formatted_data_blocks' : formatted_data_blocks, 
+    'listvalues': listvalues,
+ 
+  
     })
     html_tables = t_tables.render(c_tables)
     return html_datafile, html_tables
