@@ -64,6 +64,7 @@ class FileProperty(object):
             self._prop_data_tensorial_index=[]
             self._prop_data_value=[]
             self._prop_measurement_method=[]
+            self._prop_conditions_frequency = []
 
 class PublArticle(models.Model):
     title = models.CharField(max_length=255)
@@ -133,6 +134,7 @@ class PropertyTemp(models.Model):
     tensor_dimensions = models.CharField(max_length=10)
     units = models.CharField(max_length=25)
     units_detail = models.CharField(max_length=60)
+    short_tag = models.CharField(max_length=45)
 
     def __unicode__(self):
         return str(self.name) +", "+  str(self.units)
@@ -206,7 +208,7 @@ class DataFileProperty(models.Model):
         db_table = 'data_datafile_property'
         app_label = 'File Property'
         verbose_name = _('File Property Information')
-        verbose_name_plural = _('Articles')
+        verbose_name_plural = _('File Properties')
 
 class DataFilePropertyTemp(models.Model):    
     datafiletemp =models.ForeignKey(DataFileTemp)
@@ -214,39 +216,44 @@ class DataFilePropertyTemp(models.Model):
     
     class Meta:
         db_table = 'data_datafile_property_temp'    
-   
+        
+    def __unicode__(self):
+        return str(self.datafiletemp.filename) +", "+  str(self.propertytemp.name)
+        
    
 class PropertyValues(models.Model):
     datafileproperty=models.ForeignKey(DataFileProperty)
     prop_data_label = models.CharField(max_length=255)
     prop_data_tensorial_index = models.CharField(max_length=255)
     prop_data_value = models.CharField(max_length=511)
- 
+    prop_measurement_method =  models.CharField(max_length=500)
+    prop_conditions_frequency =  models.CharField(max_length=500)
 
     def __unicode__(self):
-        return str(self.name) +", "+  str(self.units)
+        return str(self.prop_data_label)  
     
     class Meta:
         db_table = 'property_values' 
-        app_label = 'Article'
-        verbose_name = _('Article Information')
-        verbose_name_plural = _('Articles')
-             
-        
-        
+        app_label = 'File Property'
+        verbose_name = _('File Property Information')
+        verbose_name_plural = _('File Properties')
+
 class PropertyValuesTemp(models.Model):
-    datafileproperty=models.ForeignKey(DataFilePropertyTemp)
+    datafilepropertytemp=models.ForeignKey(DataFilePropertyTemp)
     prop_data_label = models.CharField(max_length=255)
     prop_data_tensorial_index = models.CharField(max_length=255)
     prop_data_value = models.CharField(max_length=511)
+    prop_measurement_method =  models.CharField(max_length=500)
+    prop_conditions_frequency =  models.CharField(max_length=500)
+    
     
 
     def __unicode__(self):
-        return str(self.name) +", "+  str(self.units)
+        return str(self.prop_data_label) 
     
     class Meta:
         db_table = 'property_values_temp' 
-        app_label = string_with_title("Properties", "Properties Settings")
+        #app_label = string_with_title("Properties", "Properties Settings")
         #verbose_name = _('Crystal System')
         #verbose_name_plural = _('CrystalSystem')
         

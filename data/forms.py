@@ -33,6 +33,7 @@ from django.contrib.admin.widgets import AdminTextInputWidget
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_unicode
 
+from django.forms.widgets import HiddenInput
 from data.Utils import *
 
 from  ctypes import *
@@ -1270,7 +1271,9 @@ class FileUserAdminForm(forms.ModelForm):
             if not args[0].has_key('_save') and not args[0].has_key('_addanother') and not args[0].has_key('_continue'):    
                 args ={}
                 onchange = True
-                
+         
+        
+        
         super(FileUserAdminForm, self).__init__(*args, **kwargs)
         
         #define field to form page
@@ -1288,12 +1291,14 @@ class FileUserAdminForm(forms.ModelForm):
             widget=FilteredSelectMultiple(
                 verbose_name='Property',
                 is_stacked=False,
-                attrs={"ondblclick":"getProperty(this)"}
+                #attrs={"onclick":"oneclick(this);"}
+                #attrs={"ondblclick":"towclick(this)", "onclick":"oneclick(this)"}
             )
 
         )
-        
-        
+ 
+        self.fields['properties_click'] = forms.CharField(widget=HiddenInput,required=False,label="")
+        self.fields['properties_click'].initial="properties"
  
  
         """self.fields['reportvalidationcustom'] = forms.CharField(widget = DetailFieldWidget, required=False)
@@ -1422,6 +1427,9 @@ class FileUserAdminForm(forms.ModelForm):
                 if onchange:
                     pass
                 else:#select from list for change
+                    
+                    
+                        
                     fields1  = []
                     self.fields['fileuserid'].initial = self.instance.pk
                     """for item in self.instance.__dict__.items():
@@ -1482,6 +1490,10 @@ class FileUserAdminForm(forms.ModelForm):
                     self.fields['last_page'].initial = objPublArticleTemp.last_page
                     self.fields['reference'].initial = objPublArticleTemp.reference
                     self.fields['pages_number'].initial = objPublArticleTemp.pages_number
+                    
+                    datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(datafiletemp=objDataFileTemp).values_list('id',flat=True) 
+                    propertyValuesTempQuerySet= PropertyValuesTemp.objects.filter(datafilepropertytemp_id__in=datafilepropertytemp_ids)
+                    
         else:
             if args:#save  new
                 pass

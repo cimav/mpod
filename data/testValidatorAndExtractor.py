@@ -57,7 +57,7 @@ if __name__ == '__main__':
             
         
     filelist = []    
-    filelist.append("zabweokcwgfesuhta.mpod")#lista lenada por unevento en admin site
+    filelist.append("zakozrfxinykjdxac.mpod")#lista lenada por unevento en admin site
     estr = Extractor(str(paths.cifs_dir_valids),str(paths.core_dic_filepath),str(paths.mpod_dic_filepath),str(paths.cifs_dir_output),filelist);
     estr.extractConditions(False)
     estr.extractPublarticleAndDataFile_Data(False)

@@ -78,6 +78,7 @@ def divide_loop_secs(loop):
     props_flag = False
     tensor_flag = False
     uncertainty_flag = False
+    props_label_flag = False
     props = []
     cond_start = 2
     if len(loop_tags) == 1:
@@ -492,12 +493,13 @@ def all_props_list(file_data_blocks):
             if  k.startswith("_symmetry"):
                 itemdictionary[k] = v
         #conditions inside   loop_   see example in file 1000066.mpod    
-        if type(loop_structs[0]) == type(""):
-            if not loop_structs[0].startswith("_"):
-                lps.append(loop_structs[0])
-        if type(loop_structs[0]) == type([]):
-            for ls in loop_structs[0]:
-                lps.append("_prop_"+ls)
+        if  loop_structs[0] != None:
+            if type(loop_structs[0]) == type(""):
+                if not loop_structs[0].startswith("_"):
+                    lps.append(loop_structs[0])
+            if type(loop_structs[0]) == type([]):
+                for ls in loop_structs[0]:
+                    lps.append("_prop_"+ls)
     return tlps, nlps, lps, itemdictionary
 
 

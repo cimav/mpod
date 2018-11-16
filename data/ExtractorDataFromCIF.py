@@ -187,8 +187,8 @@ class Extractor (object):
                 
                 parts=prstr.split('_')
                 if parts[1] in ntgs:
-                    if prstr not in props_agg and objProperty != None:
-                        props_agg.append(prstr)
+                    if prstr not in props_agg and objProperty == None:
+                        props_agg.append(tag)
                 else:
                     if prstr not in props:
                         structureProperty=FileProperty()
@@ -205,11 +205,24 @@ class Extractor (object):
                 if lin.find(t)>-1:
                     lcs=lin.split() 
                     if not lcs[0].startswith("_prop"):
-                        propsStructure[j]._prop_data_label.append(lcs[0])
-                        propsStructure[j]._prop_data_tensorial_index.append(lcs[1])
-                        propsStructure[j]._prop_data_value.append(lcs[2])
-                        #propsStructure[j]._prop_measurement_method.append(lcs[3])
+                        if '_prop_data_label'  in props_agg:
+                            propsStructure[j]._prop_data_label.append(lcs[0])
+                            
+                        if '_prop_data_tensorial_index' in props_agg:  
+                            propsStructure[j]._prop_data_tensorial_index.append(lcs[1])
                         
+                        if  '_prop_data_value' in props_agg:
+                            propsStructure[j]._prop_data_value.append(lcs[2])
+                        
+                        if  '_prop_measurement_method' in props_agg:
+                            propsStructure[j]._prop_measurement_method.append(lcs[3])
+                        else:
+                            propsStructure[j]._prop_measurement_method.append('')
+
+                        if  '_prop_conditions_frequency' in props_agg:
+                            propsStructure[j]._prop_conditions_frequency.append(lcs[4])
+                        else:
+                            propsStructure[j]._prop_conditions_frequency.append('')
           
                 #for tag in propstag:
                 #propsval.append(object)
@@ -485,6 +498,9 @@ class Extractor (object):
                         #dictionary.deploy 
                         #dictionary.type  
                         #dictionary.category
+                        
+                        
+                    
 
                     try:
                         if approved:
@@ -514,6 +530,9 @@ class Extractor (object):
                         
                         objProperty.units =un
                         objProperty.units_detail = ud
+                        if pr._prop_data_label[0] != "":
+                            objProperty.short_tag =  pr._prop_data_label[0]
+                            
                         objProperty.save()
                         
  
@@ -579,8 +598,7 @@ class Extractor (object):
                                 self.dataFile.phase_generic =  dataFileTemp.phase_generic 
                                 self.dataFile.phase_name =  dataFileTemp.phase_name
                                 self.dataFile.chemical_formula =  dataFileTemp.chemical_formula
-                        
-                                
+
                             else:
                                 pass
                             
@@ -601,15 +619,35 @@ class Extractor (object):
                                 dataFileProperty.property=propertyExist
                                 dataFileProperty.datafile=self.dataFile
                                 dataFileProperty.save()
+                                for i, label in enumerate(pr._prop_data_label):
+                                    propertyValues= PropertyValues()
+                                    propertyValues.datafileproperty = dataFileProperty
+                                    propertyValues.prop_data_label  = pr._prop_data_label[i]
+                                    propertyValues.prop_data_tensorial_index = pr._prop_data_tensorial_index[i]
+                                    propertyValues.prop_data_value =  pr._prop_data_value[i]
+                                    propertyValues.prop_measurement_method =   pr._prop_measurement_method[i]
+                                    propertyValues. prop_conditions_frequency = pr._prop_conditions_frequency[i]
+                                    propertyValues.save();
+                                #PropertyValues
+                                
                             else:
                                 dataFileProperty=DataFilePropertyTemp()
                                 dataFileProperty.propertytemp=propertyExist
                                 dataFileProperty.datafiletemp=self.dataFile
                                 dataFileProperty.save()
+                                for i, label in enumerate(pr._prop_data_label):
+                                    propertyValuesTemp= PropertyValuesTemp()
+                                    propertyValuesTemp.datafilepropertytemp = dataFileProperty
+                                    propertyValuesTemp.prop_data_label  = pr._prop_data_label[i]
+                                    propertyValuesTemp.prop_data_tensorial_index = pr._prop_data_tensorial_index[i]
+                                    propertyValuesTemp.prop_data_value =  pr._prop_data_value[i]
+                                    propertyValuesTemp.prop_measurement_method =   pr._prop_measurement_method[i]
+                                    propertyValuesTemp. prop_conditions_frequency = pr._prop_conditions_frequency[i]
+                                    propertyValuesTemp.save();
                         else:
                             pass
                             
-                    
+                        
                         """if approved:
                             fileUser=FileUser.objects.get(filename__exact=fil)
                             fileUser.datafile=self.dataFile

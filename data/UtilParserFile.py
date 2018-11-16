@@ -83,7 +83,10 @@ class PuntualGroup(object):
             i = index[0]
             j= index[1]
             print str(i) + "," + str(j)
-            self.coefficientsmatrix2[i][j]  = p[1]
+            if p[1] == '?':
+                self.coefficientsmatrix2[i][j]  = '0'
+            else:
+                self.coefficientsmatrix2[i][j]  = p[1]
     
         for i in range(int(dimensions[0])):        
             for j in range(int(dimensions[1])):

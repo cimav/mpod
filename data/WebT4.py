@@ -483,7 +483,7 @@ class StiffnessT4():
       try:
         s = np.linalg.inv(c)
       except Exception as e:
-        self.error = 'Internal error occurred, consult technical support (when calculating the inverse of a matrix of Single-crystal)'
+        self.error = 'Internal error occurred, consult technical support (calculating the inverse of a matrix of Stiffness Single-crystal)'
         return
 
       s11=s[0,0]; s12=s[0,1]; s13=s[0,2]; s14=s[0,3]; s15=s[0,4]; s16=s[0,5]

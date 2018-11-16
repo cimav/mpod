@@ -440,8 +440,8 @@
            data: datasend,
            dataType: 'json',
            success: function (data) {
-           	$( "#" + idtd ).append(data.html);
-           	 $( "#" + spanid ).append('<button class="btn btn-warning" onclick="ranktensor(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\',\'' + tensor + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+           		$( "#" + idtd ).append(data.html);
+           		$( "#" + spanid ).append('<button class="btn btn-warning" onclick="ranktensor(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\',\'' + tensor + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
         	 },
 		 	error: function (data) {
        		if(data.status == 500)

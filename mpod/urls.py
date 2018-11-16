@@ -14,12 +14,14 @@ from data.views import *
 admin.autodiscover()
  
 
-
 urlpatterns = patterns('',
       # ADMIN
     #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/dictionary/$', dictionaryview,name='dictionary'),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/Files/fileuser/(\d+)/showmatrix/(?P<pk>-?\d+)$', showmatrix, name='showmatrix'),
+    url(r'^admin/Files/fileuser/(\d+)/updatecoefficient/(?P<pk>-?\d+)$', updatecoefficient, name='updatecoefficient'),
+    
 
     #accounts
     url(r'^accounts/profile/$', 'data.views.viewprofile'),

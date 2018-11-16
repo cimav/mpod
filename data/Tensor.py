@@ -59,7 +59,7 @@ class BaseTensor(object):
                 self.colorscale='Greys';
 
             
-                
+             
             for key, value in self.requestdic.iteritems():
                     v =  requestPostFilterToFloat(args[0],key,None,'value')
                     if v != None:

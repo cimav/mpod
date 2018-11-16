@@ -464,96 +464,97 @@ def data_item_html(dataitem_id):
                 if sec[1]:
                     for y, tens_prop in enumerate(sec[1]): 
                         print tens_prop[0]
-                        print tens_prop[1]
-                        print tens_prop[2]
-                        filename = str(dataitem_id) + tens_prop[0].replace(',',"")
-                        filename = filename.replace(' ',"")   + str(pcounter)
-                        print filename
-                       
-                        objProperty=Property.objects.get(id=tens_prop[1]) 
-                        try:
-                            objTypeDataProperty= TypeDataProperty.objects.get(dataproperty=objProperty)
-                        except ObjectDoesNotExist as error:
-                            print "Message({0}): {1}".format(99, error.message)   
-                            objTypeDataProperty = None
-                        
-                        
-                        for i,tens_row in enumerate(tens_prop[3]):
-                            #print tens_row
-                            if i ==0:
-                                coefficents = get_coefficents_total(objProperty.tensor_dimensions)
-                                dim = get_dimensions(objProperty.tensor_dimensions)
-                                
-                            for j, tens_val in enumerate(tens_row):  
-                                
-                                if dim==1:
-                                    newtens_val=remove_all("(",str(tens_val))
-                                    if ( coefficents== int(j+1) ):                                    
-                                        if newtens_val == "?":
-                                            values = values + "value" +str(j+1)  +"=" + str(float(0)) 
-                                          
-                                        else:
-                                            values = values + "value" +str(j+1)  +"=" + newtens_val
-                                       
-                                    else:                                        
-                                        if newtens_val == "?":
-                                            values = values + "value" +str(j+1)  +"=" +  str(float(0)) +"&"
+                        if not isinstance(tens_prop[0], list):
+                            print tens_prop[1]                            
+                            print tens_prop[2]
+                            filename = str(dataitem_id) + tens_prop[0].replace(',','')
+                            filename = filename.replace(' ',"")   + str(pcounter)
+                            print filename
+                           
+                            objProperty=Property.objects.get(id=tens_prop[1]) 
+                            try:
+                                objTypeDataProperty= TypeDataProperty.objects.get(dataproperty=objProperty)
+                            except ObjectDoesNotExist as error:
+                                print "Message({0}): {1}".format(99, error.message)   
+                                objTypeDataProperty = None
+                            
+                            
+                            for i,tens_row in enumerate(tens_prop[3]):
+                                #print tens_row
+                                if i ==0:
+                                    coefficents = get_coefficents_total(objProperty.tensor_dimensions)
+                                    dim = get_dimensions(objProperty.tensor_dimensions)
                                     
-                                        else:
-                                            values = values + "value" +str(j+1)  +"=" +  newtens_val +"&"
-                                 
-                                            
+                                for j, tens_val in enumerate(tens_row):  
+                                    
+                                    if dim==1:
+                                        newtens_val=remove_all("(",str(tens_val))
+                                        if ( coefficents== int(j+1) ):                                    
+                                            if newtens_val == "?":
+                                                values = values + "value" +str(j+1)  +"=" + str(float(0)) 
+                                              
+                                            else:
+                                                values = values + "value" +str(j+1)  +"=" + newtens_val
+                                           
+                                        else:                                        
+                                            if newtens_val == "?":
+                                                values = values + "value" +str(j+1)  +"=" +  str(float(0)) +"&"
+                                        
+                                            else:
+                                                values = values + "value" +str(j+1)  +"=" +  newtens_val +"&"
                                      
-                                    
-                                if dim==2:
-                                    newtens_val=remove_all("(",str(tens_val))
-                                    if ( coefficents== int(int(i+1) * int( j+1)) ):               
-                                        if newtens_val == "?":
-                                            values = values + "value" +str(i+1) + str( j+1) +"=" + str(float(0))
+                                                
                                          
-                                        else:
-                                            values = values + "value" +str(i+1) + str( j+1) +"=" + newtens_val
                                         
-                                    else:                                       
-                                        if newtens_val == "?":
-                                            values = values + "value" +str(i+1) + str( j+1) +"=" +  str(float(0)) +"&"
-                                        
-                                        else:
-                                            values = values + "value" +str(i+1) + str( j+1) +"=" +  newtens_val +"&"
-                                        
-         
-                                if dim==3:
-                                    for x, tens_val2 in enumerate(tens_val):  
-                                        newtens_val=remove_all("(",str(tens_val2))
-                                        if ( coefficents== int(int(i+1) * int( j+1) * int( x+1))):      
+                                    if dim==2:
+                                        newtens_val=remove_all("(",str(tens_val))
+                                        if ( coefficents== int(int(i+1) * int( j+1)) ):               
                                             if newtens_val == "?":
-                                                values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + str(float(0))
+                                                values = values + "value" +str(i+1) + str( j+1) +"=" + str(float(0))
                                              
                                             else:
-                                                values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + newtens_val
-                                             
-                                        else:                                            
+                                                values = values + "value" +str(i+1) + str( j+1) +"=" + newtens_val
+                                            
+                                        else:                                       
                                             if newtens_val == "?":
-                                                values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +   str(float(0))  +"&"
-                                        
+                                                values = values + "value" +str(i+1) + str( j+1) +"=" +  str(float(0)) +"&"
+                                            
                                             else:
-                                                values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +  newtens_val +"&"
+                                                values = values + "value" +str(i+1) + str( j+1) +"=" +  newtens_val +"&"
+                                            
+             
+                                    if dim==3:
+                                        for x, tens_val2 in enumerate(tens_val):  
+                                            newtens_val=remove_all("(",str(tens_val2))
+                                            if ( coefficents== int(int(i+1) * int( j+1) * int( x+1))):      
+                                                if newtens_val == "?":
+                                                    values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + str(float(0))
+                                                 
+                                                else:
+                                                    values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + newtens_val
+                                                 
+                                            else:                                            
+                                                if newtens_val == "?":
+                                                    values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +   str(float(0))  +"&"
+                                            
+                                                else:
+                                                    values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +  newtens_val +"&"
                                                 
                         
                         
-                        if objTypeDataProperty:
-                            values = values + '&type_id=' + str(objTypeDataProperty.type.id) + '&tensor=' + str(objTypeDataProperty.type.tensor) + '&clusterurl=' + str(objTypeDataProperty.type.clusterurl)+ '&filename=' + filename  +  '&dataitem_id='  + str(dataitem_id) 
-                        else:
-                            values = values + '&type_id=' + str(0) + '&tensor=undefined&clusterurl=undefined'  + '&filename=' + filename +  '&dataitem_id='  + str(dataitem_id) 
-                        
-                        listvalues.append(values)
-                        pcounter = pcounter + 1
-
-                        #print listval
-                        #print values
-                        values = ""
-                        listval = ""
-                        filename = ""
+                            if objTypeDataProperty:
+                                values = values + '&type_id=' + str(objTypeDataProperty.type.id) + '&tensor=' + str(objTypeDataProperty.type.tensor) + '&clusterurl=' + str(objTypeDataProperty.type.clusterurl)+ '&filename=' + filename  +  '&dataitem_id='  + str(dataitem_id) 
+                            else:
+                                values = values + '&type_id=' + str(0) + '&tensor=undefined&clusterurl=undefined'  + '&filename=' + filename +  '&dataitem_id='  + str(dataitem_id) 
+                            
+                            listvalues.append(values)
+                            pcounter = pcounter + 1
+    
+                            #print listval
+                            #print values
+                            values = ""
+                            listval = ""
+                            filename = ""
 
     
     t_tables = get_template('data/view_dataitem_tensors_new.html')

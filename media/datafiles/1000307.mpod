@@ -54,13 +54,15 @@ _prop_data_tensorial_index
 _prop_data_value
 _prop_measurement_method
 betrijT 11 4.93 CAP
-betrijT 12 2.77 CAP
 betrijT 22 7.80 CAP
 betrijT 33 4.95 CAP
+betrijT 31 2.77 CAP
+betrijT 13 2.77 CAP
 epsrijT 11 29.6 CAP
-epsrijT 12 -16.5 CAP
+epsrijT 13 -16.5 CAP
 epsrijT 22 12.9 CAP
 epsrijT 33 29.4 CAP
+epsrijT 31 -16.5 CAP
 sijE 11 29.4 RT
 sijE 12 ? RT
 sijE 13 ? RT

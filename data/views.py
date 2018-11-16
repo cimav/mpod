@@ -429,6 +429,7 @@ def viewsecondranktensor(request):
     divWidthHeight = 'height:'+  str(divHeight) +'px;  width:' +  str(divWidth) + 'px;'
     
     colorscale = secondRankTensor.colorscale
+     
  
     if secondRankTensor.res == 1:
         resolutionTag = "Low"
@@ -2233,72 +2234,357 @@ def adddictionaryphase(request,pk):
 @csrf_exempt 
 def rotatematrix(request,pk): 
  
+    if request.is_ajax():
+        omeg =  request.POST.get('omeg', False)   
+        mh =  request.POST.get('mh', False)   
+        mk =  request.POST.get('mk', False)   
+        ml =  request.POST.get('ml', False)   
+        mat =  request.POST.get('mat', False)   
+        tensor =  request.POST.get('url', False)   
+        #url ='http://supercomputo.cimav.edu.mx:8080/mpod/finpiezo?'
+        
     
-    omeg =  request.POST.get('omeg', False)   
-    mh =  request.POST.get('mh', False)   
-    mk =  request.POST.get('mk', False)   
-    ml =  request.POST.get('ml', False)   
-    mat =  request.POST.get('mat', False)   
-    tensor =  request.POST.get('url', False)   
-    #url ='http://supercomputo.cimav.edu.mx:8080/mpod/finpiezo?'
-    
+        values2= "mh="+ mh + "&mk=" + mk +"&ml="+ ml
+        mat = "&mat=" +mat
+        ome="&omeg=" + omeg;
+        
+        urlcluster = "http://supercomputo.cimav.edu.mx:8080/mpod/" + tensor+"?" + values2 + ome + mat
+        print urlcluster
+        response = urllib2.urlopen(urlcluster)
+        
+         
+         
+        
+        resultado = json.loads(response.read())
+        
+        rotated = resultado['resultado']
+         
+         
+        #values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18;
+        rotatedparameters =""
+        valuearrayrotated =""
+        ampersand = "&"
+        html= """<div class='container-fluid'><table class='table table-striped table-condensed table-hover sm_table' >
+                    <tbody>"""
+        
+        lastindex = len( rotated ) * len( rotated[0])     
+        counterindex = 0
+        for i,row in enumerate(rotated):
+            rowrotated=rotated[i]
+            #print len(rowrotated)  
+            html=  html+ "<tr>" 
+            for j,row in enumerate(rowrotated):
+                #print rowrotated[j]
+                #valuearrayrotated.append("'" + str(float(rowrotated[j])) +"'")
+                
+                counterindex = counterindex + 1 
+                html=  html+  "<td>" + str(float(rowrotated[j]) )+ "</td>"
+                if  counterindex <  lastindex:
+                    rotatedparameters =  rotatedparameters + "value"+str(i+1)+str(j+1)  +"="+ str(float(rowrotated[j]) ) + ampersand
+                    valuearrayrotated = valuearrayrotated +"valuearrayrotated=" + str(float(rowrotated[j])) + ampersand 
+                else:
+                    rotatedparameters =  rotatedparameters + "value"+str(i+1)+str(j+1)  +"="+ str(float(rowrotated[j]) ) 
+                    valuearrayrotated = valuearrayrotated + "valuearrayrotated=" + str(float(rowrotated[j])) 
+                    
+                
+                
+            html=  html+ "</tr>" 
+                 
+        html=  html+  "</tbody></table></div>"      
 
-    values2= "mh="+ mh + "&mk=" + mk +"&ml="+ ml
-    mat = "&mat=" +mat
-    ome="&omeg=" + omeg;
+        data = {'html': html,
+                     'rotatedparameters': rotatedparameters,
+                     'valuearrayrotated': valuearrayrotated
+                     }
+        
+        return HttpResponse(json.dumps(data), content_type="application/json")   
+    else:
+        raise Http404
     
-    urlcluster = "http://supercomputo.cimav.edu.mx:8080/mpod/" + tensor+"?" + values2 + ome + mat
-    print urlcluster
-    response = urllib2.urlopen(urlcluster)
     
-     
-     
+ 
+@csrf_exempt 
+def showmatrix(request,pk): 
     
-    resultado = json.loads(response.read())
-    
-    rotated = resultado['resultado']
-     
-     
-    #values = "?value11="+val1+"&value12="+val2+"&value13="+val3+"&value14="+val4+"&value15="+val5+"&value16="+val6+"&value21="+val7+"&value22="+val8+"&value23="+val9+"&value24="+val10+"&value25="+val11+"&value26="+val12+"&value31="+val13+"&value32="+val14+"&value33="+val15+"&value34="+val16+"&value35="+val17+"&value36="+val18;
-    rotatedparameters =""
-    valuearrayrotated =""
-    ampersand = "&"
-    html= """<div class='container-fluid'><table class='table table-striped table-condensed table-hover sm_table' >
-                <tbody>"""
-    
-    lastindex = len( rotated ) * len( rotated[0])     
-    counterindex = 0
-    for i,row in enumerate(rotated):
-        rowrotated=rotated[i]
-        print len(rowrotated)  
-        html=  html+ "<tr>" 
-        for j,row in enumerate(rowrotated):
-            #print rowrotated[j]
-            #valuearrayrotated.append("'" + str(float(rowrotated[j])) +"'")
+    if request.is_ajax():
+        #property_id =  request.POST.get('property_id', False)   
+        objPropertyTemp=PropertyTemp.objects.get(id=pk)
+        dim = get_dimensions(objPropertyTemp.tensor_dimensions)
+        coefficents = get_coefficents_total(objPropertyTemp.tensor_dimensions)
+        #parts=objPropertyTemp.tag.split('_')[-1]
+        #label =objPropertyTemp.tag.split('_')[-1]
+        label =objPropertyTemp.short_tag
+        print label
+        datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(propertytemp=objPropertyTemp).values_list('id',flat=True) 
+        
+        indexi = 0
+        indexj = 0
+        data =""  
+        table = ""
+        input = "" 
+        coefficientsmatrix = None
+        if dim == 1:
+            print "dimension 1"
+            print objPropertyTemp.tensor_dimensions
+            index = objPropertyTemp.tensor_dimensions
+            indexj = int(index)
             
-            counterindex = counterindex + 1 
-            html=  html+  "<td>" + str(float(rowrotated[j]) )+ "</td>"
-            if  counterindex <  lastindex:
-                rotatedparameters =  rotatedparameters + "value"+str(i+1)+str(j+1)  +"="+ str(float(rowrotated[j]) ) + ampersand
-                valuearrayrotated = valuearrayrotated +"valuearrayrotated=" + str(float(rowrotated[j])) + ampersand 
-            else:
-                rotatedparameters =  rotatedparameters + "value"+str(i+1)+str(j+1)  +"="+ str(float(rowrotated[j]) ) 
-                valuearrayrotated = valuearrayrotated + "valuearrayrotated=" + str(float(rowrotated[j])) 
+            
+            
+            if indexj != 0:
+               
+                coefficientsmatrix = N.zeros(indexj) 
+                print datafilepropertytemp_ids
+                if  datafilepropertytemp_ids:
+                    propertyValuesTempQuerySet= PropertyValuesTemp.objects.filter(datafilepropertytemp_id__in=datafilepropertytemp_ids).order_by('prop_data_tensorial_index')
+                    #label = propertyValuesTempQuerySet.reverse()[0].prop_data_label
+            
+                    
+                    #print coefficientsmatrix
+                    for x,item in enumerate( propertyValuesTempQuerySet):
+                        index= list(propertyValuesTempQuerySet[x].prop_data_tensorial_index)  
+                        i =int(index[0]) - 1
+                        j = int(index[1]) -1
+                        coefficientsmatrix[i,j] = float(propertyValuesTempQuerySet[x].prop_data_value)
+                        
+                        lbl='_' + str(j +1)
+                        inputlabel = label.replace("i",  lbl)
+                        if x != (len(propertyValuesTempQuerySet) - 1 ):
+                            data = data + inputlabel +'=' +str(coefficientsmatrix[i,j] ) +'&' 
+                        else:
+                            data = data + inputlabel +'=' +str(coefficientsmatrix[i,j] ) 
+                else:
+                    #pass
+                    countercoeff = 0
+                    for i in range(dim):
+                        for j in range(indexj):
+                            lbl='_' + str(j +1)
+                            inputlabel = label.replace("i",  lbl)
+                        
+                            if countercoeff != (coefficents -1):
+                                data = data + inputlabel +'=' +str(coefficientsmatrix[j] ) +'&' 
+                            else:
+                                data = data + inputlabel +'=' +str(coefficientsmatrix[j] ) 
+                                
+                            countercoeff = countercoeff + 1
+                    
+                        
+                
+                
+                table = '<table class="table table-striped table-condensed table-hover sm_table" > <tbody>' 
+                print coefficientsmatrix
+                #for i in range(int(indexi[-1])):
+                for i in range(dim):
+                    table = table +  ' <tr>' 
+                    #for j in range(int(indexj[-1])):
+                    for j in range(indexj):
+                        lbl='_' +  str(j +1)
+                        inputlabel = label.replace("i",  lbl)
+                        if coefficientsmatrix[j] != 0.0:
+                            input = '<input type="text" name="coeff_'+ inputlabel+'" value="'+ str(coefficientsmatrix[j] )+'" id="id_'+ inputlabel+'" style="width: 50px;" />'
+                        else:
+                            if datafilepropertytemp_ids:
+                                input = '<input type="text" name="coeff_'+ inputlabel+'" value="'+ str(coefficientsmatrix[j] )+'" id="id_'+ inputlabel+'" style="width: 50px;" readonly="readonly"  disabled/>'
+                            else:
+                                input = '<input type="text" name="coeff_'+ inputlabel+'" value="'+ str(coefficientsmatrix[j] )+'" id="id_'+ inputlabel+'" style="width: 50px;" />'
+                       
+                       
+                        table = table + ' <td> '+ input+'</td>' 
+                     
+                    table = table +  ' </tr>' 
+                    
+                table = table +  ' <tr >' 
+                
+                #data = data + 'propertyid' + '=' + pk
+                function = "updatecoefficient('" + data + "', '"+ pk + "')"
+                #table = table + ' <td colspan="'+str(indexj[-1])+'"> <div class="submit-row"><p  ><a href="#" class="submit-row" onclick="' + function + '">Update</a></p></div></td>' 
+                table = table + ' <td colspan="'+str(indexj)+'"> <div class="submit-row"><p  ><a href="#" class="submit-row" onclick="' + function + '">Update</a></p></div></td>' 
+              
+                table = table +  ' </tr>' 
+                    
+                table = table + ' </tbody></table>'
                 
             
-            
-        html=  html+ "</tr>" 
-             
-    html=  html+  "</tbody></table></div>"      
-            
+        if dim == 2:
+            print "dimension 2"
+            print objPropertyTemp.tensor_dimensions
+            index = objPropertyTemp.tensor_dimensions.split(",")
+            indexi = int(index[0])
+            indexj=  int(index[1])
  
+            print coefficents
+            coefficientsmatrix = N.zeros([indexi,indexj]) 
+            print coefficientsmatrix
+            
+            
+            
+            
+            print datafilepropertytemp_ids
+            if  datafilepropertytemp_ids:
+                propertyValuesTempQuerySet= PropertyValuesTemp.objects.filter(datafilepropertytemp_id__in=datafilepropertytemp_ids).order_by('prop_data_tensorial_index')
+                #label = propertyValuesTempQuerySet.reverse()[0].prop_data_label
         
-     
-    data = {'html': html,
-                 'rotatedparameters': rotatedparameters,
-                 'valuearrayrotated': valuearrayrotated
-                 }
+                
+                #print coefficientsmatrix
+                for x,item in enumerate( propertyValuesTempQuerySet):
+                    index= list(propertyValuesTempQuerySet[x].prop_data_tensorial_index)  
+                    i =int(index[0]) - 1
+                    j = int(index[1]) -1
+                    coefficientsmatrix[i,j] = float(propertyValuesTempQuerySet[x].prop_data_value)
+                    
+                    lbl='_' + str(i +1) + str(j +1)
+                    inputlabel = label.replace("ij",  lbl)
+                    if x != (len(propertyValuesTempQuerySet) - 1 ):
+                        data = data + inputlabel +'=' +str(coefficientsmatrix[i,j] ) +'&' 
+                    else:
+                        data = data + inputlabel +'=' +str(coefficientsmatrix[i,j] ) 
+            else:
+                #pass
+                countercoeff = 0
+                for i in range(indexi):
+                    for j in range(indexj):
+                        lbl='_' + str(i +1) + str(j +1)
+                        inputlabel = label.replace("ij",  lbl)
+                    
+                        if countercoeff != (coefficents -1):
+                            data = data + inputlabel +'=' +str(coefficientsmatrix[i,j] ) +'&' 
+                        else:
+                            data = data + inputlabel +'=' +str(coefficientsmatrix[i,j] ) 
+                            
+                        countercoeff = countercoeff + 1
+                
+                    
+            
+            
+            table = '<table class="table table-striped table-condensed table-hover sm_table" > <tbody>' 
+            print coefficientsmatrix
+            #for i in range(int(indexi[-1])):
+            for i in range(indexi):
+                table = table +  ' <tr>' 
+                #for j in range(int(indexj[-1])):
+                for j in range(indexj):
+                    lbl='_' + str(i +1) + str(j +1)
+                    inputlabel = label.replace("ij",  lbl)
+                    if coefficientsmatrix[i,j] != 0.0:
+                        input = '<input type="text" name="coeff_'+ inputlabel+'" value="'+ str(coefficientsmatrix[i,j] )+'" id="id_'+ inputlabel+'" style="width: 50px;" />'
+                    else:
+                        if datafilepropertytemp_ids:
+                            input = '<input type="text" name="coeff_'+ inputlabel+'" value="'+ str(coefficientsmatrix[i,j] )+'" id="id_'+ inputlabel+'" style="width: 50px;" readonly="readonly"  disabled/>'
+                        else:
+                            input = '<input type="text" name="coeff_'+ inputlabel+'" value="'+ str(coefficientsmatrix[i,j] )+'" id="id_'+ inputlabel+'" style="width: 50px;" />'
+                   
+                   
+                    table = table + ' <td> '+ input+'</td>' 
+                 
+                table = table +  ' </tr>' 
+                
+            table = table +  ' <tr >' 
+            
+            #data = data + 'propertyid' + '=' + pk
+            function = "updatecoefficient('" + data + "', '"+ pk + "')"
+            #table = table + ' <td colspan="'+str(indexj[-1])+'"> <div class="submit-row"><p  ><a href="#" class="submit-row" onclick="' + function + '">Update</a></p></div></td>' 
+            table = table + ' <td colspan="'+str(indexj)+'"> <div class="submit-row"><p  ><a href="#" class="submit-row" onclick="' + function + '">Update</a></p></div></td>' 
+          
+            table = table +  ' </tr>' 
+                
+            table = table + ' </tbody></table>'
+        
+        if dim == 3:
+            print "dimension 3"
+            print objPropertyTemp.tensor_dimensions
+            index = objPropertyTemp.tensor_dimensions.split(",")
+            indexi = int(index[0])
+            indexj=  int(index[1])
+       
+        
+
+    data = {'html': table,
+                     }
+    return HttpResponse(json.dumps(data), content_type="application/json")   
     
+    
+    
+@csrf_exempt 
+def updatecoefficient(request,pk): 
+    
+    if request.is_ajax():
+        objPropertyTemp=PropertyTemp.objects.get(id=pk)
+        dim = get_dimensions(objPropertyTemp.tensor_dimensions)
+        coefficents = get_coefficents_total(objPropertyTemp.tensor_dimensions)
+        #parts=objPropertyTemp.tag.split('_')[-1]
+        label =objPropertyTemp.tag.split('_')[-1]
+        print label
+        
+        datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(propertytemp=objPropertyTemp).values_list('id',flat=True) 
+        #print datafilepropertytemp_ids
+        
+        def getIndex(coefficientsTag):              
+            match = re.match(r"([a-z]+)([0-9]+)",  coefficientsTag, re.I)
+            if match:
+                items = match.groups()
+                numbers = items[1]
+                index = re.findall(r'.{1,1}',numbers,re.DOTALL)
+                indextem=[]
+                indextem.append(int(index[0]) - 1)
+                indextem.append( int(index[1]) - 1)
+                return indextem
+        
+        objPropertyValuesTemp = None
+        for k,v in request.POST.iterlists():
+            #index = k.split("_")
+            #print index 
+            tag = k.replace("_","")
+            #print tag 
+            index= getIndex(tag)
+            tensorial_index = str(index[0] +1) + str( index[1] +1)
+            #print tensorial_index
+                
+            if datafilepropertytemp_ids:
+                objPropertyValuesTemp= PropertyValuesTemp.objects.get(datafilepropertytemp_id=datafilepropertytemp_ids[0],prop_data_tensorial_index=tensorial_index)
+                objPropertyValuesTemp.prop_data_value = float(v[0])
+            else:
+                objDtaFilePropertyTemp = DataFilePropertyTemp()
+                objDtaFilePropertyTemp.propertytemp = objPropertyTemp
+                objPropertyValuesTemp= PropertyValuesTemp()
+                objPropertyValuesTemp.datafilepropertytemp=objDtaFilePropertyTemp
+                objPropertyValuesTemp.prop_data_label = label
+                objPropertyValuesTemp.prop_data_tensorial_index =  tensorial_index
+                objPropertyValuesTemp.prop_data_value = float(v[0])
+                """objPropertyValuesTemp.prop_measurement_method =   
+                objPropertyValuesTemp.prop_conditions_frequency =   
+                """
+                
+     
+                    
+                 
+        propertyValuesTempList =[]
+        if not 'propertyValuesTempList' in request.session or not request.session['propertyValuesTempList' ]: 
+            
+            propertyValuesTempList.append(objPropertyValuesTemp)
+            request.session['propertyValuesTempList' ] = propertyValuesTempList
+        else:
+            #del request.session['propertyValuesTempList']
+            found = False
+            propertyValuesTempList = request.session['propertyValuesTempList' ] 
+            for i, item in enumerate(propertyValuesTempList):
+                if propertyValuesTempList[i].datafilepropertytemp.propertytemp.id == objPropertyTemp.id:
+                    propertyValuesTempList[i] = objPropertyValuesTemp
+                    found = True
+                    break
+                 
+             
+            if not  found:       
+                propertyValuesTempList.append(objPropertyValuesTemp)
+            
+            
+            request.session['propertyValuesTempList' ] = propertyValuesTempList
+        
+        
+        print len(propertyValuesTempList)
+        
+        data = {'html': 'table',
+         }
+         
     return HttpResponse(json.dumps(data), content_type="application/json")   
 
 

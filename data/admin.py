@@ -274,7 +274,7 @@ class FileUserAdmin(admin.ModelAdmin):
         def get_fieldsets(self, *args, **kwargs):
             return  (
                 ('File', {
-                    'fields': ('fileuserid','authuser','filename','filenamepublished','cod_code','date','datepublished','reportvalidation','published','experimentalcon','properties','phase_generic','phase_name','chemical_formula',)
+                    'fields': ('properties_click','fileuserid','authuser','filename','filenamepublished','cod_code','date','datepublished','reportvalidation','published','experimentalcon','properties','phase_generic','phase_name','chemical_formula',)
                 }),
                 ('Publication info', {
                       'classes': ('collapse',),
@@ -287,6 +287,24 @@ class FileUserAdmin(admin.ModelAdmin):
             )
             
             
+
+ 
+        def change_view(self, request, object_id, form_url='', extra_context=None):
+            extra_context = extra_context or {}
+            if not 'propertyValuesTempList' in request.session or not request.session['propertyValuesTempList' ]: 
+                pass
+            else:
+                del request.session['propertyValuesTempList']
+            extra_context = {
+                'original':'File User',
+                 
+            }
+ 
+          
+ 
+            return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+      
+         
         def save_model(self, request, obj, form, change):    
             try:
                 if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
@@ -340,7 +358,7 @@ class FileUserAdmin(admin.ModelAdmin):
                         estr.extractProperties(True,request.POST)
                         
                         print 'fecha'
-                        #obj.published = True
+ 
                         if not obj.datepublished:
                             obj.datepublished = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
                             
@@ -363,7 +381,7 @@ class FileUserAdmin(admin.ModelAdmin):
                             ciffileout = os.path.join(path.cifs_dir,str(estr.code) + ".mpod")
                              
             
-                            #line.replace("data_" + obj.filename, "data_" +dataFile.code ), end='')
+                   
                             datacode = "data_"+ obj.filename.replace('.mpod', ' ')
                             newdatacode =   "data_" + str(cod_code)
                             print datacode
@@ -445,7 +463,7 @@ class FileUserAdmin(admin.ModelAdmin):
                             filename = objDataFile.filename       
                             objDataFile.delete()
     
-                            #objPublArticle.delete() 
+                          
                              
                             if publArticleQuerySet:
                                 if len(publArticleQuerySet) == 1:
