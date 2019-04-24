@@ -30,6 +30,7 @@ class MPODUtil():
         Constructor
         '''
         self.__propertylist=None
+        self.__propertyMaster = None
         self.fid = None 
         # protected variable
         self.__line =  ''
@@ -50,8 +51,10 @@ class MPODUtil():
         self.__dij = ''
         self.__kij = ''
         self.__yij = ''
+        self.__loopBlock = []
+        self.message = None
          
-        self.__propertylist = None
+        
         self.__cif_dir=''
         self.cifs_dir_valids=''
         self.cifs_dir_invalids=''
@@ -69,6 +72,10 @@ class MPODUtil():
                                                     [0, 0, 0, 0, 1, 1],
                                                     [0, 0, 0, 0, 0, 1]]
         
+        self.maskmatrix3x3 =   [[1, 1, 1],
+                                                    [0, 1, 1],
+                                                    [0, 0, 1]]
+        
         
         self.maxmatrixnonceros = None
  
@@ -84,8 +91,9 @@ class MPODUtil():
         
  
         
-    def mpodwrite(self,filename,propertylist):
-        self.__propertylist = propertylist
+    def mpodwrite(self,filename,propertyMaster):
+        self.__propertyMaster= propertyMaster
+        #self.__propertylist = data.propertyList
         
         
         mpoffile=MpodFile.objects.all()
@@ -189,15 +197,16 @@ class MPODUtil():
         
         
         
+        
     def addline(self,line):
         self.__mpod_str =self.__mpod_str  + line
         
     def addinfo(self):
         
-        for p  in self.__propertylist:
-            if p.puntualgroupselected_name  != "":
+        for p  in self.__propertyMaster.propertyList:
+            if self.__propertyMaster.puntualgroup  != "":
                 if self.__symmetry_point_group_name == False:         
-                    self.__line =  "_symmetry_point_group_name_H-M" + " " + p.puntualgroupselected_name+"\n"      
+                    self.__line =  "_symmetry_point_group_name_H-M" + " " + self.__propertyMaster.puntualgroup+"\n"      
                     self.addline(self.__line)    
                         
                     self.__symmetry_point_group_name = True
@@ -207,8 +216,23 @@ class MPODUtil():
                     self.addline(self.__line)   
                     
                     self.__symmetry_point_group_name = True
+                    
+                    
                 
- 
+            if self.__condition==False :  
+
+                if self.__propertyMaster.headerBlockValues != None:
+                    for key,value in self.__propertyMaster.headerBlockValues.items():
+                        if key[1] == "char" or key[1] == None:
+                            self.__line =  key[0] + " '" + value +"'" +"\n"
+                            self.addline(self.__line) 
+                        elif key[1] == "numb":
+                            self.__line =   key[0]  + " " + value  +"\n"
+                            self.addline(self.__line) 
+                        
+                    
+                self.__condition=True
+                
 
             if self.__loop_article_info==False:  
                 self.__line =  "loop_" +"\n"
@@ -217,7 +241,7 @@ class MPODUtil():
                 self.addline(self.__line)   
                 
               
-                lins1 = map(lambda x: x.strip(),   p.authors.strip().split(","))
+                lins1 = map(lambda x: x.strip(),   self.__propertyMaster.authors.strip().split(","))
                 print "authors"
                 for li in lins1:
                     self.__line ="'" + li + "'\n"
@@ -230,98 +254,49 @@ class MPODUtil():
                     self.addline(self.__line)   
                     self.__line =  ";"  +"\n"
                     self.addline(self.__line)   
-                    self.__line =  p.title  +"\n"
+                    self.__line =  self.__propertyMaster.title  +"\n"
                     self.addline(self.__line)   
                     self.__line =  ";"  +"\n"
                     self.addline(self.__line)   
                     
-                    self.__line = '_journal_name_full ' + "'"+p.journal +"'"+" \n"
+                    self.__line = '_journal_name_full ' + "'"+self.__propertyMaster.journal +"'"+" \n"
                     self.addline(self.__line)   
-                    self.__line = '_journal_volume  ' + "'"+p.volume +"'"+" \n"
+                    self.__line = '_journal_volume  ' + "'"+self.__propertyMaster.volume +"'"+" \n"
                     self.addline(self.__line)   
-                    self.__line = '_journal_page_first  ' + "'"+p.page_first +"'"+" \n"
+                    self.__line = '_journal_page_first  ' + "'"+self.__propertyMaster.page_first +"'"+" \n"
                     self.addline(self.__line)  
-                    self.__line = '_journal_page_last  ' + "'"+p.page_last +"'"+" \n"
+                    self.__line = '_journal_page_last  ' + "'"+self.__propertyMaster.page_last +"'"+" \n"
                     self.addline(self.__line)    
                         
                           
-                    self.__line = '_journal_year  ' + "'"+p.year +"'"+" \n"
+                    self.__line = '_journal_year  ' + "'"+self.__propertyMaster.year +"'"+" \n"
                     self.addline(self.__line)                  
                 
                 self.__loop_article_info=True 
             
                
-            if self.__condition==False :  
 
-                if p.dictionaryValues != None:
-                    for key,value in p.dictionaryValues.items():
-                        if key[1] == "char" or key[1] == None:
-                            self.__line =  key[0] + " '" + value +"'" +"\n"
-                            self.addline(self.__line) 
-                        elif key[1] == "numb":
-                            self.__line =   key[0]  + " " + value  +"\n"
-                            self.addline(self.__line) 
-                        
-                    
-                self.__condition=True
                
-
-                    
-                    
-            if p.objTypeSelected.name  == "c": 
-                if self.__prop_elastic_stiffness == False:
-                    self.__cij= self.getTag(p.objDataProperty.tag)
-                    self.__line =  p.objDataProperty.tag +" '"+self.__cij+"'" + "\n"
-                    self.addline(self.__line)
-                    self.__prop_elastic_stiffness= True
-          
-            if p.objTypeSelected.name  == "s": 
-                if self.__prop_elastic_compliance == False:
-                    self.__sij= self.getTag(p.objDataProperty.tag)
-                    self.__line =  p.objDataProperty.tag +" '"+self.__sij+"'" + "\n"
-                    self.addline(self.__line)
-                    self.__prop_elastic_compliance= True
+            if p.loopBlockValues != None:
+                for key,value in p.loopBlockValues.items():
+                    if key[0] not in self.__loopBlock:
+                        self.__loopBlock.append(key[0])
+                    else:
+                        pass
                 
-            if p.objTypeSelected.name  == "dg" or p.objTypeSelected.name  == "eh": 
-                if self.__prop_piezoelectric == False:
-                    self.__dij= self.getTag(p.objDataProperty.tag)
-                    self.__line =  p.objDataProperty.tag +" '"+self.__dij+"'" + "\n"
-                    self.addline(self.__line)
-                    self.__prop_piezoelectric= True
-                
-            if p.objTypeSelected.name  == "k": 
-                if self.__magnetoelectricity_n == False:
-                    self.__kij= self.getTag(p.objDataProperty.tag)
-                    self.__line =  p.objDataProperty.tag +" '"+self.__kij+"'" + "\n"
-                    self.addline(self.__line)
-                    self.__magnetoelectricity_n= True
+         
                     
-            if p.objTypeSelected.name  == "y": 
-                if self.__magnetoelectricity_y == False:
-                    self.__yij= self.getTag(p.objDataProperty.tag)
-                    self.__line =  p.objDataProperty.tag +" '"+self.__yij+"'" + "\n"
-                    self.addline(self.__line)
-                    self.__magnetoelectricity_y= True
-                    
-                    
-                          
-             
-            if self.__loop_tag==False:  
-                self.__line =  "loop_" +"\n"
-                self.addline(self.__line)   
-                self.__line =  "_prop_data_label"  +"\n"
-                self.addline(self.__line)   
-                self.__line =  "_prop_data_tensorial_index"  +"\n"
-                self.addline(self.__line)   
-                self.__line =  "_prop_data_value"  +"\n"
-                self.addline(self.__line)   
-                self.__loop_tag=True 
-            
-                 
-
+           
+            self.__line =  p.objDataProperty.tag +" '"+p.tag+"'" + "\n"
+            self.addline(self.__line)
+                     
+ 
      
     def adddatavalue(self):
-        for p  in self.__propertylist:
+        
+       
+        for p  in self.__propertyMaster.propertyList:
+            
             if self.__loop_tag==False:  
                 self.__line =  "loop_" +"\n"
                 self.addline(self.__line)   
@@ -331,91 +306,70 @@ class MPODUtil():
                 self.addline(self.__line)   
                 self.__line =  "_prop_data_value"  +"\n"
                 self.addline(self.__line)   
-                self.__loop_tag=True 
-            
-              
-            if self.__prop_elastic_stiffness == True:
-                y = 0
-                x= 0
-                self.maxmatrixnonceros = (p.coefficientsmatrix != 0) 
-                for r in p.coefficientsmatrix:
-                    x = x + 1
-                    y= 0
-                    for c in r:
-                        y= y + 1
-                        indexx = str(x)
-                        indexy = str(y)
-                        index = ''
-                        index = indexx + indexy
-                        if self.maskmatrix6x6[x -1][y -1] and self.maxmatrixnonceros[x -1][y -1]:
-                            self.__line= self.__cij +" " + index + " "+ str(c) +"\n"
-                            self.addline(self.__line)   
+                
+                
+                
+                for item in self.__loopBlock:
+                    self.__line =  item  +"\n"
+                    self.addline(self.__line) 
                  
-           
-            if self.__prop_elastic_compliance == True:
-                y = 0
-                x= 0       
-                self.maxmatrixnonceros = (p.coefficientsmatrix != 0) 
-                for r in p.coefficientsmatrix:
-                    x = x + 1
-                    y= 0
-                    for c in r:
-                        y= y + 1
-                        indexx = str(x)
-                        indexy = str(y)
-                        index = ''
-                        index = indexx + indexy
-                        if self.maskmatrix6x6[x -1][y -1] and self.maxmatrixnonceros[x -1][y -1]:
-                            self.__line= self.__sij +" " + index + " "+ str(c) +"\n"
-                            self.addline(self.__line)   
-            
-                   
-            if self.__prop_piezoelectric == True:    
-                y = 0
-                x= 0       
-                for r in p.coefficientsmatrix:
-                    x = x + 1
-                    y= 0
-                    for c in r:
-                        y= y + 1
-                        indexx = str(x)
-                        indexy = str(y)
-                        index = ''
-                        index = indexx + indexy
-                        self.__line= self.__dij +" " + index + " "+ str(c) +"\n"
-                        self.addline(self.__line)
-                
-                
-            if self.__magnetoelectricity_n == True:    
-                y = 0
-                x= 0       
-                for r in p.coefficientsmatrix:
-                    x = x + 1
-                    y= 0
-                    for c in r:
-                        y= y + 1
-                        indexx = str(x)
-                        indexy = str(y)
-                        index = ''
-                        index = indexx + indexy
-                        self.__line= self.__kij +" " + index + " "+ str(c) +"\n"
-                        self.addline(self.__line)
+
                         
-            if self.__magnetoelectricity_y == True:    
-                y = 0
-                x= 0       
-                for r in p.coefficientsmatrix:
-                    x = x + 1
-                    y= 0
-                    for c in r:
-                        y= y + 1
-                        indexx = str(x)
-                        indexy = str(y)
-                        index = ''
-                        index = indexx + indexy
-                        self.__line= self.__yij +" " + index + " "+ str(c) +"\n"
-                        self.addline(self.__line)              
+                self.__loop_tag=True     
+                
+                
+            dim= p.coefficientsmatrix.shape
+            self.maxmatrixnonceros = (p.coefficientsmatrix != 0) 
+            if len(dim) == 2:
+                for i in range(0,dim[0]):
+                    for j  in range(0,dim[1]):    
+                        tagindex = str(i +1 )  + str(j + 1)
+                        tag = p.tag.replace('ij',tagindex);
+                        lineloop = ""
+                        try:
+                            value1 = p.formargsvalitated[0][tag]
+                            value2 = p.formdata[0][tag]
+                            if p.loopBlockValues:
+                                for x, item in enumerate(self.__loopBlock):
+                                    lineloop = lineloop +" " +str(p.loopBlockValues[p.loopBlockValues.keys()[x]]  )
         
+                                self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop+  "\n"     
+                            else:
+                                for x, item in enumerate(self.__loopBlock):
+                                    lineloop = lineloop +" " +"?"  
+                                    
+                            if p.symmetry:  
+                                
+                                if dim[0] == 6  and dim[1] == 6:  
+                                    if (self.maskmatrix6x6[i][j] and self.maxmatrixnonceros[i][j]):
+                                            self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop +   "\n"     
+                                            self.addline(self.__line)  
+                                elif  dim[0] == 3  and dim[1] == 3:  
+                                    if(self.maskmatrix3x3[i][j] and self.maxmatrixnonceros[i][j]):
+                                        self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop +   "\n"     
+                                        self.addline(self.__line)  
+                                else:
+                                    pass
+                                
+                            else:
+                                if(self.maxmatrixnonceros[i][j]):
+                                    self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop +   "\n"   
+                                    self.addline(self.__line)   
+                                
+                                
+                        except  Exception as e:
+                            print " Error: {1}".format( e.message, e.args) 
+                            self.message = " Error: {1}".format( e.message, e.args) 
+                            self.sucess = 0
+                            return     
+                        
+            elif len (dim) == 1:
+                pass
+
+ 
+                 
+
+           
         
             
     def savefile(self):
@@ -428,8 +382,16 @@ class MPODUtil():
         #print self.cif_created
   
         validator = CifMpodValidator(str(self.__cifs_dir_output),str(self.__core_dic_filepath),str(self.__mpod_dic_filepath),'')
-      
-        validator.getValidation()
+        
+        try:
+            validator.getValidation()
+        except Exception  as e:
+            #print " Error: {1}".format( e) 
+            self.message =  e
+            self.sucess = 0
+            return     
+        
+        
         objectValidateds=validator.resultListVaild
         
         for objectValidated in objectValidateds:
@@ -450,6 +412,8 @@ class MPODUtil():
             filelist.append(self.cif_created)
             move(self.fid.name, os.path.join(str(self.cifs_dir_valids), self.cif_created))
             self.valid=True
+            
+      
 
         estr = Extractor(str(self.cifs_dir_valids),str(self.__core_dic_filepath),str(self.__mpod_dic_filepath),str(self.__cifs_dir_output),filelist);
         estr.extractConditions(False)

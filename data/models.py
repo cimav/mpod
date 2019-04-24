@@ -58,13 +58,28 @@ class string_with_title(str):
     __deepcopy__ = lambda self, memodict: self         
 
 class FileProperty(object):
-        def __init__(self,):
-            self._prop_name=''
-            self._prop_data_label=[]
-            self._prop_data_tensorial_index=[]
-            self._prop_data_value=[]
-            self._prop_measurement_method=[]
-            self._prop_conditions_frequency = []
+       
+        def __init__(self):
+            self._name = {}
+            self._propstag = {}
+            self._coeffi = {}
+            self._looped_val = {}
+            self._looped_tag_val = {}
+            self._looped= []
+            self._coefflen = None
+
+            
+ 
+    
+
+
+class FilePropertyData(object):
+        def __init__(self):
+            self._no_looped= []
+            self._other_looped= []
+            self.fileproperty = []
+      
+            
 
 class PublArticle(models.Model):
     title = models.CharField(max_length=255)
@@ -223,11 +238,11 @@ class DataFilePropertyTemp(models.Model):
    
 class PropertyValues(models.Model):
     datafileproperty=models.ForeignKey(DataFileProperty)
-    prop_data_label = models.CharField(max_length=255)
-    prop_data_tensorial_index = models.CharField(max_length=255)
-    prop_data_value = models.CharField(max_length=511)
-    prop_measurement_method =  models.CharField(max_length=500)
-    prop_conditions_frequency =  models.CharField(max_length=500)
+    label=  models.CharField(max_length=255)
+    tensorial_index= models.IntegerField(max_length=11)
+    value  =  models.CharField(max_length=500)
+    
+
 
     def __unicode__(self):
         return str(self.prop_data_label)  
@@ -240,11 +255,10 @@ class PropertyValues(models.Model):
 
 class PropertyValuesTemp(models.Model):
     datafilepropertytemp=models.ForeignKey(DataFilePropertyTemp)
-    prop_data_label = models.CharField(max_length=255)
-    prop_data_tensorial_index = models.CharField(max_length=255)
-    prop_data_value = models.CharField(max_length=511)
-    prop_measurement_method =  models.CharField(max_length=500)
-    prop_conditions_frequency =  models.CharField(max_length=500)
+    label=  models.CharField(max_length=255)
+    tensorial_index= models.IntegerField(max_length=11)
+    value  =  models.CharField(max_length=500)
+    
     
     
 
@@ -310,6 +324,41 @@ class CatalogProperty(models.Model):
         
     def __unicode__(self):
         return str(self.description)
+    
+    
+class PropertyConditionDetail(models.Model):
+    datafileproperty=models.ForeignKey(DataFileProperty)
+    condition=models.ForeignKey(ExperimentalParCond)
+    value  =  models.CharField(max_length=511)
+    
+    
+    
+
+    def __unicode__(self):
+        return str(self.prop_data_label) 
+    
+    class Meta:
+        db_table = 'datafileproperty_condition_detail' 
+        app_label = string_with_title("Properties", "Properties Settings")
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')
+        
+class PropertyConditionDetailTemp(models.Model):
+    datafileproperty=models.ForeignKey(DataFilePropertyTemp)
+    condition=models.ForeignKey(ExperimentalParCondTemp)
+    value  =  models.CharField(max_length=511)
+    
+    
+    
+
+    def __unicode__(self):
+        return str(self.prop_data_label) 
+    
+    class Meta:
+        db_table = 'datafileproperty_condition_detail_temp' 
+        app_label = string_with_title("Properties", "Properties Settings")
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')
     
     
     
@@ -451,6 +500,21 @@ class CrystalSystemPuntualGroupNames(models.Model):
         app_label = string_with_title("Properties", "Properties Settings")
          
     
+    
+class KeyNotation(models.Model): 
+    description = models.CharField(max_length=1000)   
+    source_components_number = models.CharField(_(u'Source Components Number'),max_length=45)     
+    applyforallproperty = models.BooleanField(_(u'Apply Forall Property'),default=False)
+   
+        
+    class Meta:
+        db_table = 'key_notation'    
+        app_label = string_with_title("Properties", "Properties Settings")
+        
+    def __unicode__(self):
+        return str(self.description)
+    
+ 
  
           
 class CatalogPropertyDetail(models.Model): 
@@ -462,6 +526,7 @@ class CatalogPropertyDetail(models.Model):
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
     puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
     dataproperty = models.ForeignKey(Property,verbose_name="Tag",blank=True)  
+   
     class Meta:
         db_table = 'catalog_property_detail'       
         #db_table = 'catalog_property_detail_testing'  
@@ -473,6 +538,25 @@ class CatalogPropertyDetail(models.Model):
     def __unicode__(self):
         return str(self.name)
     
+    
+    
+    
+class KeyNotationCatalogPropertyDetail(models.Model): 
+    keynotation = models.ForeignKey(KeyNotation,verbose_name="Tag",blank=True)  
+    catalogpropertydetail = models.ForeignKey(CatalogPropertyDetail,verbose_name="Tag",blank=True)  
+    source = models.CharField(max_length=100)
+    target = models.CharField(max_length=100)
+    
+    class Meta:
+        db_table = 'keynotation_catalogpropertydetail'       
+        #db_table = 'catalog_property_detail_testing'  
+        
+        app_label = string_with_title("Properties", "Properties Settings")
+        #verbose_name = _('Tensor Coefficient')
+        #verbose_name_plural = _('Tensor Coefficients')
+        
+    def __unicode__(self):
+        return str(self.catalogpropertydetail.name)
 
         
     
@@ -616,7 +700,7 @@ class FileUser(models.Model):
     date = models.DateTimeField(_(u'Registration Date'),default=datetime.datetime.now(), blank=True)
     reportvalidation =  models.TextField(_(u'Report Validation'), blank=True)
     datafile  = models.ForeignKey(DataFile,verbose_name="File",null=True,blank=True)   
-    published= models.BooleanField(_(u'Published'),max_length=1)
+    publish= models.BooleanField(_(u'Publish'),max_length=1)
     datepublished = models.DateTimeField(_(u'Published Date'),default=None, blank=True)
    
      
@@ -760,8 +844,18 @@ class Tags(models.Model):
         return str(self.tag)
     
     
+class PropLoopedTags(models.Model):
+    tag = models.CharField(_(u'tag'),max_length=100)
+    active= models.BooleanField(_(u'Active'),max_length=1,default=True)
+ 
     
-    
+    class Meta:
+        db_table = 'prop_looped_tags'
+        
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.tag)
+        
+
 class CatalogpropertyDictionary(models.Model):
     catalogproperty = models.ForeignKey(CatalogProperty,related_name="CatalogProperty", verbose_name="Catalog Properties")
     dictionary =models.ForeignKey(Dictionary,related_name="Dictionary",verbose_name="Dictionary")
@@ -786,14 +880,29 @@ class CatalogpropertyDictionary(models.Model):
         return str(self.catalogproperty.description)
     
     
+    
+class  ExperimentalParCond_DataFile(models.Model):
+    datafile =models.ForeignKey(DataFile,verbose_name="Data File")
+    experimentalfilecon = models.ForeignKey(ExperimentalParCond, verbose_name="Experimental conditions")
+  
+    
+    class Meta:
+        db_table = 'experimentalfilecon_datafile'
+        app_label = string_with_title("Properties", "Properties Settings")
+        #verbose_name = _('Experimental Conditions Datafile')
+        #verbose_name_plural = _('Experimental par conditions')
+        
 
-class  ExperimentalfilecontempDatafiletemp(models.Model):
+class  ExperimentalParCondTemp_DataFileTemp(models.Model):
     datafiletemp =models.ForeignKey(DataFileTemp,verbose_name="Data File")
     experimentalfilecontemp = models.ForeignKey(ExperimentalParCondTemp, verbose_name="Experimental conditions")
   
     
     class Meta:
         db_table = 'experimentalfilecontemp_datafiletemp'
+        app_label = string_with_title("Properties", "Properties Settings")
+        #verbose_name = _('Experimental par condition')
+        #verbose_name_plural = _('Experimental par conditions')
     
  
  

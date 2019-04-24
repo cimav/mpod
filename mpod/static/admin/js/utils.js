@@ -5,10 +5,10 @@ divs = null;
 length = 0;
 var divformrowfield= null;
 var fields=[]
-
+var fieldsnames=[]
  
 
-function updatecoefficient(param,prop_id)
+function updatecoefficient(param,prop_id,datafile_id)
 {
         //console.log(param);
 	    item=  param.split("&");
@@ -20,6 +20,7 @@ function updatecoefficient(param,prop_id)
 	    	datasend[coeff[0]] = $('input[name=' + n +']').val();
 	    }
 	     
+	    datasend['datafile_id'] = datafile_id;
 
 
 	    
@@ -54,6 +55,7 @@ $(function(){
  for (i = 0; i < $('input[type=hidden]').length; i++) 
   {
          fields[i] = $('input[type=hidden]')[i].value;
+         fieldsnames[i] = $('input[type=hidden]')[i].name
          
          if($('input[type=hidden]')[i].id != '')
          {
@@ -76,7 +78,7 @@ $(function(){
 	 
 	 $(document).mousemove(function (event ) {
 		     divs = document.getElementsByClassName("selector-chosen");
-	
+		     datafile_tempid = ""
 		     if(!loaded)
 		     {
 		          
@@ -91,6 +93,15 @@ $(function(){
 								      field = "id_" + fields[x] + "_to"
 								      divformrowfield = "div.form-row.field-" + fields[x]
 								      iddivformrowfield = "iddivformrowfield" + fields[x]
+								      
+								      
+							         if (  fieldsnames[x] =="datafile_tempid")
+					    	          {
+					    	        	  datafile_tempid= fields[x];
+					    	          }
+								    
+					    	         
+								    	        
 
 								       if(divs[i].childNodes[j].id == field)
 								       {   
@@ -99,9 +110,12 @@ $(function(){
 								    	   													      ' </div>');
 
 								    		   url = "showmatrix";
-
-								    	       $( divs[i].childNodes[j]).bind('click',{id: iddivformrowfield,url:url }, function (e ) {
-											      datasend = {'property_id':this.id	}
+								    	      
+								    		  
+								    	       $( divs[i].childNodes[j]).bind('click',{id: iddivformrowfield,url:url, datafile_id:datafile_tempid }, function (e ) {
+								    	       
+											      datasend = {'datafile_id':e.data.datafile_id}
+											       
   
 											      $.ajax({
 														url:  e.data.url + '/' + this.value,

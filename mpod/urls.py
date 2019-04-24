@@ -22,17 +22,15 @@ urlpatterns = patterns('',
     url(r'^admin/Files/fileuser/(\d+)/showmatrix/(?P<pk>-?\d+)$', showmatrix, name='showmatrix'),
     url(r'^admin/Files/fileuser/(\d+)/updatecoefficient/(?P<pk>-?\d+)$', updatecoefficient, name='updatecoefficient'),
     
+    
 
     #accounts
     url(r'^accounts/profile/$', 'data.views.viewprofile'),
     url(r'^accounts/update/(?P<pk>[\-\w]+)/$', edit_user,name='update'),
     url(r'^accounts/file/(?P<pk>\d+)$', file_detail_view, name='file-detail'),
     url(r'^accounts/onhold/(?P<todo>[\-\w]+)/(?P<index>-?\d+)/$', onhold, name='onhold'),
-    url(r'^accounts/adddictionaryproperty/(?P<pk>-?\d+)$',adddictionaryproperty, name='adddictionaryproperty'), 
     url(r'^accounts/addnewdictionaryproperty/(?P<todo>[\-\w]+)/(?P<index>-?\d+)/$',addnewdictionaryproperty, name='addnewdictionaryproperty'), 
-    url(r'^accounts/adddictionaryphase/(?P<pk>-?\d+)$',adddictionaryphase, name='adddictionaryphase'), 
-    url(r'^accounts/adddictionaryphasecharacteristic/(?P<pk>-?\d+)$',adddictionaryphasecharacteristic , name='adddictionaryphasecharacteristic'), 
-    url(r'^accounts/adddictionarymeasurement/(?P<pk>-?\d+)$',adddictionarymeasurement , name='adddictionarymeasurement'), 
+    url(r'^accounts/addmaterial/(?P<pk>-?\d+)$',addmaterial, name='addmaterial'), 
     
 
       # USER

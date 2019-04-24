@@ -11,7 +11,7 @@ from functools import update_wrapper
  
  
 from django.core.urlresolvers import reverse
- 
+from django.utils.safestring import mark_safe
  
 
 from django.core  import urlresolvers
@@ -31,7 +31,7 @@ from django.contrib.admin.views.main import ChangeList
 from django.core import serializers
 
 from time import gmtime, strftime
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import transaction
 from django.db import IntegrityError
 import fileinput
@@ -65,6 +65,7 @@ from data.Utils import requestPostToIntList
 from CifMpodValidator import *
 from data.ExtractorDataFromCIF import *
 from django.http import QueryDict
+from data.JScriptUtil import *
 
 """
 class UserAdmin(admin.ModelAdmin):
@@ -140,7 +141,7 @@ class ExperimentalParCondAdmin(admin.ModelAdmin):
     search_fields = ['tag', 'description', 'name','units','units_detail']
 
 
-#admin.site.register(ExperimentalParCond,ExperimentalParCondAdmin)
+admin.site.register(ExperimentalParCond,ExperimentalParCondAdmin)
 
 class DataFileAdmin(admin.ModelAdmin):
     list_display =('code', 'filename', 'cod_code', 'phase_generic','phase_name','chemical_formula' ,'get_article')
@@ -263,7 +264,7 @@ admin.site.register(MessageCategoryDetail, MessageCategoryDetailAdmin)
 
 
 class FileUserAdmin(admin.ModelAdmin):
-        list_display =('filename','date','user_name','published')  
+        list_display =('filename','date','user_name','publish')  
         search_fields = ['filename', ]
         
         
@@ -274,7 +275,7 @@ class FileUserAdmin(admin.ModelAdmin):
         def get_fieldsets(self, *args, **kwargs):
             return  (
                 ('File', {
-                    'fields': ('properties_click','fileuserid','authuser','filename','filenamepublished','cod_code','date','datepublished','reportvalidation','published','experimentalcon','properties','phase_generic','phase_name','chemical_formula',)
+                    'fields': ('properties_click','fileuserid','datafile_tempid','authuser','filename','filenamepublished','cod_code','date','datepublished','reportvalidation','publish','experimentalcon','properties','phase_generic','phase_name','chemical_formula',)
                 }),
                 ('Publication info', {
                       'classes': ('collapse',),
@@ -303,10 +304,164 @@ class FileUserAdmin(admin.ModelAdmin):
           
  
             return admin.ModelAdmin.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
-      
+         
+        def delete_model_queryset(self, request, queryset):
+            for obj in queryset:
+                print obj
+                #obj.delete()
+                
+        def delete_model(self, request, obj):
+            
+            if obj.publish != True:
+                if obj.datafile:
+                    publicArticle =  obj.datafile.publication
+                    filename = obj.datafile.filename
+                    
+                    dataFilePropertyQuerySet = DataFilePropertyTemp.objects.filter(datafile=obj.datafile)                       
+                    for i, item in enumerate(dataFilePropertyQuerySet):
+                        propertyValuesQuerySet = PropertyValues.objects.filter(datafileproperty = item) 
+                        propertyConditionDetailQuerySet = PropertyConditionDetail.objects.filter(datafileproperty = item )
+                        for j, pv in enumerate(propertyValuesQuerySet):
+                            pv.delete()
+                            
+                        for j, pcd in enumerate(propertyConditionDetailQuerySet):
+                            pcd.delete()
+                            
+                        item.delete()
+                        
+                        
+                    experimentalParCond_DataFileQuerySet= ExperimentalParCond_DataFile.objects.filter(datafile=obj.datafile)
+                    for i, item in enumerate(experimentalParCond_DataFileQuerySet):
+                        item.delete()
+
+                    obj.datafile.delete()
+                    publicArticle.delete()                                                                                                                  
+
+                    pathslist=Path.objects.all()   
+                    path=Path() 
+                    for cifdir in pathslist:
+                        path = cifdir
+                        if os.path.isdir(path.cifs_dir):
+                            break
+                                        
+               
+                    ciffileout = os.path.join(path.cifs_dir,filename)
+                    print "archivo a borrar"
+                    print ciffileout
+                    try:
+                        if os.path.isfile(ciffileout):
+                            os.remove(ciffileout)                    
+                    except Exception as e:
+                        raise Http404('%s object no deleted yet.' % (force_unicode(e)))
+                                
+                else:
+                    dataFileTemp = DataFileTemp.objects.get(filename__exact=obj.filename)
+                    publicArticleTemp =  dataFileTemp.publication
+                    
+                    dataFilePropertyTempQuerySet = DataFilePropertyTemp.objects.filter(datafiletemp=dataFileTemp)                       
+                    for i, item in enumerate(dataFilePropertyTempQuerySet):
+                        propertyValuesTempQuerySet = PropertyValuesTemp.objects.filter(datafilepropertytemp = item ) 
+                        propertyConditionDetailTempQuerySet = PropertyConditionDetailTemp.objects.filter(datafileproperty = item)
+                        for j, pvt in enumerate(propertyValuesTempQuerySet):
+                            pvt.delete()
+                            
+                        for j, pcdt in enumerate(propertyConditionDetailTempQuerySet):
+                            pcdt.delete()
+                            
+                        item.delete()
+                        
+                        
+                    experimentalParCondTemp_DataFileTempQuerySet= ExperimentalParCondTemp_DataFileTemp.objects.filter(datafiletemp=dataFileTemp)
+                    for i, item in enumerate(experimentalParCondTemp_DataFileTempQuerySet):
+                        item.delete()
+
+                   
+                    dataFileTemp.delete()
+                    publicArticleTemp.delete()
+                    obj.delete()                  
+                #obj.delete()
+            else:
+                messages.set_level(request, messages.ERROR)
+                messages.error(request, 'the process was not done: ' + '%s object no unpublished yet.' % (force_unicode(obj))) 
+                                  
+    
+            
+            
+        def delete_view(self, request, object_id, extra_context=None):    
+            opts = self.model._meta
+            app_label = opts.app_label
+            try:
+                obj = self.model._default_manager.get(pk=object_id)
+            except self.model.DoesNotExist:
+                obj = None
+                    
+            print obj   
+            if obj is None:
+                raise Http404('%s object with primary key %r does not exist.' % (force_unicode(opts.verbose_name), escape(object_id)))
+              
+            using = router.db_for_write(self.model)  
+     
+     
+            (deleted_objects, perms_needed, protected) = get_deleted_objects([obj], opts, request.user, self.admin_site, using)
+            if request.POST: # The user has already confirmed the deletion.
+                if perms_needed:
+                    raise PermissionDenied
+                obj_display = force_unicode(obj)
+                self.log_deletion(request, obj, obj_display)
+                
+              
+               
+                #queryset = PuntualGroupGroups.objects.filter(puntualgroupnames=obj)
+                #self.delete_model_queryset( request, queryset)
+                self.delete_model(request, obj)
+    
+                self.message_user(request,('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})
+    
+                if not self.has_change_permission(request, None):
+                    return HttpResponseRedirect(reverse('admin:index',
+                                                        current_app=self.admin_site.name))
+                return HttpResponseRedirect(reverse('admin:%s_%s_changelist' %
+                                            (opts.app_label, opts.module_name),
+                                            current_app=self.admin_site.name))
+    
+            object_name = force_unicode(opts.verbose_name)
+    
+            if perms_needed or protected:
+                title = ("Cannot delete %(name)s") % {"name": object_name}
+            else:
+                title = ("Are you sure?")
+    
+            context = {
+                "title": title,
+                "object_name": object_name,
+                "object": obj,
+                "deleted_objects": deleted_objects,
+                "perms_lacking": perms_needed,
+                "protected": protected,
+                "opts": opts,
+                "app_label": app_label,
+            }
+            context.update(extra_context or {})
+    
+            return TemplateResponse(request, self.delete_confirmation_template or [
+                "admin/%s/%s/delete_confirmation.html" % (app_label, opts.object_name.lower()),
+                "admin/%s/delete_confirmation.html" % app_label,
+                "admin/delete_confirmation.html"
+            ], context, current_app=self.admin_site.name)
          
         def save_model(self, request, obj, form, change):    
             try:
+                pathslist=Path.objects.all()      
+                pathexist = 0
+                cifs_dir=''    
+                for cifdir in pathslist:
+                    paths=Path() 
+                    paths = cifdir
+                    if os.path.isdir(paths.cifs_dir_valids): 
+                        pathexist = 1
+                        cifs_dir= paths.cifs_dir_valids
+                        break
+                    
                 if not request.POST.has_key('_addanother') and not request.POST.has_key('_continue') and not request.POST.has_key('_save'):
                     print "pass"
                 elif  request.POST.has_key('_addanother'): 
@@ -315,7 +470,7 @@ class FileUserAdmin(admin.ModelAdmin):
                     print request.POST.get('_continue',False)
                 elif request.POST.has_key('_save'):
                     print request.POST.get('_save',False)
-                    if (request.POST.get('published',False)  != False):
+                    if (request.POST.get('publish',False)  != False):
 
                         
                         properties_ids= requestPostToIntList(request.POST,'properties')  
@@ -333,20 +488,11 @@ class FileUserAdmin(admin.ModelAdmin):
                         issue = requestPostCheck(request.POST,'issue')  
                         cod_code = requestPostToInt(request.POST,'cod_code') 
                         chemical_formula = requestPostCheck(request.POST,'chemical_formula')  
-                        published = requestPostCheck(request.POST,'published') 
+                        publish = requestPostCheck(request.POST,'publish') 
                         experimentalcon = requestPostCheck(request.POST,'experimentalcon') 
             
 
-                        pathslist=Path.objects.all()      
-                        pathexist = 0
-                        cifs_dir=''    
-                        for cifdir in pathslist:
-                            paths=Path() 
-                            paths = cifdir
-                            if os.path.isdir(paths.cifs_dir_valids): 
-                                pathexist = 1
-                                cifs_dir= paths.cifs_dir_valids
-                                break
+
  
                     
                     
@@ -357,102 +503,143 @@ class FileUserAdmin(admin.ModelAdmin):
                         estr.extractPublarticleAndDataFile_Data(True,request.POST)
                         estr.extractProperties(True,request.POST)
                         
-                        print 'fecha'
+                         
  
                         if not obj.datepublished:
                             obj.datepublished = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
                             
                         #obj.reportvalidation = reportvalidation
-                        obj.published = True
-                        obj.datafile = estr.dataFile
-                        obj.save()  
+                        obj.publish = True
+                        code=None
+                        for key,code in estr.data_code.items():
+                            code=estr.data_code[key[0],key[1]]
+                            
+                            
+                        dataFile = None
+                        try:
+                            dataFile = DataFile.objects.get(code=code)
+                            obj.datafile = dataFile
+                            obj.save()  
+                        except Exception  as error:
+                            print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)  
+                            messages.set_level(request, messages.ERROR)
+                            messages.error(request, 'the process was not done: Error' + '%s .' % (error) )
                         
                         try:
-                            pathslist=Path.objects.all()      
+                            """pathslist=Path.objects.all()      
                             path=Path() 
                             for cifdir in pathslist:
                                 path = cifdir
                                 if os.path.isdir(path.cifs_dir):
                                     break
+                            """
                            
                       
                              
-                            ciffilein =os.path.join(path.cifs_dir_valids, obj.filename)
-                            ciffileout = os.path.join(path.cifs_dir,str(estr.code) + ".mpod")
+                            ciffilein =os.path.join(paths.cifs_dir_valids, obj.filename)
+                            ciffileout = os.path.join(paths.cifs_dir,str(code) + ".mpod")
                              
             
                    
                             datacode = "data_"+ obj.filename.replace('.mpod', ' ')
-                            newdatacode =   "data_" + str(cod_code)
+                            newdatacode =   "data_" + str(code)
                             print datacode
                             print newdatacode
-           
-                            with open(ciffilein) as infile, open(ciffileout, 'w') as outfile:
-                                for line in infile:
-                                    l = line.rstrip('\n')
-                                    if l in datacode:
-                                        print line
-                                        line = newdatacode + '\n'
-                                        outfile.write(line)
-                                    else:                                        
-                                        outfile.write(line)
+                            print ciffilein
+                            print ciffileout
+                            
+                            
+                            try:
+                                with open(ciffilein) as infile, open(ciffileout, 'w') as outfile:
+                                    for line in infile:
+                                        l = line.rstrip('\n')
+                                        if l in datacode:
+                                            print line
+                                            line = newdatacode + '\n'
+                                            outfile.write(line)
+                                        else:                                        
+                                            outfile.write(line)
+                            except  IOError as e:
+                                messages.add_message(request, messages.ERROR, "Error %s " % e.strerror)
+                                
                             
                             
                             messageCategoryDetailQuerySet1=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=2))#2 for user notification
-                       
-                            for mcd in messageCategoryDetailQuerySet1:
-                                messageCategoryDetail = MessageCategoryDetail()
-                                messageCategoryDetail = mcd
-                                messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
-                                
-                                if messageMail.pk == 7:
-                                    configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
-                                    smtpconfig= configurationMessage.account
+                            try:
+                                for mcd in messageCategoryDetailQuerySet1:
+                                    messageCategoryDetail = MessageCategoryDetail()
+                                    messageCategoryDetail = mcd
+                                     
+                                    messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
                                     
-                                    my_use_tls = False
-                                    if smtpconfig.email_use_tls ==1:
-                                        my_use_tls = True
-                                    
-                                    connection = get_connection(host=smtpconfig.email_host, 
-                                                                            port= int(smtpconfig.email_port ), 
-                                                                            username=smtpconfig.email_host_user, 
-                                                                            password=smtpconfig.email_host_password, 
-                                                                            use_tls=my_use_tls) 
-                
-                     
-                                    current_site = get_current_site(request)
-                                    dataitem ="dataitem"
-                                    forwardslash="/"
-                                    message = render_to_string('notification_to_user_file_published.html', {
-                                                                                    'regards':messageMail.email_regards,
-                                                                                    'email_message':  messageMail.email_message,
-                                                                                    'user': obj.authuser,
-                                                                                    'domain': current_site.domain,
-                                                                                    'code':  str(estr.code),
-                                                                                    'dataitem': dataitem,
-                                                                                    'forwardslash': forwardslash,
-                                                                                    
-                                                                                    })
-                                    
-                                    print message
-                 
-                                    send_mail(
-                                                    messageMail.email_subject,
-                                                    message,
-                                                    smtpconfig.email_host_user,
-                                                    [obj.authuser.email],
-                                                    connection=connection
-                                                )
+                                    if messageMail.pk == 7:
+                                        configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                                        smtpconfig= configurationMessage.account
+                                        
+                                        my_use_tls = False
+                                        if smtpconfig.email_use_tls ==1:
+                                            my_use_tls = True
+                                        
+                                            connection = get_connection(host=smtpconfig.email_host, 
+                                                                                    port= int(smtpconfig.email_port ), 
+                                                                                    username=smtpconfig.email_host_user, 
+                                                                                    password=smtpconfig.email_host_password, 
+                                                                                    use_tls=my_use_tls) 
+                        
+                             
+                                            current_site = get_current_site(request)
+                                            dataitem ="dataitem"
+                                            forwardslash="/"
+                                            message = render_to_string('notification_to_user_file_published.html', {
+                                                                                            'regards':messageMail.email_regards,
+                                                                                            'email_message':  messageMail.email_message,
+                                                                                            'user': obj.authuser,
+                                                                                            'domain': current_site.domain,
+                                                                                            'code':  str(code),
+                                                                                            'dataitem': dataitem,
+                                                                                            'forwardslash': forwardslash,
+                                                                                            
+                                                                                            })
+                                            
+                                            print message
+                         
+                                            send_mail(
+                                                            messageMail.email_subject,
+                                                            message,
+                                                            smtpconfig.email_host_user,
+                                                            [obj.authuser.email],
+                                                            connection=connection
+                                                        )
+                            except Exception  as e:
+                                messages.add_message(request, messages.ERROR, "Error %s " % e)
                         
 
                         except ObjectDoesNotExist as error:
                                     messages.add_message(request, messages.ERROR, "Error %s " % error.message)
                     else:
-                        if obj.datafile:
-                            dataFilePropertyToDeleteQuerySet = DataFileProperty.objects.filter(datafile=obj.datafile)
+                        objDataFile  = None
+                        
+                        if not obj.datafile:
+                            datafile_tempid = requestPostCheck(request.POST,'datafile_tempid')  
+                            dataFileTemp = DataFileTemp.objects.get(id = datafile_tempid)
+                            
+                            
+                            try:
+                                objDataFile = DataFile.objects.get(code= dataFileTemp.code)
+                            except ObjectDoesNotExist as error:
+                                print "message in the function FileUserAdmin.save_model for debug purposes.  Message({0}): {1}".format(99, error.message) 
+                                messages.set_level(request, messages.WARNING)                        
+                                messages.warning(request, 'the process was not done: ' + '%s object no published yet.' % (force_unicode(obj))) 
+                                return
+                        
+                        else:
+                            objDataFile = obj.datafile
+                        
+                        if objDataFile:
+                            dataFilePropertyToDeleteQuerySet = DataFileProperty.objects.filter(datafile=objDataFile)
      
                             
-                            objDataFile = DataFile.objects.get(code=obj.datafile.code)
+                            #objDataFile = DataFile.objects.get(code=obj.datafile.code)
                             objPublArticle= objDataFile.publication
                             
                             publArticleQuerySet= PublArticle.objects.filter(id=objPublArticle.id)
@@ -474,18 +661,19 @@ class FileUserAdmin(admin.ModelAdmin):
                              
                             obj.datafile = None       
                             obj.datepublished = None
-                            obj.published = False      
+                            obj.publish = False      
                             obj.save()  
                             
-                            pathslist=Path.objects.all()   
+                            """pathslist=Path.objects.all()   
                             path=Path() 
                             for cifdir in pathslist:
                                 path = cifdir
                                 if os.path.isdir(path.cifs_dir):
                                     break
+                            """
                                                 
                        
-                            ciffileout = os.path.join(path.cifs_dir,filename)
+                            ciffileout = os.path.join(paths.cifs_dir,filename)
                             print "archivo a borrar"
                             print ciffileout
                             try:
@@ -493,9 +681,19 @@ class FileUserAdmin(admin.ModelAdmin):
                                     os.remove(ciffileout)                    
                             except Exception as e:
                                 raise Http404('%s object no deleted yet.' % (force_unicode(e)))
+                            
+                            
+                            filelist = []    
+                            filelist.append(obj.filename ) 
+                            estr = Extractor(str(paths.cifs_dir_valids),str(paths.core_dic_filepath),str(paths.mpod_dic_filepath),str(paths.cifs_dir_output),filelist);
+                            estr.extractConditions(False,request.POST)
+                            estr.extractPublarticleAndDataFile_Data(False,request.POST)
+                            estr.extractProperties(False,request.POST)
                                 
                         else:
-                            messages.add_message(request, messages.ERROR, "An unexpected error occurred, consult technical support.")
+                            #messages.add_message(request, messages.ERROR, "An unexpected error occurred, consult technical support.")
+                            messages.set_level(request, messages.ERROR)
+                            messages.error(request, 'the process was not done: ' + '%s object no deleted yet.' % (force_unicode(obj))) 
      
                         
                         
@@ -863,17 +1061,47 @@ class DummyModelAdmin(admin.ModelAdmin):
  
 admin.site.register([DummyModel], DummyModelAdmin)
 
+ 
+ 
+class TypeInline(admin.TabularInline):
+    model = Type
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'catalogproperty':
+            urlactual=request.get_full_path()
+            urlactual=urlactual.split('/')
+            type_id=int(urlactual[4])
+       
+            
+            kwargs["queryset"] = TypeDataProperty.objects.filter(type=Type.objects.filter(id=type_id))
+            #kwargs["queryset"] = Type.objects.filter(~Q(id=type_id))
+        return super(TypeInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+    
+       
+        
+
+    extra = 0
+
+ 
+    
+
+class CatalogCrystalSystemInline(admin.TabularInline):
+    model = CatalogCrystalSystem
+    extra = 0
+    
+    
+
 
 
 class CatalogPropertyAdmin(admin.ModelAdmin):
-     
+    form = CatalogPropertyAdminForm
     fieldsets = (
         ('Category Property', {
             'fields': ('name','description','active',)
         }),
-      
-            
     )
+    
+    
+    #inlines = [TypeInline,CatalogCrystalSystemInline]
     
 admin.site.register(CatalogProperty, CatalogPropertyAdmin)
 
@@ -886,9 +1114,7 @@ class TypeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Type Information', {
             'fields': ('name','description','catalogproperty','active','tensor','clusterurl',)
-        }),
-      
-            
+        }),  
     )
           
           
@@ -1549,7 +1775,7 @@ class TypeDataPropertyAdmin(admin.ModelAdmin):
  
     
     list_display =('type','dataproperty', )   
-    list_filter = ('type__catalogproperty__description',)
+    list_filter = ('type__catalogproperty__description','type__description',)
     #fields = ['puntualgroupnames','catalogpointgroup','catalogpointgroup1']
     fieldsets = (
         ('Property information', {
@@ -1603,9 +1829,179 @@ class TensorAdmin(admin.ModelAdmin):
     def get_fieldsets(self, *args, **kwargs):
         return  (
             ('Tensor', {
-                'fields': ('errormessage','name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup','pointgroupdetail','puntualgroupnames','puntualgroupnamesdetail','axis','axisdetail','coefficients',),
+                'fields': ('errormessage','name','description','active','type','dataproperty','catalogcrystalsystem','catalogpointgroup','pointgroupdetail','puntualgroupnames','puntualgroupnamesdetail','axis','axisdetail','coefficients',('coefficientsrules','keynotation','zerocomponent','jquery',),'detailrules',),
             }),
         )
+        
+        
+ 
+ 
+    
+       
+    def saverule(self, request,id):
+        if request.method == 'POST':
+            response_data = {}
+            if int(id) == 1 or int(id) == 3:
+                symmetry = True
+            elif int(id) ==  2:
+                symmetry = False
+                
+                
+            jsutils = JSUtils()
+            #catalogpropertydetaillist = request.POST.getlist('catalogpropertydetaillist[]',False)
+            datapropertySelected = request.POST.getlist('datapropertySelected',False)
+            propertydetaillistselected = request.POST.getlist('propertydetaillistselected[]',False)
+            keynotationselected = request.POST.getlist('keynotationselected',False)
+            zerocomponentselected = request.POST.getlist('zerocomponentselected[]',False)
+            
+            sourceList = []
+            sourceListstr = ""
+            targetListstr= ""
+            kNotation = None
+            if keynotationselected:
+                kNotation= KeyNotation.objects.get(id=keynotationselected[0])
+            
+            size = 0
+            if propertydetaillistselected:
+                size = len(propertydetaillistselected) - 1
+                for i, id in enumerate(propertydetaillistselected):
+                    catalogPropertyDetailTemp= CatalogPropertyDetail.objects.get(id=id)
+                    #sourceListstr.append(catalogPropertyDetailTemp.name)
+                    if i < size:
+                        sourceListstr +=   catalogPropertyDetailTemp.name + ', ' 
+                    else:
+                        sourceListstr +=   catalogPropertyDetailTemp.name 
+                      
+                    sourceList.append(catalogPropertyDetailTemp)
+
+            if zerocomponentselected:
+                size = len(zerocomponentselected) - 1
+                for i, id in enumerate(zerocomponentselected):
+                    catalogPropertyDetailTemp= CatalogPropertyDetailTemp.objects.get(id=id)
+                    if i < size:
+                        targetListstr +=   catalogPropertyDetailTemp.name + ', ' 
+                    else:
+                        targetListstr +=   catalogPropertyDetailTemp.name 
+                    
+                    
+            for source in sourceList:
+                keyNotationCatalogPropertyDetail = jsutils.getKeyNotationCatalogPropertyDetail(source,kNotation)
+                keyNotationCatalogPropertyDetail.source =sourceListstr
+                keyNotationCatalogPropertyDetail.target = targetListstr
+                #keyNotationCatalogPropertyDetail.save()
+            
+            response_data['test'] = 'test'
+     
+        
+            return HttpResponse(
+                json.dumps(response_data),
+                content_type="application/json"
+            )
+        else:
+            return HttpResponse(
+                json.dumps({"nothing to see": "this isn't happening"}),
+                content_type="application/json"
+            )
+            
+    def getrules(self, request,id):
+        if request.method == 'POST':
+            #coefficient_id = request.POST.get('coefficient')
+            
+            if int(id) == 1 or int(id) == 3:
+                symmetry = True
+            elif int(id) ==  2:
+                symmetry = False
+                
+                
+            jsutils = JSUtils()
+            catalogpropertydetaillist = request.POST.getlist('catalogpropertydetaillist[]',False)
+            catalogpropertydetailnames = request.POST.getlist('catalogpropertydetailnames[]',False)
+            propertydetaillistselected = request.POST.getlist('propertydetaillistselected',False)
+            keynotationselected = request.POST.getlist('keynotationselected',False)
+            
+            
+            datapropertySelected_id = request.POST.get('datapropertySelected',False)
+            datapropertySelected= Property.objects.get(id=int(datapropertySelected_id))  
+            dimensions=datapropertySelected.tensor_dimensions.split(',')
+            scij = None
+            if len(dimensions) == 2:
+                coefficients = N.zeros([int(dimensions[0]),int(dimensions[1])])    
+                parts=datapropertySelected.tag.split('_')[-1]
+                scij =parts.split('ij')
+                
+            keynotationlist= []
+            response_data = {}
+            for i, coefficient_id in enumerate(propertydetaillistselected):   
+                obj=CatalogPropertyDetail.objects.get(id=coefficient_id)
+                keyNotationCatalogPropertyDetail= jsutils.getKeyNotation(obj)
+                if isinstance(keyNotationCatalogPropertyDetail, QuerySet):
+                    
+                    source_target_Dic = {}
+                    size = len(keyNotationCatalogPropertyDetail) -1
+                    for x,knotationpropertydetail in enumerate(keyNotationCatalogPropertyDetail):
+                        keynotationlist.append(str(knotationpropertydetail.keynotation.id))
+    
+                        sourceList = [x.strip() for x in knotationpropertydetail.source.split(',')]
+                        if len(sourceList) > 1:
+                            targetList = [x.strip() for x in knotationpropertydetail.target.split(',')]
+                            source_target_Dic[ tuple(sourceList)]=targetList
+                        elif len(sourceList) == 1:
+                            targetList = [x.strip() for x in knotationpropertydetail.target.split(',')]
+                            source_target_Dic[obj.name]=targetList
+     
+     
+                    jsutils.getrules( obj.name,scij,source_target_Dic,False,symmetry)
+                    
+     
+                else:
+     
+                    keynotationlist.append(str(keyNotationCatalogPropertyDetail.keynotation.id))
+                    targetList = [x.strip() for x in keyNotationCatalogPropertyDetail.target.split(',')]
+                    source_target_Dic = {}
+                    source_target_Dic[obj.name]=targetList
+                    
+                    if keyNotationCatalogPropertyDetail.keynotation.id ==4 or keyNotationCatalogPropertyDetail.keynotation.id ==6 or keyNotationCatalogPropertyDetail.keynotation.id ==5 or keyNotationCatalogPropertyDetail.keynotation.id ==10:
+                        jsutils.getrules( obj.name,scij,source_target_Dic,True,symmetry)
+                      
+                    else:
+                        jsutils.getrules( obj.name,scij,source_target_Dic, False,symmetry)
+                    
+
+                response_data['keynotationlist'] = keynotationlist
+     
+        
+            return HttpResponse(
+                json.dumps(response_data),
+                content_type="application/json"
+            )
+        else:
+            return HttpResponse(
+                json.dumps({"nothing to see": "this isn't happening"}),
+                content_type="application/json"
+            )
+            
+        
+    def get_urls(self):
+            def wrap(view):
+                def wrapper(*args, **kwargs):
+                    return self.admin_site.admin_view(view)(*args, **kwargs)
+                wrapper.model_admin = self
+                return update_wrapper(wrapper, view)
+    
+            urls = super(TensorAdmin,self).get_urls()
+    
+            info = self.model._meta.app_label, self.model._meta.module_name
+            getrules='%s_%s_getrules' % info
+            saverule='%s_%s_saverule' % info
+             
+  
+            my_urls = [
+                url(r'^(.+)/getrules/$', wrap(self.getrules), name=getrules),
+                url(r'^(.+)/saverule/$', wrap(self.saverule), name=saverule),
+               
+            ]
+ 
+            return my_urls + urls
  
     """def changelist_view(self, request, extra_context=None):
         extra_context = {
@@ -1656,7 +2052,7 @@ class TensorAdmin(admin.ModelAdmin):
                 
         print obj   
         if obj is None:
-              raise Http404('%s object with primary key %r does not exist.' % (force_unicode(opts.verbose_name), escape(object_id)))
+            raise Http404('%s object with primary key %r does not exist.' % (force_unicode(opts.verbose_name), escape(object_id)))
           
         using = router.db_for_write(self.model)  
  
@@ -1829,18 +2225,18 @@ class TensorAdmin(admin.ModelAdmin):
                          
                         if len(disctincttemp) == 0 and len(disctinct) == 0:
                             messages.set_level(request, messages.WARNING)
-                            messages.warning(request, 'the process was not done, no coefficient selected for this property: ' + datapropertySelected.name)    
+                            messages.warning(request, 'The process was not done, no new coefficient selected for this property: ' + datapropertySelected.name)    
                             
                                     
                     except ObjectDoesNotExist as error:
                         messages.set_level(request, messages.ERROR)
-                        messages.error(request, 'the process was not done, no coefficient selected for this property: ' + error) 
+                        messages.error(request, 'The process was not done: ' + error) 
                         
                     
                     
                 else:
                     messages.set_level(request, messages.WARNING)
-                    messages.warning(request, 'the process was not done, no coefficient selected for this property: ' + datapropertySelected.name) 
+                    messages.warning(request, 'The process was not done, no coefficient selected for this property: ' + datapropertySelected.name) 
                     #messages.set_level(request, messages.ERROR)
                     #messages.ERROR(request, 'The process was not done')
                 

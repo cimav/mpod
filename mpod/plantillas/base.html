@@ -26,12 +26,16 @@
     <!--<script src='{{STATIC_URL}}js/jquery-1.7.2.min.js'></script>-->
     <!--<script src='{{STATIC_URL}}js/demo.js'></script>-->
     
-     <script src='{{STATIC_URL}}js/view_data_item_tensors.js'></script>
+     
+    <script src='{{STATIC_URL}}js/view_data_item_tensors.js'></script>
     
     <script src="{{STATIC_URL}}js/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="{{STATIC_URL}}js/bootstrap.min.js"></script>
     <script src="{{STATIC_URL}}js/general.js"></script>
+    
+    
+     <!--<script src='{{STATIC_URL}}js/customcarousel.js'></script>-->
 
   </head>
 
@@ -102,27 +106,30 @@
                 </ul>
                 </li>
                 
-                 <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">USERS<span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                  <li><a href="/signup">REGISTER - MPOD</a></li>
-                  <li><a href="/login">LOGIN- MPOD</a></li>
-                   
-                  
-                </ul>
-                </li>
+            
+		                 <li class="dropdown">
+		                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">USERS<span class="caret"></span></a>
+		                <ul class="dropdown-menu" role="menu">
+		                  <li><a href="/signup">REGISTER - MPOD</a></li>
+		                  <li><a href="/login">LOGIN- MPOD</a></li>
+		                   
+		                  
+		                </ul>
+		                </li>
+		                
+		             
+		                 {% if user.username != ""%}  
+		                <li class="dropdown">
+		                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{user.username}} <span class="caret"></span></a>
+		                <ul class="dropdown-menu" role="menu">            
+		                   <li><a href="/logout">LOGOUT - MPOD</a></li>
+		                   <li><a href="/accounts/profile">My Profile</a></li>
+		                   
+		                </ul>
+		                </li>
+		                 {% endif %}
+                 
                 
-             
-                 {% if user.username != ""%}  
-                <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{user.username}} <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">            
-                   <li><a href="/logout">LOGOUT - MPOD</a></li>
-                   <li><a href="/accounts/profile">My Profile</a></li>
-                   
-                </ul>
-                </li>
-                 {% endif %}
                 
                
                 

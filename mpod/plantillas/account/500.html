@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+
+  
+      <div class="container-fluid">
+      {% include "account/menu.html" %}
+     
+      
+          <div class="qlt-confirmation">
+  	<div class="panel panel-default">
+      <div class="panel-body">
+        <center>
+          <div class="alert alert-danger" role="alert">
+		  {{message}}
+		  
+		 
+		</div>
+		
+		  <div class="alert alert-danger" role="alert">
+		  {{description}}
+		</div>
+        </center>
+        
+      
+      </div>
+	</div>
+</div>
+          
+           
+
+
+
+        </div>
+      </div>
+  
+  
+  
+
+	 
+
+{% endblock %}

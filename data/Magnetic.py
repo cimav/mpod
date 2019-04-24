@@ -339,27 +339,25 @@ class Magneto():
                  
                  self.surfacecolorMagnetostriction =  '['  + self.surfacecolorMagnetostriction + ']' 
             else: 
-                  lx=len(ZEC)
-                  ly=len(ZEC[0])
-                  sc='['
-                  out=[]
-                  for i in xrange(lx):
-                        temp = []
-                        sc= sc + '['
-                        for j in xrange( ly):
-                            res= self.dist_origin(XEC[i][j], YEC[i][j], ZEC[i][j])
-                            #print res
-                            if j ==( ly -1): 
-                                if i == ( lx -1): 
-                                    sc= sc + str(res) + ']'  
-                                else:
-                                    sc= sc + str(res) + '],'  
-                                #print sc
+                lx=len(ZEC)
+                ly=len(ZEC[0])
+                sc='['
+                out=[]
+                for i in xrange(lx):
+                    temp = []
+                    sc= sc + '['
+                    for j in xrange( ly):
+                        res= self.dist_origin(XEC[i][j], YEC[i][j], ZEC[i][j])
+                        #print res
+                        if j ==( ly -1): 
+                            if i == ( lx -1): 
+                                sc= sc + str(res) + ']'  
                             else:
-                                  sc= sc + str(res) + ','  
+                                sc= sc + str(res) + '],'  
+                            #print sc
+                        else:
+                            sc= sc + str(res) + ','  
             
                    
-                  sc= sc + ']'     
-                  self.surfacecolorMagnetostriction =sc  
-              
-      
+                sc= sc + ']'     
+                self.surfacecolorMagnetostriction =sc   

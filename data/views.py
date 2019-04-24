@@ -17,6 +17,7 @@ from WebRankTensors import *
 from Magnetic import *
 from Properties import *
 from Propertiesv2 import *
+from PropertyMaster import *
 from mpodwrite import *
 import gc
 from forms import *
@@ -92,6 +93,7 @@ def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
+            form.instance.is_active = False
             form.save()
             
             #user.refresh_from_db()  # load the profile instance created by the signal
@@ -163,10 +165,10 @@ def signup(request):
                                     connection=connection
                                 )
                     
-
-        
+       
             return redirect('/account_activation_sent')
-            #return redirect('home')
+             
+             
     else:
         form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
@@ -195,7 +197,7 @@ def viewactivate(request, uidb64, token):
         
         '''user = authenticate(username=user.username, password=user.password)
         login(request, user)'''
-        return redirect('/home/')
+        return redirect('/login')
     
     else:
         return render(request, 'account_activation_invalid.html')
@@ -1632,7 +1634,7 @@ def get_catalog_type():
 
 
 
-@login_required(login_url="/login/")
+@login_required(login_url="/login")
 def newcasev2(request): 
     
        
@@ -1785,6 +1787,12 @@ def newcasev2(request):
     #if 'dictionaryPhaseCharacteristicList' not in request.session  or not request.session['dictionaryCharacteristicPhaseList']:
     #    request.session['dictionaryPhaseCharacteristicList']=dictionaryPhaseCharacteristicList   
         
+        
+    if not 'propertyMaster' in request.session or not request.session['propertyMaster' ]:  
+        pass
+    else:
+        del  request.session['propertyMaster']   
+            
     
     current ="New Case"
             
@@ -1823,249 +1831,277 @@ def onhold(request,todo,index):
     propertySessionList=[]
     response =None
     current ="On Hold"
+    sizelist = 0;
+    message = ""
     
     if todo == 'show' and int(index) == -2 :
-        if not 'propertySessionList' in request.session or not request.session['propertySessionList']:
+        if not 'propertyMaster' in request.session or not request.session['propertyMaster']:
             pass
-        elif  'propertySessionList' in request.session or  request.session['propertySessionList']:
-            propertySessionList = request.session['propertySessionList']
+        elif  'propertyMaster' in request.session or  request.session['propertyMaster']:
+            propertyMasterSession = request.session['propertyMaster']
             print "show "
             
             
+            
+    
     if todo == 'remove' and int(index)  > 0:
-        if  'propertySessionList' in request.session or  request.session['propertySessionList']:
-            propertySessionList = request.session['propertySessionList']
+        if  'propertyMaster' in request.session or  request.session['propertyMaster']:
+            propertyMaster = request.session['propertyMaster']
+            
             try:
                 print "remove: " + index
                 #print propertySessionList[int(index)-1]
-                del propertySessionList[int(index)-1]       
-                request.session['propertySessionList']=propertySessionList              
+                del propertyMaster.propertyList[int(index)-1]       
+                sizelist = len(propertyMaster.propertyList)
+                if sizelist==0:
+                    propertyMaster.puntualgroup = None
+                    
+                request.session['propertyMaster']=propertyMaster    
+                   
+                data = {
+                'tblProperty': "tblProperty" + str(index),
+                'sizelist':  str(sizelist),
+                'error' : ''
+                } 
+                
+                response =  HttpResponse(json.dumps(data), content_type="application/json")          
+                
             except ValueError:
                 pass  
             
     if todo == 'removeall' and int(index)  == -1 :
-        if  'propertySessionList' in request.session or  request.session['propertySessionList']:
-                propertySessionList = request.session['propertySessionList']
+        if  'propertyMaster' in request.session or  request.session['propertyMaster']:
+                propertyMaster = request.session['propertyMaster']
+      
                 try:
                     print "removeall "
-                    del request.session['propertySessionList']     
-                    propertySessionList = []
+                    sizelist = len(propertyMaster.propertyList)
+                    #del request.session['propertyMaster']     
+                    propertyMaster.propertyList = []
+                    
+                    propertyMaster.puntualgroup = None
+                    request.session['propertyMaster'] = propertyMaster
+                    data = {
+                        'tblProperty': "tblProperty",
+                        'sizelist':  str(sizelist),
+                        'error' : ''
+                        } 
+                        
+                    response =  HttpResponse(json.dumps(data), content_type="application/json")       
                 except ValueError:
                     pass  
         
-        
+ 
         
                 
     if todo == 'save' and  int(index) == -2:
-        if not 'propertySessionList' in request.session or not request.session['propertySessionList']:
-            propertySessionList=[]
-        elif  'propertySessionList' in request.session or  request.session['propertySessionList']:
-                propertySessionList = request.session['propertySessionList']
-                try:
-                    name_str = lambda n: ''.join([random.choice(string.lowercase) for i in xrange(n)])
-                    #  length 10
-                    
-                    user =None
-                    if 'user' not in request.session  or not request.session['user']:
-                        pass
-                    else:
-                        user= request.session['user']
+        if not 'propertyMaster' in request.session or not request.session['propertyMaster']:
+            #propertySessionList=[]
+            pass
+        elif  'propertyMaster' in request.session or  request.session['propertyMaster']:
+                propertyMaster = request.session['propertyMaster']
+                #propertySessionList = propertyMaster.propertyList
+                if len(propertyMaster.propertyList)  > 0:
+                    try:
+                        name_str = lambda n: ''.join([random.choice(string.lowercase) for i in xrange(n)])
+                        #  length 10
                         
-                    usernamebase64= base64.b64encode(force_bytes(str(user.username)))
-                    newusernamebase64 = usernamebase64.replace("==", "")
-                    
-                    
-                    filename = newusernamebase64.lower() + name_str(15) 
-                                      
-                    
-                    if 'newDictionaryList' not in request.session  or not request.session['newDictionaryList']:
-                        pass
-                    else:
-                        newDictionaryList =  request.session['newDictionaryList']
-                        for d in newDictionaryList:
-                            print d.tag
-                            try:
-                                dictionary=Dictionary.objects.get(tag__exact=d.tag)                                                          
-                            except ObjectDoesNotExist as error:
-                                print "Message({0}): {1}".format(99, error.message)  
-                                d.save()  
-                                try:                               
-                                    
-                                    lcs=d.tag.split()
-                                    prstr=lcs[0].strip()[5:]
-                                    parts=prstr.split('_')                                
-                                    #proptag=PropTags.objects.get(tag__exact=parts[1])
+                        user =None
+                        if 'user' not in request.session  or not request.session['user']:
+                            pass
+                        else:
+                            user= request.session['user']
+                            
+                        usernamebase64= base64.b64encode(force_bytes(str(user.username)))
+                        newusernamebase64 = usernamebase64.replace("==", "")
+                        
+                        
+                        filename = newusernamebase64.lower() + name_str(15) 
+                                          
+                        
+                        if 'newDictionaryList' not in request.session  or not request.session['newDictionaryList']:
+                            pass
+                        else:
+                            newDictionaryList =  request.session['newDictionaryList']
+                            for d in newDictionaryList:
+                                print d.tag
+                                try:
+                                    dictionary=Dictionary.objects.get(tag__exact=d.tag)                                                          
                                 except ObjectDoesNotExist as error:
                                     print "Message({0}): {1}".format(99, error.message)  
-                                    pt=PropTags()
-                                    pt.tag= parts[1]
-                                    pt.save()
-                            
-                            
-                    mpodutil=MPODUtil()
-                    mpodutil.mpodwrite(filename,propertySessionList)
-                    mpodutil.addinfo()
-                    mpodutil.adddatavalue()                
-                    mpodutil.savefile()
-                    
- 
-                             
+                                    d.save()  
+                                    try:                               
+                                        
+                                        lcs=d.tag.split()
+                                        prstr=lcs[0].strip()[5:]
+                                        parts=prstr.split('_')                                
+                                        #proptag=PropTags.objects.get(tag__exact=parts[1])
+                                    except ObjectDoesNotExist as error:
+                                        print "Message({0}): {1}".format(99, error.message)  
+                                        pt=PropTags()
+                                        pt.tag= parts[1]
+                                        pt.save()
+                                
+                                
+                        mpodutil=MPODUtil()
+                        mpodutil.mpodwrite(filename,propertyMaster)
+                        mpodutil.addinfo()
+                        mpodutil.adddatavalue()                
+                        mpodutil.savefile()
                         
-                    
-                    
-
-                    
-                    u= User()
-                    u=user
-                    fileuser = FileUser()
-                    fileuser.filename=mpodutil.cif_created
-                    fileuser.authuser=u 
-                    fileuser.reportvalidation = mpodutil.reportValidation
-                    fileuser.save()
-                    
-                    
-                    
-                    #uid= base64.b64encode(force_bytes(str(user.pk))),
-                    #token= account_activation_token.make_token(user)
-                    datafilescreated ="datafilescreated"
-                    forwardslash="/"
-                    #request.session['cif_created']=mpodutil.cif_created
+                        if mpodutil.message:
+                            message = mpodutil.message
+                            description = "An error occurred while creating the" + filename + ".mpod file" 
+                            response = render_to_response('account/500.html', { "message":message, "current" :"File created and sent","description" :description,}, context_instance=RequestContext(request))  
+                            return response
     
-                    #linkactivate = os.path.join(datafilescreated,forwardslash)
-                   
-                    
-                    current_site = get_current_site(request)
-                    
-                    
-                    messageCategoryDetailQuerySet1=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=3))#3 for category staff notification
-                    #messageMailQuerySet1= MessageMail.objects.filter(pk=messageCategoryDetail1.message.pk)
-                    
-                    for mcd in messageCategoryDetailQuerySet1:
-                        messageCategoryDetail = MessageCategoryDetail()
-                        messageCategoryDetail = mcd
-                        messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
                         
-                        if messageMail.pk == 5:
-                            configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
-                            smtpconfig= configurationMessage.account
-             
-                            my_use_tls = False
-                            if smtpconfig.email_use_tls ==1:
-                                my_use_tls = True
-                            
-                            fail_silently= False
-                            listemail=[]
-                            listuser=User.objects.filter(groups=messageCategoryDetail.group)
-                            for u in listuser:
-                                #print u.email   
-                                listemail.append(u.email)
-                            
-                            
-        
-                            message = render_to_string('notification_to_staff_email.html', {
-                                                                                    'regards':messageMail.email_regards,
-                                                                                    'email_message':  messageMail.email_message,
-                                                                                    'user': user,
-                                                                                    'domain': current_site.domain,
-                                                                                    'datafilescreated': datafilescreated,
-                                                                                    'cif_created': mpodutil.cif_created,
-                                                                                    'reportValidation':mpodutil.reportValidation,
-                                                                                    'forwardslash':forwardslash
-                            })
+                        u= User()
+                        u=user
+                        fileuser = FileUser()
+                        fileuser.filename=mpodutil.cif_created
+                        fileuser.authuser=u 
+                        fileuser.reportvalidation = mpodutil.reportValidation
+                        fileuser.save()
                         
-                            print message
-                        
-                            
-                                           
-                            backend = EmailBackend(   host=smtpconfig.email_host, 
-                                                                                port=int(smtpconfig.email_port ), 
-                                                                                username=smtpconfig.email_host_user, 
-                                                                                password=smtpconfig.email_host_password, 
-                                                                                use_tls=my_use_tls,
-                                                                                fail_silently=fail_silently)
-                                                        
-                            email = EmailMessage( messageMail.email_subject,
-                                                                        message,
-                                                                        smtpconfig.email_host_user,
-                                                                        listemail,
-                                                                        connection=backend)
-                            
-                            email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
-                            email.send()
-                            
-                            
-                            
-                    messageCategoryDetailQuerySet2=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=2))#2 for category User notification
-                    #messageMail= MessageMail.objects.get(pk=messageCategoryDetailQuerySet2.message.pk)
- 
-                    for mcd in messageCategoryDetailQuerySet2:
-                        messageCategoryDetail = MessageCategoryDetail()
-                        messageCategoryDetail = mcd
-                        messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
                        
-                        if messageMail.pk == 6:
-                            configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
-                            smtpconfig= configurationMessage.account
-                            
-                            my_use_tls = False
-                            if smtpconfig.email_use_tls ==1:
-                                my_use_tls = True
-                            
-                            fail_silently= False
-                            
                         
-                            
-                            message = render_to_string('notification_to_user_email.html', {
-                                                                                    'regards':messageMail.email_regards,
-                                                                                    'email_message':  messageMail.email_message,
-                                                                                    'user': user,
-                                                                                    'domain': current_site.domain,
-                                                                                    'datafilescreated': datafilescreated,
-                                                                                    'cif_created': mpodutil.cif_created,
-                                                                                    'forwardslash':forwardslash
-                            })
                         
-                            
                         
-                            
-                                           
-                            backend = EmailBackend(   host=smtpconfig.email_host, 
-                                                                                port=int(smtpconfig.email_port ), 
-                                                                                username=smtpconfig.email_host_user, 
-                                                                                password=smtpconfig.email_host_password, 
-                                                                                use_tls=my_use_tls,
-                                                                                fail_silently=fail_silently)
-                                                        
-                            email = EmailMessage( messageMail.email_subject,
-                                                                        message,
-                                                                        smtpconfig.email_host_user,
-                                                                          [user.email],
-                                                                        connection=backend)
-                            
-                            email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
-                            email.send()
-                            
-                            
-                    del request.session['propertySessionList']     
-                except ValueError:
-                    pass
+                        #uid= base64.b64encode(force_bytes(str(user.pk))),
+                        #token= account_activation_token.make_token(user)
+                        datafilescreated ="datafilescreated"
+                        forwardslash="/"
+                        #request.session['cif_created']=mpodutil.cif_created
+        
+                        #linkactivate = os.path.join(datafilescreated,forwardslash)
+                       
+                        
+                        current_site = get_current_site(request)
+                        
+                        
+                        messageCategoryDetailQuerySet1=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=3))#3 for category staff notification
+                        #messageMailQuerySet1= MessageMail.objects.filter(pk=messageCategoryDetail1.message.pk)
+                        try:
+                            for mcd in messageCategoryDetailQuerySet1:
+                                messageCategoryDetail = MessageCategoryDetail()
+                                messageCategoryDetail = mcd
+                                messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+                                
+                                if messageMail.pk == 5:
+                                    configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                                    smtpconfig= configurationMessage.account
+                     
+                                    my_use_tls = False
+                                    if smtpconfig.email_use_tls ==1:
+                                        my_use_tls = True
+                                    
+                                    fail_silently= False
+                                    listemail=[]
+                                    listuser=User.objects.filter(groups=messageCategoryDetail.group)
+                                    for u in listuser:
+                                        #print u.email   
+                                        listemail.append(u.email)
+                                    
+                                    
                 
-    
-      
-    if todo == 'removeall' and  int(index) == -1: 
-        current ="New Case"           
-        propertySessionList = []
-  
-        response = redirect('/newcasev2')
-    
-    if todo == 'save' and  int(index) == -2:    
-        if len(propertySessionList)  > 0:
-            
-            current ="File created and sent"
-            response = render_to_response('account/successfile.html', {"propertySessionList":propertySessionList,
-                                                                                                                    "current":current, }, context_instance=RequestContext(request))        
-  
-            
+                                    message = render_to_string('notification_to_staff_email.html', {
+                                                                                            'regards':messageMail.email_regards,
+                                                                                            'email_message':  messageMail.email_message,
+                                                                                            'user': user,
+                                                                                            'domain': current_site.domain,
+                                                                                            'datafilescreated': datafilescreated,
+                                                                                            'cif_created': mpodutil.cif_created,
+                                                                                            'reportValidation':mpodutil.reportValidation,
+                                                                                            'forwardslash':forwardslash
+                                    })
+                                
+                                    print message
+                                
+                                    
+                                                   
+                                    backend = EmailBackend(   host=smtpconfig.email_host, 
+                                                                                        port=int(smtpconfig.email_port ), 
+                                                                                        username=smtpconfig.email_host_user, 
+                                                                                        password=smtpconfig.email_host_password, 
+                                                                                        use_tls=my_use_tls,
+                                                                                        fail_silently=fail_silently)
+                                                                
+                                    email = EmailMessage( messageMail.email_subject,
+                                                                                message,
+                                                                                smtpconfig.email_host_user,
+                                                                                listemail,
+                                                                                connection=backend)
+                                    
+                                    email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
+                                    email.send()
+                        except Exception  as e:
+                            response = render_to_response('account/500.html', { "message":e, "current" :"File created and sent","description" :"Error when sending the email for staff notification",}, context_instance=RequestContext(request))  
+                            return response
+                                
+                                
+                                
+                        messageCategoryDetailQuerySet2=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=2))#2 for category User notification
+                        #messageMail= MessageMail.objects.get(pk=messageCategoryDetailQuerySet2.message.pk)
+     
+                        for mcd in messageCategoryDetailQuerySet2:
+                            messageCategoryDetail = MessageCategoryDetail()
+                            messageCategoryDetail = mcd
+                            messageMail= MessageMail.objects.get(pk=messageCategoryDetail.message.pk)
+                           
+                            if messageMail.pk == 6:
+                                configurationMessage = ConfigurationMessage.objects.get(message=messageMail)
+                                smtpconfig= configurationMessage.account
+                                
+                                my_use_tls = False
+                                if smtpconfig.email_use_tls ==1:
+                                    my_use_tls = True
+                                
+                                fail_silently= False
+                                
+                            
+                                
+                                message = render_to_string('notification_to_user_email.html', {
+                                                                                        'regards':messageMail.email_regards,
+                                                                                        'email_message':  messageMail.email_message,
+                                                                                        'user': user,
+                                                                                        'domain': current_site.domain,
+                                                                                        'datafilescreated': datafilescreated,
+                                                                                        'cif_created': mpodutil.cif_created,
+                                                                                        'forwardslash':forwardslash
+                                })
+                            
+                                
+                            
+                                
+                                               
+                                backend = EmailBackend(   host=smtpconfig.email_host, 
+                                                                                    port=int(smtpconfig.email_port ), 
+                                                                                    username=smtpconfig.email_host_user, 
+                                                                                    password=smtpconfig.email_host_password, 
+                                                                                    use_tls=my_use_tls,
+                                                                                    fail_silently=fail_silently)
+                                                            
+                                email = EmailMessage( messageMail.email_subject,
+                                                                            message,
+                                                                            smtpconfig.email_host_user,
+                                                                              [user.email],
+                                                                            connection=backend)
+                                
+                                email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
+                                email.send()
+                                
+                                
+                        del request.session['propertyMaster']     
+ 
+                        current ="File created and sent"
+                        response = render_to_response('account/successfile.html', {"propertySessionList":propertySessionList,
+                                                                                                                                        'propertyMaster':propertyMaster,
+                                                                                                                                        "current":current,}, context_instance=RequestContext(request))  
+                    except  ValueError as e:
+                        response = render_to_response('account/500.html', { "message":e, "current" :"File created and sent","description" :"Error when sending the email for user notification",}, context_instance=RequestContext(request))  
+                        return response
+ 
         #return newcase(request);#render_to_response('newcase.html', { "saved_compliancepropetyList":saved_compliancepropetyList}, context_instance=RequestContext(request))
     return response
 
@@ -2173,63 +2209,6 @@ def isnumber(param):
         print("That's not an int!")
         return result
 
-@login_required
-@csrf_exempt 
-def adddictionaryphase(request,pk): 
-    response = None
-    todo  = request.POST.get('todo', False)
-    dicvalue = request.POST.get('phasevalue', False)
-    in_list = False
-    error =""
-    dictionary_pk =  request.POST.get('dictionary_pk', False) 
-    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
-    if dicvalue != "":
-        if objDictionarySelected.type == "numb":
-            if not isnumber(dicvalue):
-                error ="The value must be numeric" 
-            elif objDictionarySelected.type == "char":
-                pass
-    else:
-        error ="the field can not be empty"
-
-    if error!= "":
-        data = {
-                    'name': objDictionarySelected.name,
-                    'units': objDictionarySelected.units,
-                    'units_detail': objDictionarySelected.units_detail,
-                    'dicvalue': dicvalue,
-                    'in_list': in_list,
-                    'error':error,
-                }
-        return  HttpResponse(json.dumps(data), content_type="application/json")   
-
-    if pk == '-1' and todo == "change":
-        pass
-    elif  pk == '-1' and todo == "addphase":
-        if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
-            dictionaryValues = {}
-            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
-            request.session['dictionaryValues' ] = dictionaryValues
-        else:
-            dictionaryValues=request.session['dictionaryValues' ] 
-            if objDictionarySelected.tag.encode("ascii") in dictionaryValues:
-                in_list = True
-            else:
-                in_list = False
-                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
-                request.session['dictionaryValues' ] = dictionaryValues
-                
-    data = {
-        'name': objDictionarySelected.name,
-        'units': objDictionarySelected.units,
-        'units_detail': objDictionarySelected.units_detail,
-        'dicvalue': dicvalue,
-        'in_list': in_list,
-        'error':error,
-
-    }
-    
-    return HttpResponse(json.dumps(data), content_type="application/json")   
 
 @csrf_exempt 
 def rotatematrix(request,pk): 
@@ -2307,7 +2286,11 @@ def rotatematrix(request,pk):
 def showmatrix(request,pk): 
     
     if request.is_ajax():
-        #property_id =  request.POST.get('property_id', False)   
+        datafile_id =  request.POST.get('datafile_id', False)   
+        
+        datafiletemp = DataFileTemp.objects.get(id=int(datafile_id))
+        
+        
         objPropertyTemp=PropertyTemp.objects.get(id=pk)
         dim = get_dimensions(objPropertyTemp.tensor_dimensions)
         coefficents = get_coefficents_total(objPropertyTemp.tensor_dimensions)
@@ -2315,7 +2298,8 @@ def showmatrix(request,pk):
         #label =objPropertyTemp.tag.split('_')[-1]
         label =objPropertyTemp.short_tag
         print label
-        datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(propertytemp=objPropertyTemp).values_list('id',flat=True) 
+        datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(datafiletemp=datafiletemp,propertytemp=objPropertyTemp).values_list('id',flat=True) 
+        
         
         indexi = 0
         indexj = 0
@@ -2394,9 +2378,9 @@ def showmatrix(request,pk):
                     table = table +  ' </tr>' 
                     
                 table = table +  ' <tr >' 
-                
+           
                 #data = data + 'propertyid' + '=' + pk
-                function = "updatecoefficient('" + data + "', '"+ pk + "')"
+                function = "updatecoefficient('" + data + "', '"+ pk + "', '"+ datafile_id + "')"
                 #table = table + ' <td colspan="'+str(indexj[-1])+'"> <div class="submit-row"><p  ><a href="#" class="submit-row" onclick="' + function + '">Update</a></p></div></td>' 
                 table = table + ' <td colspan="'+str(indexj)+'"> <div class="submit-row"><p  ><a href="#" class="submit-row" onclick="' + function + '">Update</a></p></div></td>' 
               
@@ -2481,7 +2465,7 @@ def showmatrix(request,pk):
             table = table +  ' <tr >' 
             
             #data = data + 'propertyid' + '=' + pk
-            function = "updatecoefficient('" + data + "', '"+ pk + "')"
+            function  = "updatecoefficient('" + data + "', '"+ pk + "', '"+ datafile_id + "')"
             #table = table + ' <td colspan="'+str(indexj[-1])+'"> <div class="submit-row"><p  ><a href="#" class="submit-row" onclick="' + function + '">Update</a></p></div></td>' 
             table = table + ' <td colspan="'+str(indexj)+'"> <div class="submit-row"><p  ><a href="#" class="submit-row" onclick="' + function + '">Update</a></p></div></td>' 
           
@@ -2508,6 +2492,10 @@ def showmatrix(request,pk):
 def updatecoefficient(request,pk): 
     
     if request.is_ajax():
+        datafile_id =  request.POST.get('datafile_id', False)   
+        
+        datafiletemp = DataFileTemp.objects.get(id=int(datafile_id))
+        
         objPropertyTemp=PropertyTemp.objects.get(id=pk)
         dim = get_dimensions(objPropertyTemp.tensor_dimensions)
         coefficents = get_coefficents_total(objPropertyTemp.tensor_dimensions)
@@ -2515,9 +2503,10 @@ def updatecoefficient(request,pk):
         label =objPropertyTemp.tag.split('_')[-1]
         print label
         
-        datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(propertytemp=objPropertyTemp).values_list('id',flat=True) 
+        datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(datafiletemp=datafiletemp,propertytemp=objPropertyTemp).values_list('id',flat=True) 
         #print datafilepropertytemp_ids
         
+    
         def getIndex(coefficientsTag):              
             match = re.match(r"([a-z]+)([0-9]+)",  coefficientsTag, re.I)
             if match:
@@ -2536,24 +2525,25 @@ def updatecoefficient(request,pk):
             tag = k.replace("_","")
             #print tag 
             index= getIndex(tag)
-            tensorial_index = str(index[0] +1) + str( index[1] +1)
-            #print tensorial_index
-                
-            if datafilepropertytemp_ids:
-                objPropertyValuesTemp= PropertyValuesTemp.objects.get(datafilepropertytemp_id=datafilepropertytemp_ids[0],prop_data_tensorial_index=tensorial_index)
-                objPropertyValuesTemp.prop_data_value = float(v[0])
-            else:
-                objDtaFilePropertyTemp = DataFilePropertyTemp()
-                objDtaFilePropertyTemp.propertytemp = objPropertyTemp
-                objPropertyValuesTemp= PropertyValuesTemp()
-                objPropertyValuesTemp.datafilepropertytemp=objDtaFilePropertyTemp
-                objPropertyValuesTemp.prop_data_label = label
-                objPropertyValuesTemp.prop_data_tensorial_index =  tensorial_index
-                objPropertyValuesTemp.prop_data_value = float(v[0])
-                """objPropertyValuesTemp.prop_measurement_method =   
-                objPropertyValuesTemp.prop_conditions_frequency =   
-                """
-                
+            if index:
+                tensorial_index = str(index[0] +1) + str( index[1] +1)
+                #print tensorial_index
+                    
+                if datafilepropertytemp_ids:
+                    objPropertyValuesTemp= PropertyValuesTemp.objects.get(datafilepropertytemp_id=datafilepropertytemp_ids[0],prop_data_tensorial_index=tensorial_index)
+                    objPropertyValuesTemp.prop_data_value = float(v[0])
+                else:
+                    objDtaFilePropertyTemp = DataFilePropertyTemp()
+                    objDtaFilePropertyTemp.propertytemp = objPropertyTemp
+                    objPropertyValuesTemp= PropertyValuesTemp()
+                    objPropertyValuesTemp.datafilepropertytemp=objDtaFilePropertyTemp
+                    objPropertyValuesTemp.prop_data_label = label
+                    objPropertyValuesTemp.prop_data_tensorial_index =  tensorial_index
+                    objPropertyValuesTemp.prop_data_value = float(v[0])
+                    """objPropertyValuesTemp.prop_measurement_method =   
+                    objPropertyValuesTemp.prop_conditions_frequency =   
+                    """
+                    
      
                     
                  
@@ -2586,150 +2576,28 @@ def updatecoefficient(request,pk):
          }
          
     return HttpResponse(json.dumps(data), content_type="application/json")   
-
-
-@login_required
-@csrf_exempt 
-def adddictionaryphasecharacteristic(request,pk): 
-    response = None
-    todo  = request.POST.get('todo', False)
-    dicvalue = request.POST.get('phasecharacteristicvalue', False)
-    in_list = False
-    error =""
-    dictionary_pk =  request.POST.get('dictionary_pk', False)     
-    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
-    if dicvalue != "":        
-        if objDictionarySelected.type == "numb":
-            if not isnumber(dicvalue):
-                error ="The value must be numeric"
-        elif objDictionarySelected.type == "char":
-                pass
-    else:
-        error ="the field can not be empty"
-
-    if error != "":
-        data = {
-                    'name': objDictionarySelected.name,
-                    'units': objDictionarySelected.units,
-                    'units_detail': objDictionarySelected.units_detail,
-                    'dicvalue': dicvalue,
-                    'in_list': in_list,
-                    'error':error,
-            
-        }
-    
-        return  HttpResponse(json.dumps(data), content_type="application/json")   
-
-    if pk == '-1' and todo == "phasecharacteristicchange":
-        pass
-    elif  pk == '-1' and todo == "addphasecharacteristic":
-        if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
-            dictionaryValues = {}
-            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
-            request.session['dictionaryValues' ] = dictionaryValues
-        else:
-            dictionaryValues=request.session['dictionaryValues' ] 
-            if objDictionarySelected.tag.encode("ascii") in dictionaryValues:
-                in_list = True
-            else:
-                in_list = False
-                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
-                request.session['dictionaryValues' ] = dictionaryValues
-
-    data = {
-        'name': objDictionarySelected.name,
-        'units': objDictionarySelected.units,
-        'units_detail': objDictionarySelected.units_detail,
-        'dicvalue': dicvalue,
-        'in_list': in_list,
-        'error':error,
-
-    }
-
-    
-    return HttpResponse(json.dumps(data), content_type="application/json")   
-    
-       
-@login_required
-@csrf_exempt 
-def adddictionarymeasurement(request,pk): 
-    response = None
-    todo  = request.POST.get('todo', False)
-    dicvalue = request.POST.get('measurementvalue', False)
-    in_list = False
-    error =""
-    dictionary_pk =  request.POST.get('dictionary_pk', False) 
-    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
-    if dicvalue != "": 
-        if objDictionarySelected.type == "numb":
-            if not isnumber(dicvalue):
-                error ="The value must be numeric"
-        elif objDictionarySelected.type == "char":
-            pass
-    else:
-        error ="the field can not be empty"
         
-    if error != "":
-        data = {
-                    'name': objDictionarySelected.name,
-                    'units': objDictionarySelected.units,
-                    'units_detail': objDictionarySelected.units_detail,
-                    'dicvalue': dicvalue,
-                    'in_list': in_list,
-                    'error':error,
-            
-        }               
-        return  HttpResponse(json.dumps(data), content_type="application/json")   
+          
+          
+          
 
-    if pk == '-1' and todo == "measurementchange":
-        pass
-    elif  pk == '-1' and todo == "addmeasurement":
-        if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
-            dictionaryValues = {}
-            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
-            request.session['dictionaryValues' ] = dictionaryValues
-        else:
-            dictionaryValues=request.session['dictionaryValues' ] 
-            if objDictionarySelected.tag.encode("ascii") in dictionaryValues:
-                in_list = True
-            else:
-                in_list = False
-                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
-                request.session['dictionaryValues' ] = dictionaryValues
-                
-
-    data = {
-        'name': objDictionarySelected.name,
-        'units': objDictionarySelected.units,
-        'units_detail': objDictionarySelected.units_detail,
-        'dicvalue': dicvalue,
-        'in_list': in_list,
-        'error':error,
-
-    }
-    
- 
-    
-    return HttpResponse(json.dumps(data), content_type="application/json")           
-          
-          
-          
-          
-          
-          
-          
-          
-            
 @login_required
 @csrf_exempt 
-def adddictionaryproperty(request,pk):
+def addmaterial(request,pk):
     #response= None
-    todo  = request.POST.get('todo', False)
+    todo  = request.POST.get('todo', False)    
     dicvalue = request.POST.get('dicvalue', False)
+    apply_to_all = request.POST.get('apply_to_all', False)
+    """dicvalue = request.POST.get('phasevalue', False)
+    dicvalue = request.POST.get('phasecharacteristicvalue', False)
+    dicvalue = request.POST.get('measurementvalue', False)"""
+    print 'addmaterial'
+    
     in_list = False
     error =""
     dictionary_pk =  request.POST.get('dictionary_pk', False) 
     objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
+    print objDictionarySelected.type
     if dicvalue != "":
         if objDictionarySelected.type == "numb":
             if not isnumber(dicvalue):
@@ -2761,7 +2629,7 @@ def adddictionaryproperty(request,pk):
     elif  pk == '-1' and todo == "add":
         if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
             dictionaryValues = {}
-            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+            dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type,apply_to_all]=dicvalue.encode("ascii")
             request.session['dictionaryValues' ] = dictionaryValues
         else:
             dictionaryValues=request.session['dictionaryValues' ] 
@@ -2769,7 +2637,7 @@ def adddictionaryproperty(request,pk):
                 in_list = True
             else:
                 in_list = False
-                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type]=dicvalue.encode("ascii")
+                dictionaryValues[objDictionarySelected.tag.encode("ascii"),objDictionarySelected.type,apply_to_all]=dicvalue.encode("ascii")
                 request.session['dictionaryValues' ] = dictionaryValues
 
     data = {
@@ -2802,7 +2670,7 @@ def addcasev2(request):
         isvalid =False
         form=None  
         inputList = []   
-        coefficientsparts = []
+        #coefficientsparts = []
         if 'inputList' not in request.session  or not request.session['inputList']:
             pass
         else:
@@ -2813,7 +2681,7 @@ def addcasev2(request):
             else:
                 del request.session['inputList']
                 
- 
+        """
         if 'coefficientsparts' not in request.session  or not request.session['coefficientsparts']:
             pass
         else:
@@ -2823,6 +2691,7 @@ def addcasev2(request):
                 coefficientsparts=request.session['coefficientsparts']
             else:
                 del request.session['coefficientsparts']
+        """
  
  
             
@@ -2990,19 +2859,24 @@ def addcasev2(request):
         ShowBtnSend=0
 
         form =ValidateAddCaseFormv2(request.POST,inputList=inputList)
+        
+
          
         validationbyform = 0
         propertiesv2=None
         
-        #inicializacion
+                
+        propertyMaster = PropertyMaster()
         lengthlist = 0
-        propertySessionList =[]
-        if not 'propertySessionList' in request.session or not request.session['propertySessionList' ]:  
+        if not 'propertyMaster' in request.session or not request.session['propertyMaster' ]:  
             pass
         else:
-            propertySessionList = request.session['propertySessionList' ]
-            print propertySessionList
-            lengthlist =len(propertySessionList) 
+            propertyMaster = request.session['propertyMaster' ]
+            print propertyMaster
+            if propertyMaster.propertyList:
+                print propertyMaster.propertyList
+                lengthlist =len(propertyMaster.propertyList) 
+                
 
 
         propertaddedmessage =""
@@ -3011,78 +2885,187 @@ def addcasev2(request):
         inputListReadOnly = [] 
         inputListValues = {}
       
-             
+        warning2 = ""
+        warning = ""
+        samepuntualgroup = True
         if form.is_valid():
-            propertiesv2=Propertiesv2(catalogproperty_name, crystalsystem_name, typeselected,datapropertytagselected, chkBoxmge, rq=request,inputList=inputList,coefficientsparts=coefficientsparts)
-            propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
+            #request.POST = form.data
+           
+            if not propertyMaster.puntualgroup:
+                propertyMaster.puntualgroup = puntualgroupselected_name
+            elif not propertyMaster.puntualgroup == puntualgroupselected_name:
+                samepuntualgroup = False
+                warning = "The punctual group " +propertyMaster.puntualgroup +" must be the same for all the properties of this case"
+            
+            
+            propertiesv2=Propertiesv2(catalogproperty_name, crystalsystem_name, typeselected,datapropertytagselected, chkBoxmge,request.POST, inputList=inputList)#,coefficientsparts=coefficientsparts)
+            qd =[]
+            qd.append(form.data)
+            propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name,*qd)
 
             sucess=propertiesv2.sucess  
+
+ 
+
+             
 
             
             if  sucess  == 0:
                 inputList=propertiesv2.catalogPropertyDetail
                 request.session['inputList']=inputList
-                request.session['coefficientsparts']=propertiesv2.coefficientsparts
+                #request.session['coefficientsparts']=propertiesv2.coefficientsparts
                 
                 inputListReadOnly=propertiesv2.catalogPropertyDetailReadOnly
  
                 print "continue"
             else:
                 
-                propertiesv2.releaseRequet()
-                propertiesv2.title = request.POST.get('title', False)
+                #propertiesv2.releaseRequet()
+                """propertiesv2.title = request.POST.get('title', False)
                 propertiesv2.authors = request.POST.get('author', False)
                 propertiesv2.journal = request.POST.get('journal', False)
                 propertiesv2.year = request.POST.get('year', False)
                 propertiesv2.volume = request.POST.get('volume', False)
                 propertiesv2.page_first = request.POST.get('page_first', False)
                 propertiesv2.page_last = request.POST.get('page_last', False)
+                """
+                
+                
+                
+                propertyMaster.title = request.POST.get('title', False)
+                propertyMaster.authors = request.POST.get('author', False)
+                propertyMaster.journal = request.POST.get('journal', False)
+                propertyMaster.year = request.POST.get('year', False)
+                propertyMaster.volume = request.POST.get('volume', False)
+                propertyMaster.page_first = request.POST.get('page_first', False)
+                propertyMaster.page_last = request.POST.get('page_last', False)
+               
+                 
  
      
                 if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:                 
                     pass 
                 else:
                     dictionaryValues =request.session['dictionaryValues' ] 
-                    propertiesv2.dictionaryValues=dictionaryValues   
+                    #propertiesv2.dictionaryValues=dictionaryValues
+                 
+                    if dictionaryValues:
+                        if not propertyMaster.headerBlockValues:
+                            propertyMaster.headerBlockValues = {}
+                            
+                        if not propertiesv2.loopBlockValues:
+                            propertiesv2.loopBlockValues = {}    
+                        
+                            
+                        for key,value in dictionaryValues.items():
+                            for i, item in enumerate(dictionaryPhaseList):
+                                if  dictionaryPhaseList[i].tag == key[0]:
+                                    propertyMaster.headerBlockValues[key[0],key[1],key[2]] = value
+                                    
+                                    break
+                              
+                            for i, item in enumerate(dictionaryPhaseCharacteristicList):
+                                if  dictionaryPhaseCharacteristicList[i].tag == key[0]:
+                                    propertyMaster.headerBlockValues[key[0],key[1],key[2]] = value     
+                                   
+                                    break
+                                    
+                            for i, item in enumerate(dictionaryList):
+                                if  dictionaryList[i].tag == key[0]:
+                                    if key[2] == 'false':
+                                        propertiesv2.loopBlockValues[key[0],key[1],key[2]] = value  
+                                    else:
+                                        propertyMaster.headerBlockValues[key[0],key[1],key[2]] = value
+                                        
+                                     
+                                    break
+                                    
+                            for i, item in enumerate(dictionaryMeasurementList):
+                                if  dictionaryMeasurementList[i].tag == key[0]:
+                                    if key[2] == 'false':
+                                        propertiesv2.loopBlockValues[key[0],key[1],key[2]] = value  
+                                    else:
+                                        propertyMaster.headerBlockValues[key[0],key[1],key[2]] = value
+ 
+                                    break  
+                                
+                     
+                                 
+                    
+                    print propertyMaster.headerBlockValues  
+                    print propertiesv2.loopBlockValues
+ 
+                     
+                    #propertiesv2.headerBlockValues = list
+                    
+                    
                     
                  
-         
+           
                 
                 print "add to list"
-                added =addToSession(request,propertiesv2,'propertySessionList')
+                
+                
+                
+                added = checkList(propertiesv2,propertyMaster.propertyList)
+                if not 'dictionaryValues' in request.session or not request.session['dictionaryValues' ]:  
+                    pass
+                else:
+                    del request.session['dictionaryValues' ] 
+                
+                if added == 0:
+                    warning2 = "Property previously added with same values"
+                else:
+                    if samepuntualgroup:
+                        propertyMaster.propertyList.append(propertiesv2)  
+                                     
+                    lengthlist =len(propertyMaster.propertyList) 
+                     
+                 
+                request.session['propertyMaster']= propertyMaster    
+                 
+                    
+
+                """added =addToSession(request,propertiesv2,'propertySessionList')
                 propertySessionList= request.session['propertySessionList'];
                 
  
                 if added == 0:
-                    propertaddedmessage = "Property previously added"
+                    warning2 = "Property previously added"
                 else:
                     lengthlist =len(propertySessionList) 
+                """
 
                 validationbyform = 0
                 #ShowBtnSend=0
                 print "valid"
                 
-                
+            #add       
             if lengthlist == 0 and sucess==0 and len(inputListReadOnly) > 0:
                 ShowBtnSend=0
             elif lengthlist == 0 and sucess==0 and len(inputListReadOnly) == 0:
                 ShowBtnSend=1
-            elif lengthlist == 1 and sucess==1 and len(inputListReadOnly) == 0:
+            #send  
+            elif lengthlist != 0 and sucess==0 and len(inputListReadOnly) == 0:
                 ShowBtnSend=2
+            #disabled    
+            elif lengthlist != 0 and sucess==1 and len(inputListReadOnly) == 0:
+                ShowBtnSend=3
                 
+       
                 
-            """
-            print "sucess: " + str(sucess )   
-            print "lengthlist: " + str(lengthlist)
-            print "inputListReadOnly: " + str( len(inputListReadOnly) ) 
-           """
-            
+            #print "lengthlist: " + str(lengthlist) + " sucess: " + str(  sucess ) + " inputListReadOnly: " + str(len(inputListReadOnly))
+        
+   
+                    
         else:
 
             ShowBtnSend=1
             validationbyform = 1
-            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected,datapropertytagselected, chkBoxmge)
+            propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected,datapropertytagselected, chkBoxmge,request.POST)
             propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
+            
+            puntualgroupselected_name = propertiesv2.puntualgroupselected_name
 
             if  len(inputList) > 0:                
                 for cpd in inputList:
@@ -3091,8 +3074,38 @@ def addcasev2(request):
                         if value != "" :
                             inputListValues[cpd.name] = value
 
-                print inputListValues
+
                 inputListReadOnly = propertiesv2.catalogPropertyDetailReadOnly
+                    
+                 
+                for row  in inputListReadOnly:
+                    for col  in row:
+                        if col in form.fields:
+                            for field  in form:
+                                if  field.name == col:
+                                    if   field.errors:
+                                        for error in field.errors:                                           
+                                            for key,value in inputListValues.items():
+                                                if col == key:
+                                                    #print "correcto " + col +"=" + str(value)
+                                                    pass
+        
+                                    else:
+                                        #print "correcto " + str(col )
+                                        for key,value in inputListValues.items():
+                                            if col == key:
+                                                #print "correcto " + col +"=" + str(value)
+                                                pass
+                                     
+                                else:
+                                    pass 
+                                
+                            
+                                      
+                        else:
+                            print "correcto " + str(col )
+
+            
             else:
                 print  inputList
                 print "invalid"
@@ -3109,6 +3122,8 @@ def addcasev2(request):
                                                                                              "axisList":propertiesv2.axisList, 
                                                                                              "questionAxis":propertiesv2.questionAxis, 
                                                                                              'message':propertiesv2.message,
+                                                                                             'warning':warning,
+                                                                                             'warning2':warning2,
                                                                                             "read_write_inputs":propertiesv2.read_write_inputs,
                                                                                              "inputListReadOnly":inputListReadOnly,
                                                                                              "jquery" :propertiesv2.jquery,
@@ -3128,15 +3143,53 @@ def addcasev2(request):
                                                                                              "dictionaryPhaseList":dictionaryPhaseList,   
                                                                                              "dictionaryPhaseCharacteristicList":dictionaryPhaseCharacteristicList,   
                                                                                              "dictionaryMeasurementList":dictionaryMeasurementList,                                                                               
-                                                                                             "propertaddedmessage":propertaddedmessage,
+                                                                                             #"propertaddedmessage":propertaddedmessage,
                                                                                              "experimentalparcond_name_selected":experimentalparcond_name_selected,
-                                                                                             'propertySessionList':propertySessionList,
+                                                                                             #'propertySessionList':propertySessionList,
+                                                                                             'propertyMaster':propertyMaster,
                                                                                              'chkBoxMagnetoelectricity':chkBoxMagnetoelectricity,
                                                                                              'dataPropertyList':dataPropertyList,
                                                                                              'datapropertytagselected':int(datapropertytagselected),
                                                                                              'magnetoelectricity':magnetoelectricity
                                                                                        }, context_instance=RequestContext(request))
       
+def checkList(customobject,listProperty):
+    result = 0
+    def containsproperty(listObject, obj):
+        result = False
+        for x in listObject:
+            print x.catalogproperty_name + " == " + obj.catalogproperty_name
+            if x.catalogproperty_name ==obj.catalogproperty_name :  # elastic, piezolectric, etc.?
+                print x.crystalsystem_name + " == " + obj.crystalsystem_name 
+                if x.crystalsystem_name == obj.crystalsystem_name: #Triclinic, monoclinic, cubic, etc.
+                    print x.type + " == " + obj.type
+                    if x.type == obj.type:   # s (compliance) o c (stiffness)?
+                        print x.dataproperty + " == " + obj.dataproperty 
+                        if  x.dataproperty  ==  obj.dataproperty:   #Data Property Tag id
+                            result= True
+                            break
+                            """if N.array_equal(x.coefficientsmatrix, obj.coefficientsmatrix):
+                                print x.coefficientsmatrix 
+                                print  " == " 
+                                print obj.coefficientsmatrix 
+                                result= True
+                                break"""
+                    
+        return result        
+    
+    is_in_list=containsproperty(listProperty, customobject)  
+    if is_in_list == False:
+
+        print "objeto agregado a la lista" 
+        #print request.session[nameObjectOnSession]
+        result = 1
+    else:
+        print "objeto no agregado a la lista" 
+        #print request.session[nameObjectOnSession]
+           
+    return result
+    
+    
 def addToSession(request,customobject,nameObjectOnSession):
     result = 0
     def containsproperty(listObject, obj):
@@ -3182,7 +3235,7 @@ def addToSession(request,customobject,nameObjectOnSession):
             
         
 
-    
+
 
                 
                   

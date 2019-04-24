@@ -879,6 +879,9 @@ data_prop_elastic_stiffness_cijS
                ij = 11 – 66
 ;
 
+
+
+
 data_prop_elastic_compliance_sij
     _name                      '_prop_elastic_compliance_sij'
     _category                    prop
@@ -900,6 +903,19 @@ data_prop_elastic_compliance_sijD
 
     _definition
 ;              elastic compliance sijD
+               ij = 11 – 66
+;
+
+
+data_prop_elastic_compliance_sijS
+    _name                      '_prop_elastic_compliance_sijS'
+    _category                    prop
+    _type                        char
+    _units                       10^-12.Pa^-1
+    _units_detail              'metre square over tera pascal'
+
+    _definition
+;              elastic compliance sijS
                ij = 11 – 66
 ;
 

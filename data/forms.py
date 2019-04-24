@@ -32,11 +32,18 @@ from django.forms.widgets import SelectMultiple
 from django.contrib.admin.widgets import AdminTextInputWidget
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_unicode
+from django.template.loader import render_to_string
 
 from django.forms.widgets import HiddenInput
 from data.Utils import *
 
 from  ctypes import *
+from django.http import QueryDict
+import json
+from collections import defaultdict
+from operator import itemgetter
+from data.JScriptUtil import *
+from django.db.models.query import QuerySet
  
  
  
@@ -104,6 +111,7 @@ class SignUpForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
+   
 
     class Meta:
         model = User
@@ -112,6 +120,9 @@ class SignUpForm(UserCreationForm):
         widgets = {   'first_name': forms.TextInput(attrs={'class': 'form-control input-sm','style': 'width: 350px;','placeholder':"First Name"}),
                    
                    }
+        
+ 
+ 
         
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -189,17 +200,19 @@ class NewCaseFormv2(forms.Form):
     
     
 
-             
+def test(*args):
+        print args[0]
+                    
 
     
 class ValidateAddCaseFormv2(forms.Form):
-    title = forms.CharField(required=True,help_text="Enter title." ,label= 'Article Title')
+    title = forms.CharField(required=False,help_text="Enter title." ,label= 'Article Title')
     author = forms.CharField(required=True,help_text="Enter author(s) separated by commas.",label='Author(s)')
-    journal = forms.CharField(required=True,help_text="Enter journal.",label='Journal')
-    volume = forms.CharField(required=True,help_text="Enter volume.",label='Volume',initial='')
+    journal = forms.CharField(required=True,help_text="Enter journal.",label='Journal/Book')
+    volume = forms.CharField(required=False,help_text="Enter volume.",label='Volume',initial='')
     year = forms.CharField(required=True,help_text="Enter year.",label='Year',initial='')
-    page_first = forms.CharField(required=True,help_text="Enter page.",label='First page',initial='')
-    page_last = forms.CharField(required=True,help_text="Enter page.",label='Last page',initial='')
+    page_first = forms.CharField(required=False,help_text="Enter page.",label='First page',initial='')
+    page_last = forms.CharField(required=False,help_text="Enter page.",label='Last page',initial='')
     
 
     def clean_year(self):
@@ -213,44 +226,85 @@ class ValidateAddCaseFormv2(forms.Form):
     def clean_page_first(self):
         page_first = self.cleaned_data['page_first']
         try:
-            int(page_first)
-            pass
+           
+            if page_first:
+                int(page_first)
+                pass
         except ValueError:
             raise forms.ValidationError(u'Page first "%s" is not a valid value.' % page_first)
         
     def clean_page_last(self):
         page_last = self.cleaned_data['page_last']
         try:
-            int(page_last)
-            pass
+            if page_last:
+                int(page_last)
+                pass
         except ValueError:
             raise forms.ValidationError(u'Page last "%s" is not a valid value.' % page_last)
       
+      
      
+  
     def __init__(self, *args, **kwargs):
         if 'inputList' not in kwargs:
             pass
         else:
             
-            #print  kwargs.pop('inputList') 
-            inputList = kwargs.pop('inputList')    
-            
-            #print inputList
-           
-            super(ValidateAddCaseFormv2, self).__init__(*args, **kwargs)
-            if inputList:
-                for ipt  in inputList:  
-                    self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
+            if args:
+                #print  kwargs.pop('inputList') 
+                inputList = kwargs.pop('inputList')  
+                ar = []  
+                if inputList:
+                    dict = { }
+                    for key, value in args[0].items():
+                        dict[key] = value
 
-                    """if   's' in ipt.name:
-                        self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
+                    for ipt  in inputList:
+                        if  dict.has_key(ipt.name):
+                            val= argsToFloat(args,ipt.name) 
+                            if val:
+                                dict[ipt.name] = val
+                             
+ 
+                    argsupdate = QueryDict('', mutable=True)
+                    argsupdate.update(dict)
+                    ar.append(argsupdate)
+                    
+ 
+                    args = ar
+                     
+       
+                
+                
+                super(ValidateAddCaseFormv2, self).__init__(*args, **kwargs)
+
+ 
+             
                         
-                    if   'c' in ipt.name:
-                        self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
+                
+                #print inputList
+                
+                
+                
+                
+                if inputList:
+                    for ipt  in inputList:  
+                  
+ 
                         
-                    if   'd' in ipt.name:
+                        
                         self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
-                    """
+                        self.fields[ipt.name].initial = 'nnn'
+    
+                        """if   's' in ipt.name:
+                            self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
+                            
+                        if   'c' in ipt.name:
+                            self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
+                            
+                        if   'd' in ipt.name:
+                            self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
+                        """
 
 
 
@@ -443,11 +497,16 @@ class DetailFieldWidget(AdminTextInputWidget):
             
         html =   force_unicode( """    <div class='results' id='"""+attrs['id'] +"""'>"""+ value + """</div>""") 
         return mark_safe(html)  
+    
+    
+ 
+
      
 class TensorAdminForm(forms.ModelForm):  
     
     class Meta:
         model = Tensor
+ 
         
     def clean(self,*args,**kwargs):
          
@@ -480,7 +539,24 @@ class TensorAdminForm(forms.ModelForm):
         
         return catalogpointgroup
     
+    def get_alert_types(self,catalogpropertydetail_id):
+        """
+        Creates a tuple structure of the alert types grouped by event types
+        suitable for the choices of a MultipleChoiceField with optgroups
+        [
+          (event_type, [(alert_type, alert_type), (alert_type, alert_type)]),
+          (event_type, [(alert_type, alert_type), (alert_type, alert_type)])
+        ]
+        """
+        alert_types = defaultdict(list)
+        for keyNotationCatalogPropertyDetail in KeyNotationCatalogPropertyDetail.objects.filter(catalogpropertydetail_id=catalogpropertydetail_id):
+            alert_types[keyNotationCatalogPropertyDetail.keynotation.description].append(
+                (keyNotationCatalogPropertyDetail.catalogpropertydetail.id, keyNotationCatalogPropertyDetail.target))
     
+        return sorted(alert_types.items(), key=itemgetter(0))
+    
+    
+
     def __init__(self, *args, **kwargs):
         type_id  = None
         dataproperty_id = None
@@ -490,6 +566,9 @@ class TensorAdminForm(forms.ModelForm):
         axis_id  = None
         coefficients_ids =  []
         onchange = False
+        
+        
+ 
  
         if args: #(true if edit and save or save an existing instance, when form was changed), false when instance was selected from change list
             
@@ -509,6 +588,10 @@ class TensorAdminForm(forms.ModelForm):
                 onchange = True
                 
         super(TensorAdminForm, self).__init__(*args, **kwargs)
+        """"f = self.fields.get('type', None)
+        if f is not None:
+            f.queryset = f.queryset
+        """
 
         self.fields['type']  =forms.ModelChoiceField(queryset=None,label="Type Tensor")
         self.fields['type'].widget=forms.Select(attrs={"onChange":'submit()'})
@@ -536,13 +619,36 @@ class TensorAdminForm(forms.ModelForm):
                 verbose_name='Name',
                 is_stacked=False,
             )
+                                                              
         )
+        
+
+        
+        #self.fields['coefficientsrules']  =forms.ModelMultipleChoiceField(queryset=None,label="Coefficients for capture",required=False)
+        
+        self.fields['coefficientsrules']  =forms.ModelMultipleChoiceField(queryset=None,label="Coefficients for capture",required=False)
+        self.fields['keynotation']  =forms.ModelMultipleChoiceField(queryset=None,label="Rules",required=False)
+        self.fields['zerocomponent']  =forms.ModelMultipleChoiceField(queryset=None,label="Destination value ",required=False)
+        
+ 
+ 
 
         #self.fields['crysralsystemdetail'] = forms.CharField(label='Crystal System Detail',widget = DetailFieldWidget, required=False)
         self.fields['pointgroupdetail'] = forms.CharField(label='Point Group Detail',widget = DetailFieldWidget, required=False)
         self.fields['puntualgroupnamesdetail'] = forms.CharField(label='Groups Detail',widget = DetailFieldWidget, required=False)
-        self.fields['axisdetail'] = forms.CharField(label='Axis Detail',widget = DetailFieldWidget, required=False)
+        self.fields['axisdetail'] = forms.CharField(label='Axis Detail',widget = DetailFieldWidget, required=False) 
         self.fields['errormessage'] = forms.CharField(widget = DetailFieldWidget, required=False)
+        
+         
+        self.fields['jquery'] = forms.CharField(label='',widget = DetailFieldWidget, required=False) 
+        #self.fields['jquery'].empty_label = None
+        
+        self.fields['detailrules'] = forms.CharField(label='Detail rules',widget = DetailFieldWidget, required=False) 
+        
+        
+ 
+       
+ 
          
   
         typeSelected = None
@@ -664,7 +770,7 @@ class TensorAdminForm(forms.ModelForm):
                             self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
                             self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
                         else:
-                            pointgroupQuerySet=CatalogPointGroup.objects.filter(id=45)
+                            """pointgroupQuerySet=CatalogPointGroup.objects.filter(id=45)
                             self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
                             
                             catalogpointgroup_ids =CatalogPointGroup.objects.all().values_list('id',flat=True) 
@@ -675,6 +781,15 @@ class TensorAdminForm(forms.ModelForm):
                                 
                             self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
                             self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
+                            """
+                            
+                            pointgroupQuerySet=CatalogPointGroup.objects.filter(id=45)
+                            self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
+                            catalogpointgroupSelected = CatalogPointGroup.objects.get(id=45)
+                            self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
+                            self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
+                            
+
 
                         
                         #*******************************puntualgroupnames*************************************
@@ -700,7 +815,7 @@ class TensorAdminForm(forms.ModelForm):
                             self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
                             
                         else:
-                            puntualGroupNamesQuerySet = PuntualGroupNames.objects.filter(id=21)
+                            """puntualGroupNamesQuerySet = PuntualGroupNames.objects.filter(id=21)
                             self.fields['puntualgroupnames'].queryset = puntualGroupNamesQuerySet
                             
                             puntualgroupnames_ids =PuntualGroupNames.objects.all().values_list('id',flat=True) 
@@ -712,17 +827,22 @@ class TensorAdminForm(forms.ModelForm):
                              
                             self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
                             self.fields['puntualgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
+                            """
                             
+                            puntualGroupNamesQuerySet = PuntualGroupNames.objects.filter(id=21)
+                            self.fields['puntualgroupnames'].queryset = puntualGroupNamesQuerySet
+                            self.fields['puntualgroupnames'].help_text = "Select this option if all groups of points in this crystal system have the same matrix" 
+                            puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=21)
+                            self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
+                            self.fields['puntualgroupnamesdetail'].initial = "<strong>groups not assigned</strong>"
+                            
+                      
                         
                         
                         #*******************************axis*************************************
                         axis_ids= CrystalSystemAxis.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,puntualgroupnames = puntualgroupnamesSelected,active=1).values_list('axis_id',flat=True)  
                         if axis_ids:
                             axisQuerySet = CatalogAxis.objects.filter(id__in=axis_ids)
-                            """if checkAxis(typeSelected, catalogcrystalsystemSelected,datapropertySelected):  
-                            axisQuerySet= setAxis(typeSelected, catalogcrystalsystemSelected,datapropertySelected)
-                            axis_ids = getIdsFromQuerySet(axisQuerySet)"""
-                           
                             fieldsList = ['name','description']
                             html = getTableHTMLFromQuerySet(axisQuerySet,fields=fieldsList)
                             print axis_ids
@@ -739,16 +859,12 @@ class TensorAdminForm(forms.ModelForm):
                             self.fields['axis'].queryset =   axisQuerySet
                             self.fields['axis'].initial = axisSelected
                         else:
-                            axisQuerySet=  CatalogAxis.objects.filter(id=4)
+                            axisQuerySet=  CatalogAxis.objects.filter(id=4) 
                             self.fields['axis'].queryset = axisQuerySet
-                            axis_ids=  CatalogAxis.objects.all().values_list('id',flat=True) 
-                            if axis_id in axis_ids:
-                                axisSelected = CatalogAxis.objects.get(id=int(axis_id))  
-                            else:
-                                axisSelected = CatalogAxis.objects.get(id=4)
-                                
+                            self.fields['axis'].help_text = "Axis not assigned"
+                            axisSelected = CatalogAxis.objects.get(id=4)
                             self.fields['axis'].initial = axisSelected
-                            self.fields['axisdetail'].initial = "<strong>axis not assigned</strong>"
+                            self.fields['axisdetail'].initial = "<strong>axis not assigneds</strong>"
                             
                         
                     
@@ -779,10 +895,6 @@ class TensorAdminForm(forms.ModelForm):
                     catalogpointgroup_ids= CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('catalogpointgroup_id',flat=True)  
                     if catalogpointgroup_ids:
                         pointgroupQuerySet = CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
-                    
-                    
-                        """if checkPointGroup(typeSelected, catalogcrystalsystemSelected,datapropertySelected):  
-                        pointgroupQuerySet = setPointGroup(typeSelected, catalogcrystalsystemSelected,datapropertySelected)"""
                         catalogpointgroupSelected = pointgroupQuerySet[0]
                         self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
                         self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
@@ -804,10 +916,6 @@ class TensorAdminForm(forms.ModelForm):
                     puntualgroupnames_ids= CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('puntualgroupnames_id',flat=True)  
                     if puntualgroupnames_ids:
                         puntualgroupnamesQuerySet = PuntualGroupNames.objects.filter(id__in=puntualgroupnames_ids)
-                        
-                    
-                        """if checkPuntualGroupNames(typeSelected, catalogcrystalsystemSelected,datapropertySelected):
-                        puntualgroupnamesQuerySet,puntualGroupsQuerySet =setPuntualGroupNames(typeSelected, catalogcrystalsystemSelected,datapropertySelected)"""
                         puntualgroupnamesSelected = puntualgroupnamesQuerySet[0]
                         self.fields['puntualgroupnames'].queryset = puntualgroupnamesQuerySet
                         self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
@@ -829,9 +937,7 @@ class TensorAdminForm(forms.ModelForm):
                     axis_ids= CrystalSystemAxis.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,puntualgroupnames = puntualgroupnamesSelected,active=1).values_list('axis_id',flat=True)  
                     if axis_ids:
                         axisQuerySet = CatalogAxis.objects.filter(id__in=axis_ids)
-                    
-                        """if checkAxis(typeSelected, catalogcrystalsystemSelected,datapropertySelected):  
-                        axisQuerySet= setAxis(typeSelected, catalogcrystalsystemSelected,datapropertySelected)"""
+                        fieldsList = ['name','description']
                         html = getTableHTMLFromQuerySet(axisQuerySet,fields=fieldsList)
                         self.fields['axis'].queryset = axisQuerySet
                         self.fields['axis'].help_text = "<strong>axis  assigned</strong>"
@@ -847,7 +953,7 @@ class TensorAdminForm(forms.ModelForm):
                         self.fields['axisdetail'].initial = "<strong>axis not assigneds</strong>"
                         
                     
-            catalogPropertyDetailQuerySet, catalogPropertyDetailList = setCoefficients(typeSelected, catalogcrystalsystemSelected,datapropertySelected,catalogpointgroupSelected,puntualgroupnamesSelected,axisSelected)
+            catalogPropertyDetailQuerySet, catalogPropertyDetailList,catalogPropertyDetailnames = setCoefficients(typeSelected, catalogcrystalsystemSelected,datapropertySelected,catalogpointgroupSelected,puntualgroupnamesSelected,axisSelected)
             catalogPropertyDetailNamesList = []
             #coefficients_ids = getIdsFromQuerySet(catalogPropertyDetailQuerySet)
             
@@ -880,6 +986,266 @@ class TensorAdminForm(forms.ModelForm):
 
             catalogPropertyDetailTempQuerySet=CatalogPropertyDetailTemp.objects.all()#get all newcoefficients
             self.fields['coefficients'].queryset = catalogPropertyDetailTempQuerySet
+            
+            
+            
+            #******************************Rules**************************************************************************#
+            size = 0
+            if len(catalogPropertyDetailQuerySet) > 0:
+            
+                if len(catalogPropertyDetailnames) > 0:
+                    size = len(catalogPropertyDetailnames) 
+                else:
+                    size = 10
+                
+                catalogpropertydetailnames = json.dumps(catalogPropertyDetailnames)
+                propertydetaillist = json.dumps(catalogPropertyDetailList)
+                url = reverse('admin:Properties_tensor_getrules', args=[self.instance.pk])  
+                
+                    
+                #self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={"onChange":"getRules('" +url +"'," +propertydetaillist +"," +catalogpropertydetailnames +"," + str(datapropertySelected.id )+"," +"this);",'size': size})
+                #self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={'size': size})
+                #self.fields['coefficientsrules'].widget=forms.Select(attrs={"onChange":"getRules('" +url +"'," +propertydetaillist +"," +catalogpropertydetailnames +"," + str(datapropertySelected.id )+"," +"this);",'size': size})
+                #self.fields['coefficientsrules'].widget.attrs['style'] = 'width: 100%;'
+                self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={'size': size})
+                self.fields['coefficientsrules'].queryset  = catalogPropertyDetailQuerySet
+             
+                
+     
+     
+      
+                javascript =  """<script> 
+     
+                                        function getRules(url,propertydetaillist,catalogpropertydetailnames,datapropertySelected_id,obj){
+                                                var propertydetaillistselected = django.jQuery("[name=coefficientsrules]").val();
+                                                var keynotationselected = django.jQuery("[name=keynotation]").val();
+                                                
+                                                //alert(keynotationselected);
+                                                
+                                                datasend ={//'coefficient': obj.value,
+                                                                     'catalogpropertydetaillist': propertydetaillist,
+                                                                     
+                                                                     'catalogpropertydetailnames':catalogpropertydetailnames,
+                                                                     'propertydetaillistselected':propertydetaillistselected,
+                                                                     'datapropertySelected':datapropertySelected_id,
+                                                                     'keynotationselected':keynotationselected  }
+                                                                     
+                                                callajax(url, datasend);
+                                        } 
+                                        
+                                        function saveRule(url,propertydetaillist,catalogpropertydetailnames,datapropertySelected_id,obj){
+                                                var propertydetaillistselected = django.jQuery("[name=coefficientsrules]").val();
+                                                var keynotationselected = django.jQuery("[name=keynotation]").val();
+                                                var zerocomponentselected = django.jQuery("[name=zerocomponent]").val();
+    
+                                                
+                                                datasend ={//'coefficient': obj.value,
+                                                                     'zerocomponentselected': zerocomponentselected,
+                                                                     'propertydetaillistselected':propertydetaillistselected,
+                                                                     'datapropertySelected':datapropertySelected_id,
+                                                                     'keynotationselected':keynotationselected  }
+                                                                     
+                                                callajax(url, datasend);
+                                        } 
+                                        
+                                        function  callajax(url, datasend)
+                                        {
+                                             var csrftoken = django.jQuery("[name=csrfmiddlewaretoken]").val();
+                                             function csrfSafeMethod(method) {
+                                                    // these HTTP methods do not require CSRF protection
+                                                    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                                                }
+                                                                                       
+                                               // start django.jQuery
+                                                 django.jQuery(function($) {
+                                                 
+                                                   // prepare ajax
+                                                    $.ajaxSetup({
+                                                        beforeSend: function(xhr, settings) {
+                                                            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                                                                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                                            }
+                                                        }
+                                                    });
+                                                    
+                                                    
+                                                // start ajax
+                                                    $.ajax({
+                                                    url : url,  
+                                                    type: "POST",  
+                                                    dataType: 'json',
+                                                    data : datasend, 
+                                                    success: function (data) {
+                                 
+                                                        console.log(data); // log the returned json to the console
+                                                        console.log("success"); // another sanity check
+                                                        django.jQuery("[name=keynotation]").val(data.keynotationlist);
+                                                        
+                                                    },
+                                            
+                                                    // handle a non-successful response
+                                                    error : function(xhr,errmsg,err) {
+                                                        $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+                                                            " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+                                                        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                                                    }
+                                                });
+                                                
+                                                //end ajax
+                                             });
+                                             // end django.jQuery
+                                        
+                                        }
+                                        </script>
+                                        
+                                        """
+                
+                url = reverse('admin:Properties_tensor_saverule', args=[self.instance.pk])  
+                onclick = "saveRule(\"" +url +"\"," +propertydetaillist +"," +catalogpropertydetailnames +"," +  str(datapropertySelected.id )+"," +"this);"
+                #html = "<p class='deletelink-box'><a href='#' class='btn btn-sm btn-default' onclick='" +onclick+ "'><span class='glyphicon glyphicon-floppy-save'></span>  Save Rule</a> <input class='default' type='button' value='Save Rule' onclick='" +onclick+ "'> </p>"
+                html = "<p class='deletelink-box'><input class='default' type='button' value='Save Rule' onclick='" +onclick+ "'> </p>"
+               
+                html = html  + javascript
+                self.fields['jquery'].initial = html
+                #print read_write_coefficients
+                
+                
+    
+                keyNotationQuerySet = KeyNotation.objects.all()
+                size = 0
+                if len(keyNotationQuerySet) > 0:
+                    size = len(keyNotationQuerySet) 
+                else:
+                    size = 10
+                    
+            
+                self.fields['keynotation'].widget=forms.Select(attrs={'size': size})
+                self.fields['keynotation'].widget.attrs['style'] = 'width: 100%;'
+                self.fields['keynotation'].queryset  = keyNotationQuerySet
+    
+                
+                """
+                alert_types=self.get_alert_types(3006)
+                self.fields['alert_type'] = forms.MultipleChoiceField(
+                choices=alert_types,
+                required=False
+                )
+                """
+                
+                if int(self.instance.pk) == 1 or int(self.instance.pk) == 3:
+                    symmetry = True
+                elif int(self.instance.pk) ==  2:
+                    symmetry = False
+                    
+                    
+                jsutils = JSUtils()
+      
+                dimensions=datapropertySelected.tensor_dimensions.split(',')
+                scij = None
+                if len(dimensions) == 2:
+                    parts=datapropertySelected.tag.split('_')[-1]
+                    scij =parts.split('ij')
+                    
+                    
+                col_text =['Coefficient','Destination coefficient','Rule']
+                htmlcode = ""   
+                htmlcode += "<table>"
+                htmlcode += "<thead>"
+                htmlcode += "<tr>"
+                for i, name in enumerate(col_text):
+                    htmlcode += "<th scope='col'>"
+                    htmlcode += "<div class='text'>"
+                    htmlcode += "<span>" + name + "</span>"
+                    htmlcode += "</div>"
+                    htmlcode += "<div class='clear'></div>"
+                    htmlcode += "</th>"
+                
+                htmlcode += "</tr>"
+                htmlcode += "</thead>"
+                htmlcode += "<tbody>"
+                
+                response_data = {}
+                for i, obj  in enumerate(catalogPropertyDetailQuerySet):   
+                    keyNotationCatalogPropertyDetail= jsutils.getKeyNotation(obj)
+                    rulesAndTarget =[]
+                    if isinstance(keyNotationCatalogPropertyDetail, QuerySet):
+                        source_target_Dic = {}
+                        for x,knotationpropertydetail in enumerate(keyNotationCatalogPropertyDetail):
+                            source_target = {}
+                            sourceList = [y.strip() for y in knotationpropertydetail.source.split(',')]
+                            if len(sourceList) > 1:
+                                targetList = [y.strip() for y in knotationpropertydetail.target.split(',')]
+                                source_target_Dic[ tuple(sourceList)]=targetList
+                                source_target[ tuple(sourceList)]=targetList
+                                source_target['keynotation']=knotationpropertydetail.keynotation
+                                rulesAndTarget.append(source_target)
+                                
+                            elif len(sourceList) == 1:
+                                targetList = [y.strip() for y in knotationpropertydetail.target.split(',')]
+                                source_target_Dic[obj.name]=targetList
+                                source_target[obj.name]=targetList
+                                source_target['keynotation']=knotationpropertydetail.keynotation
+                                rulesAndTarget.append(source_target)
+                                
+                                
+                        if source_target_Dic:
+                            jsutils.getsimetricandnonzero( obj.name,scij,source_target_Dic,symmetry)
+                            
+                            for i, d in enumerate(rulesAndTarget):
+                                jsutils.getrules(obj.name,scij,d,symmetry)
+                            
+                        
+         
+                    else:
+                        targetList = [x.strip() for x in keyNotationCatalogPropertyDetail.target.split(',')]
+                        source_target_Dic = {}
+                        source_target_Dic[obj.name]=targetList
+                        source_target_Dic['keynotation']=keyNotationCatalogPropertyDetail.keynotation
+                        if source_target_Dic:
+                            if keyNotationCatalogPropertyDetail.keynotation.id ==4 or keyNotationCatalogPropertyDetail.keynotation.id ==6 or keyNotationCatalogPropertyDetail.keynotation.id ==5 or keyNotationCatalogPropertyDetail.keynotation.id ==10:
+                                jsutils.getsimetricandnonzero( obj.name,scij,source_target_Dic,symmetry)
+                                jsutils.getrules(obj.name,scij,source_target_Dic,symmetry)
+                            else:
+                                jsutils.getsimetricandnonzero( obj.name,scij,source_target_Dic,symmetry)
+                                jsutils.getrules(obj.name,scij,source_target_Dic,symmetry)
+                            
+                            
+             
+                htmlcode +=  str(jsutils.htmlcode )  
+     
+                htmlcode +=    "</tbody>"
+                htmlcode += "</table>"    
+                
+                self.fields['detailrules'].initial = htmlcode 
+                
+                      
+                zero_component= list(set(catalogPropertyDetailList) - set(jsutils.simetricandnonzeroinputs))
+                size = 0
+                if len(zero_component) > 0:
+                    size = len(zero_component) 
+                    keyNotation = KeyNotation.objects.filter(id=1)
+                    self.fields['keynotation'].initial  = keyNotation
+                else:
+                    size = 5
+                    
+                    
+               
+                    
+                
+                self.fields['zerocomponent'].widget=forms.SelectMultiple(attrs={'size': size})
+                self.fields['zerocomponent'].widget.attrs['style'] = 'width: 100%;'
+                self.fields['zerocomponent'].queryset = CatalogPropertyDetailTemp.objects.filter(name__in=zero_component).order_by('name')
+                
+            
+            else:
+                self.fields['jquery'].initial  = '' 
+                self.fields['detailrules'].initial = '' 
+                self.fields['coefficientsrules'].queryset  = CatalogPropertyDetailTemp.objects.none() 
+                self.fields['keynotation'].queryset  = KeyNotation.objects.none() 
+                zero_component= list(set(catalogPropertyDetailList))
+                self.fields['zerocomponent'].queryset = CatalogPropertyDetailTemp.objects.none() 
+            
+             
 
         else:
             if args:#save  new
@@ -1137,13 +1503,7 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                         #catalogpointgroupSelected = CatalogAxis.objects.get(id=4)
                         #self.fields['axis'].initial =catalogpointgroupSelected
                         #self.fields['axisdetail'].initial = "<strong>axis not assigned</strong>"
-                        
-                     
-                     
 
-
-                    
-                    
                     
         else:
             if args:#save  new
@@ -1242,7 +1602,7 @@ class FileUserAdminForm(forms.ModelForm):
         issue = None
         cod_code = None
         chemical_formula = None
-        published = None
+        publish = None
  
         onchange = False
         if args: #(true if edit and save or save an existing instance, when form was changed), false when instance was selected from change list
@@ -1265,7 +1625,7 @@ class FileUserAdminForm(forms.ModelForm):
             issue = argsCheck(args,'issue')  
             cod_code = argsToInt(args,'cod_code') 
             chemical_formula = argsCheck(args,'chemical_formula')  
-            published = argsCheck(args,'published') 
+            publish = argsCheck(args,'publish') 
             
             
             if not args[0].has_key('_save') and not args[0].has_key('_addanother') and not args[0].has_key('_continue'):    
@@ -1282,6 +1642,9 @@ class FileUserAdminForm(forms.ModelForm):
         self.fields['fileuserid'].widget = forms.HiddenInput()
         #self.fields['fileuserid'].empty_label = None
         
+        
+        self.fields['datafile_tempid']  = forms.CharField(label="")
+        self.fields['datafile_tempid'].widget = forms.HiddenInput()
 
         
         self.fields['properties'] = forms.ModelMultipleChoiceField(
@@ -1330,7 +1693,7 @@ class FileUserAdminForm(forms.ModelForm):
         
          
         #self.fields['title']  = forms.CharField(label='Title', required=False)
-        self.fields['title']  = forms.CharField(label='Title')
+        self.fields['title']  = forms.CharField(label='Title',required=False)
         self.fields['title'].widget = forms.TextInput() 
         
         self.fields['authors']  = forms.CharField(label='Authors')
@@ -1342,7 +1705,7 @@ class FileUserAdminForm(forms.ModelForm):
         self.fields['year']  = forms.CharField(label='Year')
         self.fields['year'].widget = forms.TextInput() 
         
-        self.fields['volume']  = forms.CharField(label='Volume')
+        self.fields['volume']  = forms.CharField(label='Volume',required=False)
         self.fields['volume'].widget = forms.TextInput() 
         
         self.fields['issue']  = forms.CharField(label='Issue')
@@ -1382,7 +1745,7 @@ class FileUserAdminForm(forms.ModelForm):
         
         if self.instance.pk: 
             if args:
-                    if published:
+                    if publish:
                         if datepublished:
                             self.instance.datepublished = datetime.datetime.strptime(datepublished, '%Y-%m-%d %H:%M:%S')
                             if  self.instance.datafile:
@@ -1439,60 +1802,63 @@ class FileUserAdminForm(forms.ModelForm):
                     #fn=reverse('get_datafile', args=['1000377.mpod'])  
                     
                     
-                    #self.instance.datafile
-                    if  self.instance.datafile:
-                        #self.fields['filenamepublished'].label = mark_safe("<a href='%s'>File name published </a>") % (reverse('get_datafile', args=[self.instance.datafile.filename]))
-                        self.fields['filenamepublished'].initial = "<a href='/datafiles/" + self.instance.datafile.filename  +"' target='_blank'>"  + self.instance.datafile.filename  +"</a>"
-                    else:
-                        self.fields['filenamepublished'].initial = ""
+                    try:
                         
-                        
-                        
+                        if  self.instance.datafile:
+                            #self.fields['filenamepublished'].label = mark_safe("<a href='%s'>File name published </a>") % (reverse('get_datafile', args=[self.instance.datafile.filename]))
+                            self.fields['filenamepublished'].initial = "<a href='/datafiles/" + self.instance.datafile.filename  +"' target='_blank'>"  + self.instance.datafile.filename  +"</a>"
+                        else:
+                            self.fields['filenamepublished'].initial = ""
+                            
+                    except Exception  as error:
+                        print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)  
+           
 
                   
                     
                         
+                    try:
+                        objDataFileTemp = DataFileTemp.objects.get(filename__exact=self.instance.filename)
+                        self.fields['datafile_tempid'].initial = objDataFileTemp.pk
+                        objPublArticleTemp = objDataFileTemp.publication
+                        propertyTempQuerySet= objDataFileTemp.properties.all()
+                        experimentalcond_ids = ExperimentalParCondTemp_DataFileTemp.objects.filter(datafiletemp=objDataFileTemp).values_list('experimentalfilecontemp_id',flat=True)  
+                       
+             
+                        experimentalcondQuerySet = ExperimentalParCondTemp.objects.filter(id__in=experimentalcond_ids)
+                  
+                        
+                        self.fields['experimentalcon'].queryset= ExperimentalParCondTemp.objects.all()
+                        self.fields['experimentalcon'].initial= experimentalcondQuerySet
+                        
+                         
+                        self.fields['properties'].queryset = PropertyTemp.objects.all() 
+                        self.fields['properties'].initial = propertyTempQuerySet
+                        
+                        self.fields['phase_generic'].initial = objDataFileTemp.phase_generic
+                        self.fields['phase_name'].initial = objDataFileTemp.phase_name
+                        self.fields['chemical_formula'].initial = objDataFileTemp.chemical_formula
+                        
+                        if objDataFileTemp.cod_code:
+                            self.fields['cod_code'] = objDataFileTemp.cod_code
+                        
+                        self.fields['title'].initial = objPublArticleTemp.title
+                        self.fields['authors'].initial = objPublArticleTemp.authors
+                        self.fields['journal'].initial = objPublArticleTemp.journal
+                        self.fields['year'].initial = objPublArticleTemp.year
+                        self.fields['volume'].initial = objPublArticleTemp.volume
+                        self.fields['issue'].initial = objPublArticleTemp.issue
+                        self.fields['first_page'].initial = objPublArticleTemp.first_page
+                        self.fields['last_page'].initial = objPublArticleTemp.last_page
+                        self.fields['reference'].initial = objPublArticleTemp.reference
+                        self.fields['pages_number'].initial = objPublArticleTemp.pages_number
+                        
+                        datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(datafiletemp=objDataFileTemp).values_list('id',flat=True) 
+                        propertyValuesTempQuerySet= PropertyValuesTemp.objects.filter(datafilepropertytemp_id__in=datafilepropertytemp_ids)
+                    except ObjectDoesNotExist as error:
+                        print "message in the function extractProperties  for debug purposes Message({0}): {1}".format(99, error.message)  
+ 
                     
-                    objDataFileTemp = DataFileTemp.objects.get(filename__exact=self.instance.filename)
-                    objPublArticleTemp = objDataFileTemp.publication
-                    propertyTempQuerySet= objDataFileTemp.properties.all()
-                    experimentalcond_ids = ExperimentalfilecontempDatafiletemp.objects.filter(datafiletemp=objDataFileTemp).values_list('experimentalfilecontemp_id',flat=True)  
-                   
-                    #self.fields['reportvalidationcustom'].initial = "<strong><font color='black'>" + self.instance.reportvalidation +" </font></strong>" 
-                    #self.fields['reportvalidation'].initial= self.instance.reportvalidation
-                   
-                    experimentalcondQuerySet = ExperimentalParCondTemp.objects.filter(id__in=experimentalcond_ids)
-                    """self.fields['experimentalcon'].queryset= experimentalcondQuerySet
-                    self.fields['experimentalcon'].initial= experimentalcond_ids
-                    """
-                    
-                    self.fields['experimentalcon'].queryset= ExperimentalParCondTemp.objects.all()
-                    self.fields['experimentalcon'].initial= experimentalcondQuerySet
-                    
-                     
-                    self.fields['properties'].queryset = PropertyTemp.objects.all() 
-                    self.fields['properties'].initial = propertyTempQuerySet
-                    
-                    self.fields['phase_generic'].initial = objDataFileTemp.phase_generic
-                    self.fields['phase_name'].initial = objDataFileTemp.phase_name
-                    self.fields['chemical_formula'].initial = objDataFileTemp.chemical_formula
-                    
-                    if objDataFileTemp.cod_code:
-                        self.fields['cod_code'] = objDataFileTemp.cod_code
-                    
-                    self.fields['title'].initial = objPublArticleTemp.title
-                    self.fields['authors'].initial = objPublArticleTemp.authors
-                    self.fields['journal'].initial = objPublArticleTemp.journal
-                    self.fields['year'].initial = objPublArticleTemp.year
-                    self.fields['volume'].initial = objPublArticleTemp.volume
-                    self.fields['issue'].initial = objPublArticleTemp.issue
-                    self.fields['first_page'].initial = objPublArticleTemp.first_page
-                    self.fields['last_page'].initial = objPublArticleTemp.last_page
-                    self.fields['reference'].initial = objPublArticleTemp.reference
-                    self.fields['pages_number'].initial = objPublArticleTemp.pages_number
-                    
-                    datafilepropertytemp_ids=DataFilePropertyTemp.objects.filter(datafiletemp=objDataFileTemp).values_list('id',flat=True) 
-                    propertyValuesTempQuerySet= PropertyValuesTemp.objects.filter(datafilepropertytemp_id__in=datafilepropertytemp_ids)
                     
         else:
             if args:#save  new
@@ -1500,3 +1866,13 @@ class FileUserAdminForm(forms.ModelForm):
             else:#add new
                 pass
         
+        
+        
+        
+        
+class CatalogPropertyAdminForm(forms.ModelForm):  
+    class Meta:
+        model = CatalogProperty
+        
+    def __init__(self, *args, **kwargs):   
+        super(CatalogPropertyAdminForm, self).__init__(*args, **kwargs)

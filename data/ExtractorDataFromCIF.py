@@ -24,6 +24,8 @@ class Extractor (object):
         self.core_dic_filepath=core_dic_filepath
         self.mpod_dic_filepath=mpod_dic_filepath
         self.experimentalParCondList=[]
+        self.experimentalCond={}
+        self.data_code={}
         self.code = 0
         self.dataFile= None
         
@@ -50,9 +52,11 @@ class Extractor (object):
         #self.code=0
         for li in lins:
              
-            self.code = self.get_data_code_lin(li)
-            if self.code>0:
-                break
+            code = self.get_data_code_lin(li)
+            #return self.get_data_code_lin(li)
+            if code>0:
+                return code
+                
         if self.code==0:
             raise Exception('Cid data_ code', 'missing')
         """else:
@@ -87,6 +91,52 @@ class Extractor (object):
                 val = ""
             vals.append(val)
         return vals
+    
+    def get_info_2(self, texto,  tags):
+        found = ''
+        vals=[]
+        line=[]
+        for tag in tags:
+            end=tag + ' .*\n'
+            try:
+                found = re.search(r'\b' + end + r'\b', texto).group(0)
+                tagfound = found[:len(tag)]
+                
+                if tag == tagfound:
+                    foundval = found[len(tag) + 1:]
+                    foundval = foundval.rstrip("\r\n").strip().strip("'").strip()
+                    vals.append( foundval)  
+  
+            except AttributeError:
+                if tag == '_chemical_formula':
+                    try:
+                        tag = '_chemical_formula_sum'
+                        end=tag + ' .*\n'
+                        found = re.search(r'\b' + end + r'\b', texto).group(0)
+                        tagfound = found[:len(tag)]
+                    
+                        if tag == tagfound:
+                            foundval = found[len(tag) + 1:]
+                            foundval = foundval.rstrip("\r\n").strip().strip("'").strip()
+                            vals.append( foundval)  
+                    except AttributeError:
+                        found = ''
+                        vals.append( found) 
+                        
+                    
+                else: 
+                    found = ''
+                    vals.append( found)  
+                
+                
+        return vals
+            
+ 
+                
+                    
+               
+       
+    
 
     def get_info_title(self, texto):
         title_lins=[]
@@ -103,11 +153,15 @@ class Extractor (object):
         j=2
         while flag:
             stripped = lins[ind+j].strip().strip("'").strip()
-            if stripped[0]==";":
-                break
+             
+            if  len(stripped) > 0:            
+                if stripped[0]==";":
+                    break
+                else:
+                    title_lins.append(stripped)
+                    j=j+1
             else:
-                title_lins.append(stripped)
-                j=j+1
+                break
         return " ".join(title_lins)
 
     def get_info_authors(self, texto):
@@ -160,87 +214,140 @@ class Extractor (object):
         return tvs
     
     
-    def get_props(self,texto,tags):
-        
-        
+
+            
+            
+    def get_props(self,texto,tags,loopedtgs,approved):
+ 
+            
+            
         tg="_prop"
         #ntgs= ['conditions','measurement','frame','symmetry', 'data']
         ntgs=tags
         props=[]
-        propsStructure=[]
+        propsList=[]
         propstag=[]
         propsval=[]
-        props_agg=[]
+        props_tags_looped=loopedtgs
+        props_tags=[]
         lins = map(lambda x: x.strip(), texto.strip().split("\n"))
+        texto_loops = None
         ind=0
+        filePropertyData = FilePropertyData() 
+        
         for i, lin in enumerate(lins):
             if lin.find(tg)>-1:
                 lcs=lin.split()
                 prstr=lcs[0].strip()[5:]
                 objProperty = None
+                tag=lcs[0]
                 try:
-                    tag=lcs[0]
-                    objProperty=Property.objects.get(tag=tag)
+                    if approved:
+                        objProperty=Property.objects.get(tag=tag)
+                    else:
+                        objProperty=PropertyTemp.objects.get(tag=tag)
+                    
                 except ObjectDoesNotExist as error:      
-                    print "Message({0}): {1}".format(99, error.message)   
+                    print "message in the function get_props for debug purposes. Message({0}): {1}".format(99, error.message)   
+                    print "Property not exist"
                     
                 
                 parts=prstr.split('_')
-                if parts[1] in ntgs:
-                    if prstr not in props_agg and objProperty == None:
-                        props_agg.append(tag)
+                if parts[1] in ntgs: #[u'conditions', u'measurement', u'frame', u'symmetry', u'data', u'thermal']
+                    if prstr not in filePropertyData._other_looped and tag not in props_tags_looped :
+                        #props_tags.append(tag)
+                        if len(lcs) > 1:
+                            if len(lcs) > 2:
+                                val = ''
+                                for i, v in enumerate(lcs):
+                                    if i > 0:
+                                        lcs[i] = ''
+                                        val = val + " "+ v
+                                    
+                              
+                                lcs[1] = val.strip().strip("'").strip()
+                            else:
+                                lcs[1] = lcs[1].strip().strip("'").strip()
+                            
+                            filePropertyData._no_looped.append(lcs)
+                        else:                        
+                            filePropertyData._other_looped.append(tag)
+                        
+
+     
                 else:
                     if prstr not in props:
-                        structureProperty=FileProperty()
-                        structureProperty._prop_name=prstr
+                        structureProperty = FileProperty()
+                        structureProperty._name["prop_name"] = prstr
                         prtagstr=lcs[1].strip()
-                        propstag.append( prtagstr)
-                        propsStructure.append(structureProperty)
-                        props.append(prstr)
-                      
-                                     
-        for j,tag in enumerate(propstag):
-            for i, lin in enumerate(lins):
-                t=tag.strip().strip("'").strip()
-                if lin.find(t)>-1:
-                    lcs=lin.split() 
-                    if not lcs[0].startswith("_prop"):
-                        if '_prop_data_label'  in props_agg:
-                            propsStructure[j]._prop_data_label.append(lcs[0])
-                            
-                        if '_prop_data_tensorial_index' in props_agg:  
-                            propsStructure[j]._prop_data_tensorial_index.append(lcs[1])
+                        #propstag.append( prtagstr)
+                        structureProperty._propstag["propstag"] = prtagstr
+                        coeffcounter = 0
+                        cfound = False
+                        for x, lin in enumerate(lins):
+                            t=prtagstr.strip().strip("'").strip()
+                            f =  lin.find(t)
+                            if lin.find(t)>-1:
+                                coeffficientsandvalues=lin.split() 
+                                if not coeffficientsandvalues[0].startswith("_prop"):
+                                    if t == coeffficientsandvalues[0].strip().strip("'").strip():
+                                        coeff = {}
+                                        if not structureProperty._coefflen:
+                                            structureProperty._coefflen =  len(coeffficientsandvalues[:3])
+                                            structureProperty._looped_val[0] = coeffficientsandvalues[3:]
+                                            
+                                        
+                                        structureProperty._coeffi[coeffcounter] = coeffficientsandvalues[:3]
+                                        coeffcounter = coeffcounter + 1
                         
-                        if  '_prop_data_value' in props_agg:
-                            propsStructure[j]._prop_data_value.append(lcs[2])
-                        
-                        if  '_prop_measurement_method' in props_agg:
-                            propsStructure[j]._prop_measurement_method.append(lcs[3])
-                        else:
-                            propsStructure[j]._prop_measurement_method.append('')
+                                
+                        propsList.append(structureProperty)
+                             
 
-                        if  '_prop_conditions_frequency' in props_agg:
-                            propsStructure[j]._prop_conditions_frequency.append(lcs[4])
-                        else:
-                            propsStructure[j]._prop_conditions_frequency.append('')
-          
-                #for tag in propstag:
-                #propsval.append(object)
-                            
+ 
+ 
+              
+        if filePropertyData._other_looped:
+            for i, tag in enumerate(filePropertyData._other_looped):
+                for x,p in enumerate(propsList):
+                    p._looped_tag_val[tag] = p._looped_val[0][i].strip().strip("'").strip()
+                    
+
         
-        return props,props_agg,propsStructure
+
+        
+        for x,p in enumerate(propsList):
+            #p._loped =  []
+            #print p._name['prop_name']
+            for key,value in p._coeffi.items():
+                for i,tag in enumerate(props_tags_looped):
+                    looped = {}
+                    looped[tag,i] = value[i]
+                    p._looped.append(looped)
+                    #print p._looped[i]
+            #print  p._looped
+                 
+        
+        filePropertyData.fileproperty = propsList
+        
+ 
+        
+        #return props,props_agg,propsStructure
+        return filePropertyData
     
     
     
 
     
     
-    def get_conds(self,texto,tags):
+    def get_conds(self,texto,tags,approved):
         tg="_prop"
         #ntgs= ['conditions','measurement','frame','symmetry']
         
         ntgs = tags
         props_agg=[]
+        experimentalParCondList =[]
+        
         lins = map(lambda x: x.strip(), texto.strip().split("\n"))
         ind=0
         for i, lin in enumerate(lins):
@@ -252,15 +359,22 @@ class Extractor (object):
                     if prstr not in props_agg:
                         try:
                             tag = lcs[0]
-                            objExperimentalParCond=ExperimentalParCond.objects.get(tag=tag)
-                            props_agg.append(prstr)
+                            if approved:
+                                objExperimentalParCond=ExperimentalParCond.objects.get(tag=tag)
+                            else:
+                                objExperimentalParCond=ExperimentalParCondTemp.objects.get(tag=tag)
+
+                            experimentalParCondList.append(objExperimentalParCond)
+                            
                         except ObjectDoesNotExist as error:
-                            print "Message({0}): {1}".format(99, error.message)   
+                            print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error.message)   
+                            print tag + "Does Not Exist: Add to list for load to DB "
+                            props_agg.append(prstr)
 
                     
                         
 
-        return props_agg
+        return props_agg, experimentalParCondList
     
     #search in dictionary
     def props_info_in_dic(self,props):
@@ -270,7 +384,7 @@ class Extractor (object):
         lins = map(lambda x: x.strip(), texto.strip().split("\n"))
         for prop in props:
             pro_str = "data_prop"+prop
-            print pro_str
+            #print pro_str
             for ii, lin in enumerate(lins):
                 ind = None
                 if lin.startswith(pro_str):
@@ -298,7 +412,7 @@ class Extractor (object):
                     jj = jj+1
     #                if jj > len(tgs) + 1 :
     #                    cond = False
-        print "hecho"
+        #print "hecho"
         return props_info
     
     def checkExperimentalParCond(self,tag):
@@ -323,340 +437,493 @@ class Extractor (object):
         for i, pt in enumerate(proptagList):
             ntgs.append( proptagList[i].tag )
             
-            
+         
         for i, fil in enumerate(self.filets):
+            experimentalCondOutDB  = None     
+            experimentalCondInDB = None    
             filepath=os.path.join(self.cifs_dir, fil)
             texto = self.read_file_1(filepath)
-            this_conds = self.get_conds(texto,ntgs)
-            for cn in this_conds:
-                if not cn in conds:
-                    conds.append(cn)
-                    
-                cond_ind=conds.index(cn)+1
-                inds.append(cond_ind)
-                
-            conds = sorted(conds)
-
-        aa = self.props_info_in_dic(conds)
-        for cond in conds:
-            if approved == False:                
-                experimentalParCond= ExperimentalParCondTemp()
-            else:
-                experimentalParCond=ExperimentalParCond()
-                
+            experimentalCondOutDB,experimentalCondInDB = self.get_conds(texto,ntgs,approved)
+ 
             
-            print tg+cond
-            print cond
-            experimentalParCond.tag=tg+cond
-            experimentalParCond.description=cond
-
-            #tp = cond
-            if bool(aa):         
-                try:       
-                    na = aa[cond]['_name'][6:]
-                    try:
-                        un = aa[cond]['_units']
-                    except:
-                        un = 'n.a.'
-                    try:
-                        ud = aa[cond]['_units_detail']
-                    except:
-                        ud = 'n.a.'
-                except:
-                    dictionary=Dictionary.objects.get(tag__exact=tg+cond)                 
-                    na=dictionary.name  
-                    un=dictionary.units  
-                    ud=dictionary.units_detail 
-                    
-               
-            else:
-                dictionary=Dictionary.objects.get(tag__exact=tg+cond)                 
-                #print dictionary.tag
-                na=dictionary.name  
-                #dictionary.description  
-                un=dictionary.units  
-                ud=dictionary.units_detail 
-                #dictionary.active 
-                #dictionary.definition 
-                #dictionary.deploy 
-                #dictionary.type  
-                #dictionary.category
-                    
-            
+            self.experimentalCond[fil] = []
+            if experimentalCondInDB:
+                self.experimentalCond[fil] = experimentalCondInDB
              
-            try:    
-                if approved == False:      
-                    try:
-                        experimentalParCondExist=ExperimentalParCondTemp.objects.get(tag__exact=experimentalParCond.tag)
-                    except ObjectDoesNotExist as error:
-                        print "Message({0}): {1}".format(99, error.message)   
-                        experimentalParCondExist = None
+            if experimentalCondOutDB:
+                experimentalCondOutDB = sorted(experimentalCondOutDB)
+                aa = self.props_info_in_dic(experimentalCondOutDB)
+                for cond in experimentalCondOutDB:
+                    if approved:                
+                        experimentalParCond= ExperimentalParCond()
+                    else:
+                        experimentalParCond=ExperimentalParCondTemp()
                         
-                
+    
+                    experimentalParCond.tag=tg+cond
+                    experimentalParCond.description=cond
+        
+                    #tp = cond
+                    if bool(aa):         
+                        try:       
+                            na = aa[cond]['_name'][6:]
+                            try:
+                                un = aa[cond]['_units']
+                            except:
+                                un = 'n.a.'
+                            try:
+                                ud = aa[cond]['_units_detail']
+                            except:
+                                ud = 'n.a.'
+                        except:
+                            dictionary=Dictionary.objects.get(tag__exact=tg+cond)                 
+                            na=dictionary.name  
+                            un=dictionary.units  
+                            ud=dictionary.units_detail 
+                            
+                       
+                    else:
+
+                        try:
+                            dictionary=Dictionary.objects.get(tag__exact=tg+cond)                 
+                            na=dictionary.name  
+                            un=dictionary.units  
+                            ud=dictionary.units_detail 
+
+                            
+                        except ObjectDoesNotExist as error:
+                            #print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error.message)   
+                            print tg+cond + " it does not exist in the DB or in the dictionary"
+                            na= (tg+cond)[6:]
+                            un='?'
+                            ud='?'
+                            
+                            
                     
-                    if not experimentalParCondExist:
-                        print 'propiedad nueva'
+                     
+                    try:                            
                         experimentalParCond.name=' '.join(na.split('_')) 
                         experimentalParCond.units=un
                         experimentalParCond.units_detail=ud
                         experimentalParCond.save()    
-                        self.experimentalParCondList.append(experimentalParCond)
-                    else:
-                        print 'propiedad existe' 
-                        self.experimentalParCondList.append(experimentalParCondExist)
-               
+                        #self.experimentalParCondList.append(experimentalParCond)
+                        list = self.experimentalCond[fil]
+                        list.append(experimentalParCond)
+                        self.experimentalCond[fil] = list
+
+        
+                    except Exception  as error:
+                        print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)    
+                        print "I had an error when inserting record"
+                        return False
                     
+         
+            else:
+                print  "This file does not contain new experimental conditions"
+                
+        return True
+    
+        
+            
+    def saveDataFileProperty(self,approved,dataFileProperty,objProperty,dataFile,pr):
+        sucess = False
+        if approved:
+            if  dataFileProperty:
+                PropertyValues.objects.filter(datafileproperty=dataFileProperty).delete()
+                
+            try:
+                if not dataFileProperty:
+                    dataFileProperty=DataFileProperty()
+                    dataFileProperty.property=objProperty
+                    dataFileProperty.datafile=dataFile
+                    dataFileProperty.save()
+                
+                    
+            except Exception  as error:
+                print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)  
+                print "An error occurred when inserting the DB the new dataFileProperty"
+                return False
+
+            propertyValues= PropertyValues()
+            for n, it in enumerate(pr._looped):
+                
+                propertyValues.datafileproperty = dataFileProperty
+                for key,value in it.items():
+                    if key[0] == '_prop_data_label':
+                        propertyValues.label = value
+                        
+                    if key[0] == '_prop_data_tensorial_index':
+                        propertyValues.tensorial_index = value
+                        
+                    if key[0] == '_prop_data_value':
+                        propertyValues.value = value
+
+                if  key[1] < (pr._coefflen - 1):
+                    pass
+                else:
+                    #counter = counter + 1
+                    try:
+                        propertyValues.save();  
+                        propertyValues= PropertyValues()
+                    except Exception  as error:
+                        print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)  
+                        print "An error occurred when inserting the DB the new propertyValues"
+                        return sucess
+            
+                          
+                  
+                  
+        else:
+            if  dataFileProperty:
+                PropertyValuesTemp.objects.filter(datafilepropertytemp=dataFileProperty).delete()
+                
+            try:
+                if not dataFileProperty:
+                    dataFileProperty=DataFilePropertyTemp()
+                    dataFileProperty.propertytemp=objProperty
+                    dataFileProperty.datafiletemp=dataFile
+                    dataFileProperty.save()
+                    
+            except Exception  as error:
+                print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)  
+                print "An error occurred when inserting the DB the new dataFileProperty"
+                return False
+
+       
+            propertyValuesTemp= PropertyValuesTemp()
+            for n, it in enumerate(pr._looped):
+                
+                propertyValuesTemp.datafilepropertytemp = dataFileProperty
+                for key,value in it.items():
+                    if key[0] == '_prop_data_label':
+                        propertyValuesTemp.label = value
+                        
+                    if key[0] == '_prop_data_tensorial_index':
+                        propertyValuesTemp.tensorial_index = value
+                        
+                    if key[0] == '_prop_data_value':
+                        propertyValuesTemp.value = value
+
+                if  key[1] < (pr._coefflen - 1):
+                    pass
                 else:
                     try:
-                        experimentalParCondExist=ExperimentalParCond.objects.get(tag__exact=experimentalParCond.tag)
-                    except ObjectDoesNotExist as error:
-                        print "Message({0}): {1}".format(99, error.message)   
-                        experimentalParCondExist = None
-                 
-                    if not experimentalParCondExist:
-                        experimentalParCondExistTemp=ExperimentalParCondTemp.objects.get(tag__exact=experimentalParCond.tag)
-                        print 'propiedad nueva'
-                        experimentalParCond.name= experimentalParCondExistTemp.name
-                        experimentalParCond.units=experimentalParCondExistTemp.units
-                        experimentalParCond.units_detail=experimentalParCondExistTemp.units_detail
-                        experimentalParCond.save()    
-                        self.experimentalParCondList.append(experimentalParCond)
-                    else:
-                        print 'propiedad existe' 
-                        #experimentalParCondExist.update(name=' '.join(na.split('_')),units=un,units_detail=ud) 
-                        self.experimentalParCondList.append(experimentalParCondExist)
-                
                         
-                
-                        
-                    
-
-            except  Exception, e:
-                print "Error({0}): {1}".format(e.errno, e.strerror)       
-                
+                        propertyValuesTemp.save();  
+                        propertyValuesTemp= PropertyValuesTemp()
+                    except Exception  as error:
+                        print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)  
+                        print "An error occurred when inserting the DB the new propertyValuesTemp"
+                        return False
          
+                  
+        return True
+    
+     
+    def  extractCondictionsValues(self,approved,dataFileProperty,objProperty,datafile,key,val):
+        experimentalCondition = None
+         
+         
+        if not dataFileProperty:
+            try:
+                if approved:
+                    dataFileProperty=DataFileProperty.objects.get(property=objProperty, datafile=datafile)
+                else:
+                    dataFileProperty=DataFilePropertyTemp.objects.get(propertytemp=objProperty, datafiletemp=datafile)
+            except ObjectDoesNotExist as error:
+                print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error.message)  
+                print "The dataFileProperty does not exist a new record will be created in the DB"
+                return False
+            
+        try:
+                if approved:
+                    if not dataFileProperty:
+                        dataFileProperty=DataFileProperty()
+                        dataFileProperty.property=objProperty
+                        dataFileProperty.datafile=datafile
+                        dataFileProperty.save()
+                else:
+                    if not dataFileProperty:
+                        dataFileProperty=DataFilePropertyTemp()
+                        dataFileProperty.property=objProperty
+                        dataFileProperty.datafile=datafile
+                        dataFileProperty.save()
+                
+        except Exception  as error:
+            print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)  
+            print "An error occurred when inserting the DB the new dataFileProperty"
+            return False
         
+
         
+        try:
+            if approved:
+                experimentalCondition = ExperimentalParCond.objects.get(tag__exact=key)
+            else:
+                experimentalCondition = ExperimentalParCondTemp.objects.get(tag__exact=key)
+        
+        except ObjectDoesNotExist as error:
+            print "message in the function extractProperties  for debug purposes Message({0}): {1}".format(99, error.message)  
+            print "The experimentalCondition does not exist"
+            return False
+                
+                
+                
+        propertyConditionDetail = None   
+        try:
+                if approved:
+                    propertyConditionDetail = PropertyConditionDetail.objects.get(datafileproperty=dataFileProperty, condition=experimentalCondition)
+                else:
+                    propertyConditionDetail=  PropertyConditionDetailTemp.objects.get(datafileproperty=dataFileProperty,condition=experimentalCondition)
+        except ObjectDoesNotExist as error:
+            print "message in the function extractProperties  for debug purposes Message({0}): {1}".format(99, error.message)  
+            print "The propertyConditionDetail does not exist a new record will be created in the DB"
+            
+    
+        try:
+            if not propertyConditionDetail:
+                if approved:
+                    propertyConditionDetail = PropertyConditionDetail()
+                    propertyConditionDetail.condition = experimentalCondition
+                    propertyConditionDetail.datafileproperty = dataFileProperty
+                    propertyConditionDetail.value = val
+                    propertyConditionDetail.save()
+    
+                else:
+                    propertyConditionDetail = PropertyConditionDetailTemp()                 
+                    propertyConditionDetail.condition = experimentalCondition
+                    propertyConditionDetail.datafileproperty = dataFileProperty
+                    propertyConditionDetail.value = val
+                    propertyConditionDetail.save()
+                
+                
+            
+            else:
+                propertyConditionDetail.value = val
+                propertyConditionDetail.save()
+                
+        except Exception  as error:
+                        print "message in the function extractProperties  for debug purposes Message({0}): {1}".format(99, error)  
+                        print "An error occurred when inserting the new  propertyConditionDetail in the DB"
+                        return False
+            
+            
     def extractProperties(self,approved, *args):
         propertyList =[]
         dataFilePropertyList=[]
+        filePropertyData = None
+
         
        
         try: 
             tg="_prop"
-            props = []
+            
             data_props={}
             ntgs=[]
+            loopedtgs=[]
             #proptagList=PropTags.objects.filter(active=1)        #categorytag_id=2
             proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=2))
+            loopedproptagList=PropLoopedTags.objects.all()
+            
             for i, pt in enumerate(proptagList):
                 ntgs.append( proptagList[i].tag )
+                
+            for i, pt in enumerate(loopedproptagList):
+                #loopedtgs.append( loopedproptagList[i].tag.strip()[5:])
+                loopedtgs.append( loopedproptagList[i].tag)
  
             
             for i, fil in enumerate(self.filets):
+                dictionary = None
+                objProperty = None
+                dataFileProperty = None
+                dataFile = None
+                filePropertyData = None
                 filepath=os.path.join(self.cifs_dir, fil)
                 texto = self.read_file_1(filepath)
-                #code = self.get_data_code(texto)          
-                this_props,props_agg,propsStructure = self.get_props(texto,ntgs)
-                for pr in this_props:
+
+                this_props  = []
+                props_agg  = []
+                propsStructure = []
+                
+              
+                filePropertyData = self.get_props(texto,ntgs,loopedtgs,approved)
+                props = []
+                for pr in filePropertyData.fileproperty:
                     if not pr in props:
-                        props.append(pr)
-                #props = sorted(props)   
-    
-                #dataFilePropertyold=False
+                        props.append(pr._name['prop_name'])
+
+
+
                 aa = self.props_info_in_dic(props)
     
-                for i_pr, pr in enumerate(propsStructure):     
+                for i_pr, pr in enumerate(filePropertyData.fileproperty):     
+                    indextag = pr._propstag
+                    
                     
                     if bool(aa):         
                         try:       
-                            na = aa[pr._prop_name]['_name'][6:]
+                            na = aa[pr._name["prop_name"]]['_name'][6:]
                             try:
-                                un = aa[pr._prop_name]['_units']
+                                un = aa[pr._name["prop_name"]]['_units']
                             except:
                                 un = 'n.a.'
                             try:
-                                ud = aa[pr._prop_name]['_units_detail']
+                                ud = aa[pr._name["prop_name"]]['_units_detail']
                             except:
                                 ud = 'n.a.'
                         except:
-                            dictionary=Dictionary.objects.get(tag__exact=tg+pr._prop_name)                 
+                            print tg+pr._name["prop_name"] + " it does not exist in the in the Dictionary File"
+                            
+                            try:
+                                dictionary=Dictionary.objects.get(tag__exact=tg+pr._name["prop_name"])                 
+                                na=dictionary.name  
+                                un=dictionary.units  
+                                ud=dictionary.units_detail 
+                            except ObjectDoesNotExist as error:
+                                #print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error.message)   
+                                print tg+pr._name["prop_name"] + " it does not exist in the  Dictionary Table"
+                       
+                   
+                    else:
+                        try:
+                            dictionary=Dictionary.objects.get(tag__exact=tg+pr._name["prop_name"])                 
                             na=dictionary.name  
                             un=dictionary.units  
                             ud=dictionary.units_detail 
-                        
-                   
-                    else:
-                        dictionary=Dictionary.objects.get(tag__exact=tg+pr._prop_name)                 
-                        #print dictionary.tag
-                        na=dictionary.name  
-                        #dictionary.description  
-                        un=dictionary.units  
-                        ud=dictionary.units_detail 
-                        #dictionary.active 
-                        #dictionary.definition 
-                        #dictionary.deploy 
-                        #dictionary.type  
-                        #dictionary.category
-                        
-                        
+                        except ObjectDoesNotExist as error:
+                            #print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error.message)   
+                            print tg+pr._name["prop_name"] + " it does not exist in the  Dictionary Table"
+                            
+                            
+                            
                     
-
                     try:
                         if approved:
-                            propertyExist=Property.objects.get(tag__exact=tg+pr._prop_name)
+                            objProperty=Property.objects.get(tag__exact=tg+pr._name["prop_name"])
+                            na=objProperty.name  
+                            un=objProperty.units  
+                            ud=objProperty.units_detail 
                         else:
-                            propertyExist=PropertyTemp.objects.get(tag__exact=tg+pr._prop_name)
+                            objProperty=PropertyTemp.objects.get(tag__exact=tg+pr._name["prop_name"])
+                            na=objProperty.name  
+                            un=objProperty.units  
+                            ud=objProperty.units_detail 
   
                     except ObjectDoesNotExist as error:
-                        print "Message({0}): {1}".format(99, error.message)   
-                        propertyExist = None
-    
-                        
-                    dataFilePropertyExist = None    
+                        print "message in the function extractProperties for debug purposes.  Message({0}): {1}".format(99, error.message)   
+                        print "the property does not exist  in the DB, a new one will be created"
+                               
                     
-                    dataFileProperty = None
-                    if not propertyExist:        
+                           
+
+                    if objProperty == None and dictionary == None:
+                        na= (tg+pr._name["prop_name"])[6:]
+                        un='?'
+                        ud='?'
+
+                    if not objProperty:        
                         if approved:
                             objProperty=Property()
                         else:
                             objProperty=PropertyTemp()
+                            
+                            
                         
-                        objProperty.tag=tg+pr._prop_name
-                        objProperty.description=pr._prop_name     
+                        objProperty.tag=tg+pr._name["prop_name"]
+                        objProperty.description=pr._name["prop_name"]   
                         formatedname = ' '.join(na.split('_')) 
                         print formatedname
                         objProperty.name = formatedname
                         
                         objProperty.units =un
                         objProperty.units_detail = ud
-                        if pr._prop_data_label[0] != "":
-                            objProperty.short_tag =  pr._prop_data_label[0]
-                            
-                        objProperty.save()
                         
- 
+                        if pr._propstag != "":
+                            objProperty.short_tag =  pr._propstag["propstag"].strip().strip("'").strip()
+                            
                         try:
-                            if approved:
-                                self.dataFile=DataFile.objects.get(filename__exact=str(self.code) + '.mpod') 
-                            else:
-                                self.dataFile=DataFileTemp.objects.get(filename__exact=fil) 
-                                
+                            objProperty.save()
                         except ObjectDoesNotExist as error:
-                            print "Message({0}): {1}".format(99, error.message)   
-                            
-                            
-                        if not self.dataFile:     
-                            if approved: 
-                                self.dataFile=DataFile()
-                            else:
-                                self.dataFile=DataFileTemp()    
-                        else:
-                            try:
-                                if approved:
-                                    dataFileProperty = DataFileProperty.objects.get(property=objProperty, datafile=self.dataFile)
-                                else:
-                                    dataFileProperty=  DataFilePropertyTemp.objects.get(propertytemp=objProperty,datafiletemp=self.dataFile)
-                                
-                            except ObjectDoesNotExist as error:
-                                print "Message({0}): {1}".format(99, error.message)     
-                                
- 
-
-                        
-                        if not dataFileProperty:  
-                            if approved:
-                                dataFileProperty=DataFileProperty()
-                                dataFileProperty.property=objProperty
-                            else:
-                                dataFileProperty=DataFilePropertyTemp()
-                                dataFileProperty.propertytemp=objProperty
-                        else:
-                            if approved:
-                                dataFileProperty.property=objProperty
-                            else:
-                                dataFileProperty.propertytemp=objProperty
-
-                    else:     
-                        try:
-                            if approved:
-                                self.dataFile=DataFile.objects.get(filename__exact=str(self.code) + '.mpod') 
-                            else:
-                                self.dataFile=DataFileTemp.objects.get(filename__exact=fil) 
-                                
-                        except ObjectDoesNotExist as error:
-                            print "Message({0}): {1}".format(99, error.message)  
-                            
-                            
-                        if not self.dataFile:     
-                            if approved: 
-                                self.dataFile=DataFile()
-                                dataFileTemp  =DataFileTemp.objects.get(filename__exact=fil) 
-                                self.dataFile.code =  dataFileTemp.code
-                                self.dataFile.filename =  str(self.code) + '.mpod'
-                                self.dataFile.cod_code =  dataFileTemp.cod_code 
-                                self.dataFile.phase_generic =  dataFileTemp.phase_generic 
-                                self.dataFile.phase_name =  dataFileTemp.phase_name
-                                self.dataFile.chemical_formula =  dataFileTemp.chemical_formula
-
-                            else:
-                                pass
-                            
-                        else:
-                            try:
-                                if approved:
-                                    dataFileProperty = DataFileProperty.objects.get(property=propertyExist, datafile=self.dataFile)
-                                else:
-                                    dataFileProperty=  DataFilePropertyTemp.objects.get(propertytemp=propertyExist,datafiletemp=self.dataFile)
-                                
-                            except ObjectDoesNotExist as error:
-                                print "Message({0}): {1}".format(99, error.message)     
-                            
-                            
-                        if not dataFileProperty:  
-                            if approved:
-                                dataFileProperty=DataFileProperty()
-                                dataFileProperty.property=propertyExist
-                                dataFileProperty.datafile=self.dataFile
-                                dataFileProperty.save()
-                                for i, label in enumerate(pr._prop_data_label):
-                                    propertyValues= PropertyValues()
-                                    propertyValues.datafileproperty = dataFileProperty
-                                    propertyValues.prop_data_label  = pr._prop_data_label[i]
-                                    propertyValues.prop_data_tensorial_index = pr._prop_data_tensorial_index[i]
-                                    propertyValues.prop_data_value =  pr._prop_data_value[i]
-                                    propertyValues.prop_measurement_method =   pr._prop_measurement_method[i]
-                                    propertyValues. prop_conditions_frequency = pr._prop_conditions_frequency[i]
-                                    propertyValues.save();
-                                #PropertyValues
-                                
-                            else:
-                                dataFileProperty=DataFilePropertyTemp()
-                                dataFileProperty.propertytemp=propertyExist
-                                dataFileProperty.datafiletemp=self.dataFile
-                                dataFileProperty.save()
-                                for i, label in enumerate(pr._prop_data_label):
-                                    propertyValuesTemp= PropertyValuesTemp()
-                                    propertyValuesTemp.datafilepropertytemp = dataFileProperty
-                                    propertyValuesTemp.prop_data_label  = pr._prop_data_label[i]
-                                    propertyValuesTemp.prop_data_tensorial_index = pr._prop_data_tensorial_index[i]
-                                    propertyValuesTemp.prop_data_value =  pr._prop_data_value[i]
-                                    propertyValuesTemp.prop_measurement_method =   pr._prop_measurement_method[i]
-                                    propertyValuesTemp. prop_conditions_frequency = pr._prop_conditions_frequency[i]
-                                    propertyValuesTemp.save();
-                        else:
-                            pass
-                            
-                        
-                        """if approved:
-                            fileUser=FileUser.objects.get(filename__exact=fil)
-                            fileUser.datafile=self.dataFile
-                            fileUser.save()"""
-
+                            print "message in the function extactProperties for debug purposes.  Message({0}): {1}".format(99, error.message)   
+                            print "An error occurred when inserting the DB the new property"
+                            return False
+                    else:
+                        pass
                     
+                    
+                    code = self.data_code[fil,'code']
+                     
+                    datafile= None
+                    realfil = None 
+                    try:                
+                        
+                            namecode = fil[:(len(fil)-5)] 
+                            if str(code) == namecode:
+                                if approved:   
+                                    datafile=DataFile.objects.get(filename__exact=str(fil))
+                                else: 
+                                    datafile=DataFileTemp.objects.get(filename__exact=str(fil))  
+                            else:
+                                if approved: 
+                                    datafile=DataFile.objects.get(filename__exact=str(code) + ".mpod")  
+                                else: 
+                                    datafile=DataFileTemp.objects.get(filename__exact=str(fil))  
+                                
+                                
+                                
+                    except ObjectDoesNotExist as error:
+                        print "message in the function extractProperties  for debug purposes Message({0}): {1}".format(99, error.message)  
+                        print "the DataFile " + fil +"The DataFile does not exist a new record will be created in the DB"
+                        
+                        
+                    if datafile:
+                        if approved:  
+    
+                            #self.data_code[datafile.filename,'code'] = datafile.code
+                            code= datafile.code
+                        else: 
+                            datafile.code = code
+                        
+                    else:
+                        if approved:   
+                            datafile=DataFile()
+                            datafile.code = code
+                            datafile.filename = str(code) + ".mpod"
+                        else:
+                            datafile=DataFileTemp()
+                            datafile.code = code
+                            datafile.filename = fil
+                            
+
+                    dataFileProperty = None
+                    try:
+                            if approved:
+                                dataFileProperty = DataFileProperty.objects.get(property=objProperty, datafile=datafile)
+                            else:
+                                dataFileProperty=  DataFilePropertyTemp.objects.get(propertytemp=objProperty,datafiletemp=datafile)
+                    except ObjectDoesNotExist as error:
+                        print "message in the function extractProperties  for debug purposes Message({0}): {1}".format(99, error.message)  
+                        print "The dataFileProperty does not exist a new record will be created in the DB"
+                         
+                    
+
+                    self.saveDataFileProperty(approved,dataFileProperty,objProperty,datafile,pr)    
+      
+
+                    for tag in filePropertyData._no_looped:
+                        self.extractCondictionsValues(approved,dataFileProperty,objProperty,datafile,tag[0],tag[1])
+                        
+                    for key,val in pr._looped_tag_val.items():
+                        self.extractCondictionsValues(approved,dataFileProperty,objProperty,datafile,key,val)
+ 
+
+            return True        
+                        
             
         except  Exception as e:
-            print "Error: {1}".format( e.message, e.args) 
+            print "Error in the function extractProperties for debug purposes.  Error: {1}".format( e.message, e.args) 
+            return False
   
  
             
@@ -671,6 +938,7 @@ class Extractor (object):
         
         """
         gen_tags = []
+        publArticle = None
         proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=5))
 
             
@@ -684,10 +952,7 @@ class Extractor (object):
         for i, pt in enumerate(proptagList):
             publi_tags.append( proptagList[i].tag )
         
-        if approved == False:   
-            publicArticle=PublArticleTemp()
-        else: 
-            publicArticle=PublArticle()
+
             
         
         dataFileList=[]
@@ -698,7 +963,12 @@ class Extractor (object):
         titles=[]
         ii = 1
         for i, fil in enumerate(self.filets):
-            print fil
+
+            if approved:   
+                publicArticle=PublArticle()
+            else: 
+                publicArticle=PublArticleTemp()
+                
             filepath=os.path.join(self.cifs_dir, fil)
             texto = self.read_file_1(filepath)
             title = self.get_info_title(texto)
@@ -707,21 +977,21 @@ class Extractor (object):
             else:
                 titles.append(title)
                 publi_vals=[ii]
-                publi_vals = publi_vals + self.get_info_1(texto, publi_tags)
+                publi_vals = publi_vals + self.get_info_2(texto, publi_tags)
                 authors = self.get_info_authors(texto)            
                 
                 aut=''
                 for a in authors:
                     coma=''
                     if aut != '':
-                        coma=', '   
+                        coma='; '   
                     else:
-                        coma=' ' 
+                        coma='' 
                     
                     aut=aut + coma + a
                         
                 publicArticle.title=title
-                publicArticle.authors=aut         
+                publicArticle.authors=aut       
 
                     
                 formatss = "%d, %s, %s, %s, %d, %s, %d, %d, %d, %s, %d"
@@ -740,18 +1010,32 @@ class Extractor (object):
                         func=float
                     try:                    
                         if i == 9:
-                            vv = '?'
-                            if  i == 9:
-                                publicArticle.reference=vv
+                            if v:
+                                vv=func(v)
+                            else:
+                                vv = '?'
+                                
+                            publicArticle.reference=vv
                         elif (i == 6 or i == 10):    
                             vv=0
                             if  i == 6:
+                                if v:
+                                    vv=func(v)
+                                     
                                 publicArticle.issue=vv
                             elif  i == 10:
+                                if v:
+                                    vv=func(v)
+                                    
                                 publicArticle.pages_number=vv
                                 
                         else:
-                            vv=func(v)
+                            vv = None
+                            if v:
+                                vv=func(v)
+                            else:
+                                vv = v
+                            
                             if i == 3:
                                 publicArticle.journal=vv                             
                             elif  i == 4:
@@ -761,137 +1045,141 @@ class Extractor (object):
                             elif  i == 6:
                                 publicArticle.issue=vv
                             elif  i == 7:
-                                publicArticle.first_page=vv
+                                if vv:
+                                    publicArticle.first_page=vv
+                                else:
+                                    publicArticle.first_page= 0
                             elif  i == 8:
-                                publicArticle.last_page=vv
-                            
-                            
-
+                                if vv:
+                                    publicArticle.last_page=vv
+                                else:
+                                    publicArticle.last_page= 0
                          
                     except  Exception as e:
-                        print "Error: {1}".format( e.message, e.args) 
+                        print "Error in the function extractPublarticleAndDataFile_Data  for debug purposes.  Error: {1}".format( e.message, e.args) 
+                        print "An error occurred when extracting the articles from the .mpod file"
+                        return False
                         
                 
-                publArticle = None 
+                 
+          
+            publicArticleExist= None
+            try:
+                if approved: 
                 
+                    publicArticleExist=PublArticle.objects.get( authors__exact = publicArticle.authors,
+                                                                                                 journal__exact = publicArticle.journal,
+                                                                                                 year__exact = publicArticle.year)      
+      
 
-                try:
-                        if approved == False:   
-                            publArticle=PublArticleTemp.objects.get(  title = publicArticle.title,
-                                                                                                                     authors = publicArticle.authors,
-                                                                                                                     journal = publicArticle.journal,
-                                                                                                                     year = publicArticle.year,
-                                                                                                                     volume = publicArticle.volume,
-                                                                                                                     issue = publicArticle.issue,
-                                                                                                                     first_page = publicArticle.first_page,
-                                                                                                                     last_page = publicArticle.last_page,
-                                                                                                                     reference = publicArticle.reference,
-                                                                                                                     pages_number = publicArticle.pages_number)
-                            
+                else: 
+                    publicArticleExist=PublArticleTemp.objects.get(
+                                                                                         authors__exact = publicArticle.authors,
+                                                                                         journal__exact = publicArticle.journal,
+                                                                                         year__exact = publicArticle.year)
+                    
 
-                        else: 
-                            publArticle=PublArticle.objects.get(  title = publicArticle.title,
-                                                                                         authors = publicArticle.authors,
-                                                                                         journal = publicArticle.journal,
-                                                                                         year = publicArticle.year,
-                                                                                         volume = publicArticle.volume,
-                                                                                         issue = publicArticle.issue,
-                                                                                         first_page = publicArticle.first_page,
-                                                                                         last_page = publicArticle.last_page,
-                                                                                         reference = publicArticle.reference,
-                                                                                         pages_number = publicArticle.pages_number)        
-                            
-                except ObjectDoesNotExist as error:
-                    print "Message({0}): {1}".format(99, error.message)   
+                        
+            except ObjectDoesNotExist as error:
+                print "message in the function extractPublarticleAndDataFile_Data  for debug purposes Message({0}): {1}".format(99, error.message)   
+                print "The article does not exist a new record will be created  in the DB"
                     
  
                 
              
-                if not publArticle:
-                    publicArticle.save()
-                else:
-                    pass
-                    """publArticleExist.title = publicArticle.title
-                    publArticleExist.authors = publicArticle.authors
-                    publArticleExist.journal = publicArticle.journal
-                    publArticleExist.year = publicArticle.year
-                    publArticleExist.volume = publicArticle.volume
-                    publArticleExist.issue = publicArticle.issue
-                    publArticleExist.first_page = publicArticle.first_page
-                    publArticleExist.last_page = publicArticle.last_page
-                    publArticleExist.reference = publicArticle.reference
-                    publArticleExist.pages_number = publicArticle.pages_number                    
-                    publArticleExist.save()
-                    """
-                    
-                self.get_data_code(texto) 
-                datafileExist = None
-                realfil = None 
-                datafile = None
+            if not publicArticleExist:
                 try:
-                        
-                        if approved == False:   
-                            datafile=DataFileTemp.objects.get(filename__exact=str(fil))
-                            self.code = datafile.code
+                    publicArticle.save()
+                except Exception  as error:
+                    print "message in the function extractPublarticleAndDataFile_Data  for debug purposes Message({0}): {1}".format(99, error)   
+                    print "An error occurred when inert  publicArticle"
+                    
+            else:
+                publicArticle = publicArticleExist
+                    
+            code = self.get_data_code(texto) 
+            self.data_code[fil,'code'] = code
+            datafile= None
+            realfil = None 
+            try:                
+                
+                    namecode = fil[:(len(fil)-5)] 
+                    if str(code) == namecode:
+                        if approved:   
+                            datafile=DataFile.objects.get(filename__exact=str(fil))
                         else: 
-                            datafileTemp=DataFileTemp.objects.get(filename__exact=str(fil))
-                            self.code = datafileTemp.code
-                            fil=str(self.code) + ".mpod"
-                            datafile=DataFile.objects.get(filename__exact=fil)          
-                            
-                except ObjectDoesNotExist as error:
-                    print "Message({0}): {1}".format(99, error.message)   
-
+                            datafile=DataFileTemp.objects.get(filename__exact=str(fil))  
+                    else:
+                        if approved: 
+                            datafile=DataFile.objects.get(filename__exact=str(code) + ".mpod")  
+                        else: 
+                            datafile=DataFileTemp.objects.get(filename__exact=str(fil))  
                         
-   
-               
-                ind = ii
-                ii = ii+1         
+                        
+                        
+            except ObjectDoesNotExist as error:
+                print "message in the function extractPublarticleAndDataFile_Data  for debug purposes Message({0}): {1}".format(99, error.message)  
+                print "the DataFile: " + fil +" The DataFile does not exist a new record will be created in the DB"
                 
-                 
-                    
                 
-              
-                gen_vals=[self.code, fil]
-                publi_vals=[ii]
-
-                gen_vals = gen_vals + self.get_info_1(texto, gen_tags)
+            if datafile:
+                if approved:  
+                    self.data_code = {}
+                    self.data_code[datafile.filename,'code'] = datafile.code
+                    code= datafile.code
+                else: 
+                    datafile.code = code
                 
-                if not datafile:
-                    if approved == False:
-                        datafile=DataFileTemp()
-                    else: 
-                        datafile=DataFile()
+            else:
+                if approved:   
+                    datafile=DataFile()
+                    datafile.code = code
+                    datafile.filename = str(code) + ".mpod"
                 else:
-                    pass
-                        
+                    datafile=DataFileTemp()
+                    datafile.code = code
+                    datafile.filename = fil
  
-                    
-                datafile.code=self.code 
-  
-    
-                #list: [1000378L, 'zaydsfjtrglkmmhup.mpod', '?', '', '', '', 1]
-                formatss = "%d, %s, %d, %s, %s, %s, %d"
-                formats = map(lambda x: x.strip(), formatss.split(","))
-                func=None
-                info_vals=gen_vals+[ind]
-                for i,v in enumerate(info_vals):
-                    #if not v=="None":
-                    f=formats[i]
-                    if f=='%d':
-                        func=int
-                    if f=='%s':
-                        func=lambda x: ""+str(x)+""
-                    if f=='%f':
-                        func=float
-   
-                    try:
-                        if ( i == 2)  and (v == '?'):    
-                            vv=0
-                            if i == 2:
-                                datafile.cod_code=vv 
-                        else:                  
+            
+            
+            ind = ii
+            ii = ii+1         
+
+            gen_vals=[code, datafile.filename]
+            publi_vals=[ii]
+
+            gen_vals = gen_vals + self.get_info_2(texto, gen_tags)
+ 
+
+
+            #list: [1000378L, 'zaydsfjtrglkmmhup.mpod', '?', '', '', '', 1]
+            formatss = "%d, %s, %d, %s, %s, %s, %d"
+            formats = map(lambda x: x.strip(), formatss.split(","))
+            func=None
+            info_vals=gen_vals+[ind]
+            for i,v in enumerate(info_vals):
+                #if not v=="None":
+                f=formats[i]
+                if f=='%d':
+                    func=int
+                if f=='%s':
+                    func=lambda x: ""+str(x)+""
+                if f=='%f':
+                    func=float
+
+                try:
+                    if ( i == 2)  and (v == '?'):   
+                        if v and v != '?':
                             vv=func(v)    
+                            datafile.cod_code=vv 
+                        else:                             
+                            pass #vv=0
+
+                        
+                        
+                    else:                  
+                        if v:
+                            vv=func(v)   
                             if i == 1:
                                 datafile.filename=vv
                             elif i == 3:
@@ -899,82 +1187,92 @@ class Extractor (object):
                             elif i == 4:
                                 datafile.phase_name=vv 
                             elif i == 5:
-                                datafile.chemical_formula=vv 
-                            """elif i == 6:                                                                  
-                                datafile.publication= publicArticle"""
-
-                    except  Exception as e:
-                        print "Error: {1}".format( e.message, e.args)       
-                        
-                try:
-                    if not publArticle:
-                        datafile.publication = publicArticle     
-                    else:    
-                        datafile.publication = publArticle
-                        
-                    datafile.save()
-                        
-                    """if not datafile: 
-                        if not publArticle:
-                            datafile.publication = publicArticle     
-                        else:    
-                            datafile.publication = publArticle 
-
-                        datafile.save()
-
-                    else:
-                        if not publArticle:
-                            datafile.publication = publicArticle     
-                        else:    
-                            datafile.publication = publArticle
-                        datafile.save()
-                    """
-                        
+                                datafile.chemical_formula=vv  
+                        else:
+                            pass
+                            
                         
  
-                                  
-                    #filename= datafile.filename
-        
-                            
-            
-                    for i,obj in enumerate(self.experimentalParCondList):
-                        #print type(obj) # <class 'project.app.models.Car'>
-                        #print str(isinstance(obj, ExperimentalParCondTemp))
-
-                        if approved == False:
-                            dataFileTemp=DataFileTemp.objects.get(filename__exact=datafile.filename)
-                            #por si en un futuro se registran nuevas ExperimentalCon para este archivo
-                            experimentalfilecontempDatafiletempQuerySet = ExperimentalfilecontempDatafiletemp.objects.filter(experimentalfilecontemp=obj,datafiletemp=dataFileTemp)
-                            if experimentalfilecontempDatafiletempQuerySet:
-                                pass
-                            else:            
-                                experimentalfilecontempDatafiletemp = ExperimentalfilecontempDatafiletemp()
-                                experimentalfilecontempDatafiletemp.experimentalfilecontemp = obj
-                                experimentalfilecontempDatafiletemp.datafiletemp = dataFileTemp
-                                experimentalfilecontempDatafiletemp.save()
-    
-                        else: 
-                            pass                           
-                            """experimentalParCond = ExperimentalParCond()
-                            for efct in experimentalfilecontempDatafiletempQuerySet:
-                                try:
-                                    experimentalParCond = ExperimentalParCond.objects.get(tag__exact=efct.experimentalfilecontemp.tag)
-                                    #experimentalParCond= None
-                                except ObjectDoesNotExist as error:
-                                    print "Error({0}): {1}".format(99, error.message) 
-                                     
-                                    experimentalParCond.tag = efct.experimentalfilecontemp.tag
-                                    experimentalParCond.name =  efct.experimentalfilecontemp.name
-                                    experimentalParCond.description =  efct.experimentalfilecontemp.description
-                                    experimentalParCond.units =  efct.experimentalfilecontemp.units
-                                    experimentalParCond.units_detail =  efct.experimentalfilecontemp.units_detail
-                                    experimentalParCond.save()
-                            """
 
                 except  Exception as e:
-                        print "Error: {1}".format( e.message, e.args)       
+                    print "Error: {1}".format( e.message, e.args)     
+                    print "There was an error while extracting data from DataFile" 
+                    return False
+                     
+                        
+            try:
 
+                datafile.publication = publicArticle  
+                datafile.save()
+            except Exception  as error:
+                print "message in the function extractPublarticleAndDataFile_Data  for debug purposes Message({0}): {1}".format(99, error) 
+                print "There was an error inserting the DataFile object into the DB"
+                return False
                 
+ 
+    
+                        
+            try:
+
+                for key,list in self.experimentalCond.items():
+            
+                    if key == fil:
+                        if approved:   
+                            if list:
+                                
+                                for v,item in enumerate(list):
+                                    experimentalParCond_DataFile = None
+                                    try:
+                                        experimentalParCond_DataFile = ExperimentalParCond_DataFile.objects.get(experimentalfilecon=item,datafile=datafile)
+                                    except ObjectDoesNotExist as error:
+                                        print "message in the function ExperimentalParCondTemp_DataFileTemp  for debug purposes Message({0}): {1}".format(99, error.message) 
+                                        print "There was an error inserting the ExperimentalParCond_DataFile object into the DB"
+                                        
+                                        
+                                    if not experimentalParCond_DataFile:
+                                        try:
+                                            experimentalParCond_DataFile = ExperimentalParCond_DataFile()
+                                            experimentalParCond_DataFile.experimentalfilecon = item
+                                            experimentalParCond_DataFile.datafile = datafile
+                                            experimentalParCond_DataFile.save()
+                                        except Exception  as error:
+                                            print "message in the function ExperimentalParCondTemp_DataFileTemp  for debug purposes Message({0}): {1}".format(99, error) 
+                                            print "There was an error inserting the ExperimentalParCondTemp_DataFileTemp object into the DB"
+                                      
+                                            
+                        else: 
+                            if list:
+                                
+                                for v,item in enumerate(list):
+                                    experimentalParCondTemp_DataFileTemp = None
+                                    try:
+                                        experimentalParCondTemp_DataFileTemp = ExperimentalParCondTemp_DataFileTemp.objects.get(experimentalfilecontemp=item,datafiletemp=datafile)
+                                    except ObjectDoesNotExist as error:
+                                        print "message in the function ExperimentalParCondTemp_DataFileTemp  for debug purposes Message({0}): {1}".format(99, error.message) 
+                                        print "There was an error inserting the ExperimentalParCondTemp_DataFileTemp object into the DB"
+                                        
+                                    try:
+                                        if not experimentalParCondTemp_DataFileTemp:
+                                            experimentalParCondTemp_DataFileTemp = ExperimentalParCondTemp_DataFileTemp()
+                                            experimentalParCondTemp_DataFileTemp.experimentalfilecontemp = item
+                                            experimentalParCondTemp_DataFileTemp.datafiletemp = datafile
+                                            experimentalParCondTemp_DataFileTemp.save()
+                                    except Exception  as error:
+                                        print "message in the function ExperimentalParCondTemp_DataFileTemp  for debug purposes Message({0}): {1}".format(99, error) 
+                                        print "There was an error inserting the ExperimentalParCondTemp_DataFileTemp object into the DB"
+                                    
+                    else:
+                        pass
+                                    
+                                               
+
+
+            except ObjectDoesNotExist as error:
+                print "message in the function ExperimentalParCondTemp_DataFileTemp  for debug purposes Message({0}): {1}".format(99, error.message) 
+                print "I had an error when inserting record"
+                return False
+
+        return True       
            
             
             

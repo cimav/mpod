@@ -11,7 +11,26 @@ from django.core.exceptions import ObjectDoesNotExist
 import numpy as N
  
 import string
+import re
+ 
+def compareList(list1, list2):
+    
 
+    return list(set(list1) - set(list2))
+    
+    
+def groupNamesSelectedDesciptionToList(description):
+    g =  description.replace('(', '')
+    g =  g.replace(')', '')
+    g =  g.split(',')
+ 
+    
+    listString = []
+    for i, item in enumerate(g):
+        listString.append(item.strip())
+
+    return listString
+    
 
 def argsToInt(args,field=None,value=None):
     result = None
@@ -19,6 +38,65 @@ def argsToInt(args,field=None,value=None):
         if args[0].has_key(field):
             try:
                 result= int(args[0][field])
+            except ValueError:
+                result = value
+        else:
+            pass
+    return result
+
+def checkInputField(item):
+        res = None
+        tol = None
+        
+        x = re.match(r"^[-+]?\d+\.\d+$|^[-+]?\d+$|^[-+]?\d+\.\d+\([-+]?\d+\.\d+\)$|^[-+]?\d+\.\d+\([-+]?\d+\)$|^[-+]?\d+\([-+]?\d+\.\d+\)$|^[-+]?\d+\([-+]?\d+\)$|^[-+]?\d+\.\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^[-+]?\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^[-+]?\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\([+\-]?(\d+\.\d+|\d+)\))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\))$", item)
+        
+        #testeado en https://www.datacamp.com/community/tutorials/python-regular-expression-tutorial
+        #item = 3, 3.3, 3(3), 3.3(3.3),3(3.3),3.3(3)
+        #x = re.findall(r"^[-+]?\d+\.\d+$|^[-+]?\d+$|^[-+]?\d+\.\d+\([-+]?\d+\.\d+\)$|^[-+]?\d+\.\d+\([-+]?\d+\)$|^[-+]?\d+\([-+]?\d+\.\d+\)$|^[-+]?\d+\([-+]?\d+\)$", item)
+        
+        #item = '-3.3(-3.3e+1.3)'
+        #x = re.match(r"^[-+]?\d+\.\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^[-+]?\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^[-+]?\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$", item)
+
+        #item = '-3.3e+1.3(-3.3e+1.3)', item = '-3.3e+1.3(3.3)', item = '-3.3e+1.3(3)'
+        #x = re.match(r"^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\([+\-]?(\d+\.\d+|\d+)\))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\))$",item)
+        
+        
+        
+        
+        if x:
+            result = x.group(0)
+             
+            
+            if result.find('(') > -1:
+                
+                    val = result.split('(')
+                    tol = val[1].split(')')
+                    #print 'correcto '  + val[0]  + ' tolerance '  + tolerance[0]
+                    return val[0] 
+            else:
+                if x: 
+                    #print 'correcto ' + item
+                    return item 
+                else:
+                    return res
+        else:
+            return res    
+                    
+                    
+
+def argsToFloat(args,field=None,value=None):
+    result = None
+    if field:
+        if args[0].has_key(field):
+            try:
+                
+                item = args[0][field]
+                val1 =checkInputField(item)
+                if  val1:
+                    result= float(val1)
+                else:
+                    pass
+                    
             except ValueError:
                 result = value
         else:
@@ -134,7 +212,9 @@ def getIdsFromQuerySet(queryset):
 
  
 def getTableHTMLFromQuerySet(querySet, **kwargs):
+    
     html =  ""
+ 
     modelname= ""
     if querySet:
         print querySet.model.__name__.lower()
@@ -349,6 +429,7 @@ def setCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataPrope
     
     
     catalogPropertyDetailList = []
+    catalogpropertydetailnames= []
     catalogPropertyDetailQuerySet= None
     try:
         catalogPropertyDetailQuerySet=CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=objDataProperty,catalogpointgroup=objCatalogpointgroupSelected,puntualgroupnames=objPuntualgroupnamesSelected,catalogaxis=axisSelected).order_by('name')
@@ -357,10 +438,11 @@ def setCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataPrope
         pass
     
      
-    #read_write_inputs_temp =  {}
+    
     read_write_coefficients = {}
     for i,cpd in enumerate(catalogPropertyDetailQuerySet):
         read_write_coefficients[catalogPropertyDetailQuerySet[i].name] = "w"  
+        catalogpropertydetailnames.append(cpd.name)
  
     #print read_write_coefficients
     datapropertyinitial=objDataProperty
@@ -384,10 +466,8 @@ def setCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataPrope
                     catalogPropertyDetailList.append(letters[0] +col + letters[1])
                 y= y + 1 
  
-                
- 
-         
-    return catalogPropertyDetailQuerySet, catalogPropertyDetailList
+
+    return catalogPropertyDetailQuerySet, catalogPropertyDetailList,catalogpropertydetailnames
  
          
     

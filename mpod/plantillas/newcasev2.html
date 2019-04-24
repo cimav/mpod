@@ -10,19 +10,38 @@
       
           <script>
        
-            function call_ajax(url,todo) {
+            function call_ajax(url,todo,list) {
+            	
+            	     
         
             	      datasend = "";
             	      dictionary_pk  ="";
             	      if  (todo=="add" || todo=="change" )
            	          {
-            	    	  value =  $('#dicvalue').val();
+            	    	  
+            	    	  /*
+            	    	  value =  $('#dicvalue').val();            	    	  
             	    	  dictionary_pk  =  $('#dictionary_name').val();
+            	    	  */
+            	    	  value =  $('#' +  list[1] ).val();            	    	  
+            	    	  dictionary_pk  =  $('#' +  list[0] ).val();
+            	    	  
+            	    	  apply_to_all = false;
+            	    	  if( $('#' +  list[4] ).prop('checked') ) {
+            	    		  apply_to_all = true;
+            	    		  
+            	    		}
+            	    	  
+            	    	   
+            	    	  
+    
+            	    	  
             	    	  //alert(dictionary_pk);
          	    		  datasend ={
 				       	 		                 'todo': todo,
 				      			                  'dicvalue': value,
-				      			                  'dictionary_pk':dictionary_pk
+				      			                  'dictionary_pk':dictionary_pk,
+				      			                  'apply_to_all':apply_to_all
 				      			                }
          	    		 
            	          }
@@ -70,47 +89,8 @@
              		      $( "#divdictionarynew" ).hide();
              		      return;
             	      }
-            	      else if (todo == "addphase" || todo=="phasechange" )
-           	    	  {
-            	    	  value =  $('#phasevalue').val();
-            	    	  dictionary_pk  =  $('#phase_name').val();
-            	    	  //alert(dictionary_pk);
-         	    		  datasend ={
-				       	 		                 'todo': todo,
-				      			                  'phasevalue': value,
-				      			                  'dictionary_pk':dictionary_pk
-				      			                }
-           	    	    
-           	    	  }
-            	      else if (todo == "addphasecharacteristic" || todo=="phasecharacteristicchange" )
-           	    	  {
-            	    	   
-            	    	  value =  $('#phasecharacteristicvalue').val();
-            	    	  dictionary_pk  =  $('#phasecharacteristic_name').val();
-            	    	  //alert(dictionary_pk);
-         	    		  datasend ={
-				       	 		                 'todo': todo,
-				      			                  'phasecharacteristicvalue': value,
-				      			                  'dictionary_pk':dictionary_pk
-				      			                }
-           	    	    
-           	    	  }
-            	      else if (todo == "addmeasurement" || todo=="measurementchange" )
-           	    	  {
-            	    	  value =  $('#measurementvalue').val();
-            	    	  dictionary_pk  =  $('#measurement_name').val();
-            	    	  //alert(dictionary_pk);
-         	    		  datasend ={
-				       	 		                 'todo': todo,
-				      			                  'measurementvalue': value,
-				      			                  'dictionary_pk':dictionary_pk
-				      			                }
-           	    	    
-           	    	  }
-
-            	            
-            	           	      
-            	      
+ 
+           
             	  
 		              $.ajax({
 		            	 type: "POST",
@@ -129,15 +109,20 @@
 						                		 }
 						                		 else
 						                		{
-						                			 alert("added" );
-						                			  $('#errordictionaryproperty').text('');
-						               	    		  $('#errordictionaryproperty').hide();
+						                			  alert("added" );
+						                			 /* $('#errordictionaryproperty').text('');
+						               	    		  $('#errordictionaryproperty').hide();*/
+						               	    		  $('#' +  list[2] ).text('');
+						               	    		  $('#' +  list[2] ).hide();
 						                		}
 				            		    	}
 				                		 else
 			                		      {
-			                		    	$('#errordictionaryproperty').text(data.error);
-				               	    		$('#errordictionaryproperty').show();
+			                		    	/*$('#errordictionaryproperty').text(data.error);
+				               	    		$('#errordictionaryproperty').show();*/
+				               	    		
+				               	    		  $('#' +  list[2] ).text(data.error);
+				               	    		  $('#' +  list[2] ).show();
 	
 			                		      }
 			                		 
@@ -150,15 +135,22 @@
 						                		
 						                		$('#units_detail').text(data.units_detail);
 						                		
-						                		$('#errordictionaryproperty').text('');
-						               	    	$('#errordictionaryproperty').hide();
+						                		/*$('#errordictionaryproperty').text('');
+						               	    	$('#errordictionaryproperty').hide();*/
+						               	    	
+						               	    	$('#' +  list[2] ).text('');
+					               	    		 $('#' +  list[2] ).hide();
 						                	
 				            		    	}
 				                		 else
 			                		      {
-				                			 $('#units_detail').text(data.units_detail);
-			                		    	$('#errordictionaryproperty').text(data.error);
-				               	    		$('#errordictionaryproperty').show();
+				                			// $('#units_detail').text(data.units_detail);
+			                		    	 /*$('#errordictionaryproperty').text(data.error);
+				               	    		 $('#errordictionaryproperty').show();*/
+				               	    		
+				               	    		  $('#' +  list[3] ).text(data.units_detail);
+				               	    		  $('#' +  list[2] ).text(data.error);
+				               	    		  $('#' +  list[2] ).show();
 	
 			                		      }
 			                		    
@@ -184,114 +176,52 @@
 			            	    	    $('#units_detailnew').attr("placeholder", "kelvin, tesla, pascal, etc.");
 			            	    	    $('#definitionnew').attr("placeholder", "Text of definition");
 	
-			                		 }
-			                	 else if (todo == "addphase")
-			                		 {
-			                		       
-			                		    if (data.error == "")
-			                		    	{
-			    				                if (data.in_list) {
-						                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
-			    				                	 alert("not added" );
-						                		 }
-						                		 else
-						                		 {
-						                			 alert("added" );
-					               	    		     $('#errorphase').text('');
-					               	    		     $('#errorphase').hide();
-						                		 }
-			                		    	}
-			                		    else
-			                		      {
-			                		    	$('#errorphase').text(data.error);
-				               	    		$('#errorphase').show();
-	
-			                		      }
-			                		 
-			                		 }
-			                	 else if (todo == "phasechange")
-		                		 {
-			                		 if (data.error == "")
-		                		    	{
-			                			   $('#errorphase').text('');
-		               	    		       $('#errorphase').hide();
-		               	    		       $('#units_detailphase').text(data.units_detail);
-		                		    	}
-		                		    else
-		                		      {
-		                		    	$('#units_detailphase').text(data.units_detail);
-		                		    	$('#errorphase').text(data.error);
-			               	    		$('#errorphase').show();
-
-		                		      }
-		                		 }
-			                	 else if (todo == "addphasecharacteristic")
-		                		 {
-			                		  
-		                		    if (data.error == "")
-		                		    	{
-		    				                if (data.in_list) {
-					                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
-		    				                	 alert("not added" );
-					                		 }
-					                		 else
-					                		 {
-					                			 alert("added" );
-				               	    		     $('#errorphasecharacteristic').text('');
-				               	    		     $('#errorphasecharacteristic').hide();
-				               	    		     
-					                		 }
-		                		    	}
-		                		    else
-		                		      {
-		                		    	
-		                		    	$('#errorphasecharacteristic').text(data.error);
-			               	    		$('#errorphasecharacteristic').show();
-
-		                		      }
-		                		 }
-			                else if ( todo=="phasecharacteristicchange" )
-			           	    	  {
-			                	      
-			                		 if (data.error == "")
-		                		    	{
-			                			 alert("not added" );
-			                			   $('#errorphasecharacteristic').text('');
-		               	    		       $('#errorphasecharacteristic').hide();
-		               	    		       $('#units_detailpcchange').text(data.units_detail);
-		                		    	}
-		                		    else
-		                		      {
-		                		    	$('#units_detailpcchange').text(data.units_detail);
-		                		    	$('#errorphasecharacteristic').text(data.error);
-			               	    		$('#errorphasecharacteristic').show();
-
-		                		      }
-			                		 
-			           	    	  }
-			                else if (todo == "addmeasurement")
-		                		 {
-		                		       
-		                		    if (data.error == "")
-		                		    	{
-		    				                if (data.in_list) {
-					                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
-		    				                	 
-					                		 }
-					                		 else
-					                		 {
-					                			 alert("added" );
-				               	    		     $('#errormeasurement').text('');
-				               	    		     $('#errormeasurement').hide();
-					                		 }
-		                		    	}
-		                		    else
-		                		      {
-		                		    	$('#errormeasurement').text(data.error);
-			               	    		$('#errormeasurement').show();
-
-		                		      }
-		                		 }
+			                		 }			                	
+				                else if (todo=="removepropertyfromlist")
+				                	{  
+				                	 
+				                	    console.log(data);
+				                		if (data.error == "")
+	                		        	{
+	    				                   if (data.tblProperty)
+	    				                   {
+	    				                	   console.log(data.tblProperty);
+	    				                	   $('#' + data.tblProperty).remove(); 
+	    				                	   if(data.sizelist== 0)
+					                	   		{
+					                	   			//$('#paneltitleproperties').remove(); 
+					                	   			$('#paneltitleproperties').html('Property'); 
+					                	   		}
+	    				                	   
+				                		   }
+				                	
+				                	    }
+				                	}
+				                else if  (todo=="removepropertylist" )
+				                	{
+				                		if (data.error == "")
+	            		        		{
+					                  		 if (data.tblProperty) 
+					                  		 {
+					                  			 if (data.tblProperty) 
+						                  		 {
+					                  				var  size = parseInt(data.sizelist);
+						                	   		console.log(data.sizelist);
+						                	   		for(var i=0; i < size; i++)
+						                	   		{
+						                	   			$('#' + data.tblProperty + (i + 1).toString()).remove(); 
+						                	   		}
+						                	   		 
+						                	   		
+						                	   		$('#paneltitleproperties').html('Property'); 
+						                	   	
+						                	   			
+						                	   		
+						                  		 }
+			                		      	 }
+			                	
+			                	       }
+				                	}
 			                	  
 		                
 		                }
@@ -338,55 +268,17 @@
         	})
         	
         	
-        	$(function(){
-			  $('#phasecharacteristicvalue').keypress(function(e){
-				 
-			    if(e.which == 13) {
-			      //dosomething
-			      //alert('Enter pressed');
-			      call_ajax('{% url adddictionaryphasecharacteristic -1%}','addphasecharacteristic' );
+        	function enterKey(event,list)
+           { 
+        	  
+        	   if(event.which == 13) {
+        		    
+        		   call_ajax('{% url addmaterial -1%}','add',list );
 			    }
-			  })
-			})
-			
-			
-			 $(function(){
-			  $('#phasevalue').keypress(function(e){
-				 
-			    if(e.which == 13) {
-			      //dosomething
-			      //alert('Enter pressed');
-			      call_ajax('{% url adddictionaryphase -1%}','addphase' );
-			    }
-			  })
-			})
-			
-			
-			
-		 $(function(){
-			  $('#dicvalue').keypress(function(e){
-				 
-			    if(e.which == 13) {
-			      //dosomething
-			      //alert('Enter pressed');
-			      call_ajax('{% url adddictionaryproperty -1%}','add' );
-			    }
-			  })
-			})
-			
-		  $(function(){
-			  $('#measurementvalue').keypress(function(e){
-				 
-			    if(e.which == 13) {
-			      //dosomething
-			      //alert('Enter pressed');
-			      call_ajax('{% url adddictionarymeasurement -1%}','addmeasurement' );
-			    }
-			  })
-			})
-           
-			
-			
+        	   
+           }
+        	
+ 
 			
 			 
 			
@@ -432,8 +324,11 @@
 
 
 
+{% for property in propertyMaster.propertyList%} 
 
-{% for property in propertySessionList%} 
+{# {% for property in propertySessionList%}  #}
+
+
 
 					      <div class="modal" id="Modal{{forloop.counter}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"  >
 						  <div class="modal-dialog" role="document">
@@ -594,7 +489,7 @@
 											<table>
 													     <tr>
 													     <td>
-													     <label for="journal">Phase </label>
+													     <label for="phase_name">Phase </label>
 											           <td>
 													     <td>
 													     </td>
@@ -602,7 +497,7 @@
 											     <tr>
 											           <td>
 										          
-												       <select  id="phase_name"  name="phase_name"  class="form-control"  onchange="call_ajax('{% url adddictionaryphase -1 %}','phasechange')"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       <select  id="phase_name"  name="phase_name"  class="form-control"  onchange="call_ajax('{% url addmaterial -1%}','change',['phase_name','phasevalue','errorphase','units_detailphase'] )"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
 												       {% for obj in dictionaryPhaseList %}       
 														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
 												        {% endfor %}
@@ -628,15 +523,15 @@
 																		    </tr>
 																		     <tr>
 																		       			      <td>
-																						       <a href="#"  onclick="call_ajax('{% url adddictionaryphase -1%}','addphase' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																						       <a href="#"  onclick="call_ajax('{% url addmaterial -1%}','add',['phase_name','phasevalue','errorphase','units_detailphase','chkphase'] )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
 																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
 																							   </a>
 																						     </td>
 																				            <td>
-																						      <input type="text" id="phasevalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"   >	
+																						      <input type="text" id="phasevalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"  onkeypress="enterKey(event,['phase_name','phasevalue','errorphase','units_detailphase','chkphase'] );">	
 																						     </td>
 																				               <td>
-																						          <label id="units_detailphase" for="units_detail">{{obj.units_detail}} </label>
+																						          <label id="units_detailphase" for="units_detailphase">{{obj.units_detail}} </label>
 																						     </td>
 																			
 																		   </tr>
@@ -649,6 +544,14 @@
 																         </table>
 														 </td>
 													</tr>
+														<tr  style="opacity:0;">
+													     <td>
+													      Apply for all properties? 
+											           <td>
+													     <td>
+													     <input type="checkbox" id="chkphase" disabled="disabled" checked="checked" >
+													     </td>
+													     </tr>
 											</table>
 
 										    </div>
@@ -663,7 +566,7 @@
 											<table>
 													     <tr>
 													     <td>
-													     <label for="journal">Phase Characteristics </label>
+													     <label for="phasecharacteristic_name">Phase Characteristics </label>
 											           <td>
 													     <td>
 													     </td>
@@ -671,7 +574,7 @@
 											     <tr>
 											           <td>
 										          
-												       <select  id="phasecharacteristic_name"  name="phasecharacteristic_name"  class="form-control"  onchange="call_ajax('{% url adddictionaryphasecharacteristic -1 %}','phasecharacteristicchange')"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       <select  id="phasecharacteristic_name"  name="phasecharacteristic_name"  class="form-control"  onchange="call_ajax('{% url addmaterial -1%}','change',['phasecharacteristic_name','phasecharacteristicvalue','errorphasecharacteristic','units_detailphasecharacteristic',''] )"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
 												       {% for obj in dictionaryPhaseCharacteristicList %}       
 														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
 												        {% endfor %}
@@ -697,15 +600,15 @@
 																		    </tr>
 																		     <tr>
 																		       			      <td>
-																						       <a href="#"  onclick="call_ajax('{% url adddictionaryphasecharacteristic -1%}','addphasecharacteristic' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																						       <a href="#"  onclick="call_ajax('{% url addmaterial -1%}','add',['phasecharacteristic_name','phasecharacteristicvalue','errorphasecharacteristic','units_detailphasecharacteristic','chkphasecharacteristic'] )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
 																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
 																							   </a>
 																						     </td>
 																				            <td>
-																						      <input type="text" id="phasecharacteristicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"   >	
+																						      <input type="text" id="phasecharacteristicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;" onkeypress="enterKey(event,['phasecharacteristic_name','phasecharacteristicvalue','errorphasecharacteristic','units_detailphasecharacteristic','chkphasecharacteristic'] );"  >	
 																						     </td>
 																				               <td>
-																						          <label id="units_detailpcchange" for="units_detail">{{obj.units_detail}} </label>
+																						          <label id="units_detailphasecharacteristic" for="units_detailphasecharacteristic">{{obj.units_detail}} </label>
 																						     </td>
 																			
 																		   </tr>
@@ -718,6 +621,15 @@
 																         </table>
 														 </td>
 													</tr>
+																		 
+														 <tr   style="opacity:0;">
+													     <td>
+													      Apply for all properties? 
+											           <td>
+													     <td>
+													     <input type="checkbox" id="chkphasecharacteristic" disabled="disabled" checked="checked">
+													     </td>
+													     </tr>
 											</table>
 
 										    </div>
@@ -785,10 +697,10 @@
 										    <div class="form-group searches" id="divdictionaryexistent" >
 										    
 										    
-										     <table>
+										     <table  >
 													     <tr>
 													     <td>
-													     <label for="journal">Conditions </label>
+													     <label for="dictionary_name">Conditions </label>
 											           <td>
 													     <td>
 													     </td>
@@ -796,16 +708,21 @@
 											     <tr>
 											           <td>
 										          
-												       <select  id="dictionary_name"  name="dictionary_name"  class="form-control"  onchange="call_ajax('{% url adddictionaryproperty -1 %}','change')"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       <select  id="dictionary_name"  name="dictionary_name"  class="form-control"  onchange="call_ajax('{% url addmaterial -1 %}','change',['dictionary_name','dicvalue','errordictionaryproperty','units_detail'])"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
 												       {% for obj in dictionaryList %}       
 														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
 												        {% endfor %}
 											         </select>	
 									         			   </td>
 													       <td>
+													      
+													       
+													         <!--   
 									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Add a new one">
 																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
 																	   </a>
+															 -->		   
+																	   
 														</td>
 														 
 												    </tr>
@@ -821,12 +738,12 @@
 																		    </tr>
 																		     <tr>
 																		       			      <td>
-																						       <a href="#"  onclick="call_ajax('{% url adddictionaryproperty -1%}','add' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																						       <a href="#"  onclick="call_ajax('{% url addmaterial -1%}','add',['dictionary_name','dicvalue','errordictionaryproperty','units_detail','chkconditions'] )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
 																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
 																							   </a>
 																						     </td>
 																				            <td>
-																						      <input type="text" id="dicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"   >	
+																						      <input type="text" id="dicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"    onkeypress="enterKey(event,['dictionary_name','dicvalue','errordictionaryproperty','units_detail','chkconditions'] );">	
 																						     </td>
 																				               <td>
 																						         <label id="units_detail" for="units_detail">{{obj.units_detail}} </label>
@@ -842,6 +759,14 @@
 																         </table>
 														 </td>
 													</tr>
+														 <tr>
+													     <td>
+													      Apply for all properties? 
+											           <td>
+													     <td>
+													     <input type="checkbox" id="chkconditions">
+													     </td>
+													     </tr>
 											</table>
 											
 											
@@ -856,7 +781,7 @@
 											<table>
 													     <tr>
 													     <td>
-													     <label for="journal">Measurement </label>
+													     <label for="measurement_name">Measurement </label>
 											           <td>
 													     <td>
 													     </td>
@@ -864,17 +789,13 @@
 											     <tr>
 											           <td>
 										          
-												       <select  id="measurement_name"  name="measurement_name"  class="form-control"  onchange="call_ajax('{% url adddictionarymeasurement -1 %}','measurementchange')"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       <select  id="measurement_name"  name="measurement_name"  class="form-control"  onchange="call_ajax('{% url addmaterial -1 %}','change',['measurement_name','measurementvalue','errormeasurement'])"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
 												       {% for obj in dictionaryMeasurementList %}       
 														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
 												        {% endfor %}
 											         </select>	
 									         			   </td>
-													       <td><!--  
-									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-default" data-toggle="tooltip" data-placement="top" title="Add a new one">
-																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
-																	   </a>
-																	-->
+													       <td> 
 														</td>
 														 
 												    </tr>
@@ -890,15 +811,15 @@
 																		    </tr>
 																		     <tr>
 																		       			      <td>
-																						       <a href="#"  onclick="call_ajax('{% url adddictionarymeasurement -1%}','addmeasurement' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																						       <a href="#"  onclick="call_ajax('{% url addmaterial -1%}','add',['measurement_name','measurementvalue','errormeasurement','measurementunits_detail','chkmeasurement'] )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
 																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
 																							   </a>
 																						     </td>
 																				            <td>
-																						      <input type="text" id="measurementvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the measurement selected above" style="width: 100px;"   >	
+																						      <input type="text" id="measurementvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the measurement selected above" style="width: 100px;"   onkeypress="enterKey(event,['measurement_name','measurementvalue','errormeasurement','measurementunits_detail','chkmeasurement']  );">	
 																						     </td>
 																				               <td>
-																						        
+																							         <label id="measurementunits_detail" for="measurementunits_detail">{{obj.units_detail}} </label>
 																						     </td>
 																			
 																		   </tr>
@@ -911,6 +832,14 @@
 																         </table>
 														 </td>
 													</tr>
+													<tr>
+													     <td>
+													      Apply for all properties? 
+											           <td>
+													     <td>
+													     <input type="checkbox" id="chkmeasurement">
+													     </td>
+													     </tr>
 											</table>
 
 										    </div>
@@ -929,7 +858,7 @@
 						                  <!-- db table data_catalogproperty -->
 										    {% if propertyCategoryName %}  
 										    <div class="form-group searches">
-										      <label for="journal">Property:</label>
+										      <label for="catalogproperty_name">Property:</label>
 										      <br/>
 										       <select  id="catalogproperty_name"  name="catalogproperty_name" onchange="onchangeFunc();"  class="form-control">
 										       {% for obj in propertyCategoryName %}       
@@ -972,11 +901,11 @@
 											      		{% if magnetoelectricity == 0 %} 
 											      
 														    <div class="form-group searches"  >
-														       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="" onclick="onchangeFunc();"> Yes/No</label>
+														       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="" onclick="onchangeFunc();"> Yes</label>
 														    </div>
 											    			{% else %}
 														     <div class="form-group searches"  >
-														       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="1" onclick="onchangeFunc();" checked> Yes/No</label>
+														       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="1" onclick="onchangeFunc();" checked> Yes</label>
 														    </div>
 														     {% endif %}   
 											    
@@ -986,7 +915,7 @@
 											  <!-- start db table data_property -->
 											  
 											   <div class="form-group searches"  >
-											      <label for="journal">Data Property Tag</label>
+											      <label for="datapropertytag">Data Property Tag</label>
 											    </div>
 											    
 											    
@@ -1011,7 +940,7 @@
 										     <!-- db table catalog_crystal_system -->
 										    {% if catalogCrystalSystemList %}  
 										  <div class="form-group searches">
-										      <label for="journal">Crystal system</label>
+										      <label for="crystalsystem_name">Crystal system</label>
 										      <select id="crystalsystem_name" name="crystalsystem_name" onchange="onchangeFunc()"  class="form-control">       
 										       {% for ccs in catalogCrystalSystemList %}       
 										        {% if crystalsystem_name == ccs.name %} 
@@ -1029,7 +958,7 @@
 						
 											    	{% if puntualGroupList %}  
 											 			<div class="form-group searches">
-													      <label for="journal">
+													      <label for="puntualgroupselected_name">
 													       {% if questionGp %} 
 												               {{questionGp }}  
 												          {% endif %}        
@@ -1050,7 +979,7 @@
 													 
 													 
 													<div class="form-group searches">
-												      <label for="journal">
+												      <label for="axisselected_name">
 												       {% if questionAxis %} 
 											               {{questionAxis }}  
 											          {% endif %}        
@@ -1083,6 +1012,31 @@
 											  
 											    </div>   
 											    
+											    
+											 <div class="form-group searches">
+											
+
+										           	     {% if warning %}
+														    	  <div class="alert alert-danger fade in alert-dismissable">
+																	  <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a>
+																	  <strong>NOTE:</strong> {{warning }}
+																	</div>
+														 {% endif %} 
+											  
+											    </div>   
+											    
+											    									 <div class="form-group searches">
+											
+
+										           	     {% if warning2 %}
+														    	  <div class="alert alert-danger fade in alert-dismissable">
+																	  <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a>
+																	  <strong>NOTE:</strong> {{warning2 }}
+																	</div>
+														 {% endif %} 
+											  
+											    </div>   
+											    
 						
 											    
 											     
@@ -1094,7 +1048,7 @@
 						        <div class="col-sm-4">
 						          <div class="panel panel-default">
 						            <div class="panel-heading">
-						              <h3 class="panel-title">Property 
+						              <h3 class="panel-title" id="paneltitleproperties">Property 
 								            {% if lengthlist > 0 %}  
 										         <!--  
 										             <a href="#"  class="btn btn-sm btn-default" onclick="showEditor('Modal1');">
@@ -1105,18 +1059,29 @@
 										              <span class="glyphicon glyphicon-floppy-save"></span>  Save
 								   					</a>
 								   					
-								   					<a href="{% url onhold todo='removeall'  index=-1%}" class="btn btn-sm btn-default">
-										              <span class="glyphicon glyphicon-remove"></span>  Remove
-								   					</a>
+								   					 
+								   					
+	   							   					   <script>
+							   					      var url = "{% url onhold todo='removeall'  index=-1%}";
+							   					      // alert(url);		
+							   					      //document.write('<a href="'+url+' " class="btn btn-sm btn-default">');
+							   					      event = "call_ajax('" +url +"','removepropertylist');" ;
+							   					      console.log(event);
+							   				 
+							   					      document.write( '<a href="#" onclick='+ event +'  class="btn btn-sm btn-default">'); 
+							   					      document.write('<span class="glyphicon glyphicon-remove"></span>  Remove All');
+							   					      document.write('</a>');
+									              
+							   					   </script>
 								   					
 								   					 
 											{% endif %}     
 						              </h3>
 						            </div>
-						            <div class="panel-body">
-						            
+						            <div class="panel-body" style="height: 660px; overflow-y: scroll;">
+						                 
 														  
-												      {% if inputListReadOnly %}  
+												         {% if inputListReadOnly %}  
 														<div class="form-group searches"> 
 														 <table>
 														    {% for row  in inputListReadOnly %}   
@@ -1128,24 +1093,35 @@
 																		               	        {% if  field.name == col   %}
 																		               	              {% if   field.errors  %}
 																						         			   {% for error in field.errors %}
-																										         <label for="journal" style="color: red;">{{col}}</label>	
-																										         <input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 53px;" >	
+																										              {%for key,value in inputListValues.items%} 
+																										               		{% if col == key%}   
+																										                        <label for="journal" style="color: red;">{{col}}</label>	
+																										         			    <input type="text" id="{{col}}" name="{{col}}" value="{{value}}"  class="form-control" placeholder=""  rel="txtTooltip" title="**{{ error }}**" style="width: 53px;" >	
+																										     				
+																										     				{% endif %} 
+																										           
+																										           
+																										            {% endfor %} 
+																										     
 																										        {% endfor %}
 																										 {% else %}   
-																										           <label for="journal" >{{col}}</label>		
+																										           
+																										           
+																										          {%for key,value in inputListValues.items%} 
+																	                  		            	        {% if col == key%}   
+																	                  		            	        <label for="journal" >{{col}}</label>		
+																					                  		          <input type="text" id="{{col}}" name="{{col}}" value="{{value}}" class="form-control" placeholder=""  style="width: 53px;" >
+																					                  		                          
+																					                  		                          
+																					                  		         {% endif %} 
+																					                  		         
+																			                  		          {% endfor %} 
+																                  		          
 																								       {% endif %}   
 																				         			 
 																				         		 {% endif %}     
 																			               {% endfor %} 
-																		                  	 	{%for key,value in inputListValues.items%} 
-														                  		            	        {% if col == key%}   
-																		                  		            	     <input type="text" id="{{col}}" name="{{col}}" value="{{value}}" class="form-control" placeholder=""  style="width: 53px;" >
-																		                  		                          
-																		                  		         {% endif %} 
-																		                  		         
-																                  		          {% endfor %} 
-												                  		          
-																	                  		       
+   
 								
 										                  		            	 {% else %}  
 						                 		          
@@ -1164,33 +1140,55 @@
 														    </div>
 	 
 														  {% endif %}  
-														  
-														  
-														  {% for property in propertySessionList%} 
-														               <table>
+														          
+				
+											
+														  {% for property in propertyMaster.propertyList%} 
+   
+														 
+														               <table id="tblProperty{{forloop.counter}}" border="0">
+														                  <tr>
+														                    <td colspan="6"> 
+														                      &nbsp;
+														                    </td>
+														                 </tr>
+														                  <tr id="tdProperty{{forloop.counter}}">
+														                    <td colspan="2"> 
+														                       Property {{forloop.counter}}
+														                    </td>
+														              
+														                    <td colspan="4"> 
+														                       &nbsp;
+														   					   <script>
+														   					      var url = "{% url onhold todo='remove'  index=123456789%}".replace('123456789', {{forloop.counter}});
+														   					   // alert(url);		
+														   					      //document.write('<a href="'+url+' " class="btn btn-sm btn-default">');
+														   					     event = "call_ajax('" +url +"','removepropertyfromlist');" ;
+														   					     console.log(event);
+														   				 
+														   					     document.write( '<a href="#" onclick='+ event +'  class="btn btn-sm btn-default">'); 
+														   					      document.write('<span class="glyphicon glyphicon-remove-sign"></span>  Remove');
+														   					      document.write('</a>');
+																              
+														   					   </script>
+														                    </td>
+														                    
+														                 </tr>
 														                 <tr>
-														                    <tr>
 														                    <td colspan="6"> 
-														                       Property Information
+														                       
+														                        {{property.objDataProperty.name}} 
 														                    </td>
 														                 </tr>
-														                    <td colspan="6"> 
-														                    |
-														                     {{property.objProperty.description}} |
-																		  {{property.objCatalogCrystalSystemSelected.description}} |
-																	       {{property.objTypeSelected.description}} |
-																	       {{property.puntualgroupselected_name}} |
-																	       {{property.axisselected_name}} 
-														                    </td>
-														                 </tr>
+														       
+										
 														                  <tr>
 														                    <td colspan="6"> 
 														              
 														                    </td>
 														                 </tr>
 														               
-														               </table>
-																	    <table>
+														      
 																		 	
 																		      {% for row  in property.coefficientsmatrix%} 
 																		       <tr>
@@ -1202,42 +1200,76 @@
 																				 {% endfor %}
 																		      
 																		      {% endfor %}
+																		      
+																		      </tr>
+																		      <tr>
+																		      
+																		      <td colspan="6">
+															
+																			     				<table class="table">
+																			     				<tr>
+																			     				<td colspan="3"> Property Name </td> <td colspan="3" align="right">Units</td>
+																			     				</tr>
+																		                        </table>
+																		        </td>
+																		        </tr>
+																		    <tr>
+																		      
+																		      <td colspan="6">
+																		      			{% if propertyMaster.headerBlockValues %} 
+																			     				<table class="table">
+												
+																			     				 
+																							     {% for key,value in propertyMaster.headerBlockValues.items %} 														    
+																						                  <tr>
+																						                   <td colspan="3"> {{key.0}} </td> <td colspan="3" align="right">{{value}}</td>
+																						                  </tr>
+																							       {% endfor %}
+																							   
+																						     
+																						      </table>
+																			            {% endif %}  
+																			    </td>         
+																			    </tr>         
+																		      <tr>
+							
+																		      <td colspan="6">
+			
+																			            
+																			            
+																		        		 {% if property.loopBlockValues %} 
+																			     				<table class="table">
+		
+																			     				 
+																							     {% for key,value in property.loopBlockValues.items %} 														    
+																						                  <tr>
+																						                   <td colspan="3"> {{key.0}} </td> <td colspan="3" align="right">{{value}}</td>
+																						                  </tr>
+																							       {% endfor %}
+																							   
+																						     
+																						      </table>
+																			            {% endif %}  
+																		      
+																		      </td>
+																		      </tr>
 																	      
 																	      </table>
 																	      
 																	      
 																	
 																	       
-													      </td>
-													     <td>
-													            {% if property.dictionaryValues %} 
-													     				<table class="table">
-													     				<tr>
-													     				<td> Property Name </td> <td>Units</td>
-													     				</tr>
-													     				 
-																	     {% for key,value in property.dictionaryValues.items %} 														    
-																	                  <tr>
-																	                   <td> {{key.0}} </td> <td>{{value}}</td>
-																	                       </tr>
-																	       {% endfor %}
-																	   
-																     
-																      </table>
-													            {% endif %}  
-													       </td>
-													         </tr>
-													      </table>
+						 
 														  
 														  
 														    {% endfor %}
 										 
 														  
 						
-								
-						            </div>
+								       
+						             </div>
 						          </div>
-						
+						 
 						        </div><!-- /.col-sm-4 -->
 						      </div>
 							    
@@ -1335,11 +1367,15 @@
 							     {% endif %}    
 							     
                                 {% if ShowBtnSend == 0%}  
-						               <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Process</button>
+						               <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Add</button>
 						       {% endif %}   
 
 							      {% if ShowBtnSend == 2 %}  
-							           <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');"  disabled="disabled" >Process</button>
+							           <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Send</button>
+							      {% endif %}   
+							      
+							      {% if ShowBtnSend == 3 %}  
+							           <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');"  disabled="disabled" >Add</button>
 							      {% endif %}   
 							     
 		 

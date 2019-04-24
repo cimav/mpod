@@ -79,6 +79,11 @@
   var optionscs="toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=false,width=760,height=600,top="+h+",left="+wcs+"";
   var expr = "Firefox";
   
+  
+  
+  
+  
+  
   navigator.sayswho= (function(){
     var ua= navigator.userAgent, tem, 
     M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
@@ -234,6 +239,7 @@
 	   
 	  
 	  listvalues = stringGET.split(",")
+	  listvaluestemp = []
 	  var mat = "";
 	  type_id = null;
 	  var tensor_category = "";
@@ -278,18 +284,43 @@
 			   
 		  }
 		   
-		   array_values[i] = "?" + listvalues[i]
+		   spl2=list.split("&");
+		   listvaluestemp = ""
+		 
+		   for (var j=0; j < spl2.length; j++) 
+		      {
+				  val = spl2[j].split("=");
+				
+				  if (j == (spl2.length - 1))
+				  {
+					  v = validateValue(val[1]);
+					  listvaluestemp  = listvaluestemp + val[0] + "=" + v
+					  
+				  }
+			     else
+				  {
+			    	 v = validateValue(val[1]);
+			    	 listvaluestemp=  listvaluestemp + val[0] + "=" + v +"&";
+				  }
+		      }
+		 
+		   
+		   
+		   //array_values[i] = "?" + listvalues[i]
+		   array_values[i] = "?" + listvaluestemp
 		   for (var j=0; j < spl.length; j++) 
 	      {
 			  val = spl[j].split("=");
 			
 			  if (j == (spl.length - 1))
 			  {
-				  mat = mat + val[1];
+				  v = validateValue(val[1]);
+				  mat = mat + v;
 			  }
 		     else
 			  {
-		    	 mat = mat + val[1] +",";
+		    	 v = validateValue(val[1]);
+		    	 mat = mat + v +",";
 			  }
 	      }
 		   
@@ -317,6 +348,8 @@
 										'mat': mat ,
 										'url':jsonurl //parameter for urlcluster
 										}
+		   
+		   
 
 		   array_datasend[i] = jsondatasend
 		   type_id = null;  
@@ -344,8 +377,10 @@
 		    
 		   if(tensor_category != "undefined")
 		    {
-		    	vals = "?" + list;
+		    	//vals = "?" + list;
+		    	vals =   array_values[i];
 		    	console.log(vals);
+		    	 
 		    	html_colorandbtngraph = '<select id="'+select_color_id+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="ranktensor(this.id,\'' +  vals  + '\',\'' + select_color_id + '\',\'' + tensor_file_name + '\',\'' + valuearray + '\',\'' + tensor_category + '\')" id="'+i+'">Graph</button> ';		     
 			    html_select_colorb_btngraph[i] = html_colorandbtngraph;
 			    html_btnpolycrystalline = '<button class="btn btn-warning" onclick="showfields(this.id)" id="'+tensor_file_name+'">' + btnPolycrystallinelbl + '</button>';
@@ -490,5 +525,23 @@
 	   //console.log("listtensortags: " + stringlocal);
 	   return stringlocal
    }
+   
+   
+   function validateValue(value) {
+       var str = value
+       var expreg =         /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)$|^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)\([-+]?\d+(\.\d+)?\)$|^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)\([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)\)$|^[-+]?\d+(\.\d+)?$|^[-+]?\d+(\.\d+)?\([-+]?\d+(\.\d+)?\)$|^[-+]?\d+(\.\d+)?\([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)\)$/;
+       var val = '';
+     
+       var result = str.match(expreg);
+       if(result != null)
+       {
+         val=parseFloat(result[0].replace(/ *\([^)]*\) */g, "") );
+         return  val;
+       }
+       else
+       {
+           return value;
+       }
+     }
    
   
