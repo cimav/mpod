@@ -12,6 +12,7 @@ import numpy as N
  
 import string
 import re
+import os
  
 def compareList(list1, list2):
     
@@ -44,11 +45,23 @@ def argsToInt(args,field=None,value=None):
             pass
     return result
 
+def argsToBoolean(args,field=None,value=None):
+    result = False
+    if field:
+        if args[0].has_key(field):
+            try:
+                result= bool(args[0][field])
+            except ValueError:
+                result = value
+        else:
+            pass
+    return result
+
 def checkInputField(item):
         res = None
         tol = None
         
-        x = re.match(r"^[-+]?\d+\.\d+$|^[-+]?\d+$|^[-+]?\d+\.\d+\([-+]?\d+\.\d+\)$|^[-+]?\d+\.\d+\([-+]?\d+\)$|^[-+]?\d+\([-+]?\d+\.\d+\)$|^[-+]?\d+\([-+]?\d+\)$|^[-+]?\d+\.\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^[-+]?\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^[-+]?\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\([+\-]?(\d+\.\d+|\d+)\))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\))$", item)
+        x = re.match(r"^[-+]?\d+\.\d+$|^[-+]?\d+$|^[-+]?\d+\.\d+\([-+]?\d+\.\d+\)$|^[-+]?\d+\.\d+\([-+]?\d+\)$|^[-+]?\d+\([-+]?\d+\.\d+\)$|^[-+]?\d+\([-+]?\d+\)$|^[-+]?\d+\.\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^[-+]?\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^[-+]?\d+\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\)$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\([+\-]?(\d+\.\d+|\d+)\))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\))$|\?$", item)
         
         #testeado en https://www.datacamp.com/community/tutorials/python-regular-expression-tutorial
         #item = 3, 3.3, 3(3), 3.3(3.3),3(3.3),3.3(3)
@@ -59,26 +72,22 @@ def checkInputField(item):
 
         #item = '-3.3e+1.3(-3.3e+1.3)', item = '-3.3e+1.3(3.3)', item = '-3.3e+1.3(3)'
         #x = re.match(r"^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\([+\-]?(\d+\.\d+|\d+)\))$|^([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+))\(([+-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?(\d+\.\d+|\d+)))\))$",item)
-        
-        
-        
-        
+
         if x:
             result = x.group(0)
-             
-            
-            if result.find('(') > -1:
-                
-                    val = result.split('(')
-                    tol = val[1].split(')')
-                    #print 'correcto '  + val[0]  + ' tolerance '  + tolerance[0]
-                    return val[0] 
+            if result.find('?') > -1:
+                    val = 0
+                    return val
             else:
-                if x: 
-                    #print 'correcto ' + item
-                    return item 
+                if result.find('(') > -1:
+                    val = result.split('(')
+                    #tol = val[1].split(')')
+                    return val[0] 
                 else:
-                    return res
+                    if x: 
+                        return item 
+                    else:
+                        return res
         else:
             return res    
                     
@@ -92,8 +101,12 @@ def argsToFloat(args,field=None,value=None):
                 
                 item = args[0][field]
                 val1 =checkInputField(item)
-                if  val1:
-                    result= float(val1)
+                if  val1 != None:
+                    if item != "?":
+                        result= float(val1)
+                    else:
+                        result= val1
+                        
                 else:
                     pass
                     
@@ -141,6 +154,18 @@ def requestPostToIntList(POST,key=None,value=[]):
                     ids.append(int(id)) 
         
                 result= ids
+            except ValueError:
+                result = value
+        else:
+            pass
+    return result
+
+def requestPostToBoolean(POST,key=None,value=None):
+    result = False
+    if key:
+        if POST.has_key(key):
+            try:
+                result= bool(POST.get(key,False))
             except ValueError:
                 result = value
         else:
@@ -344,71 +369,71 @@ def checkPointGroupFiltred(objTypeSelected,objCatalogCrystalSystemSelected,dataP
 
 
 
-def checkPuntualGroupNames(objTypeSelected,objCatalogCrystalSystemSelected,dataPropertySelected):        
-    propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=dataPropertySelected).values('puntualgroupnames').annotate(total=Count('puntualgroupnames'))
+def checkPointGroupNames(objTypeSelected,objCatalogCrystalSystemSelected,dataPropertySelected):        
+    propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=dataPropertySelected).values('pointgroupnames').annotate(total=Count('pointgroupnames'))
     result = False
     if propertyDetail:  
         result = True
  
     return result
         
-def setPuntualGroupNames(objTypeSelected,objCatalogCrystalSystemSelected, dataPropertySelected):                                  
-    propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=dataPropertySelected).values('puntualgroupnames').annotate(total=Count('puntualgroupnames'))
-    puntualGroupsList=[]
-    puntualGroupNamesList = []
+def setPointGroupNames(objTypeSelected,objCatalogCrystalSystemSelected, dataPropertySelected):                                  
+    propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=dataPropertySelected).values('pointgroupnames').annotate(total=Count('pointgroupnames'))
+    pointGroupsList=[]
+    pointGroupNamesList = []
     for d in propertyDetail:
-        #if d['puntualgroupnames'] != 21:   
-            #print d['puntualgroupnames']              
-        objPuntualgroupnames=PuntualGroupNames.objects.get(id__exact=d['puntualgroupnames']) 
-        puntualGroupNamesList.append(objPuntualgroupnames.id)
-        catalogpointgroupValuesQuerySet = PuntualGroupGroups.objects.filter(puntualgroupnames=objPuntualgroupnames).values('catalogpointgroup')
-        del objPuntualgroupnames
+        #if d['pointgroupnames'] != 21:   
+            #print d['pointgroupnames']              
+        objPointgroupnames=PointGroupNames.objects.get(id__exact=d['pointgroupnames']) 
+        pointGroupNamesList.append(objPointgroupnames.id)
+        catalogpointgroupValuesQuerySet = PointGroupGroups.objects.filter(pointgroupnames=objPointgroupnames).values('catalogpointgroup')
+        del objPointgroupnames
         for obj in catalogpointgroupValuesQuerySet:
-            puntualGroupsList.append(obj['catalogpointgroup'])
+            pointGroupsList.append(obj['catalogpointgroup'])
                 
      
     try:
-        puntualGroupNamesQuerySet = PuntualGroupNames.objects.filter(id__in=puntualGroupNamesList)
-        puntualGroupsQuerySet = CatalogPointGroup.objects.filter(id__in=puntualGroupsList)
+        pointGroupNamesQuerySet = PointGroupNames.objects.filter(id__in=pointGroupNamesList)
+        pointGroupsQuerySet = CatalogPointGroup.objects.filter(id__in=pointGroupsList)
     except ObjectDoesNotExist as error:
         print "Message({0}): {1}".format(99, error.message)            
 
     
-    return puntualGroupNamesQuerySet,puntualGroupsQuerySet
+    return pointGroupNamesQuerySet,pointGroupsQuerySet
     
 def setPointGroup(objTypeSelected,objCatalogCrystalSystemSelected,objDataProperty):                                                                                               
     propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=objDataProperty).values('catalogpointgroup').annotate(total=Count('catalogpointgroup'))
-    puntualGroupList = []
+    pointGroupList = []
     for d in propertyDetail:  
         #if d['catalogpointgroup'] != 45:       
             #print d['catalogpointgroup']  
         objCatalogPointGroup=CatalogPointGroup.objects.get(id =d['catalogpointgroup'])  
-        puntualGroupList.append(objCatalogPointGroup.id)   
+        pointGroupList.append(objCatalogPointGroup.id)   
         
-    puntualGroupQuerySet = None
+    pointGroupQuerySet = None
     try:
-        puntualGroupQuerySet=CatalogPointGroup.objects.filter(id__in=puntualGroupList)
+        pointGroupQuerySet=CatalogPointGroup.objects.filter(id__in=pointGroupList)
     except ObjectDoesNotExist as error:
         print "Message({0}): {1}".format(99, error.message) 
     
-    return  puntualGroupQuerySet
+    return  pointGroupQuerySet
 
 def setPointGroupFiltred(objTypeSelected,objCatalogCrystalSystemSelected,objDataProperty):                                                                                               
     propertyDetail = CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=objDataProperty).values('catalogpointgroup').annotate(total=Count('catalogpointgroup'))
-    puntualGroupList = []
+    pointGroupList = []
     for d in propertyDetail:  
         if d['catalogpointgroup'] != 45:       
             #print d['catalogpointgroup']  
             objCatalogPointGroup=CatalogPointGroup.objects.get(id =d['catalogpointgroup'])  
-            puntualGroupList.append(objCatalogPointGroup.id)   
+            pointGroupList.append(objCatalogPointGroup.id)   
         
-    puntualGroupQuerySet = None
+    pointGroupQuerySet = None
     try:
-        puntualGroupQuerySet=CatalogPointGroup.objects.filter(id__in=puntualGroupList)
+        pointGroupQuerySet=CatalogPointGroup.objects.filter(id__in=pointGroupList)
     except ObjectDoesNotExist as error:
         print "Message({0}): {1}".format(99, error.message) 
     
-    return  puntualGroupQuerySet
+    return  pointGroupQuerySet
                     
 def get_nextautoincrement( mymodel ):
         from django.db import connection
@@ -418,63 +443,67 @@ def get_nextautoincrement( mymodel ):
         cursor.close()
         return row[0]
     
-def setCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataProperty,objCatalogpointgroupSelected,objPuntualgroupnamesSelected,axisSelected): 
-    print 'SELECT *  FROM mpod.catalog_property_detail '
-    print 'where type_id = ' + str(objTypeSelected.id)
-    print 'and crystalsystem_id = ' + str(objCatalogCrystalSystemSelected.id)  
-    print 'and dataproperty_id = '  + str(objDataProperty.id)  
-    print 'and catalogpointgroup_id = ' + str(objCatalogpointgroupSelected.id)   
-    print 'and puntualgroupnames_id = '  + str(objPuntualgroupnamesSelected.id)
-    print 'and catalogaxis_id = ' + str(axisSelected.id)   
-    
-    
-    catalogPropertyDetailList = []
-    catalogpropertydetailnames= []
-    catalogPropertyDetailQuerySet= None
+def setCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataProperty,objCatalogpointgroupSelected,objPointgroupnamesSelected,axisSelected): 
     try:
-        catalogPropertyDetailQuerySet=CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=objDataProperty,catalogpointgroup=objCatalogpointgroupSelected,puntualgroupnames=objPuntualgroupnamesSelected,catalogaxis=axisSelected).order_by('name')
+        print 'SELECT *  FROM mpod.catalog_property_detail '
+        print 'where type_id = ' + str(objTypeSelected.id)
+        print 'and crystalsystem_id = ' + str(objCatalogCrystalSystemSelected.id)  
+        print 'and dataproperty_id = '  + str(objDataProperty.id)  
+        print 'and catalogpointgroup_id = ' + str(objCatalogpointgroupSelected.id)   
+        print 'and pointgroupnames_id = '  + str(objPointgroupnamesSelected.id)
+        print 'and catalogaxis_id = ' + str(axisSelected.id)   
         
-    except ObjectDoesNotExist as error:
-        pass
-    
+        
+        catalogPropertyDetailList = []
+        catalogpropertydetailnames= []
+        catalogPropertyDetailQuerySet= None
+        try:
+            catalogPropertyDetailQuerySet=CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=objDataProperty,catalogpointgroup=objCatalogpointgroupSelected,pointgroupnames=objPointgroupnamesSelected,catalogaxis=axisSelected).order_by('name')
+            
+        except ObjectDoesNotExist as error:
+            pass
+        
+         
+        
+        read_write_coefficients = {}
+        for i,cpd in enumerate(catalogPropertyDetailQuerySet):
+            read_write_coefficients[catalogPropertyDetailQuerySet[i].name] = "w"  
+            catalogpropertydetailnames.append(cpd.name)
+     
+        #print read_write_coefficients
+        datapropertyinitial=objDataProperty
+        dimensions=datapropertyinitial.tensor_dimensions.split(',')
+        #print str(len(dimensions))
+        
+        if len(dimensions) == 2:
+            coefficients = N.zeros([int(dimensions[0]),int(dimensions[1])])    
+            #print datapropertyinitial.tag
+            parts=datapropertyinitial.tag.split('_')[-1]
+            letters =parts.split('ij')
+            x = 0
+            #row = []
+            for r in coefficients:
+                x=x+ 1
+                y=1   
+                for c in r: 
+                    col= str(x) + str(y)                
+                    if (letters[0] +col + letters[1]) not in read_write_coefficients:
+                        read_write_coefficients[letters[0] +col + letters[1]] =   "r"  
+                        catalogPropertyDetailList.append(letters[0] +col + letters[1])
+                    y= y + 1 
      
     
-    read_write_coefficients = {}
-    for i,cpd in enumerate(catalogPropertyDetailQuerySet):
-        read_write_coefficients[catalogPropertyDetailQuerySet[i].name] = "w"  
-        catalogpropertydetailnames.append(cpd.name)
- 
-    #print read_write_coefficients
-    datapropertyinitial=objDataProperty
-    dimensions=datapropertyinitial.tensor_dimensions.split(',')
-    #print str(len(dimensions))
+        return catalogPropertyDetailQuerySet, catalogPropertyDetailList,catalogpropertydetailnames
     
-    if len(dimensions) == 2:
-        coefficients = N.zeros([int(dimensions[0]),int(dimensions[1])])    
-        #print datapropertyinitial.tag
-        parts=datapropertyinitial.tag.split('_')[-1]
-        letters =parts.split('ij')
-        x = 0
-        #row = []
-        for r in coefficients:
-            x=x+ 1
-            y=1   
-            for c in r: 
-                col= str(x) + str(y)                
-                if (letters[0] +col + letters[1]) not in read_write_coefficients:
-                    read_write_coefficients[letters[0] +col + letters[1]] =   "r"  
-                    catalogPropertyDetailList.append(letters[0] +col + letters[1])
-                y= y + 1 
- 
-
-    return catalogPropertyDetailQuerySet, catalogPropertyDetailList,catalogpropertydetailnames
+    except Exception  as e: 
+        return [],[],[]
  
          
     
     
 
-def checkCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataProperty,objCatalogpointgroupSelected,objPuntualgroupnamesSelected,axisSelected): 
-    catalogPropertyDetail=CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=objDataProperty,catalogpointgroup=objCatalogpointgroupSelected,puntualgroupnames=objPuntualgroupnamesSelected,catalogaxis=axisSelected).order_by('name')
+def checkCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataProperty,objCatalogpointgroupSelected,objPointgroupnamesSelected,axisSelected): 
+    catalogPropertyDetail=CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=objDataProperty,catalogpointgroup=objCatalogpointgroupSelected,pointgroupnames=objPointgroupnamesSelected,catalogaxis=axisSelected).order_by('name')
     #catalogPropertyDetail=CatalogPropertyDetail.objects.filter(type=objTypeSelected,crystalsystem=objCatalogCrystalSystemSelected,dataproperty=objDataProperty).order_by('name')
  
     if catalogPropertyDetail:
@@ -483,8 +512,8 @@ def checkCoefficients(objTypeSelected,objCatalogCrystalSystemSelected,objDataPro
         return False
     
     
-def puntualgroupnamesParse(puntualgroupname):    
-    line =  puntualgroupname
+def pointgroupnamesParse(pointgroupname):    
+    line =  pointgroupname
     line = line.replace('(',"")   
     line = line.replace(')',"")   
     line = line.strip()

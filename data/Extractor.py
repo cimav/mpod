@@ -1,7 +1,7 @@
 '''
 Created on Nov 25, 2014
 
-@author: admin
+@author: Jorge Torres
 '''
 
 import os

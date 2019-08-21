@@ -1,0 +1,53 @@
+#------------------------------------------------------------------------------
+#$Date: 2019-07-24 11:23:59 +0000 (Wed, 24 Jul 2019) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://mpod.cimav.edu.mx/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_zafjwuxxwvzajsuwy
+_cod_database_code ?
+_symmetry_point_group_name_H-M infinf
+loop_
+_publ_author_name
+'3'
+_publ_section_title
+;
+3
+;
+_journal_name_full '3'
+_journal_volume  '33'
+_journal_page_first  '33'
+_journal_page_last  '33'
+_journal_year  '33'
+_prop_elastic_stiffness_cij 'cij'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+cij 11 6 
+cij 12 8 
+cij 13 8 
+cij 14 0 
+cij 15 0 
+cij 16 0 
+cij 22 6 
+cij 23 8 
+cij 24 0 
+cij 25 0 
+cij 26 0 
+cij 33 6 
+cij 34 0 
+cij 35 0 
+cij 36 0 
+cij 44 -1 
+cij 45 0 
+cij 46 0 
+cij 55 -1 
+cij 56 0 
+cij 66 -1 

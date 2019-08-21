@@ -9,6 +9,12 @@
    
       
           <script>
+          
+          $(document).ready (function(){
+              $("#success-alert").hide();
+              $("#warning-alert").hide();
+              
+   			});
        
             function call_ajax(url,todo,list) {
             	
@@ -104,14 +110,33 @@
 				                		 if (data.error == "")
 				            		    	{
 						                		 if (data.in_list) {
-						                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
-							                        alert("not added");
+						                		    
+							                        //alert("not added");
+							                        $("#warning-alert").hide();
+							                        $("#success-alert").html('')
+						                			$("#success-alert").html( '<a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a> <strong>' + data.name +' = '+ data.dicvalue+ '</strong>');
+														
+				                		            $("#warning-alert").fadeTo(2000, 500).slideUp(500, function(){
+				                		             	$("#warning-alert").slideUp(500);
+				                		              });   
+					                		           
+							                        
 						                		 }
 						                		 else
 						                		{
-						                			  alert("added" );
-						                			 /* $('#errordictionaryproperty').text('');
-						               	    		  $('#errordictionaryproperty').hide();*/
+						                			  //alert("added" );
+						                			   
+						                			   $("#success-alert").hide();
+						                			   $("#success-alert").html('')
+						                			   $("#success-alert").html( '<a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a> <strong>' + data.name +' = '+ data.dicvalue+ '</strong>');
+														  
+				                		               $("#success-alert").fadeTo(2000, 500).slideUp(500, function(){
+				                		               $("#success-alert").slideUp(500);
+				                		                });   
+					                		           
+						                			  
+						                			  
+						                			  
 						               	    		  $('#' +  list[2] ).text('');
 						               	    		  $('#' +  list[2] ).hide();
 						                		}
@@ -337,7 +362,7 @@
 						        <h5 class="modal-title" id="exampleModalLabel">{{property.objProperty.description}} 
 																															  {{property.objCatalogCrystalSystemSelected.description}} 
 																														       {{property.objTypeSelected.description}} 
-																														       {{property.puntualgroupselected_name}} 
+																														       {{property.pointgroupselected_name}} 
 																														       {{property.axisselected_name}} 
 						        </h5>
 						        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -431,6 +456,12 @@
 							  
 							  
 						      <div class="row">
+						      <div class="alert alert-success fade in alert-dismissable" id="success-alert">
+									    
+								</div>
+								<div class="alert alert-warning fade in alert-dismissable" id="warning-alert">
+									   
+								</div>
 						        <div class="col-sm-4">
 						          <div class="panel panel-default">
 						            <div class="panel-heading">
@@ -486,13 +517,13 @@
 										    <div class="form-group searches" id="divdictionaryphase" >
 			 
 											
-											<table>
-													     <tr>
-													     <td>
-													     <label for="phase_name">Phase </label>
-											           <td>
-													     <td>
-													     </td>
+											<table> 
+															     <tr>
+															     <td>
+															     <label for="phase_name">Phase </label>
+													           <td>
+															     <td>
+															     </td>
 													     </tr>
 											     <tr>
 											           <td>
@@ -956,18 +987,18 @@
 				
 											    
 						
-											    	{% if puntualGroupList %}  
+											    	{% if pointGroupList %}  
 											 			<div class="form-group searches">
-													      <label for="puntualgroupselected_name">
+													      <label for="pointgroupselected_name">
 													       {% if questionGp %} 
 												               {{questionGp }}  
 												          {% endif %}        
 													      </label>
 													    </div>   
 													<div class="form-group searches"> 
-													    	<select id="puntualgroupselected_name" name="puntualgroupselected_name" onchange="onchangeFunc()"  class="form-control">       
-													       {% for gp in puntualGroupList %}       
-													        {% if puntualgroupselected_name == gp.name %} 
+													    	<select id="pointgroupselected_name" name="pointgroupselected_name" onchange="onchangeFunc()"  class="form-control">       
+													       {% for gp in pointGroupList %}       
+													        {% if pointgroupselected_name == gp.name %} 
 															       <option  selected="selected" value="{{gp.name }}"  > ({{gp.name }}) </option>
 															 {% else %}
 															      <option value="{{gp.name}}"   > ({{gp.name }}) </option>
@@ -1049,15 +1080,42 @@
 						          <div class="panel panel-default">
 						            <div class="panel-heading">
 						              <h3 class="panel-title" id="paneltitleproperties">Property 
+ 
+								   			     {% if ShowBtnSend == 1%}  
+													    <a href="#"  class="btn btn-md btn-warning" onclick="todoFunc('submit');" >
+										                  <span class="glyphicon glyphicon-send"></span>  Send
+								   			  			</a>
+											     {% endif %}    
+											     
+				                                {% if ShowBtnSend == 0%}  
+										              
+										               <a href="#"  class="btn btn-md btn-warning" onclick="todoFunc('submit');" >
+										                  <span class="glyphicon glyphicon-plus"></span>  Add
+								   			  			</a>
+										       {% endif %}   
+				
+											      {% if ShowBtnSend == 2 %}  
+											           <a href="#"   class="btn btn-md btn-warning"   onclick="todoFunc('submit');" >
+										                  <span class="glyphicon glyphicon-send"></span>  Send
+								   			  			</a>
+											      {% endif %}   
+											      
+											      {% if ShowBtnSend == 3 %}  
+											           <a href="#"  class="btn btn-md btn-warning" onclick="todoFunc('submit');"  disabled="disabled" >
+										                  <span class="glyphicon glyphicon-plus"></span>  Add
+								   			  			</a>
+											      {% endif %}   
+							      
+							      
 								            {% if lengthlist > 0 %}  
 										         <!--  
 										             <a href="#"  class="btn btn-sm btn-default" onclick="showEditor('Modal1');">
 										              <span class="glyphicon glyphicon-check"></span>  Check
 										             </a>
 										           --> 
-										           <a href="{% url onhold todo='save' index=-2%}"  class="btn btn-sm btn-default">
-										              <span class="glyphicon glyphicon-floppy-save"></span>  Save
-								   					</a>
+											           <a href="{% url onhold todo='save' index=-2%}"  class="btn btn-md btn-default">
+											              <span class="glyphicon glyphicon-floppy-save"></span>  Save
+									   					</a>
 								   					
 								   					 
 								   					
@@ -1068,7 +1126,7 @@
 							   					      event = "call_ajax('" +url +"','removepropertylist');" ;
 							   					      console.log(event);
 							   				 
-							   					      document.write( '<a href="#" onclick='+ event +'  class="btn btn-sm btn-default">'); 
+							   					      document.write( '<a href="#" onclick='+ event +'  class="btn btn-md btn-default">'); 
 							   					      document.write('<span class="glyphicon glyphicon-remove"></span>  Remove All');
 							   					      document.write('</a>');
 									              
@@ -1077,6 +1135,7 @@
 								   					 
 											{% endif %}     
 						              </h3>
+						              
 						            </div>
 						            <div class="panel-body" style="height: 660px; overflow-y: scroll;">
 						                 
@@ -1336,7 +1395,7 @@
 									   if(todovalue='submit')
 										   {
 										     document.getElementById("todo").value =todovalue
-										     //alert(document.getElementById("todo").value)
+										      
 										   }
 									   else  if(todovalue='save')
 										  {
@@ -1360,34 +1419,8 @@
 								 
 								  </script>
 						
-						        
-							     
-							    {% if ShowBtnSend == 1%}  
-									    <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Send</button>
-							     {% endif %}    
-							     
-                                {% if ShowBtnSend == 0%}  
-						               <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Add</button>
-						       {% endif %}   
-
-							      {% if ShowBtnSend == 2 %}  
-							           <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Send</button>
-							      {% endif %}   
-							      
-							      {% if ShowBtnSend == 3 %}  
-							           <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');"  disabled="disabled" >Add</button>
-							      {% endif %}   
-							     
-		 
-								  
-								<!--   
-						        <button type="button" class="btn btn-sm btn-primary">Primary</button>
-						        <button type="button" class="btn btn-sm btn-success">Success</button>
-						        <button type="button" class="btn btn-sm btn-info">Info</button>
-						        <button type="button" class="btn btn-sm btn-warning">Warning</button>
-						        <button type="button" class="btn btn-sm btn-danger">Danger</button>
-						        <button type="button" class="btn btn-sm btn-link">Link</button>
-						        -->        
+  
+     
 							  </form>
 						    
 							 

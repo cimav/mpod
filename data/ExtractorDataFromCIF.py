@@ -1,7 +1,7 @@
 '''
 Created on Nov 25, 2014
 
-@author: admin
+@author: Jorge Torres
 '''
 
 import os
@@ -218,17 +218,13 @@ class Extractor (object):
             
             
     def get_props(self,texto,tags,loopedtgs,approved):
- 
-            
-            
         tg="_prop"
-        #ntgs= ['conditions','measurement','frame','symmetry', 'data']
         ntgs=tags
         props=[]
         propsList=[]
         propstag=[]
         propsval=[]
-        props_tags_looped=loopedtgs
+        prop_data_tags_looped=loopedtgs
         props_tags=[]
         lins = map(lambda x: x.strip(), texto.strip().split("\n"))
         texto_loops = None
@@ -243,9 +239,9 @@ class Extractor (object):
                 tag=lcs[0]
                 try:
                     if approved:
-                        objProperty=Property.objects.get(tag=tag)
+                        objProperty=Property.objects.get(tag=tag, active=True)
                     else:
-                        objProperty=PropertyTemp.objects.get(tag=tag)
+                        objProperty=PropertyTemp.objects.get(tag=tag, active=True)
                     
                 except ObjectDoesNotExist as error:      
                     print "message in the function get_props for debug purposes. Message({0}): {1}".format(99, error.message)   
@@ -254,8 +250,7 @@ class Extractor (object):
                 
                 parts=prstr.split('_')
                 if parts[1] in ntgs: #[u'conditions', u'measurement', u'frame', u'symmetry', u'data', u'thermal']
-                    if prstr not in filePropertyData._other_looped and tag not in props_tags_looped :
-                        #props_tags.append(tag)
+                    if prstr not in filePropertyData._other_looped and tag not in prop_data_tags_looped :
                         if len(lcs) > 1:
                             if len(lcs) > 2:
                                 val = ''
@@ -263,8 +258,6 @@ class Extractor (object):
                                     if i > 0:
                                         lcs[i] = ''
                                         val = val + " "+ v
-                                    
-                              
                                 lcs[1] = val.strip().strip("'").strip()
                             else:
                                 lcs[1] = lcs[1].strip().strip("'").strip()
@@ -295,18 +288,12 @@ class Extractor (object):
                                         if not structureProperty._coefflen:
                                             structureProperty._coefflen =  len(coeffficientsandvalues[:3])
                                             structureProperty._looped_val[0] = coeffficientsandvalues[3:]
-                                            
-                                        
+           
                                         structureProperty._coeffi[coeffcounter] = coeffficientsandvalues[:3]
                                         coeffcounter = coeffcounter + 1
-                        
-                                
+  
                         propsList.append(structureProperty)
-                             
 
- 
- 
-              
         if filePropertyData._other_looped:
             for i, tag in enumerate(filePropertyData._other_looped):
                 for x,p in enumerate(propsList):
@@ -320,7 +307,7 @@ class Extractor (object):
             #p._loped =  []
             #print p._name['prop_name']
             for key,value in p._coeffi.items():
-                for i,tag in enumerate(props_tags_looped):
+                for i,tag in enumerate(prop_data_tags_looped):
                     looped = {}
                     looped[tag,i] = value[i]
                     p._looped.append(looped)
@@ -360,9 +347,9 @@ class Extractor (object):
                         try:
                             tag = lcs[0]
                             if approved:
-                                objExperimentalParCond=ExperimentalParCond.objects.get(tag=tag)
+                                objExperimentalParCond=ExperimentalParCond.objects.get(tag=tag, active=True)
                             else:
-                                objExperimentalParCond=ExperimentalParCondTemp.objects.get(tag=tag)
+                                objExperimentalParCond=ExperimentalParCondTemp.objects.get(tag=tag, active=True)
 
                             experimentalParCondList.append(objExperimentalParCond)
                             
@@ -416,7 +403,7 @@ class Extractor (object):
         return props_info
     
     def checkExperimentalParCond(self,tag):
-        experimentalParCond=ExperimentalParCond.objects.filter(tag__exact=tag)
+        experimentalParCond=ExperimentalParCond.objects.filter(tag__exact=tag, active=True)
         if not experimentalParCond:
             return False
         else:
@@ -432,8 +419,8 @@ class Extractor (object):
         conds = []
         inds=[]
         ntgs=[]
-        #proptagList=PropTags.objects.filter(active=1).exclude(tag__exact= 'data')        #categorytag_id=1
-        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=1))
+
+        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=1), active=True)
         for i, pt in enumerate(proptagList):
             ntgs.append( proptagList[i].tag )
             
@@ -658,9 +645,9 @@ class Extractor (object):
         
         try:
             if approved:
-                experimentalCondition = ExperimentalParCond.objects.get(tag__exact=key)
+                experimentalCondition = ExperimentalParCond.objects.get(tag__exact=key, active=True)
             else:
-                experimentalCondition = ExperimentalParCondTemp.objects.get(tag__exact=key)
+                experimentalCondition = ExperimentalParCondTemp.objects.get(tag__exact=key, active=True)
         
         except ObjectDoesNotExist as error:
             print "message in the function extractProperties  for debug purposes Message({0}): {1}".format(99, error.message)  
@@ -721,16 +708,15 @@ class Extractor (object):
             data_props={}
             ntgs=[]
             loopedtgs=[]
-            #proptagList=PropTags.objects.filter(active=1)        #categorytag_id=2
-            proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=2))
-            loopedproptagList=PropLoopedTags.objects.all()
+  
+            proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=2),active=True)
+            prop_data_tags_looped=PropLoopedTags.objects.all() 
             
             for i, pt in enumerate(proptagList):
                 ntgs.append( proptagList[i].tag )
                 
-            for i, pt in enumerate(loopedproptagList):
-                #loopedtgs.append( loopedproptagList[i].tag.strip()[5:])
-                loopedtgs.append( loopedproptagList[i].tag)
+            for i, pt in enumerate(prop_data_tags_looped):
+                loopedtgs.append( prop_data_tags_looped[i].tag)
  
             
             for i, fil in enumerate(self.filets):
@@ -800,12 +786,12 @@ class Extractor (object):
                     
                     try:
                         if approved:
-                            objProperty=Property.objects.get(tag__exact=tg+pr._name["prop_name"])
+                            objProperty=Property.objects.get(tag__exact=tg+pr._name["prop_name"], active=True)
                             na=objProperty.name  
                             un=objProperty.units  
                             ud=objProperty.units_detail 
                         else:
-                            objProperty=PropertyTemp.objects.get(tag__exact=tg+pr._name["prop_name"])
+                            objProperty=PropertyTemp.objects.get(tag__exact=tg+pr._name["prop_name"], active=True)
                             na=objProperty.name  
                             un=objProperty.units  
                             ud=objProperty.units_detail 
@@ -939,14 +925,14 @@ class Extractor (object):
         """
         gen_tags = []
         publArticle = None
-        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=5))
+        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=5),active=True)
 
             
         for i, pt in enumerate(proptagList):
             gen_tags.append( proptagList[i].tag )
         
         publi_tags = []
-        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=3))
+        proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=3),active=True)
 
             
         for i, pt in enumerate(proptagList):

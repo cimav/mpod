@@ -1,0 +1,42 @@
+#------------------------------------------------------------------------------
+#$Date: 2019-03-19 18:39:22 +0000 (Tue, 19 Mar 2019) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://mpod.cimav.edu.mx/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_qwryety5lbgxshonhzrlqkb
+_cod_database_code ?
+_symmetry_point_group_name_H-M 6mm
+_phase_name 'Wurtzite'
+_chemical_formula 'ZnO'
+loop_
+_publ_author_name
+'M. Cattia'
+'*'
+'Y. Noelb'
+'R. Dovesi'
+_publ_section_title
+;
+Full piezoelectric tensors of wurtzite and zinc blende ZnO and ZnS by first-principles calculations
+;
+_journal_name_full 'Journal of Physics and Chemistry of Solids' 
+_journal_volume  '64' 
+_journal_page_first  '2183' 
+_journal_page_last  '2190' 
+_journal_year  '2003' 
+_prop_piezoelectric_eij 'eij'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+eij 15 -0.3
+eij 24 -0.3
+eij 31 -0.62
+eij 32 -0.62
+eij 33 0.96

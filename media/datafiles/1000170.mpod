@@ -15,7 +15,7 @@ _cod_database_code               9008490
 _structure_refined 'no'
 _phase_name 'cadmium'
 _chemical_formula_sum 'Cd'
-_symmetry_point_group_name_H-M '6/m m m'
+_symmetry_point_group_name_H-M '6/mmm'
 _cell_length_a  2.97887
 _cell_length_b  2.97887
 _cell_length_c  5.61765

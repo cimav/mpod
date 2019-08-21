@@ -1,0 +1,1382 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+
+  
+      <div class="container-fluid">
+      {% include "account/menu.html" %}
+   
+      
+          <script>
+       
+            function call_ajax(url,todo,list) {
+            	
+            	     
+        
+            	      datasend = "";
+            	      dictionary_pk  ="";
+            	      if  (todo=="add" || todo=="change" )
+           	          {
+            	    	  
+            	    	  /*
+            	    	  value =  $('#dicvalue').val();            	    	  
+            	    	  dictionary_pk  =  $('#dictionary_name').val();
+            	    	  */
+            	    	  value =  $('#' +  list[1] ).val();            	    	  
+            	    	  dictionary_pk  =  $('#' +  list[0] ).val();
+            	    	  
+            	    	  apply_to_all = false;
+            	    	  if( $('#' +  list[4] ).prop('checked') ) {
+            	    		  apply_to_all = true;
+            	    		  
+            	    		}
+            	    	  
+            	    	   
+            	    	  
+    
+            	    	  
+            	    	  //alert(dictionary_pk);
+         	    		  datasend ={
+				       	 		                 'todo': todo,
+				      			                  'dicvalue': value,
+				      			                  'dictionary_pk':dictionary_pk,
+				      			                  'apply_to_all':apply_to_all
+				      			                }
+         	    		 
+           	          }
+            	      else if  (todo=="addnew" )
+           	    	  {
+
+            	    	  valuenew =  $('#valuenew').val();
+            	    	  namenew =  $('#namenew').val();
+            	    	  unitsnew =  $('#unitsnew').val();
+            	    	  units_detailnew =  $('#units_detailnew').val();
+            	    	  definitionnew =  $('#definitionnew').val();
+            	    	  //alert(namenew);
+            	    	 
+            	    	  if (namenew == "")
+            	    		  {
+            	    		     $('#errornamenew').show();
+            	    		     return;
+            	    	      
+            	    		  }
+            	    	  else
+            	    		  {
+            	    		     $('#errornamenew').hide();
+            	    		  }
+
+            	    	  datasend ={				       	 		                 
+				      			                  'valuenew': valuenew,
+				      			                  'namenew':namenew,
+				      			                  'unitsnew':unitsnew,
+				      			                  'units_detailnew':units_detailnew,
+				      			                  'definitionnew':definitionnew,
+				      			                 
+				      			                }
+   
+            	    	  
+           	    	  }
+            	      else if  (todo=="preparenew" )
+           	    	  {
+            	    	  $( "#divdictionaryexistent" ).hide();
+             		      $( "#divdictionarynew" ).show();
+             		      return;
+           	    	  }
+            	      else if (todo == "cancel")
+            	      {
+            	    	  $( "#divdictionaryexistent" ).show();
+             		      $( "#divdictionarynew" ).hide();
+             		      return;
+            	      }
+ 
+           
+            	  
+		              $.ajax({
+		            	 type: "POST",
+		                url: url,
+		                data: datasend,
+		                dataType: 'json',
+		                success: function (data) {
+		                	     
+			                	 if (todo == 'add')
+			                		 {
+				                		 if (data.error == "")
+				            		    	{
+						                		 if (data.in_list) {
+						                		   // var val =   "description: "+ data.name +  " units: "+ data.units +  " units_detail: "+ data.units_detail;
+							                        alert("not added");
+						                		 }
+						                		 else
+						                		{
+						                			  alert("added" );
+						                			 /* $('#errordictionaryproperty').text('');
+						               	    		  $('#errordictionaryproperty').hide();*/
+						               	    		  $('#' +  list[2] ).text('');
+						               	    		  $('#' +  list[2] ).hide();
+						                		}
+				            		    	}
+				                		 else
+			                		      {
+			                		    	/*$('#errordictionaryproperty').text(data.error);
+				               	    		$('#errordictionaryproperty').show();*/
+				               	    		
+				               	    		  $('#' +  list[2] ).text(data.error);
+				               	    		  $('#' +  list[2] ).show();
+	
+			                		      }
+			                		 
+			                		 
+			                		  }
+			                	 else if (todo == 'change')
+			                		 {
+				                  		 if (data.error == "")
+				            		    	{
+						                		
+						                		$('#units_detail').text(data.units_detail);
+						                		
+						                		/*$('#errordictionaryproperty').text('');
+						               	    	$('#errordictionaryproperty').hide();*/
+						               	    	
+						               	    	$('#' +  list[2] ).text('');
+					               	    		 $('#' +  list[2] ).hide();
+						                	
+				            		    	}
+				                		 else
+			                		      {
+				                			// $('#units_detail').text(data.units_detail);
+			                		    	 /*$('#errordictionaryproperty').text(data.error);
+				               	    		 $('#errordictionaryproperty').show();*/
+				               	    		
+				               	    		  $('#' +  list[3] ).text(data.units_detail);
+				               	    		  $('#' +  list[2] ).text(data.error);
+				               	    		  $('#' +  list[2] ).show();
+	
+			                		      }
+			                		    
+				                        
+			                		 }
+			                	 else if (todo == 'addnew')
+			                		 {
+			                		 
+			            	    	    $("#divdictionaryexistent" ).show(''); 
+			             		        $("#divdictionarynew" ).hide('');
+			              	    	    $('#valuenew').val('');
+			            	    	    $('#namenew').val('');
+			            	    	    $('#unitsnew').val('');
+			            	    	    $('#units_detailnew').val('');
+			            	    	    $('#definitionnew').val('');
+			            	    	    
+			            	    	    
+			            	    	    $("#divdictionaryexistent" ).show(''); 
+			             		        $("#divdictionarynew" ).hide('');
+			              	    	    $('#valuenew').attr("placeholder", "395 ,AWP, etc.");
+			            	    	    $('#namenew').attr("placeholder", "Example: conditions temperature");
+			            	    	    $('#unitsnew').attr("placeholder", "K,T,Pa, etc.");
+			            	    	    $('#units_detailnew').attr("placeholder", "kelvin, tesla, pascal, etc.");
+			            	    	    $('#definitionnew').attr("placeholder", "Text of definition");
+	
+			                		 }			                	
+				                else if (todo=="removepropertyfromlist")
+				                	{  
+				                	 
+				                	    console.log(data);
+				                		if (data.error == "")
+	                		        	{
+	    				                   if (data.tblProperty)
+	    				                   {
+	    				                	   console.log(data.tblProperty);
+	    				                	   $('#' + data.tblProperty).remove(); 
+				                		   }
+				                	
+				                	    }
+				                	}
+				                else if  (todo=="removepropertylist" )
+				                	{
+				                		if (data.error == "")
+	            		        		{
+					                  		 if (data.tblProperty) 
+					                  		 {
+					                  			 if (data.tblProperty) 
+						                  		 {
+					                  				var  size = parseInt(data.sizelist);
+						                	   		console.log(data.sizelist);
+						                	   		for(var i=0; i < size; i++)
+						                	   		{
+						                	   			$('#' + data.tblProperty + (i + 1).toString()).remove(); 
+						                	   		}
+						                	   		
+						                  		 }
+			                		      	 }
+			                	
+			                	       }
+				                	}
+			                	  
+		                
+		                }
+		              });
+            }
+
+         
+         
+            
+            
+            function showEditor(modal) {
+                modal= "#" + modal;
+                
+           	  $( modal).modal("show");
+           	  $(modal).appendTo("body");
+           	}
+           	
+           function hideEditor() {
+           	 
+           	  $("#exampleModal").modal("hide");
+           	  //$("#createModal").appendTo("body");
+           	 // $("body>#createModal").remove();
+           	}
+
+           function ngOnDestroy(){
+           	  $("body>#createModal").remove();
+           	}
+
+           
+           $(document).on('click', '.panel-heading span.clickable', function(e){
+        	    var $this = $(this);
+        	    
+        		if(!$this.hasClass('panel-collapsed')) {
+        			//alert('no');
+        			$this.parents('.panel').find('.panel-body').slideUp();
+        			$this.addClass('panel-collapsed');
+        			$this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+        		} else {
+        			//alert('si');
+        			$this.parents('.panel').find('.panel-body').slideDown();
+        			$this.removeClass('panel-collapsed');
+        			$this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        		}
+        	})
+        	
+        	
+        	function enterKey(event,list)
+           { 
+        	  
+        	   if(event.which == 13) {
+        		    
+        		   call_ajax('{% url addmaterial -1%}','add',list );
+			    }
+        	   
+           }
+        	
+ 
+			
+			 
+			
+        </script>
+        <style>
+			        textarea {
+			   resize: none;
+			}
+			.modal-backdrop {
+			    z-index: 1040 !important;
+			}
+			.modal-dialog {
+			    margin: 2px auto;
+			    z-index: 1100 !important;
+			     width: 760px;
+			}
+			
+			
+			.row{
+			    margin-top:40px;
+			    padding: 0 10px;
+			}
+			
+			.clickable{
+			    cursor: pointer;   
+			}
+			
+			.panel-heading span {
+				margin-top: -20px;
+				font-size: 15px;
+			}
+			
+			
+		 
+			
+		.popover{
+    		max-width:1000px;
+    		 
+		}
+
+</style>
+
+
+
+
+{% for property in propertyMaster.propertyList%} 
+
+{# {% for property in propertySessionList%}  #}
+
+
+
+					      <div class="modal" id="Modal{{forloop.counter}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"  >
+						  <div class="modal-dialog" role="document">
+						    <div class="modal-content">
+						      <div class="modal-header">
+						        <h5 class="modal-title" id="exampleModalLabel">{{property.objProperty.description}} 
+																															  {{property.objCatalogCrystalSystemSelected.description}} 
+																														       {{property.objTypeSelected.description}} 
+																														       {{property.puntualgroupselected_name}} 
+																														       {{property.axisselected_name}} 
+						        </h5>
+						        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						          <span aria-hidden="true">&times;</span>
+						        </button>
+						      </div>
+						      <div class="modal-body">
+								       <table>
+										         <tr> 
+										           <td>
+															 <table>
+															 	{% if property.objTypeSelected.name    == "s"%} 
+															      {% for row  in property.s%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	      
+																		<input type="text" id="{{col}}onhold" name="{{col}}onhold" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >	
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														      {% if property.objTypeSelected.name   == "c"%} 
+															      {% for row  in property.c%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	      <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														  
+															 {% if property.objTypeSelected.name  == "d"%} 
+															      {% for row  in property.d%} 
+															       <tr>
+																		{% for col  in row %}  
+																	   <td>
+																	       <input type="text" id="{{col}}" name="{{col}}" value="{{col}}" class="form-control" placeholder=""  style="width: 50px;" readonly="readonly" >
+																	   </td>	
+																	 {% endfor %}
+															      
+															      {% endfor %}
+														      {% endif %}  
+														      </table>
+										      </td>
+										     <td style="vertical-align: top;" >
+										     				<table class="table">
+										     				<tr>
+										     				<td> Name </td> <td>Units</td>
+										     				</tr>
+										     				 
+														     {% for key,value in property.dictionaryValues.items %} 														    
+														                  <tr>
+														                   <td> {{key}} </td> <td>{{value}}</td>
+														                       </tr>
+														       {% endfor %}
+														   
+													     
+													      </table>
+										     
+										       </td>
+										         </tr>
+										      </table>
+									 
+						   
+						      </div>
+						      <div class="modal-footer">
+						        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						         
+						      </div>
+						    </div>
+						  </div>
+						</div>
+  {% endfor %}
+  
+  
+
+						       
+						      <br/>
+						      <h4></h4>
+							  <h4></h4>
+							 
+							  <form role="form" action="/addcasev2/#no-back" method="POST">
+							  <input type='hidden' id=selectChange name="selectChange" value="0" />
+							  <input type='hidden' id="proccess" name="proccess" value="0" />
+							  <input type='hidden' id="todo" name="todo" value="" />
+							  <input type='hidden' id="subtodo" name="subtodo" value="" />
+							  
+							  
+						      <div class="row">
+						        <div class="col-sm-4">
+						          <div class="panel panel-default">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Article Information</h3>
+						            </div>
+						            <div class="panel-body">
+						                     {% for field  in form %}
+										        <div class="form-group searches">
+										         {% if field.name == "title" or  field.name == "author"  or  field.name == "journal" or  field.name == "volume" or  field.name == "year" or  field.name == "page_first" or  field.name == "page_last"%}
+													      <label for="{{field.name}}">{{field.label}}</label>
+													      <input type="text" id="{{field.name}}" name="{{field.name}}" value="{{field.value}}" class="form-control" placeholder="{{field.help_text}}"  style="width: 290px;">
+													        {% for error in field.errors %}
+													          <p style="color: red">{{ error }}</p>
+													        {% endfor %}
+												   {% endif %} 
+											    </div>
+										     {% endfor %}
+										 
+										 
+										     
+										     
+						            </div>
+						          </div>
+						          <!--<div class="panel panel-primary">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Panel title 4  </h3>
+						            </div>
+						 
+									 
+												
+									
+						            <div class="panel-body">
+						             body
+						 
+								     
+								      
+						            </div>
+						          </div>-->
+						        </div> <!-- /.col-sm-4 -->
+						        <div class="col-sm-4">
+						         <div class="panel panel-default ">
+						            <div class="panel-heading ">
+						              <h3 class="panel-title"> Material </h3>
+						              	<span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+						            </div>
+						            <div class="panel-body collapse">
+						             <!-- db table disctionary -->
+						             
+						            
+										    
+										    
+										    <!-- ********************************************PHASE************************************** -->
+										    <div class="form-group searches" id="divdictionaryphase" >
+			 
+											
+											<table>
+													     <tr>
+													     <td>
+													     <label for="phase_name">Phase </label>
+											           <td>
+													     <td>
+													     </td>
+													     </tr>
+											     <tr>
+											           <td>
+										          
+												       <select  id="phase_name"  name="phase_name"  class="form-control"  onchange="call_ajax('{% url addmaterial -1%}','change',['phase_name','phasevalue','errorphase','units_detailphase'] )"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       {% for obj in dictionaryPhaseList %}       
+														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
+												        {% endfor %}
+											         </select>	
+									         			   </td>
+													       <td><!--  
+									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-default" data-toggle="tooltip" data-placement="top" title="Add a new one">
+																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
+																	   </a>
+																	-->
+														</td>
+														 
+												    </tr>
+												    <tr>
+												        <td>
+																		   <table>
+																	         <tr><td>
+																					 
+																				   </td>
+																			       <td>
+																					 
+																				   </td>
+																		    </tr>
+																		     <tr>
+																		       			      <td>
+																						       <a href="#"  onclick="call_ajax('{% url addmaterial -1%}','add',['phase_name','phasevalue','errorphase','units_detailphase','chkphase'] )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
+																							   </a>
+																						     </td>
+																				            <td>
+																						      <input type="text" id="phasevalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"  onkeypress="enterKey(event,['phase_name','phasevalue','errorphase','units_detailphase','chkphase'] );">	
+																						     </td>
+																				               <td>
+																						          <label id="units_detailphase" for="units_detailphase">{{obj.units_detail}} </label>
+																						     </td>
+																			
+																		   </tr>
+																		    <tr>
+																		    <td colspan="2">
+																		      <p style="color: red; display: none" id="errorphase" > </p>
+																		    </td>
+																		    </tr>
+																		   
+																         </table>
+														 </td>
+													</tr>
+														<tr>
+													     <td>
+													      Apply for all properties? 
+											           <td>
+													     <td>
+													     <input type="checkbox" id="chkphase" disabled="disabled" checked="checked">
+													     </td>
+													     </tr>
+											</table>
+
+										    </div>
+										    
+										    <!-- **************************************END PHASE***************************************** -->
+										    
+										    
+										    <!-- ********************************************PHASE CHARACTERISTICS************************************** -->
+										    <div class="form-group searches" id="divdictionaryphase" >
+			 
+											
+											<table>
+													     <tr>
+													     <td>
+													     <label for="phasecharacteristic_name">Phase Characteristics </label>
+											           <td>
+													     <td>
+													     </td>
+													     </tr>
+											     <tr>
+											           <td>
+										          
+												       <select  id="phasecharacteristic_name"  name="phasecharacteristic_name"  class="form-control"  onchange="call_ajax('{% url addmaterial -1%}','change',['phasecharacteristic_name','phasecharacteristicvalue','errorphasecharacteristic','units_detailphasecharacteristic',''] )"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       {% for obj in dictionaryPhaseCharacteristicList %}       
+														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
+												        {% endfor %}
+											         </select>	
+									         			   </td>
+													       <td><!--  
+									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-default" data-toggle="tooltip" data-placement="top" title="Add a new one">
+																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
+																	   </a>
+																	-->
+														</td>
+														 
+												    </tr>
+												    <tr>
+												        <td>
+																		   <table>
+																	         <tr><td>
+																					 
+																				   </td>
+																			       <td>
+																					 
+																				   </td>
+																		    </tr>
+																		     <tr>
+																		       			      <td>
+																						       <a href="#"  onclick="call_ajax('{% url addmaterial -1%}','add',['phasecharacteristic_name','phasecharacteristicvalue','errorphasecharacteristic','units_detailphasecharacteristic','chkphasecharacteristic'] )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
+																							   </a>
+																						     </td>
+																				            <td>
+																						      <input type="text" id="phasecharacteristicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;" onkeypress="enterKey(event,['phasecharacteristic_name','phasecharacteristicvalue','errorphasecharacteristic','units_detailphasecharacteristic','chkphasecharacteristic'] );"  >	
+																						     </td>
+																				               <td>
+																						          <label id="units_detailphasecharacteristic" for="units_detailphasecharacteristic">{{obj.units_detail}} </label>
+																						     </td>
+																			
+																		   </tr>
+																		    <tr>
+																		    <td colspan="2">
+																		      <p style="color: red; display: none" id="errorphasecharacteristic" > </p>
+																		    </td>
+																		    </tr>
+																		   
+																         </table>
+														 </td>
+													</tr>
+																		 
+														 <tr>
+													     <td>
+													      Apply for all properties? 
+											           <td>
+													     <td>
+													     <input type="checkbox" id="chkphasecharacteristic" disabled="disabled" checked="checked">
+													     </td>
+													     </tr>
+											</table>
+
+										    </div>
+										    
+										    <!-- **************************************END PHASE CHARACTERISTICS ***************************************** -->
+										    
+										    
+										     <!-- ******************************************** NEWCONDITION************************************** -->
+						             <div class="form-group searches" id="divdictionarynew" style="display: none">
+ 
+											    <table>
+											     <tr><td colspan="2">
+															 <label id="lblnamenew" for="namenew">Name:</label>
+																      <input type="text" id="namenew" value="" class="form-control"  style="width: 250px;" placeholder="Example: conditions temperature">	
+															<p style="color: red; display: none" id="errornamenew" >Field Required</p>
+															
+														   </td>
+													       <td>
+															   
+														   </td>
+												    </tr>
+												     <tr>
+														            <td>
+														                <label for="valuenew">Value:</label>
+																      <input type="text" id="valuenew" value="" class="form-control" placeholder="395 ,AWP, etc," style="width: 120px;" >	
+																     </td>
+																     	<td>
+														               <label for="unitsnew">Units:</label>
+																      <input type="text" id="unitsnew" value="" class="form-control" placeholder="K, T, Pa, etc." style="width: 100px;"   >	
+																     </td>
+														               <td>
+														               <label for="units_detailnew">Unit detail:</label>
+																      <input type="text" id="units_detailnew" value="" class="form-control" placeholder="kelvin, tesla, pascal, etc."  style="width: 100px;"   >	
+																     </td>
+					
+												   </tr>
+												    <tr>
+												    <td colspan="2">
+												        <label for="definitionnew">Definition:</label>
+					 
+													    <textarea  id="definitionnew"  rows="6" cols="60" class="form-control"  placeholder="Text for definition"  style="width: 260px;"   ></textarea>
+												    </td>
+												    </tr>
+												    <tr>
+												      	              <td>
+		
+																     </td>
+																      <td align="right" colspan="2">
+																                 <a href="#"  onclick="call_ajax('','cancel'  )" class="btn btn-sm btn-warning">
+																			              <span class="glyphicon glyphicon glyphicon-plus"></span> Cancel 
+																	               </a>
+   																			       <a href="#"  onclick="call_ajax('{% url addnewdictionaryproperty todo='addnew' index=-2 %}','addnew'  )" class="btn btn-sm btn-warning">
+																			              <span class="glyphicon glyphicon glyphicon-plus"></span> Add 
+																	               </a>
+																     </td>
+												    </tr>
+												   
+										         </table>
+								             
+										     </div>
+										     <!-- ********************************************END NEWCONDITION************************************** -->
+										     
+										     
+										     <!-- ********************************************CONDITIONS************************************** -->
+										    <div class="form-group searches" id="divdictionaryexistent" >
+										    
+										    
+										     <table  >
+													     <tr>
+													     <td>
+													     <label for="dictionary_name">Conditions </label>
+											           <td>
+													     <td>
+													     </td>
+													     </tr>
+											     <tr>
+											           <td>
+										          
+												       <select  id="dictionary_name"  name="dictionary_name"  class="form-control"  onchange="call_ajax('{% url addmaterial -1 %}','change',['dictionary_name','dicvalue','errordictionaryproperty','units_detail'])"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       {% for obj in dictionaryList %}       
+														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
+												        {% endfor %}
+											         </select>	
+									         			   </td>
+													       <td>
+													      
+													       
+													         <!--   
+									                                <a href="#"  onclick="call_ajax('','preparenew' )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Add a new one">
+																			              <span class="glyphicon glyphicon glyphicon-new-window"></span> New 
+																	   </a>
+															 -->		   
+																	   
+														</td>
+														 
+												    </tr>
+												    <tr>
+												        <td>
+																		   <table>
+																	         <tr><td>
+																					 
+																				   </td>
+																			       <td>
+																					 
+																				   </td>
+																		    </tr>
+																		     <tr>
+																		       			      <td>
+																						       <a href="#"  onclick="call_ajax('{% url addmaterial -1%}','add',['dictionary_name','dicvalue','errordictionaryproperty','units_detail','chkconditions'] )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
+																							   </a>
+																						     </td>
+																				            <td>
+																						      <input type="text" id="dicvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the property selected above" style="width: 100px;"    onkeypress="enterKey(event,['dictionary_name','dicvalue','errordictionaryproperty','units_detail','chkconditions'] );">	
+																						     </td>
+																				               <td>
+																						         <label id="units_detail" for="units_detail">{{obj.units_detail}} </label>
+																						     </td>
+																			
+																		   </tr>
+																		    <tr>
+																		    <td colspan="2">
+																		          <p style="color: red; display: none" id="errordictionaryproperty" > </p>
+																		    </td>
+																		    </tr>
+																		   
+																         </table>
+														 </td>
+													</tr>
+														 <tr>
+													     <td>
+													      Apply for all properties? 
+											           <td>
+													     <td>
+													     <input type="checkbox" id="chkconditions">
+													     </td>
+													     </tr>
+											</table>
+											
+											
+										    </div>
+										    
+										    <!-- ********************************************END CONDITION************************************** -->
+										    
+										    <!-- ********************************************MEASUREMENT METHOD************************************** -->
+										    <div class="form-group searches" id="divdictionaryphase" >
+			 
+											
+											<table>
+													     <tr>
+													     <td>
+													     <label for="measurement_name">Measurement </label>
+											           <td>
+													     <td>
+													     </td>
+													     </tr>
+											     <tr>
+											           <td>
+										          
+												       <select  id="measurement_name"  name="measurement_name"  class="form-control"  onchange="call_ajax('{% url addmaterial -1 %}','change',['measurement_name','measurementvalue','errormeasurement'])"  style="width: 250px;" data-toggle="tooltip" data-placement="top" title="Select a property" >
+												       {% for obj in dictionaryMeasurementList %}       
+														       <option value="{{obj.pk}}"   >{{obj.name}}</option>
+												        {% endfor %}
+											         </select>	
+									         			   </td>
+													       <td> 
+														</td>
+														 
+												    </tr>
+												    <tr>
+												        <td>
+																		   <table>
+																	         <tr><td>
+																					 
+																				   </td>
+																			       <td>
+																					 
+																				   </td>
+																		    </tr>
+																		     <tr>
+																		       			      <td>
+																						       <a href="#"  onclick="call_ajax('{% url addmaterial -1%}','add',['measurement_name','measurementvalue','errormeasurement','measurementunits_detail','chkmeasurement'] )" class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="top" title="Send the value for the property selected above" >
+																									              <span class="glyphicon glyphicon-share-alt"></span>  Set Value
+																							   </a>
+																						     </td>
+																				            <td>
+																						      <input type="text" id="measurementvalue" value="" class="form-control" data-toggle="tooltip" data-placement="top" title="Enter the value for the measurement selected above" style="width: 100px;"   onkeypress="enterKey(event,['measurement_name','measurementvalue','errormeasurement','measurementunits_detail','chkmeasurement']  );">	
+																						     </td>
+																				               <td>
+																						         <label id="measurementunits_detail" for="measurementunits_detail">{{obj.units_detail}} </label>
+																						     </td>
+																			
+																		   </tr>
+																		    <tr>
+																		    <td colspan="2">
+																		      <p style="color: red; display: none" id="errormeasurement" > </p>
+																		    </td>
+																		    </tr>
+																		   
+																         </table>
+														 </td>
+													</tr>
+													<tr>
+													     <td>
+													      Apply for all properties? 
+											           <td>
+													     <td>
+													     <input type="checkbox" id="chkmeasurement">
+													     </td>
+													     </tr>
+											</table>
+
+										    </div>
+										    
+										    <!-- ********************************************END MEASUREMENT METHOD************************************** -->
+										  
+						 								      
+						            </div>
+						          </div>
+						          <div class="panel panel-default">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Property information</h3>
+						            </div>
+						            <div class="panel-body">
+
+						                  <!-- db table data_catalogproperty -->
+										    {% if propertyCategoryName %}  
+										    <div class="form-group searches">
+										      <label for="catalogproperty_name">Property:</label>
+										      <br/>
+										       <select  id="catalogproperty_name"  name="catalogproperty_name" onchange="onchangeFunc();"  class="form-control">
+										       {% for obj in propertyCategoryName %}       
+										        {% if catalogproperty_name == obj.name %} 
+												       <option  selected="selected" value="{{obj.name}}"  >{{obj.description}} </option>
+												 {% else %}
+												       <option value="{{obj.name}}"   >{{obj.description}}</option>
+												{% endif %}
+										        {% endfor %}
+									         </select>	
+										    </div>
+										     {% endif %} 
+										     
+										     {% if questiontype %} 
+											    <div class="form-group searches"  >
+											      <label for="journal">{{questiontype}}</label>
+											    </div>
+											    {% endif %}    
+											  
+											    
+											    
+											  
+							    
+										     <!-- db table type -->
+										     {% if typeList %}  
+											<div class="form-group searches"> 
+											    	<select id="type" name="type" onchange="onchangeFunc()"  class="form-control">       
+											       {% for type in typeList %}       
+											        {% if typeselected == type.name %} 
+													       <option  selected="selected" value="{{type.name }}"  > {{type.description }} </option>
+													 {% else %}
+													      <option value="{{type.name}}"   > {{type.description }} </option>
+													{% endif %}    
+											        {% endfor %}
+											      </select>
+											    </div>
+											    {% endif %} 
+											    
+											      {% if chkBoxMagnetoelectricity == 1 %} 
+											      		{% if magnetoelectricity == 0 %} 
+											      
+														    <div class="form-group searches"  >
+														       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="" onclick="onchangeFunc();"> Yes</label>
+														    </div>
+											    			{% else %}
+														     <div class="form-group searches"  >
+														       <label><input type="checkbox" id="chkBoxmge" name="chkBoxmge"  value="1" onclick="onchangeFunc();" checked> Yes</label>
+														    </div>
+														     {% endif %}   
+											    
+											    {% endif %}    
+											    
+											    
+											  <!-- start db table data_property -->
+											  
+											   <div class="form-group searches"  >
+											      <label for="datapropertytag">Data Property Tag</label>
+											    </div>
+											    
+											    
+											    
+											 {% if dataPropertyList %}  
+											<div class="form-group searches"> 
+											    	<select id="datapropertytag" name="datapropertytag" onchange="onchangeFunc()"  class="form-control" style="width: 300px;">       
+											       {% for dp in dataPropertyList %}       
+											        {% if datapropertytagselected  == dp.id %} 
+													       <option  selected="selected" value="{{dp.id}}"  > {{dp.name }} </option>
+													 {% else %}
+													      <option value="{{dp.id}}"   > {{dp.name}} </option>
+													{% endif %}    
+											        {% endfor %}
+											      </select>
+											    </div>
+											    {% endif %} 
+											  
+											  
+											  <!-- end db table data_property -->
+											    
+										     <!-- db table catalog_crystal_system -->
+										    {% if catalogCrystalSystemList %}  
+										  <div class="form-group searches">
+										      <label for="crystalsystem_name">Crystal system</label>
+										      <select id="crystalsystem_name" name="crystalsystem_name" onchange="onchangeFunc()"  class="form-control">       
+										       {% for ccs in catalogCrystalSystemList %}       
+										        {% if crystalsystem_name == ccs.name %} 
+												       <option  selected="selected" value="{{ccs.name }}"  >{{ccs.description }}</option>
+												 {% else %}
+												      <option value="{{ccs.name}}"   >{{ccs.description }} </option>
+												{% endif %}    
+										        {% endfor %}
+										      </select>
+										    </div>
+										     {% endif %}    
+										     
+				
+											    
+						
+											    	{% if puntualGroupList %}  
+											 			<div class="form-group searches">
+													      <label for="puntualgroupselected_name">
+													       {% if questionGp %} 
+												               {{questionGp }}  
+												          {% endif %}        
+													      </label>
+													    </div>   
+													<div class="form-group searches"> 
+													    	<select id="puntualgroupselected_name" name="puntualgroupselected_name" onchange="onchangeFunc()"  class="form-control">       
+													       {% for gp in puntualGroupList %}       
+													        {% if puntualgroupselected_name == gp.name %} 
+															       <option  selected="selected" value="{{gp.name }}"  > ({{gp.name }}) </option>
+															 {% else %}
+															      <option value="{{gp.name}}"   > ({{gp.name }}) </option>
+															{% endif %}    
+													        {% endfor %}
+													      </select>
+													    </div>
+													 {% endif %}  
+													 
+													 
+													<div class="form-group searches">
+												      <label for="axisselected_name">
+												       {% if questionAxis %} 
+											               {{questionAxis }}  
+											          {% endif %}        
+												      </label>
+												    </div>   
+												   
+												     {% if axisList %}  
+												    <div class="form-group searches"> 
+												    	<select id="axisselected_name" name="axisselected_name"  onchange="onchangeFunc()"  class="form-control">       
+													       {% for axis in axisList %}       
+													        {% if axisselected_name == axis.name %} 
+															       <option  selected="selected" value="{{axis.name }}"  > {{axis.name }} </option>
+															 {% else %}
+															      <option value="{{axis.name}}"   > {{axis.name }} </option>
+															{% endif %}    
+													        {% endfor %}
+												      </select>
+												    </div>
+												    {% endif %}  
+												    
+												   <div class="form-group searches">
+											
+
+										           	     {% if message %}
+														    	  <div class="alert alert-info fade in alert-dismissable">
+																	  <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a>
+																	  <strong>NOTE:</strong> {{message }}
+																	</div>
+														 {% endif %} 
+											  
+											    </div>   
+											    
+											    
+											 <div class="form-group searches">
+											
+
+										           	     {% if warning %}
+														    	  <div class="alert alert-danger fade in alert-dismissable">
+																	  <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a>
+																	  <strong>NOTE:</strong> {{warning }}
+																	</div>
+														 {% endif %} 
+											  
+											    </div>   
+											    
+											    									 <div class="form-group searches">
+											
+
+										           	     {% if warning2 %}
+														    	  <div class="alert alert-danger fade in alert-dismissable">
+																	  <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">x</a>
+																	  <strong>NOTE:</strong> {{warning2 }}
+																	</div>
+														 {% endif %} 
+											  
+											    </div>   
+											    
+						
+											    
+											     
+						            </div>
+						          </div>
+					 
+						 
+						        </div><!-- /.col-sm-4 -->
+						        <div class="col-sm-4">
+						          <div class="panel panel-default">
+						            <div class="panel-heading">
+						              <h3 class="panel-title">Property 
+								            {% if lengthlist > 0 %}  
+										         <!--  
+										             <a href="#"  class="btn btn-sm btn-default" onclick="showEditor('Modal1');">
+										              <span class="glyphicon glyphicon-check"></span>  Check
+										             </a>
+										           --> 
+										           <a href="{% url onhold todo='save' index=-2%}"  class="btn btn-sm btn-default">
+										              <span class="glyphicon glyphicon-floppy-save"></span>  Save
+								   					</a>
+								   					
+								   					 
+								   					
+	   							   					   <script>
+							   					      var url = "{% url onhold todo='removeall'  index=-1%}";
+							   					   // alert(url);		
+							   					      //document.write('<a href="'+url+' " class="btn btn-sm btn-default">');
+							   					     event = "call_ajax('" +url +"','removepropertylist');" ;
+							   					     console.log(event);
+							   				 
+							   					     document.write( '<a href="#" onclick='+ event +'  class="btn btn-sm btn-default">'); 
+							   					      document.write('<span class="glyphicon glyphicon-remove"></span>  Remove All');
+							   					      document.write('</a>');
+									              
+							   					   </script>
+								   					
+								   					 
+											{% endif %}     
+						              </h3>
+						            </div>
+						            <div class="panel-body" style="height: 660px; overflow-y: scroll;">
+						                 
+														  
+												         {% if inputListReadOnly %}  
+														<div class="form-group searches"> 
+														 <table>
+														    {% for row  in inputListReadOnly %}   
+														     <tr>
+														         {% for col  in row %}  
+														                <td>
+										                  		            {% if col in form.fields%} 
+												                  		                  {% for field  in form %}
+																		               	        {% if  field.name == col   %}
+																		               	              {% if   field.errors  %}
+																						         			   {% for error in field.errors %}
+																										         <label for="journal" style="color: red;">{{col}}</label>	
+																										         <input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 53px;" >	
+																										        {% endfor %}
+																										 {% else %}   
+																										           <label for="journal" >{{col}}</label>		
+																								       {% endif %}   
+																				         			 
+																				         		 {% endif %}     
+																			               {% endfor %} 
+																		                  	 	{%for key,value in inputListValues.items%} 
+														                  		            	        {% if col == key%}   
+																		                  		            	     <input type="text" id="{{col}}" name="{{col}}" value="{{value}}" class="form-control" placeholder=""  style="width: 53px;" >
+																		                  		                          
+																		                  		         {% endif %} 
+																		                  		         
+																                  		          {% endfor %} 
+												                  		          
+																	                  		       
+								
+										                  		            	 {% else %}  
+	
+																				<label for="journal">{{col}}</label>		
+																				<input type="text" id="{{col}}" name="{{col}}" value="" class="form-control" placeholder=""  style="width: 53px;" autocomplete="off"  data-toggle="popover" data-trigger="focus" data-placement="top" data-content="" >
+																			{% endif %} 
+														      			 </td>	
+																   {% endfor %}
+															</tr>   	     
+														      {% endfor %}
+														      
+														      
+														      </table>
+														    </div>
+	 
+														  {% endif %}  
+														          
+				
+											
+														  {% for property in propertyMaster.propertyList%} 
+   
+														 
+														               <table id="tblProperty{{forloop.counter}}" border="0">
+														                  <tr>
+														                    <td colspan="6"> 
+														                      &nbsp;
+														                    </td>
+														                 </tr>
+														                  <tr id="tdProperty{{forloop.counter}}">
+														                    <td colspan="2"> 
+														                       Property {{forloop.counter}}
+														                    </td>
+														              
+														                    <td colspan="4"> 
+														                       &nbsp;
+														   					   <script>
+														   					      var url = "{% url onhold todo='remove'  index=123456789%}".replace('123456789', {{forloop.counter}});
+														   					   // alert(url);		
+														   					      //document.write('<a href="'+url+' " class="btn btn-sm btn-default">');
+														   					     event = "call_ajax('" +url +"','removepropertyfromlist');" ;
+														   					     console.log(event);
+														   				 
+														   					     document.write( '<a href="#" onclick='+ event +'  class="btn btn-sm btn-default">'); 
+														   					      document.write('<span class="glyphicon glyphicon-remove-sign"></span>  Remove');
+														   					      document.write('</a>');
+																              
+														   					   </script>
+														                    </td>
+														                    
+														                 </tr>
+														                 <tr>
+														                    <td colspan="6"> 
+														                       
+														                        {{property.objDataProperty.name}} 
+														                    </td>
+														                 </tr>
+														       
+										
+														                  <tr>
+														                    <td colspan="6"> 
+														              
+														                    </td>
+														                 </tr>
+														               
+														      
+																		 	
+																		      {% for row  in property.coefficientsmatrix%} 
+																		       <tr>
+																					{% for col  in row %}  
+																				   <td>
+																				      
+																					<input type="text" id="{{col}}onhold" name="{{col}}onhold" value="{{col}}" class="form-control" placeholder=""  style="width: 53px;" readonly="readonly" >	
+																				   </td>	
+																				 {% endfor %}
+																		      
+																		      {% endfor %}
+																		      
+																		      </tr>
+																		      <tr>
+																		      
+																		      <td colspan="6">
+															
+																			     				<table class="table">
+																			     				<tr>
+																			     				<td colspan="3"> Property Name </td> <td colspan="3" align="right">Units</td>
+																			     				</tr>
+																		                        </table>
+																		        </td>
+																		        </tr>
+																		    <tr>
+																		      
+																		      <td colspan="6">
+																		      			{% if propertyMaster.headerBlockValues %} 
+																			     				<table class="table">
+												
+																			     				 
+																							     {% for key,value in propertyMaster.headerBlockValues.items %} 														    
+																						                  <tr>
+																						                   <td colspan="3"> {{key.0}} </td> <td colspan="3" align="right">{{value}}</td>
+																						                  </tr>
+																							       {% endfor %}
+																							   
+																						     
+																						      </table>
+																			            {% endif %}  
+																			    </td>         
+																			    </tr>         
+																		      <tr>
+							
+																		      <td colspan="6">
+			
+																			            
+																			            
+																		        		 {% if property.loopBlockValues %} 
+																			     				<table class="table">
+		
+																			     				 
+																							     {% for key,value in property.loopBlockValues.items %} 														    
+																						                  <tr>
+																						                   <td colspan="3"> {{key.0}} </td> <td colspan="3" align="right">{{value}}</td>
+																						                  </tr>
+																							       {% endfor %}
+																							   
+																						     
+																						      </table>
+																			            {% endif %}  
+																		      
+																		      </td>
+																		      </tr>
+																	      
+																	      </table>
+																	      
+																	      
+																	
+																	       
+						 
+														  
+														  
+														    {% endfor %}
+										 
+														  
+						
+								       
+						             </div>
+						          </div>
+						 
+						        </div><!-- /.col-sm-4 -->
+						      </div>
+							    
+							    
+							    
+							     <script type="text/javascript">
+								
+								  function removeFunc(index,element) {
+									if(element=='ElementFromStructureNewPropertyOnSesssionList'){
+											 document.getElementById("todo").value ='remove'+element
+											 document.getElementById("indexToDelete").value =index
+											 document.forms[0].submit();
+											 }
+									 else if(element=='StructureNewPropertyOnSesssionList') {
+										    document.getElementById("todo").value ='remove'+element
+										    document.forms[0].submit();
+										    }
+									}
+									 
+								  function addFunc(param) {
+									  
+									  
+									    document.getElementById("subtodo").value ='addcond';
+										 document.getElementById("todo").value ='submit';				
+										 document.forms[0].submit();
+										 }
+									 
+								   function saveFunc() {
+									 document.getElementById("todo").value ='save'				
+									 document.forms[0].submit();
+									 }
+								   
+								   var history_api = typeof history.pushState !== 'undefined'
+						
+									
+									if ( location.hash == '#no-back' ) {
+									 
+									  if ( history_api ) history.pushState(null, '', '#stay')
+									  else location.hash = '#stay'
+						
+									  window.onhashchange = function() {
+									    
+									    if ( location.hash == '#no-back' ) {
+									      alert("You shall not pass!")
+									      if ( history_api ) history.pushState(null, '', '#stay')
+									      else location.hash = '#stay'
+									    }
+									  }
+									}
+						
+								   function onchangeFunc() {
+								    document.getElementById("selectChange").value=1;
+								     
+								    todoFunc('submit');
+								    }
+								   
+								   function process() {
+								    document.getElementById("proccesing").value=1;
+								    todoFunc('submit');
+								    }
+								   
+								   
+								   function todoFunc(todovalue) {
+									   if(todovalue='submit')
+										   {
+										     document.getElementById("todo").value =todovalue
+										     //alert(document.getElementById("todo").value)
+										   }
+									   else  if(todovalue='save')
+										  {
+										   
+										   
+										  }
+									   else  if(todovalue='process')
+										  {
+										    document.getElementById("todo").value ='submit';
+										    document.getElementById("process").value ='1';
+										    
+										  }
+									   
+									   
+									   
+									   
+									   document.forms[0].submit();
+									 }
+								   
+								    {{jquery|safe }} 
+								 
+								  </script>
+						
+						        
+							     
+							    {% if ShowBtnSend == 1%}  
+									    <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Send</button>
+							     {% endif %}    
+							     
+                                {% if ShowBtnSend == 0%}  
+						               <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Add</button>
+						       {% endif %}   
+
+							      {% if ShowBtnSend == 2 %}  
+							           <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');" >Send</button>
+							      {% endif %}   
+							      
+							      {% if ShowBtnSend == 3 %}  
+							           <button type="button" class="btn  btn-warning pull-right"  onclick="todoFunc('submit');"  disabled="disabled" >Add</button>
+							      {% endif %}   
+							     
+		 
+								  
+								<!--   
+						        <button type="button" class="btn btn-sm btn-primary">Primary</button>
+						        <button type="button" class="btn btn-sm btn-success">Success</button>
+						        <button type="button" class="btn btn-sm btn-info">Info</button>
+						        <button type="button" class="btn btn-sm btn-warning">Warning</button>
+						        <button type="button" class="btn btn-sm btn-danger">Danger</button>
+						        <button type="button" class="btn btn-sm btn-link">Link</button>
+						        -->        
+							  </form>
+						    
+							 
+						      <br/><br/>
+						
+  
+
+        </div>
+      </div>
+  
+  
+  
+
+	 
+
+{% endblock %}

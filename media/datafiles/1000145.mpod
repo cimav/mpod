@@ -15,7 +15,7 @@ _cod_database_code               2102034
 _structure_refined 'no'
 _phase_name 'potassium alum'
 _chemical_formula_sum 'K Al S2 O20 H24'
-_symmetry_point_group_name_H-M 'm 3'
+_symmetry_point_group_name_H-M 'm3'
 _cell_length_a  12.135
 loop_
 _publ_author_name

@@ -1,0 +1,59 @@
+#------------------------------------------------------------------------------
+#$Date: 2019-07-05 17:17:16 +0000 (Fri, 05 Jul 2019) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://mpod.cimav.edu.mx/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_qwryety5zkfnwdwhtteqhyt
+_cod_database_code ?
+_symmetry_point_group_name_H-M m3m
+_chemical_formula 'C'
+_phase_name 'Diamond'
+_phase_density 3.52
+loop_
+_publ_author_name
+'A.G. Every'
+'A.K. McCurdy'
+_publ_section_title
+;
+Second and Higher Order Elastic Constants, Landoltt Bornstein
+;
+_journal_name_full 'Springer, Berlin, Heidelberg' 
+_journal_volume  '3' 
+_journal_page_first  '29' 
+_journal_page_last  '29' 
+_journal_year  '1992' 
+_prop_elastic_stiffness_cij 'cij'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+_prop_heat_capacity_C0P
+_prop_mohs_hardness
+cij 11 1077(2)  660 10
+cij 12 124.7(6)  660 10
+cij 13 124.7  660 10
+cij 14 0  660 10
+cij 15 0  660 10
+cij 16 0  660 10
+cij 22 1077  660 10
+cij 23 124.7  660 10
+cij 24 0  660 10
+cij 25 0  660 10
+cij 26 0  660 10
+cij 33 1077  660 10
+cij 34 0  660 10
+cij 35 0  660 10
+cij 36 0  660 10
+cij 44 577(1)  660 10
+cij 45 0  660 10
+cij 46 0  660 10
+cij 55 577  660 10
+cij 56 0  660 10
+cij 66 577  660 10

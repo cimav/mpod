@@ -1,7 +1,7 @@
 '''
 Created on Nov 25, 2014
 
-@author: admin
+@author: Jorge Torres
 '''
 
 import os
@@ -18,21 +18,7 @@ class JSUtils (object):
         self.simetricinputs = []
         self.simetricandnonzeroinputs = []
         self.counter = 0
-        
-        """self.__htmlcode += "<table>"
-        self.__htmlcode += "<thead>"
-        self.__htmlcode += "<tr>"
-        self.__htmlcode += "<th scope='col'>
-        self.__htmlcode += "<div class='text'>
-        self.__htmlcode += "<span>Description</span>
-        self.__htmlcode += "</div>
-        self.__htmlcode += "<div class='clear'></div>
-        self.__htmlcode += "</th>
-        self.__htmlcode += "</tr>"
-        self.__htmlcode += "</thead>"
-        self.__htmlcode += "<tbody>"
-        """
-        
+ 
         
     def getrules(self, item,scij,source_target,setsymmetry):   
         keynotation = source_target['keynotation']
@@ -189,15 +175,6 @@ class JSUtils (object):
  
         self.__jscode=   self.__jscode + """$('#""" +item+ """').keyup(function (){\n"""
 
-        #self.__jscode=   self.__jscode + """    var fullval = tolerance(this);\n"""
-        #self.__jscode=   self.__jscode + """    if(Number($(this).val()).toPrecision() != 'NaN') {\n"""                                                
-        #self.__jscode=   self.__jscode +     """    var value;\n"""
-        #self.__jscode=   self.__jscode + """        if ( isScientificNotation($(this).val()) == 1 )\n""" 
-        #self.__jscode=   self.__jscode + """        {\n""" 
-        #self.__jscode=   self.__jscode + """            value = Number.parseFloat($(this).val()).toExponential();\n""" 
-        #self.__jscode=   self.__jscode + """            $(this).val(value );  \n""" 
-        #self.__jscode=   self.__jscode + """            alert(value );  \n""" 
-        #self.__jscode=   self.__jscode + """        }\n""" 
         
         self.__jscode=   self.__jscode + """    var fullval = $(this).val();\n"""
         self.__jscode=   self.__jscode + """    var thisvalue = validateValue($(this)); \n""" 
@@ -216,12 +193,18 @@ class JSUtils (object):
             
             if setopositesing:
                 self.__jscode=   self.__jscode +     """        var value;\n"""
-                self.__jscode=   self.__jscode +     """        v = -thisvalue;\n"""   
-                self.__jscode=   self.__jscode +     """        if ( isScientificNotation(thisvalue) == 1 )\n"""  
-                self.__jscode=   self.__jscode +     """            value = Number.parseFloat(v).toExponential();\n"""  
-                self.__jscode=   self.__jscode +     """        else\n"""                                                                           
-                self.__jscode=   self.__jscode +     """            value = v;\n\n""" ; 
-                
+                self.__jscode=   self.__jscode +     """        if(thisvalue != '?')\n"""   
+                self.__jscode=   self.__jscode +     """        {\n"""   
+                self.__jscode=   self.__jscode +     """            v = -thisvalue;\n"""   
+                self.__jscode=   self.__jscode +     """            if ( isScientificNotation(thisvalue) == 1 )\n"""  
+                self.__jscode=   self.__jscode +     """                value = Number.parseFloat(v).toExponential();\n"""  
+                self.__jscode=   self.__jscode +     """            else\n"""                                                                           
+                self.__jscode=   self.__jscode +     """                value = v;\n\n""" ; 
+                self.__jscode=   self.__jscode +     """        }\n"""   
+                self.__jscode=   self.__jscode +     """        else\n"""  
+                self.__jscode=   self.__jscode +     """        {\n"""  
+                self.__jscode=   self.__jscode +     """             value = thisvalue;\n\n""" ; 
+                self.__jscode=   self.__jscode +     """        }\n"""  
               
  
              
@@ -244,27 +227,38 @@ class JSUtils (object):
 
                                     
                             if i == 1: 
+                                 
+                                self.__jscode=   self.__jscode +     """        v = thisvalue;\n"""   
+                                self.__jscode=   self.__jscode +     """        if ( isScientificNotation(thisvalue) == 1 )\n"""  
+                                self.__jscode=   self.__jscode +     """            value = Number.parseFloat(v).toExponential();\n"""  
+                                self.__jscode=   self.__jscode +     """        else\n"""                                                                           
+                                self.__jscode=   self.__jscode +     """            value = v;\n\n""" ; 
+                                
                                 if 'c' in scij[0]: 
-                                    self.__jscode=   self.__jscode +     """        v = thisvalue;\n"""   
-                                    self.__jscode=   self.__jscode +     """        if ( isScientificNotation(thisvalue) == 1 )\n"""  
-                                    self.__jscode=   self.__jscode +     """            value = Number.parseFloat(v).toExponential();\n"""  
-                                    self.__jscode=   self.__jscode +     """        else\n"""                                                                           
-                                    self.__jscode=   self.__jscode +     """            value = v;\n\n""" ; 
-                          
-                                    self.__jscode=   self.__jscode +   """        $('#""" + target +"""').val(value);\n"""                                      
-                                    self.__jscode=   self.__jscode +   """        $('#""" +simetrictarget+"""').val(value);\n"""
+                                    self.__jscode=   self.__jscode +     """        if(thisvalue != '?')\n"""  
+                                    self.__jscode=   self.__jscode +     """        {\n"""  
+                                    self.__jscode=   self.__jscode +     """            $('#""" + target +"""').val(value);\n"""                                      
+                                    self.__jscode=   self.__jscode +     """            $('#""" +simetrictarget+"""').val(value);\n"""
+                                    self.__jscode=   self.__jscode +     """        }\n"""  
+                                    self.__jscode=   self.__jscode +     """        else\n"""  
+                                    self.__jscode=   self.__jscode +     """        {\n"""  
+                                    self.__jscode=   self.__jscode +     """            $('#""" + target +"""').val(thisvalue);\n"""                                      
+                                    self.__jscode=   self.__jscode +     """            $('#""" +simetrictarget+"""').val(thisvalue);\n"""
+                                    self.__jscode=   self.__jscode +     """        }\n"""  
 
 
                                 elif 's' in scij[0]:  #twice the numerical equal         
-                                    self.__jscode=   self.__jscode +     """        v = thisvalue;\n"""   
-                                    self.__jscode=   self.__jscode +     """        if ( isScientificNotation(thisvalue) == 1)\n"""  
-                                    self.__jscode=   self.__jscode +     """            value = Number.parseFloat(v).toExponential();\n"""  
-                                    self.__jscode=   self.__jscode +     """        else\n"""                                                                           
-                                    self.__jscode=   self.__jscode +     """            value = v;\n\n""" ; 
-                                                             
-                     
-                                    self.__jscode=   self.__jscode +     """        $('#""" + target +"""').val(2 * (value) );\n"""                                    
-                                    self.__jscode=   self.__jscode +     """        $('#""" +simetrictarget+"""').val(2 * (value) );\n"""
+                                    
+                                    self.__jscode=   self.__jscode +     """        if(thisvalue != '?')\n"""  
+                                    self.__jscode=   self.__jscode +     """        {\n"""  
+                                    self.__jscode=   self.__jscode +     """            $('#""" + target +"""').val(2 * (value) );\n"""                                      
+                                    self.__jscode=   self.__jscode +     """            $('#""" +simetrictarget+"""').val(2 * (value) );\n"""
+                                    self.__jscode=   self.__jscode +     """        }\n"""  
+                                    self.__jscode=   self.__jscode +     """        else\n"""  
+                                    self.__jscode=   self.__jscode +     """        {\n"""  
+                                    self.__jscode=   self.__jscode +     """            $('#""" + target +"""').val(thisvalue);\n"""                                      
+                                    self.__jscode=   self.__jscode +     """            $('#""" +simetrictarget+"""').val(thisvalue);\n"""
+                                    self.__jscode=   self.__jscode +     """        }\n"""  
 
                             
                         else:
@@ -291,24 +285,28 @@ class JSUtils (object):
                             
             for key, value in source_target.items():
                 if isinstance(key, tuple ):
-                     
-                    self.__jscode=   self.__jscode +     """        if(Number(thisvalue).toPrecision() != 'NaN')\n"""   
-                    self.__jscode=   self.__jscode +     """        { \n """     
+                    for x,st in enumerate(value):
+                        self.simetricinputs.append(st)
+                    
+                    self.__jscode=   self.__jscode +     """        if(thisvalue != '?')\n"""  
+                    self.__jscode=   self.__jscode +     """        {\n"""  
+                    self.__jscode=   self.__jscode +     """          if(Number(thisvalue).toPrecision() != 'NaN')\n"""   
+                    self.__jscode=   self.__jscode +     """          {\n"""     
   
                     
-                    self.__jscode=   self.__jscode +     """          var key0;\n"""
-                    self.__jscode=   self.__jscode +     """          var key1;\n"""
-                    self.__jscode=   self.__jscode +     """          if($('#""" + key[0] + """').val().indexOf("(") != -1)\n"""
-                    self.__jscode=   self.__jscode +     """          {\n"""
-                    self.__jscode=   self.__jscode +     """            key0=$('#""" + key[0] + """').val() \n"""    
-                    self.__jscode=   self.__jscode +     """            tolerance('#""" + key[0] + """')\n"""     
-                    self.__jscode=   self.__jscode +     """           } \n"""
+                    self.__jscode=   self.__jscode +     """            var key0;\n"""
+                    self.__jscode=   self.__jscode +     """            var key1;\n"""
+                    self.__jscode=   self.__jscode +     """            if($('#""" + key[0] + """').val().indexOf("(") != -1)\n"""
+                    self.__jscode=   self.__jscode +     """            {\n"""
+                    self.__jscode=   self.__jscode +     """              key0=$('#""" + key[0] + """').val()\n"""    
+                    self.__jscode=   self.__jscode +     """              tolerance('#""" + key[0] + """')\n"""     
+                    self.__jscode=   self.__jscode +     """            }\n"""
                     
-                    self.__jscode=   self.__jscode +     """          if($('#""" + key[1] + """').val().indexOf("(") != -1)\n"""
-                    self.__jscode=   self.__jscode +     """          {\n"""
-                    self.__jscode=   self.__jscode +     """            key1=$('#""" + key[1] + """').val() \n"""    
-                    self.__jscode=   self.__jscode +     """            tolerance('#""" + key[1] + """')\n"""     
-                    self.__jscode=   self.__jscode +     """          }\n"""
+                    self.__jscode=   self.__jscode +     """           if($('#""" + key[1] + """').val().indexOf("(") != -1)\n"""
+                    self.__jscode=   self.__jscode +     """           {\n"""
+                    self.__jscode=   self.__jscode +     """              key1=$('#""" + key[1] + """').val()\n"""    
+                    self.__jscode=   self.__jscode +     """              tolerance('#""" + key[1] + """')\n"""     
+                    self.__jscode=   self.__jscode +     """           }\n"""
                     
                     
                     if 'c' in scij[0]:      
@@ -317,9 +315,9 @@ class JSUtils (object):
                         self.__jscode=   self.__jscode +     """          v = 2 *($('#""" + key[0] + """').val()- $('#""" + key[1] + """').val());\n"""
                     
                     self.__jscode=   self.__jscode +     """          if ( isScientificNotation(thisvalue) == 1 )\n"""
-                    self.__jscode=   self.__jscode +     """              value = Number.parseFloat(v).toExponential(); \n"""
-                    self.__jscode=   self.__jscode +     """          else \n"""
-                    self.__jscode=   self.__jscode +     """              value = v; \n \n"""
+                    self.__jscode=   self.__jscode +     """              value = Number.parseFloat(v).toExponential();\n"""
+                    self.__jscode=   self.__jscode +     """          else\n"""
+                    self.__jscode=   self.__jscode +     """              value = v;\n\n"""
 
                     self.__jscode=   self.__jscode +     """          if(key0 != undefined)\n"""
                     self.__jscode=   self.__jscode +     """             $('#""" + key[0] + """').val(key0);\n\n"""
@@ -329,22 +327,31 @@ class JSUtils (object):
                     self.__jscode=   self.__jscode +     """             $('#""" + key[1] + """').val(key1);\n\n"""
                     
   
-                    for x,st in enumerate(value):
+                    for x,st in enumerate(value): 
                         self.__jscode=   self.__jscode + """          $('#"""+ st + """').val(value);\n""" 
                             
-                    self.__jscode=   self.__jscode +     """      }\n"""        
-                    self.__jscode=   self.__jscode +  """        else\n"""
-                    self.__jscode=   self.__jscode +  """        { \n"""
+                    self.__jscode=   self.__jscode +  """           }\n"""        
+                    self.__jscode=   self.__jscode +  """          else\n"""
+                    self.__jscode=   self.__jscode +  """          {\n"""
                     for x,st in enumerate(value):
                         self.__jscode=   self.__jscode + """            $('#"""+ st + """').val('' );\n"""
-                    self.__jscode=   self.__jscode +  """        }\n"""
                         
-                                                   
+                    self.__jscode=   self.__jscode +  """          }\n"""
+                    
+                    self.__jscode=   self.__jscode +  """        }\n"""
+                    self.__jscode=   self.__jscode +  """        else\n"""           
+                    self.__jscode=   self.__jscode +  """        {\n"""       
+     
+                    #self.__jscode=   self.__jscode +     """        $('#""" + key[1] + """').val(thisvalue);\n\n"""  
+                    for x,st in enumerate(value):
+                        self.__jscode=   self.__jscode + """        $('#"""+ st + """').val(thisvalue);\n""" 
+                        
+                    self.__jscode=   self.__jscode +  """        }\n"""                
             
                                             
             self.__jscode=   self.__jscode +  """   }\n"""
             self.__jscode=   self.__jscode +  """else\n"""
-            self.__jscode=   self.__jscode +  """{ \n"""
+            self.__jscode=   self.__jscode +  """{\n"""
                                                                       
                                                                                     
                                                                             
@@ -393,8 +400,16 @@ class JSUtils (object):
                             self.simetricinputs.append(simetrictarget )
                      
                         if setopositesing:
-                            self.__jscode=   self.__jscode +     """      $('#""" + target +"""').val(-thisvalue  );  \n"""  
-                            self.__jscode=   self.__jscode +     """      $('#""" +simetrictarget+"""').val(-thisvalue );  \n """
+                            self.__jscode=   self.__jscode +     """       if(thisvalue != '?')\n""" 
+                            self.__jscode=   self.__jscode +     """       {\n"""   
+                            self.__jscode=   self.__jscode +     """          $('#""" + target +"""').val(-thisvalue  );  \n"""  
+                            self.__jscode=   self.__jscode +     """          $('#""" +simetrictarget+"""').val(-thisvalue );  \n """
+                            self.__jscode=   self.__jscode +     """       }\n"""   
+                            self.__jscode=   self.__jscode +     """       else\n"""   
+                            self.__jscode=   self.__jscode +     """       {\n"""   
+                            self.__jscode=   self.__jscode +     """          $('#""" + target +"""').val(thisvalue  );  \n"""  
+                            self.__jscode=   self.__jscode +     """          $('#""" +simetrictarget+"""').val(thisvalue );  \n """
+                            self.__jscode=   self.__jscode +     """       }\n"""   
                             
                         else:
                             if item != target:
@@ -408,11 +423,18 @@ class JSUtils (object):
                     else:
                         if setopositesing:
                             if i == 0: 
-                                self.__jscode=   self.__jscode +     """      $('#""" + target +"""').val(-thisvalue  );  \n"""  
+                                self.__jscode=   self.__jscode +     """       if(thisvalue != '?')\n""" 
+                                self.__jscode=   self.__jscode +     """          $('#""" + target +"""').val(-thisvalue  );\n"""  
+                                self.__jscode=   self.__jscode +     """       else\n""" 
+                                self.__jscode=   self.__jscode +     """          $('#""" + target +"""').val(thisvalue  );\n"""  
                                 
                             if i == 1: 
                                 if scij[0] in ['d','e','g','h','k']: 
-                                    self.__jscode=   self.__jscode +     """      $('#""" + target +"""').val(-2 * thisvalue);  \n"""  
+                                    #self.__jscode=   self.__jscode +     """      $('#""" + target +"""').val(-2 * thisvalue);  \n"""  
+                                    self.__jscode=   self.__jscode +     """       if(thisvalue != '?')\n""" 
+                                    self.__jscode=   self.__jscode +     """          $('#""" + target +"""').val(-2 * thisvalue);  \n"""  
+                                    self.__jscode=   self.__jscode +     """       else\n""" 
+                                    self.__jscode=   self.__jscode +     """          $('#""" + target +"""').val(thisvalue  );\n""" 
                         else:
                             if item != target:
                                 self.__jscode=   self.__jscode +     """      $('#""" + target +"""').val(thisvalue );  \n"""  
@@ -421,8 +443,13 @@ class JSUtils (object):
             
             for key, value in source_target.items():
                 if isinstance(key, tuple ):
-                    self.__jscode=   self.__jscode +     """        if(Number(thisvalue).toPrecision() != 'NaN') \n"""   
-                    self.__jscode=   self.__jscode +     """        { \n """     
+                    for x,st in enumerate(value):
+                        self.simetricinputs.append(st)
+                        
+                    self.__jscode=   self.__jscode +     """       if(thisvalue != '?')\n""" 
+                    self.__jscode=   self.__jscode +     """       {\n""" 
+                    self.__jscode=   self.__jscode +     """          if(Number(thisvalue).toPrecision() != 'NaN')\n"""   
+                    self.__jscode=   self.__jscode +     """          {\n """     
                     
                     
                     self.__jscode=   self.__jscode +     """          var key0;\n"""
@@ -435,7 +462,7 @@ class JSUtils (object):
                     
                     self.__jscode=   self.__jscode +     """          if($('#""" + key[1] + """').val().indexOf("(") != -1)\n"""
                     self.__jscode=   self.__jscode +     """          {\n"""
-                    self.__jscode=   self.__jscode +     """            key1=$('#""" + key[1] + """').val() \n"""    
+                    self.__jscode=   self.__jscode +     """            key1=$('#""" + key[1] + """').val()\n"""    
                     self.__jscode=   self.__jscode +     """            tolerance('#""" + key[1] + """')\n"""     
                     self.__jscode=   self.__jscode +     """          }\n"""
                     
@@ -446,9 +473,9 @@ class JSUtils (object):
                         self.__jscode=   self.__jscode +     """          v = 2 *($('#""" + key[0] + """').val()- $('#""" + key[1] + """').val());\n"""
                     
                     self.__jscode=   self.__jscode +     """          if ( isScientificNotation(thisvalue) == 1 )\n"""
-                    self.__jscode=   self.__jscode +     """              value = Number.parseFloat(v).toExponential(); \n"""
-                    self.__jscode=   self.__jscode +     """          else \n"""
-                    self.__jscode=   self.__jscode +     """              value = v; \n \n"""
+                    self.__jscode=   self.__jscode +     """              value = Number.parseFloat(v).toExponential();\n"""
+                    self.__jscode=   self.__jscode +     """          else\n"""
+                    self.__jscode=   self.__jscode +     """              value = v;\n\n"""
 
                     self.__jscode=   self.__jscode +     """          if(key0 != undefined)\n"""
                     self.__jscode=   self.__jscode +     """             $('#""" + key[0] + """').val(key0);\n\n"""
@@ -463,11 +490,22 @@ class JSUtils (object):
                             
                     self.__jscode=   self.__jscode +     """      }\n"""        
                     self.__jscode=   self.__jscode +  """        else\n"""
-                    self.__jscode=   self.__jscode +  """        { \n"""
+                    self.__jscode=   self.__jscode +  """        {\n"""
                     for x,st in enumerate(value):
                         self.__jscode=   self.__jscode + """            $('#"""+ st + """').val('' );\n"""
                         
                     self.__jscode=   self.__jscode +  """        }\n"""
+                    
+                    
+                    self.__jscode=   self.__jscode +     """       }\n""" 
+                    self.__jscode=   self.__jscode +  """        else\n"""           
+                    self.__jscode=   self.__jscode +  """        {\n"""       
+     
+                    #self.__jscode=   self.__jscode +     """        $('#""" + key[1] + """').val(thisvalue);\n\n"""  
+                    for x,st in enumerate(value):
+                        self.__jscode=   self.__jscode + """        $('#"""+ st + """').val(thisvalue);\n""" 
+                        
+                    self.__jscode=   self.__jscode +  """        }\n"""    
                             
         
                                                                     

@@ -15,7 +15,7 @@ _cod_database_code               9003112
 _structure_refined 'no'
 _phase_name 'potassium chlorite'
 _chemical_formula_sum 'K Cl'
-_symmetry_point_group_name_H-M 'm -3 m'
+_symmetry_point_group_name_H-M 'm-3m'
 _cell_length_a  6.2879
 loop_
 _publ_author_name

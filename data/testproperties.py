@@ -31,7 +31,7 @@ if __name__ == '__main__':
                 else:
                     print ('Tipo inexistente')
             elif sc == 'c':
-                print ('Todos los grupos puntuales de este sistema cristalino tienen la misma matriz\n')
+                print ('Todos los grupos pointes de este sistema cristalino tienen la misma matriz\n')
                 if tipo == 's':
                     s[0,0] = s[1,1] = s[2,2] = float (input ('s11 = '))
                     s[0,1] = s[0,2] = s[1,2] = s[1,0] = s[2,0] = s[2,1] = float (input ('s12 = '))
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                 else:
                     print ('Tipo inexistente')
             elif sc == 'h':
-                print ('Todos los grupos puntuales de este sistema cristalino tienen la misma matriz\n')
+                print ('Todos los grupos pointes de este sistema cristalino tienen la misma matriz\n')
                 if tipo == 's':
                     s[0,0] = s[1,1] = float (input ('s11 = '))
                     s[0,1] = s[1,0] = float (input ('s12 = '))
@@ -65,7 +65,7 @@ if __name__ == '__main__':
                 else:
                     print ('Tipo inexistente')
             elif sc == 'o':
-                print ('Todos los grupos puntuales de este sistema cristalino tienen la misma matriz\n')
+                print ('Todos los grupos pointes de este sistema cristalino tienen la misma matriz\n')
                 if tipo == 's':
                     s[0,0] = float (input ('s11 = '))
                     s[0,1] = s[1,0] = float (input ('s12 = '))
@@ -91,7 +91,7 @@ if __name__ == '__main__':
                 else:
                     print ('Tipo inexistente')
             elif sc == 'tc':
-                print ('Todos los grupos puntuales de este sistema cristalino tienen la misma matriz\n')
+                print ('Todos los grupos pointes de este sistema cristalino tienen la misma matriz\n')
                 if tipo == 's':
                     s[0,0] = float (input ('s11 = '))
                     s[0,1] = s[1,0] = float (input ('s12 = '))
@@ -141,7 +141,7 @@ if __name__ == '__main__':
                 else:
                     print ('Tipo inexistente')
             elif sc == 'te':
-                gp = str (input ('Cual grupo puntual? (4, -4, 4/m, 422, 4mm, -42m, 4/mmm)\n'))
+                gp = str (input ('Cual grupo point? (4, -4, 4/m, 422, 4mm, -42m, 4/mmm)\n'))
                 if gp in ('4mm', '-42m', '422', '4/mmm'):
                     if tipo == 's':
                         s[0,0] = s[1,1] = float (input ('s11 = '))
@@ -185,10 +185,10 @@ if __name__ == '__main__':
                     else:
                         print ('Tipo inexistente')
                 else:
-                    print ('Grupo puntual inexistente')
+                    print ('Grupo point inexistente')
             elif sc == 'm':
                 eje = str (input ('Donde se ubica el eje especial?(x2 o x3)\n'))
-                print ('Todos los grupos puntuales de este sistema cristalino tienen la misma matriz\n')
+                print ('Todos los grupos pointes de este sistema cristalino tienen la misma matriz\n')
                 if eje == 'x2':
                     if tipo == 's':
                         s[0,0] = float (input ('s11 = '))
@@ -258,7 +258,7 @@ if __name__ == '__main__':
                 else:
                     print ('Ubicacion del eje especial inexistente')
             elif sc == 'tg':
-                gp = str (input ('Cual grupo puntual? (3, -3, 32, 3m, -3m)\n'))
+                gp = str (input ('Cual grupo point? (3, -3, 32, 3m, -3m)\n'))
                 if gp in ('32', '-3m', '3m'):
                     if tipo == 's':
                         s[0,0] = s[1,1] = float (input ('s11 = '))
@@ -313,12 +313,12 @@ if __name__ == '__main__':
                     else:
                         print ('Tipo inexistente')
                 else:
-                    print ('Grupo puntual inexistente')
+                    print ('Grupo point inexistente')
             else:
                 print ('Sistema Cristalino inexistente')
         elif propiedad == 'p':
             if sc == 'tc':
-                gp = str (input ('Cual grupo puntual? (1, -1)\n'))
+                gp = str (input ('Cual grupo point? (1, -1)\n'))
                 if gp == 1:
                     d[0,0] = float (input ('d11 = '))
                     d[0,1] = float (input ('d12 = '))
@@ -340,12 +340,12 @@ if __name__ == '__main__':
                     d[2,5] = float (input ('d36 = '))
                     print (d)
                 elif gp == '-1':
-                    print ('Este grupo puntual no tiene priezoelectricidad')
+                    print ('Este grupo point no tiene priezoelectricidad')
                 else:
-                    print ('Grupo puntual inexistente')
+                    print ('Grupo point inexistente')
             elif sc == 'm':
                 eje = str (input ('Donde se ubica el eje especial?(x2 o x3)\n'))
-                gp = str (input ('Cual grupo puntual? (2, m, 2/m)\n'))
+                gp = str (input ('Cual grupo point? (2, m, 2/m)\n'))
                 if eje == 'x2':
                     if gp == '2':
                         d[0,3] = float (input ('d14 = '))
@@ -370,9 +370,9 @@ if __name__ == '__main__':
                         d[2,4] = float (input ('d35 = '))
                         print (d)
                     elif gp == '2/m':
-                        print ('Este grupo puntual no tiene priezoelectricidad')
+                        print ('Este grupo point no tiene priezoelectricidad')
                     else:
-                        print ('Grupo puntual inexistente')
+                        print ('Grupo point inexistente')
                 elif eje == 'x3':
                     if gp == '2':
                         d[0,3] = float (input ('d14 = '))
@@ -397,13 +397,13 @@ if __name__ == '__main__':
                         d[2,4] = float (input ('d35 = '))
                         print (d)
                     elif gp == '2/m':
-                        print ('Este grupo puntual no tiene priezoelectricidad')
+                        print ('Este grupo point no tiene priezoelectricidad')
                     else:
-                        print ('Grupo puntual inexistente')
+                        print ('Grupo point inexistente')
                 else:
                     print ('Ubicacion del eje especial inexistente')
             elif sc == 'o':
-                gp = str (input ('Cual grupo puntual? (222, 2mm, mmm)\n'))
+                gp = str (input ('Cual grupo point? (222, 2mm, mmm)\n'))
                 if gp == '222':
                     d[0,3] = float (input ('d14 = '))
                     d[1,4] = float (input ('d25 = '))
@@ -417,11 +417,11 @@ if __name__ == '__main__':
                     d[2,2] = float (input ('d33 = '))
                     print (d)
                 elif gp == 'mmm':
-                    print ('Este grupo puntual no tiene priezoelectricidad')
+                    print ('Este grupo point no tiene priezoelectricidad')
                 else:
-                    print ('Grupo puntual inexistente')
+                    print ('Grupo point inexistente')
             elif sc == 'te':
-                gp = str (input ('Cual grupo puntual? (4, -4, 4/m, 422, 4mm, -42m, 4/mmm)\n'))
+                gp = str (input ('Cual grupo point? (4, -4, 4/m, 422, 4mm, -42m, 4/mmm)\n'))
                 if gp == '4':
                     d[0,3] = float (input ('d14 = '))
                     d[1,4] = -d[0,3]
@@ -438,7 +438,7 @@ if __name__ == '__main__':
                     d[2,5] = float (input ('d36 = '))
                     print (d)
                 elif gp in ('4/m', '4/mmm'):
-                    print ('Este grupo puntual no tiene priezoelectricidad')
+                    print ('Este grupo point no tiene priezoelectricidad')
                 elif gp == '422':
                     d[0,3] = float (input ('d14 = '))
                     d[1,4] = -d[0,3]
@@ -453,18 +453,18 @@ if __name__ == '__main__':
                     d[2,5] = float (input ('d36 = '))
                     print (d)
                 else:
-                    print ('Grupo puntual inexistente')
+                    print ('Grupo point inexistente')
             elif sc == 'c':
-                gp = str (input ('Cual grupo puntual? (23, m3, 432, -43m, m3m)\n'))
+                gp = str (input ('Cual grupo point? (23, m3, 432, -43m, m3m)\n'))
                 if gp in ('23', '-43m'):
                     d[0,3] = d[1,4] = d[2,5] = float (input ('d14 = '))
                     print (d)
                 elif gp in ('m3', '432', 'm3m'):
-                    print ('Este grupo puntual no tiene priezoelectricidad')
+                    print ('Este grupo point no tiene priezoelectricidad')
                 else:
-                    print ('Grupo puntual inexistente')
+                    print ('Grupo point inexistente')
             elif sc == 'tg':
-                gp = str (input ('Cual grupo puntual? (3, -3, 32, 3m, -3m)\n'))
+                gp = str (input ('Cual grupo point? (3, -3, 32, 3m, -3m)\n'))
                 if gp == '3':
                     d[0,0] = float (input ('d11 = '))
                     d[0,1] = -d[0,0]
@@ -510,11 +510,11 @@ if __name__ == '__main__':
                     else:
                         print ('Ubicacion del eje especial inexistente')
                 elif gp in ('-3', '-3m'):
-                    print ('Este grupo puntual no tiene priezoelectricidad')
+                    print ('Este grupo point no tiene priezoelectricidad')
                 else:
-                    print ('Grupo puntual inexistente')
+                    print ('Grupo point inexistente')
             elif sc == 'h':
-                gp = str (input ('Cual grupo puntual? (6, -6, 6/m, 6mm, 622, -6m2, 6/mmm)\n'))
+                gp = str (input ('Cual grupo point? (6, -6, 6/m, 6mm, 622, -6m2, 6/mmm)\n'))
                 if gp == '6':
                     d[0,3] = float (input ('d14 = '))
                     d[1,4] = -d[0,3]
@@ -554,9 +554,9 @@ if __name__ == '__main__':
                     else:
                         print ('Ubicacion del eje especial inexistente')
                 elif gp in ('6/m', '6/mmm'):
-                    print ('Este grupo puntual no tiene priezoelectricidad')
+                    print ('Este grupo point no tiene priezoelectricidad')
                 else:
-                    print ('Grupo puntual inexistente')
+                    print ('Grupo point inexistente')
             else:
                 print ('Sistema Cristalino inexistente')
         else:

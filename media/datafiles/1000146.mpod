@@ -15,7 +15,7 @@ _cod_database_code               1100043
 _structure_refined 'no'
 _phase_name 'zinc blende'
 _chemical_formula_sum 'ZnS'
-_symmetry_point_group_name_H-M '-4 3 m'
+_symmetry_point_group_name_H-M '-43m'
 _cell_length_a  4.15
 loop_
 _publ_author_name

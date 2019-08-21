@@ -1,0 +1,196 @@
+#------------------------------------------------------------------------------
+#$Date: 2013-5-12 21:51:00 +0000 $
+#$Revision: 001 $ Daniel Chateigner
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.mpod.net/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_ywrtaw4=vjxoutkceemnuiu
+_cod_database_code 9005887
+_structure_refined 'no'
+_phase_name 'cobalt oxyde'
+_chemical_name_mineral 'spinel'
+_chemical_formula_structural 'Co3O4'
+_chemical_formula_sum 'Co3 O4'
+_symmetry_point_group_name_H-M 'm 3 m'
+_cell_length_a  8.0821 
+_cell_length_b  8.0821 
+_cell_length_c  8.0821 
+_cell_angle_alpha  90
+_cell_angle_beta   90
+_cell_angle_gamma  90
+
+loop_
+_publ_author_name
+'Mocala, K.'
+'Navrotsky, A.'
+'Sherman, D.M.'
+_publ_section_title
+;
+High-Temperature Heat Capacity of Co304 Spinel: Thermally Induced Spin Unpairing Transition
+;
+_journal_name_full               'Physics and Chemistry of Minerals'
+_journal_volume                  19
+_journal_issue                   ?
+_journal_page_first              88
+_journal_page_last               95
+_journal_year                    1992
+
+_prop_heat_capacity_Cp 'Cp' 
+
+_prop_conditions_atmosphere_gas O2
+_prop_conditions_atmosphere_gas_pressure 100000
+_prop_conditions_atmosphere_gas_flow 0.01
+
+loop_
+_prop_data_label
+_prop_data_value
+_prop_conditions_temperature
+Cp 192.94  875.5    
+Cp 193.2   880.5    
+Cp 185.91  885.5    
+Cp 193.73  890.5    
+Cp 193.93  927.5    
+Cp 183.13  932.5    
+Cp 193.43  937.5    
+Cp 209.14  970.5    
+Cp 202.11  975.5    
+Cp 207.18  980.5    
+Cp 231.83  985.5    
+Cp 215.47  990.5    
+Cp 207.17  995.5    
+Cp 213.94  1000.5   
+Cp 225.94  1005.5   
+Cp 277.23  1019.5   
+Cp 242.36  1024.5   
+Cp 242.39  1029.5   
+Cp 257.56  1034.5   
+Cp 269.62  1039.5   
+Cp 272.15  1044.5   
+Cp 271.67  1049.5   
+Cp 255.80  1054.5   
+Cp 297.7I  1069.5   
+Cp 323.99  1074.5   
+Cp 331.99  1079.5   
+Cp 346.88  1084.5   
+Cp 319.39  1089.5   
+Cp 321.70  1094.5   
+Cp 368.76  1099.5   
+Cp 373.20  1104.5   
+Cp 446.51  1113.5   
+Cp 427.83  1118.5   
+Cp 432.26 1123.5    
+Cp 468.20 1128.5    
+Cp 476.57 1133.5    
+Cp 504.44 1138.5    
+Cp 494.39 1143.5    
+Cp 197.26  894.5    
+Cp 185.26  899.5    
+Cp 198.20  904.5    
+Cp 186.76  909.5    
+Cp 194.29  914.5    
+Cp 195.49  919.5    
+Cp 176.45  924.5    
+Cp 196.42  929.5    
+Cp 214.14  942.5    
+Cp 211.93  947.5    
+Cp 199.79  952.5    
+Cp 206.13  957.5    
+Cp 216.67  962.5    
+Cp 224.80  967.5    
+Cp 226.80  972.5    
+Cp 203.14  977.5    
+Cp  268.58 1010.5   
+Cp  254.98 1015.5   
+Cp  253.67 1020.5   
+Cp  277.58 1025.5   
+Cp  325.89 1054.5   
+Cp  330.79 1059.5   
+Cp  323.98 1069.5   
+Cp 343.79  1079.5   
+Cp 346.88  1084.5   
+Cp 366.92  1089.5   
+Cp 375.15  1094.5   
+Cp 396.45  1099.5   
+Cp 398.52  1104.5   
+Cp 414.66  1109.5   
+Cp 415.79  1119.5   
+Cp 465.00  1124.5   
+Cp 474.21  1129.5   
+Cp 305.10  1049.5   
+Cp 281.02  1054.5   
+Cp 294.57  1059.5   
+Cp 325.89  1064.5   
+Cp 291.36  1069.5   
+Cp 333.91  1074.5   
+Cp 356.00  1079.5   
+Cp 350.24  1084.5   
+Cp 427.14  1129.5   
+Cp 432.36  1134.5   
+Cp 481.91  1139.5   
+Cp 554.73  1144.5   
+Cp 523.11  1149.5   
+Cp 539.30  1154.5   
+Cp 562.25  1159.5   
+Cp 557.77  1164,5   
+Cp 562.52  1169.5   
+Cp 544.49  1174.5   
+Cp 548.45  1179.5   
+Cp 534.93  1184.5   
+Cp 591.94  1189.5   
+Cp 574.03  1194.5   
+Cp 529.83  1199.5   
+Cp 512.19  1204.5   
+Cp 532.62  1209.5   
+Cp 509.00  1214.5   
+Cp  455.53  1219.5  
+Cp 504.69  1224.5   
+Cp 440.87  1229.5   
+Cp 481.68  1234.5   
+Cp 553.11  1169.5   
+Cp  564.84  1174.5  
+Cp  546.06  1179.5  
+Cp  570.89  1184.5  
+Cp  500.30  1189.5  
+Cp  521.13  1194.5  
+Cp  497.94  1199.5  
+Cp  477.24  1204.5  
+Cp  518.52 1209.5   
+Cp  490.85 1214.5   
+Cp  456.31 1219,5   
+Cp  434.39  1224.5  
+Cp  477.28 1229.5   
+Cp  429.15 1234.5   
+Cp  508.26 1204.5   
+Cp  499.13 1199.5   
+Cp  553.10 1194.5   
+Cp  532.96 1189.5   
+Cp  521.83 1184.5   
+Cp  573.13 1179.5   
+Cp  518.14 1174.5   
+Cp  542.90 1169.5   
+Cp  185.83  875.5   
+Cp  186.48  913.5   
+Cp  183.93  938.5   
+Cp  190.37  943.5   
+Cp  180.64  948.5   
+Cp  410.20 1108.5   
+Cp  422.55 1113.5   
+Cp  398.60 1113.5   
+Cp  382.03 1108.5   
+Cp  408.42 1108.5   
+Cp  397.77 1113.5   
+Cp  436.07 1118.5   
+Cp  406.33 1119.5   
+Cp  430.71 1114.5   
+Cp  369.12 1109.5   
+Cp  400.16 1114.5   
+Cp  425.67 1119.5   
+Cp  440.91 1119.5   
+Cp  417.09 1114.5   
+Cp  393.96 1109.5

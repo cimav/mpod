@@ -16,7 +16,7 @@ _structure_refined 'no'
 _phase_name '?'
 _phase_formula Cu0.05Al0.95
 _chemical_formula_sum ' Cu0.05 Al0.95'
-_symmetry_point_group_name_H-M 'm 3 m'
+_symmetry_point_group_name_H-M 'm3m'
 _cell_length_a  4.04958
 loop_
 _publ_author_name

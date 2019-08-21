@@ -17,7 +17,7 @@ _phase_name 'Bi2Sr2CaCu2O8'
 _phase_generic 'Bi-2212'
 _chemical_formula_structural 'Bi2Sr2CaCu2O8'
 _chemical_formula_sum 'Bi2 Sr2 Ca1 Cu2 O8'
-_symmetry_point_group_name_H-M 'm m m'
+_symmetry_point_group_name_H-M 'mmm'
 _cell_length_a                     5.4054
 _cell_length_b                     5.4016
 _cell_length_c                     30.7152

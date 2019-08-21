@@ -17,6 +17,7 @@ from data.ExtractorDataFromCIF import *
 from shutil import  *
 from mhlib import isnumeric
 import codecs
+from data.ExtractDataFormFieldsUtil import *
 
 
 class MPODUtil():
@@ -64,6 +65,7 @@ class MPODUtil():
         self.cif_created=''
         self.valid = False
         self.reportValidation=''
+        self.user = None
         
         self.maskmatrix6x6 =   [[1, 1, 1, 1, 1, 1],
                                                     [0, 1, 1, 1, 1, 1],
@@ -117,11 +119,12 @@ class MPODUtil():
                 break
                
         filenamempod = filename + ".mpod"
-        filepath=os.path.join(self.__cifs_dir_output, filenamempod)
+        #filepath=os.path.join(self.__cifs_dir_output, filenamempod)
+        filepath=os.path.join(self.cifs_dir_valids, filenamempod)
         self.cif_created=filenamempod
         
         
-        
+        """
         try:
             files = os.listdir(str(self.__cifs_dir_output))
         except:
@@ -142,9 +145,8 @@ class MPODUtil():
                     #elif os.path.isdir(file_path): shutil.rmtree(file_path)
                 except Exception as e:
                     print(e)
-                
-                
-        
+            """
+ 
         self.fid = open(filepath,'w') 
         
          
@@ -204,9 +206,9 @@ class MPODUtil():
     def addinfo(self):
         
         for p  in self.__propertyMaster.propertyList:
-            if self.__propertyMaster.puntualgroup  != "":
+            if self.__propertyMaster.pointgroup  != "":
                 if self.__symmetry_point_group_name == False:         
-                    self.__line =  "_symmetry_point_group_name_H-M" + " " + self.__propertyMaster.puntualgroup+"\n"      
+                    self.__line =  "_symmetry_point_group_name_H-M" + " " + self.__propertyMaster.pointgroup+"\n"      
                     self.addline(self.__line)    
                         
                     self.__symmetry_point_group_name = True
@@ -259,17 +261,17 @@ class MPODUtil():
                     self.__line =  ";"  +"\n"
                     self.addline(self.__line)   
                     
-                    self.__line = '_journal_name_full ' + "'"+self.__propertyMaster.journal +"'"+" \n"
+                    self.__line = '_journal_name_full ' + "'"+self.__propertyMaster.journal +"'"+"\n"
                     self.addline(self.__line)   
-                    self.__line = '_journal_volume  ' + "'"+self.__propertyMaster.volume +"'"+" \n"
+                    self.__line = '_journal_volume  ' + "'"+self.__propertyMaster.volume +"'"+"\n"
                     self.addline(self.__line)   
-                    self.__line = '_journal_page_first  ' + "'"+self.__propertyMaster.page_first +"'"+" \n"
+                    self.__line = '_journal_page_first  ' + "'"+self.__propertyMaster.page_first +"'"+"\n"
                     self.addline(self.__line)  
-                    self.__line = '_journal_page_last  ' + "'"+self.__propertyMaster.page_last +"'"+" \n"
+                    self.__line = '_journal_page_last  ' + "'"+self.__propertyMaster.page_last +"'"+"\n"
                     self.addline(self.__line)    
                         
                           
-                    self.__line = '_journal_year  ' + "'"+self.__propertyMaster.year +"'"+" \n"
+                    self.__line = '_journal_year  ' + "'"+self.__propertyMaster.year +"'"+"\n"
                     self.addline(self.__line)                  
                 
                 self.__loop_article_info=True 
@@ -318,11 +320,18 @@ class MPODUtil():
                 self.__loop_tag=True     
                 
                 
-            dim= p.coefficientsmatrix.shape
-            self.maxmatrixnonceros = (p.coefficientsmatrix != 0) 
-            if len(dim) == 2:
-                for i in range(0,dim[0]):
+            #dim= p.coefficientsmatrix.shape
+            
+            dimensions=p.objDataProperty.tensor_dimensions.split(',')
+ 
+            #self.maxmatrixnonceros = (p.coefficientsmatrix1 != '') 
+            if len(dimensions) == 2:
+                """for i in range(0,dim[0]):
                     for j  in range(0,dim[1]):    
+                """      
+                        
+                for i in range(0,int(dimensions[0])):
+                    for j  in range(0,int(dimensions[1])):  
                         tagindex = str(i +1 )  + str(j + 1)
                         tag = p.tag.replace('ij',tagindex);
                         lineloop = ""
@@ -331,29 +340,43 @@ class MPODUtil():
                             value2 = p.formdata[0][tag]
                             if p.loopBlockValues:
                                 for x, item in enumerate(self.__loopBlock):
-                                    lineloop = lineloop +" " +str(p.loopBlockValues[p.loopBlockValues.keys()[x]]  )
-        
-                                self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop+  "\n"     
+                                    if x == 0:
+                                        lineloop = str(p.loopBlockValues[p.loopBlockValues.keys()[x]]  )
+                                    else:
+                                        lineloop = " " +str(p.loopBlockValues[p.loopBlockValues.keys()[x]]  )
+     
+                                        
+ 
                             else:
                                 for x, item in enumerate(self.__loopBlock):
-                                    lineloop = lineloop +" " +"?"  
+                                    if x == 0:
+                                        lineloop =  +"?"  
+                                    else:
+                                        lineloop = lineloop +" " +"?"  
+                                        
                                     
                             if p.symmetry:  
                                 
-                                if dim[0] == 6  and dim[1] == 6:  
-                                    if (self.maskmatrix6x6[i][j] and self.maxmatrixnonceros[i][j]):
-                                            self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop +   "\n"     
-                                            self.addline(self.__line)  
-                                elif  dim[0] == 3  and dim[1] == 3:  
-                                    if(self.maskmatrix3x3[i][j] and self.maxmatrixnonceros[i][j]):
+                                if int(dimensions[0]) == 6  and int(dimensions[1]) == 6:  
+                                    if (self.maskmatrix6x6[i][j]):# and self.maxmatrixnonceros[i][j]):
                                         self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop +   "\n"     
+
+                                            
+                                        self.addline(self.__line)  
+                                elif  int(dimensions[0]) == 3  and int(dimensions[1]) == 3:  
+                                    if(self.maskmatrix3x3[i][j]):# and self.maxmatrixnonceros[i][j]):
+                                        self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop +   "\n"     
+                                            
                                         self.addline(self.__line)  
                                 else:
                                     pass
                                 
                             else:
                                 if(self.maxmatrixnonceros[i][j]):
-                                    self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop +   "\n"   
+                                    if lineloop != "":
+                                        self.__line= p.tag +" " + tagindex + " "+ str(value2) + " " + lineloop +   "\n"     
+
+                                            
                                     self.addline(self.__line)   
                                 
                                 
@@ -363,7 +386,7 @@ class MPODUtil():
                             self.sucess = 0
                             return     
                         
-            elif len (dim) == 1:
+            elif len (dimensions) == 1:
                 pass
 
  
@@ -380,8 +403,8 @@ class MPODUtil():
         self.fid.close()
         #print self.fid.name
         #print self.cif_created
-  
-        validator = CifMpodValidator(str(self.__cifs_dir_output),str(self.__core_dic_filepath),str(self.__mpod_dic_filepath),'')
+        """ 
+        validator = CifMpodValidator(str(self.__cifs_dir_output),str(self.__core_dic_filepath),str(self.__mpod_dic_filepath))
         
         try:
             validator.getValidation()
@@ -403,14 +426,14 @@ class MPODUtil():
             os.mkdir(str(self.cifs_dir_valids)) 
             
            
-            
+  
         filelist = []
         for code in validator.codeListValid:
-            #print code
-            #print self.fid.name    
             print os.path.join(str(self.cifs_dir_valids), self.cif_created)
             filelist.append(self.cif_created)
             move(self.fid.name, os.path.join(str(self.cifs_dir_valids), self.cif_created))
+             
+            
             self.valid=True
             
       
@@ -419,6 +442,19 @@ class MPODUtil():
         estr.extractConditions(False)
         estr.extractPublarticleAndDataFile_Data(False)
         estr.extractProperties(False)
+        """
+        
+     
+        customfile = False
+        loadtodatabase = True
+        fds2 = []    
+        fds2.append(self.cif_created)
+        makevalidation=True
+        edff= ExtractDataFormFields()
+        #edff.customdir =  customdir
+        edff.user =  self.user
+        edff.debug = False
+        edff.processData(loadtodatabase,fds2,customfile,makevalidation)
         
        
     if __name__ == "__main__":      

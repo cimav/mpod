@@ -81,7 +81,7 @@
   
   
   
-  
+  var incompletematrix = false
   
   
   navigator.sayswho= (function(){
@@ -195,25 +195,31 @@
 
   
   
-	function ranktensor(clicked_id, values, selectedid, filename,valuearrayrotated,tensor) {			    
+	function ranktensor(clicked_id, values, selectedid, filename,valuearrayrotated,tensor,incompletematrix,idtd) {			    
 	    selectedColor = document.getElementById(selectedid).selectedIndex;	  
 		var url = values + "&color=" + selectedColor+ "&"+ valuearrayrotated; 
-	    if(tensor != 'undefined' )
-	    {
-	    	urlGraph = "/dataitem/" + pathname[2] + "/"+ tensor + "/" + url;
-	    	PopupCenter(urlGraph, tensor, 760, 600);
-		   /* if (valuearrayrotated == 'undefined' )
-		    {
-		    	 
-		    	PopupCenter(urlGraph, tensor,  525, 700);
-		    }
-		    else
-		    { 
-		    	 
-		    	PopupCenter(urlGraph, tensor, 760, 600);
-		    }*/
-		    	
-	    }
+		if (incompletematrix == 'false')
+		{
+			 if(tensor != 'undefined' )
+			    {
+			    	urlGraph = "/dataitem/" + pathname[2] + "/"+ tensor + "/" + url;
+			    	PopupCenter(urlGraph, tensor, 760, 600);
+			    }
+		}
+		else
+		{
+			$( "#" + idtd ).html("");
+	         var error=  '<div class="alert alert-danger" role="alert">'
+	        	 
+		     error= error + 'Incomplete Matrix';
+				 
+		     error= error + '</div>'
+		     $( "#" + idtd ).append(error);
+		     return;
+				 
+			 
+		}
+	   
 	}
   
   function setValuesGET(values,url)
@@ -311,7 +317,10 @@
 		   for (var j=0; j < spl.length; j++) 
 	      {
 			  val = spl[j].split("=");
-			
+			  
+			  if (val[1] == '?')
+				  incompletematrix = true
+				  
 			  if (j == (spl.length - 1))
 			  {
 				  v = validateValue(val[1]);
@@ -346,15 +355,17 @@
 										'ml':1,
 										'omeg':0,
 										'mat': mat ,
-										'url':jsonurl //parameter for urlcluster
+										'url':jsonurl, //parameter for urlcluster
+										'incompletematrix': incompletematrix
 										}
 		   
 		   
-
+		   
 		   array_datasend[i] = jsondatasend
 		   type_id = null;  
 		   mat = "";
 		   jsonurl = "";
+		    
 		   jsondatasend = null;
 		   select_color_id= "color" + tensor_file_name;
 		   inline_form_input_id= "inlineforminput" + tensor_file_name;
@@ -380,9 +391,10 @@
 		    	//vals = "?" + list;
 		    	vals =   array_values[i];
 		    	console.log(vals);
-		    	 
-		    	html_colorandbtngraph = '<select id="'+select_color_id+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="ranktensor(this.id,\'' +  vals  + '\',\'' + select_color_id + '\',\'' + tensor_file_name + '\',\'' + valuearray + '\',\'' + tensor_category + '\')" id="'+i+'">Graph</button> ';		     
-			    html_select_colorb_btngraph[i] = html_colorandbtngraph;
+		    	
+		    	html_colorandbtngraph = '<select id="'+select_color_id+'"><option>Jet</option><option>Hot</option><option>Cool</option><option>Gray</option></select> <button class="btn btn-warning" onclick="ranktensor(this.id,\'' +  vals  + '\',\'' + select_color_id + '\',\'' + tensor_file_name + '\',\'' + valuearray + '\',\'' + tensor_category + '\',\'' + incompletematrix + '\',\'' + tdseparatorpaddingleft_id + '\')" id="'+i+'">Graph</button> ';		     
+		    	incompletematrix = false
+		    	html_select_colorb_btngraph[i] = html_colorandbtngraph;
 			    html_btnpolycrystalline = '<button class="btn btn-warning" onclick="showfields(this.id)" id="'+tensor_file_name+'">' + btnPolycrystallinelbl + '</button>';
 			    html_btn_polycrystalline[i] = html_btnpolycrystalline
 				html_lbl_h = '<label  id="'+ lblHinline_form_input_id +'"  for="'+ inputHinline_form_input_id+'" style="display: none;" >&nbsp;H: </label>';
@@ -461,6 +473,21 @@
 		$( "#" + spanid ).html("");
 		omeg=  $("#" + omegid ).val();
 		data =array_datasend[arrayindex]
+		incompletematrix = data.incompletematrix
+		if (data.incompletematrix == true)
+		{
+			$( "#" + idtd ).html("");
+	         var error=  '<div class="alert alert-danger" role="alert">'
+	 
+	         error= error + 'Incomplete Matrix: can not be solved';
+			 
+	         error= error + '</div>'
+			 $( "#" + idtd ).append(error);
+			 return;
+		}
+ 
+	   
+		
 		datasend = {'mh':data.mh,
 								'mk':data.mk,
 								'ml':data.ml,
@@ -476,7 +503,7 @@
            dataType: 'json',
            success: function (data) {
            		$( "#" + idtd ).append(data.html);
-           		$( "#" + spanid ).append('<button class="btn btn-warning" onclick="ranktensor(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\',\'' + tensor + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
+           		$( "#" + spanid ).append('<button class="btn btn-warning" onclick="ranktensor(this.id,\'' +  values + '\',\'' + selectid + '\',\'' + filename + '\',\'' + data.valuearrayrotated + '\',\'' + tensor + '\',\'' + incompletematrix + '\',\'' + idtd + '\');" id="'+btngraphrotated_id+'">Graph</button>' );
         	 },
 		 	error: function (data) {
        		if(data.status == 500)

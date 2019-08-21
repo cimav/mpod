@@ -1,0 +1,53 @@
+#------------------------------------------------------------------------------
+#$Date: 2010-09-30 10:46:17 +0000 (Thu, 30 Sep 2010) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.mpod.net/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_ywrtaw4=ikwhelirwtqlxbd
+#_cod_database_code               2101845
+_structure_refined 'no'
+_phase_name 'galfenol29'
+_chemical_formula_sum 'Fe71Ga29'
+#_symmetry_point_group_name_H-M mm2
+#_cell_length_a  5.148
+#_cell_length_c  13.863
+loop_
+_publ_author_name
+'Jayasimha Atulasimha'
+'Alison B Flatau'
+_publ_section_title
+;
+A review of magnetostrictive iron–gallium alloys
+;
+_journal_name_full               'SMART MATERIALS AND STRUCTURES'
+_journal_volume                  20
+_journal_issue                   ?
+_journal_article_reference       ?
+_journal_pages_number            43001
+_journal_year                    2011
+
+data_ywrtaw4=ikwhelirwtqlxbda
+_prop_magnetocrystalline_anisotropy_k1,_k2 'ki'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+ki 1 -0.2
+ki 2 0.5
+
+data_ywrtaw4=ikwhelirwtqlxbdb
+_prop_magnetostriction_lambda_100,_lambda_111 'ki'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+ki 1 200
+ki 2 36.66
+

@@ -1,0 +1,63 @@
+#------------------------------------------------------------------------------
+#$Date: 2013-5-12 14:49:00 +0000 $
+#$Revision: 001 $ Daniel Chateigner
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.mpod.net/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_ywrtaw4=aruoiubnsteccaq
+_cod_database_code 6000259
+_structure_refined 'yes'
+_phase_name 'calcium carbonate'
+_chemical_name_mineral 'aragonite'
+_chemical_formula_structural 'CaCO3'
+_chemical_formula_sum 'Ca1 C1 O3'
+_symmetry_point_group_name_H-M 'm m m'
+_cell_length_a  5.733(1)
+_cell_length_b  4.951(1)
+_cell_length_c  7.963(14)
+_cell_angle_alpha  90
+_cell_angle_beta   90
+_cell_angle_gamma  90
+
+loop_
+_publ_author_name
+'Liu, Lin-gun'
+'Chen, Chien-chih'
+'Lin, Chung-Cherng'
+'Yang, Yi-jong'
+_publ_section_title
+;
+Elasticity of single-crystal aragonite by Brillouin spectroscopy
+;
+_journal_name_full               'Physics and Chemistry of Minerals'
+_journal_volume                  32
+_journal_issue                   ?
+_journal_page_first              97
+_journal_page_last               102
+_journal_year                    2005
+
+
+_prop_measurement_method 'BS'
+_prop_frame '1=[100] 2=[010] 3=[001]'
+
+_prop_elastic_stiffness_cij 'cij'
+
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+cij 11 171.1(1.0)
+cij 12 60.3(1.0)
+cij 13 27.8(1.6)
+cij 22 110.1(0.9)
+cij 23 41.9(2.0)
+cij 33 98.4(1.2)
+cij 44 39.3(0.6)
+cij 55 24.2(0.4)
+cij 66 40.2(0.6)

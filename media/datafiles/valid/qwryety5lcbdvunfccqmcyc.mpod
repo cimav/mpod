@@ -1,0 +1,88 @@
+#------------------------------------------------------------------------------
+#$Date: 2019-07-04 19:05:53 +0000 (Thu, 04 Jul 2019) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://mpod.cimav.edu.mx/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_qwryety5lcbdvunfccqmcyc
+_cod_database_code ?
+_symmetry_point_group_name_H-M m3m
+_chemical_formula 'BaF2'
+_phase_density 4.89
+_phase_name 'Barium fluoride'
+loop_
+_publ_author_name
+'A.G. Every'
+'A.K. McCurdy'
+_publ_section_title
+;
+Second and Higher Order Elastic Constants, Landoltt Bornstein
+;
+_journal_name_full 'Springer, Berlin, Heidelberg' 
+_journal_volume  '3' 
+_journal_page_first  '29' 
+_journal_page_last  '29' 
+_journal_year  '1992' 
+_prop_dielectric_permittivity_relative_epsrij 'epsrij'
+_prop_elastic_compliance_sij 'sij'
+_prop_elastic_stiffness_cij 'cij'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+_prop_heat_capacity_C0P
+_prop_mohs_hardness
+epsrij 11 7.33  11 3
+epsrij 12 0  11 3
+epsrij 13 0  11 3
+epsrij 22 7.33  11 3
+epsrij 23 0  11 3
+epsrij 33 7.33  11 3
+sij 11 15.2(1)  ? ?
+sij 12 -4.7(1)  ? ?
+sij 13 -4.7  ? ?
+sij 14 0  ? ?
+sij 15 0  ? ?
+sij 16 0  ? ?
+sij 22 15.2  ? ?
+sij 23 -9.4  ? ?
+sij 24 0  ? ?
+sij 25 0  ? ?
+sij 26 0  ? ?
+sij 33 15.2  ? ?
+sij 34 0  ? ?
+sij 35 0  ? ?
+sij 36 0  ? ?
+sij 44 39.6(7)  ? ?
+sij 45 0  ? ?
+sij 46 0  ? ?
+sij 55 39.6  ? ?
+sij 56 0  ? ?
+sij 66 39.6  ? ?
+cij 11 91.1(10)  ? ?
+cij 12 41.2(15)  ? ?
+cij 13 41.2  ? ?
+cij 14 0  ? ?
+cij 15 0  ? ?
+cij 16 0  ? ?
+cij 22 91.1  ? ?
+cij 23 41.2  ? ?
+cij 24 0  ? ?
+cij 25 0  ? ?
+cij 26 0  ? ?
+cij 33 91.1  ? ?
+cij 34 0  ? ?
+cij 35 0  ? ?
+cij 36 0  ? ?
+cij 44 25.3(4)  ? ?
+cij 45 0  ? ?
+cij 46 0  ? ?
+cij 55 25.3  ? ?
+cij 56 0  ? ?
+cij 66 25.3  ? ?

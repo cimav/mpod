@@ -19,8 +19,8 @@ urlpatterns = patterns('',
     #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/dictionary/$', dictionaryview,name='dictionary'),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^admin/Files/fileuser/(\d+)/showmatrix/(?P<pk>-?\d+)$', showmatrix, name='showmatrix'),
-    url(r'^admin/Files/fileuser/(\d+)/updatecoefficient/(?P<pk>-?\d+)$', updatecoefficient, name='updatecoefficient'),
+    #url(r'^admin/Files/fileuser/(\d+)/showmatrix/(?P<pk>-?\d+)$', showmatrix, name='showmatrix'),
+    #url(r'^admin/Files/fileuser/(\d+)/updatecoefficient/(?P<pk>-?\d+)$', updatecoefficient, name='updatecoefficient'),
     
     
 
@@ -74,7 +74,8 @@ urlpatterns = patterns('',
     url(r'^sbreference/$','data.views.sbreference'),
 
     url(r'^newcasev2/$', newcasev2 , name='newcasev2'),
-    url(r'^addcasev2/$','data.views.addcasev2'),
+    #url(r'^addcasev2/$','data.views.addcasev2'),
+    url(r'^addcasev2/$',addcasev2,  name='addcasev2'),
     url(r'^dataitem/(\d+)/rotatematrix/(?P<pk>-?\d+)$',rotatematrix, name='rotatematrix'), 
     
     

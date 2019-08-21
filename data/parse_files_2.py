@@ -7,7 +7,7 @@ from data.models import *
 from data.UtilParserFile import *
 
 
-cifs_dir='/home/pepponi/work/physdata/mpod/data_files'
+#cifs_dir='/home/pepponi/work/physdata/mpod/data_files'
  
 
 def format_name(prop_tag):
@@ -138,14 +138,12 @@ def get_non_looped_props(non_looped_lines):
     #otgs = ["phase", "symmetry", "structure"] 
     #ntgs = ['conditions', 'measurement', 'frame', 'symmetry' ]
     otgs =[]
-    #othertagList=OtherTags.objects.filter(active=1)      #categorytag_id=4
-    othertagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=4))
+    othertagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=4), active=True)
     for i, pt in enumerate(othertagList):
         otgs.append( othertagList[i].tag )
     
-    ntgs = []
-    #proptagList=PropTags.objects.filter(active=1).exclude(tag__exact= 'data')      #categorytag_id=1  
-    proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=1))
+    ntgs = []  
+    proptagList=Tags.objects.filter(categorytag=CategoryTag.objects.get(id=1), active=True)
     for i, pt in enumerate(proptagList):
         ntgs.append( proptagList[i].tag )
         
@@ -172,13 +170,13 @@ def get_non_looped_props(non_looped_lines):
                 lcs=lin.split()
                 tagfind = lcs[0]
                 try:
-                    objExperimentalParCond=ExperimentalParCond.objects.get(tag=tagfind)
+                    objExperimentalParCond=ExperimentalParCond.objects.get(tag=tagfind, active=True)
                 except ObjectDoesNotExist as error:
                     print "Message({0}): {1}".format(99, error.message)   
                
-                 
+                  
                 try:
-                    objProperty=Property.objects.get(tag=tagfind)
+                    objProperty=Property.objects.get(tag=tagfind, active=True)
                 except ObjectDoesNotExist as error:      
                     print "Message({0}): {1}".format(99, error.message)   
 
@@ -359,21 +357,25 @@ def format_tensor_sec(tensor_loop_data_sec, props_tags,  tenso_props_dims_dict, 
             elasticity = False
             fourthrank = False
             if debug ==1:
-                objDataProperty = Property.objects.get(id=int(prop_id))  
+                objDataProperty = Property.objects.get(id=int(prop_id), active=True)  
                 type_ids=TypeDataProperty.objects.filter(dataproperty=objDataProperty).values_list('type_id',flat=True)   
                 
                 if  type_ids:  #this block code make simetric the matrix coefficients from file.mpod
                     objTypeSelectedList = Type.objects.filter(id__in=type_ids) 
                     objTypeSelected = objTypeSelectedList[0]
                     if objTypeSelected.catalogproperty.description == "Elasticity":
-                        puntualgroup =  PuntualGroup("e",prop_name,dims,vals,dictitems,prop_id)
-                        tenso=puntualgroup.coefficientsmatrix2
+                        fileuserutil =  FileUserUtil()
+                        fileuserutil.setPointGroup("e",prop_name,vals,dictitems,prop_id)
+                        fileuserutil.setCoefficientsmatrix(dims)
+                        tenso=fileuserutil.coefficientsmatrix2
                         elasticity=True
  
                     elif objTypeSelected.catalogproperty.description == "4th-rank ranktensor":   
                         if objTypeSelected.description == "simetric yes":
-                            puntualgroup =  PuntualGroup("4y",prop_name,dims,vals,dictitems,prop_id)
-                            tenso=puntualgroup.coefficientsmatrix2
+                            fileuserutil =  FileUserUtil()
+                            fileuserutil.setPointGroup("4y",prop_name,vals,dictitems,prop_id)
+                            fileuserutil.setCoefficientsmatrix(dims)
+                            tenso=fileuserutil.coefficientsmatrix2
                             fourthrank = True
                         else:        
                             for i in range(dim1):

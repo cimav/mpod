@@ -40,7 +40,7 @@ _journal_page_first               141
 _journal_page_last                146
 _journal_volume                   162
 _journal_year                     1994
-_prop_conditions_temperature 4.2 K
+_prop_conditions_temperature 4.2
 _prop_magnetoelectric_MEalphaij 'MEalphaij'
 loop_
 _prop_data_label

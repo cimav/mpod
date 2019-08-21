@@ -1,0 +1,228 @@
+#------------------------------------------------------------------------------
+#$Date: 2019-06-24 18:52:30 +0000 (Mon, 24 Jun 2019) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://mpod.cimav.edu.mx/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_1000379
+_cod_database_code ?
+_symmetry_point_group_name_H-M 4mm
+_chemical_formula 'Pb(Mg1/3Nb2/3)'
+_phase_name 'PMN-30percent PT'
+loop_
+_publ_author_name
+'Rui Zhang'
+'Wenhua Jiang'
+'Bei Jiang'
+'and Wenwu Cao'
+_publ_section_title
+;
+Elastic, Dielectric and Piezoelectric Coefficients of Domain Engineered 0.70Pb(Mg1/3Nb2/3)O3-0.30PbTiO3 single crystal
+;
+_journal_name_full 'AIP Conference Proceedings' 
+_journal_volume  '626' 
+_journal_page_first  '188' 
+_journal_page_last  '188' 
+_journal_year  '2002' 
+_prop_elastic_stiffness_cijE 'cijE'
+_prop_elastic_stiffness_cijD 'cijD'
+_prop_elastic_compliance_sijE 'sijE'
+_prop_elastic_compliance_sijD 'sijD'
+_prop_piezoelectric_eij 'eij'
+_prop_piezoelectric_dij 'dij'
+_prop_piezoelectric_gij 'gij'
+_prop_piezoelectric_hij 'hij'
+_prop_dielectric_permittivity_relative_epsrijS 'epsrijS'
+_prop_dielectric_permittivity_relative_epsrijT 'epsrijT'
+_prop_dielectric_stiffness_relative_betrijS 'betrijS'
+_prop_dielectric_stiffness_relative_betrijT 'betrijT'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+cijE 11 11.7 
+cijE 12 10.3 
+cijE 13 10.1 
+cijE 14 0 
+cijE 15 0 
+cijE 16 0 
+cijE 22 11.7 
+cijE 23 10.1 
+cijE 24 0 
+cijE 25 0 
+cijE 26 0 
+cijE 33 10.8 
+cijE 34 0 
+cijE 35 0 
+cijE 36 0 
+cijE 44 7.1 
+cijE 45 0 
+cijE 46 0 
+cijE 55 7.1 
+cijE 56 0 
+cijE 66 6.6 
+cijD 11 11.8 
+cijD 12 10.4 
+cijD 13 9.5 
+cijD 14 0 
+cijD 15 0 
+cijD 16 0 
+cijD 22 11.8 
+cijD 23 9.5 
+cijD 24 0 
+cijD 25 0 
+cijD 26 0 
+cijD 33 17.4 
+cijD 34 0 
+cijD 35 0 
+cijD 36 0 
+cijD 44 7.8 
+cijD 45 0 
+cijD 46 0 
+cijD 55 7.8 
+cijD 56 0 
+cijD 66 6.6 
+sijE 11 52.0 
+sijE 12 -18.9 
+sijE 13 -31.1 
+sijE 14 0 
+sijE 15 0 
+sijE 16 0 
+sijE 22 52.0 
+sijE 23 -31.1 
+sijE 24 0 
+sijE 25 0 
+sijE 26 0 
+sijE 33 67.7 
+sijE 34 0 
+sijE 35 0 
+sijE 36 0 
+sijE 44 14.0 
+sijE 45 0 
+sijE 46 0 
+sijE 55 14.0 
+sijE 56 0 
+sijE 66 15.2 
+sijD 11 39.7 
+sijD 12 -31.2 
+sijD 13 -4.7 
+sijD 14 0 
+sijD 15 0 
+sijD 16 0 
+sijD 22 39.7 
+sijD 23 -4.7 
+sijD 24 0 
+sijD 25 0 
+sijD 26 0 
+sijD 33 10.8 
+sijD 34 0 
+sijD 35 0 
+sijD 36 0 
+sijD 44 12.9 
+sijD 45 0 
+sijD 46 0 
+sijD 55 12.9 
+sijD 56 0 
+sijD 66 15.2 
+eij 11 0 
+eij 12 0 
+eij 13 0 
+eij 14 0 
+eij 15 13.6 
+eij 16 0 
+eij 21 0 
+eij 22 0 
+eij 23 0 
+eij 24 13.6 
+eij 25 0 
+eij 26 0 
+eij 31 -2.4 
+eij 32 -2.4 
+eij 33 27.1 
+eij 34 0 
+eij 35 0 
+eij 36 0 
+dij 11 0 
+dij 12 0 
+dij 13 0 
+dij 14 0 
+dij 15 190 
+dij 16 0 
+dij 21 0 
+dij 22 0 
+dij 23 0 
+dij 24 190 
+dij 25 0 
+dij 26 0 
+dij 31 -921 
+dij 32 -921 
+dij 33 1981 
+dij 34 0 
+dij 35 0 
+dij 36 0 
+gij 11 0 
+gij 12 0 
+gij 13 0 
+gij 14 0 
+gij 15 6.0 
+gij 16 0 
+gij 21 0 
+gij 22 0 
+gij 23 0 
+gij 24 6.0 
+gij 25 0 
+gij 26 0 
+gij 31 -13.3 
+gij 32 -13.3 
+gij 33 28.7 
+gij 34 0 
+gij 35 0 
+gij 36 0 
+hij 11 0 
+hij 12 0 
+hij 13 0 
+hij 14 0 
+hij 15 4.6 
+hij 16 0 
+hij 21 0 
+hij 22 0 
+hij 23 0 
+hij 24 4.6 
+hij 25 0 
+hij 26 0 
+hij 31 -2.2 
+hij 32 -2.2 
+hij 33 24.6 
+hij 34 0 
+hij 35 0 
+hij 36 0 
+epsrijS 11 3307 
+epsrijS 12 0 
+epsrijS 13 0 
+epsrijS 22 3307 
+epsrijS 23 0 
+epsrijS 33 1242 
+epsrijT 11 3600 
+epsrijT 12 0 
+epsrijT 13 0 
+epsrijT 22 3600 
+epsrijT 23 0 
+epsrijT 33 7800 
+betrijS 11 3.0 
+betrijS 12 0 
+betrijS 13 0 
+betrijS 22 3.0 
+betrijS 23 0 
+betrijS 33 8.0 
+betrijT 11 2.8 
+betrijT 12 0 
+betrijT 13 0 
+betrijT 22 2.8 
+betrijT 23 0 
+betrijT 33 1.3 

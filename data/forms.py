@@ -44,9 +44,11 @@ from collections import defaultdict
 from operator import itemgetter
 from data.JScriptUtil import *
 from django.db.models.query import QuerySet
- 
- 
- 
+from django.forms import ModelChoiceField
+from data.UtilParserFile import *
+from data.ExtractDataFormFieldsUtil import *
+from django.views.generic.edit import FormView
+from django.http import HttpResponseRedirect
  
  
 class UserProfileForm(forms.ModelForm):
@@ -262,56 +264,21 @@ class ValidateAddCaseFormv2(forms.Form):
                     for ipt  in inputList:
                         if  dict.has_key(ipt.name):
                             val= argsToFloat(args,ipt.name) 
-                            if val:
+                            if val != None:
                                 dict[ipt.name] = val
                              
  
                     argsupdate = QueryDict('', mutable=True)
                     argsupdate.update(dict)
                     ar.append(argsupdate)
-                    
- 
                     args = ar
-                     
-       
-                
                 
                 super(ValidateAddCaseFormv2, self).__init__(*args, **kwargs)
 
- 
-             
-                        
-                
-                #print inputList
-                
-                
-                
-                
                 if inputList:
                     for ipt  in inputList:  
-                  
- 
-                        
-                        
                         self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
-                        self.fields[ipt.name].initial = 'nnn'
-    
-                        """if   's' in ipt.name:
-                            self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
-                            
-                        if   'c' in ipt.name:
-                            self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
-                            
-                        if   'd' in ipt.name:
-                            self.fields[ ipt.name] = forms.FloatField(forms.CharField(required=True,help_text=str(ipt.name) + "Enter value" ,label= ipt.name))
-                        """
-
-
-
-             
-         
-
- 
+                        #self.fields[ipt.name].initial = 'nnn'
 
 
 FAVORITE_COLORS_CHOICES = (
@@ -362,8 +329,8 @@ class GroupNamesDetailAdminForm(forms.ModelForm):
         else:
             try:
                 print name
-                PuntualGroupNames.objects.get(name__exact=name) 
-                raise forms.ValidationError("There is already a group with the selecteds 'puntual groups'. use that group or the group name already exist")
+                PointGroupNames.objects.get(name__exact=name) 
+                raise forms.ValidationError("There is already a group with the selecteds 'point groups'. use that group or the group name already exist")
             except ObjectDoesNotExist as error:
                 pass
         """
@@ -399,8 +366,8 @@ class GroupNamesDetailAdminForm(forms.ModelForm):
        
         if self.instance.pk:#_addanother, _continue, _save from change_form.html when instance exit
             if args:
-                puntualgroupnamesSelected=PuntualGroupNames.objects.get(id=self.instance.id)
-                puntualgroupnamesQuerySet =  PuntualGroupGroups.objects.filter(puntualgroupnames=self.instance)
+                pointgroupnamesSelected=PointGroupNames.objects.get(id=self.instance.id)
+                pointgroupnamesQuerySet =  PointGroupGroups.objects.filter(pointgroupnames=self.instance)
                 catalogpointgroup_ids = argsListToIntList(args,'catalogpointgroup')
                 catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
                 name = "("
@@ -419,7 +386,7 @@ class GroupNamesDetailAdminForm(forms.ModelForm):
                 self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()
                 self.fields['catalogpointgroup'].initial = catalogpointgroupQuerySet
             else:
-                catalogpointgroup_ids =  PuntualGroupGroups.objects.filter(puntualgroupnames=self.instance).values_list('catalogpointgroup_id',flat=True)  
+                catalogpointgroup_ids =  PointGroupGroups.objects.filter(pointgroupnames=self.instance).values_list('catalogpointgroup_id',flat=True)  
                 catalogpointgroupQuerySet=CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
                 self.fields['name'].initial=self.instance.name
                 self.fields['description'].initial=self.instance.name   
@@ -428,8 +395,8 @@ class GroupNamesDetailAdminForm(forms.ModelForm):
         else:
             if args:# true  (_addanother, _continue, _save)  when instance no exit and and change_form.html  was filled
 
-                puntualgroupnames_name = str(args[0]['name'])
-                puntualgroupnames_description = str(args[0]['description'])
+                pointgroupnames_name = str(args[0]['name'])
+                pointgroupnames_description = str(args[0]['description'])
                 catalogpointgroupids=args[0].getlist('catalogpointgroup')
                 catalogpointgroup_ids = []
                 for id in catalogpointgroupids:
@@ -443,14 +410,14 @@ class GroupNamesDetailAdminForm(forms.ModelForm):
                     self.fields['catalogpointgroup'].initial = catalogpointgroupQuerySet
                     
  
-                    puntualgroupgroups=PuntualGroupGroups.objects.annotate(total=models.Count('catalogpointgroup')).filter(total=len(catalogpointgroup_ids)).filter(catalogpointgroup_id__in =catalogpointgroup_ids ).values('puntualgroupnames').annotate(total=Count('catalogpointgroup')).order_by('catalogpointgroup')
-                    print puntualgroupgroups.query   
-                    print puntualgroupgroups
-                    if not puntualgroupgroups:
+                    pointgroupgroups=PointGroupGroups.objects.annotate(total=models.Count('catalogpointgroup')).filter(total=len(catalogpointgroup_ids)).filter(catalogpointgroup_id__in =catalogpointgroup_ids ).values('pointgroupnames').annotate(total=Count('catalogpointgroup')).order_by('catalogpointgroup')
+                    print pointgroupgroups.query   
+                    print pointgroupgroups
+                    if not pointgroupgroups:
                         name = "("
-                        if len(puntualgroupnames_name) > 0:
-                            self.fields['name'].initial=puntualgroupnames_name
-                            self.fields['description'].initial=puntualgroupnames_description
+                        if len(pointgroupnames_name) > 0:
+                            self.fields['name'].initial=pointgroupnames_name
+                            self.fields['description'].initial=pointgroupnames_description
                         else:
                             for i,cpg in enumerate(catalogpointgroupQuerySet):
                                 if i == (len( catalogpointgroupQuerySet  ) - 1):
@@ -461,18 +428,18 @@ class GroupNamesDetailAdminForm(forms.ModelForm):
                             name =name + ")"
                             self.fields['name'].initial=name
                             args[0]['name']=name
-                            if len(puntualgroupnames_description) > 0:
-                                self.fields['description'].initial=puntualgroupnames_description 
-                                args[0]['description']=puntualgroupnames_description
+                            if len(pointgroupnames_description) > 0:
+                                self.fields['description'].initial=pointgroupnames_description 
+                                args[0]['description']=pointgroupnames_description
                             else:
                                 self.fields['description'].initial=name
                                 args[0]['description']=name
 
                     else:
                        
-                        puntualgroupnamesSelected=PuntualGroupNames.objects.get(id=int(puntualgroupgroups[0]['puntualgroupnames'])) 
+                        pointgroupnamesSelected=PointGroupNames.objects.get(id=int(pointgroupgroups[0]['pointgroupnames'])) 
                         self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()
-                        args[0]['name']=puntualgroupnamesSelected.name
+                        args[0]['name']=pointgroupnamesSelected.name
                 else:
          
                     self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()    
@@ -499,7 +466,17 @@ class DetailFieldWidget(AdminTextInputWidget):
         return mark_safe(html)  
     
     
- 
+class HiddenFieldWidget(AdminTextInputWidget):
+    def render(self, name, value, attrs=None):
+        html = super(HiddenFieldWidget, self).render(name, value, attrs)
+        if value:
+            pass
+        else:
+            value = ""    
+            "<input type='hidden' name='datafile' value='" + str(value) +"' />"
+        #html =   force_unicode( """    <div style='display:none' id='"""+str(attrs['id']) +"""'>"""+ str(value) + """</div>""") 
+        html =   force_unicode( """    <div style='display:none' >"""+ "<input type='hidden' name='datafile' value='" + str(value) +"' />" + """</div>""") 
+        return mark_safe(html)  
 
      
 class TensorAdminForm(forms.ModelForm):  
@@ -510,29 +487,29 @@ class TensorAdminForm(forms.ModelForm):
         
     def clean(self,*args,**kwargs):
          
-        puntualgroupnames=self.cleaned_data.get("puntualgroupnames")
+        pointgroupnames=self.cleaned_data.get("pointgroupnames")
         catalogpointgroup=self.cleaned_data.get("catalogpointgroup")
         coefficients=self.cleaned_data.get("coefficients") 
  
-        if not catalogpointgroup and not puntualgroupnames:
+        if not catalogpointgroup and not pointgroupnames:
             raise forms.ValidationError("the 'Point Group' or 'Groups' fields are not selected, you must select one of the two!")
         
-        if  catalogpointgroup  and  puntualgroupnames:
-            if  (catalogpointgroup.id == 45  and  puntualgroupnames.id  != 21 ) or (catalogpointgroup.id  != 45  and  puntualgroupnames.id == 21):
+        if  catalogpointgroup  and  pointgroupnames:
+            if  (catalogpointgroup.id == 45  and  pointgroupnames.id  != 21 ) or (catalogpointgroup.id  != 45  and  pointgroupnames.id == 21):
                 pass
-            elif (catalogpointgroup.id  != 45  and  puntualgroupnames.id == 21):
+            elif (catalogpointgroup.id  != 45  and  pointgroupnames.id == 21):
                 pass
-            elif (catalogpointgroup.id  != 45  and  puntualgroupnames.id != 21):
+            elif (catalogpointgroup.id  != 45  and  pointgroupnames.id != 21):
                 raise forms.ValidationError("the 'Point Group' or 'Groups' fields have selected options, you must select one of the two!")
          
  
    
         return super(TensorAdminForm,self).clean(*args,**kwargs)
     
-    def clean_puntualgroupnames(self):
-        puntualgroupnames = self.cleaned_data['puntualgroupnames']
+    def clean_pointgroupnames(self):
+        pointgroupnames = self.cleaned_data['pointgroupnames']
         
-        return puntualgroupnames
+        return pointgroupnames
     
     def clean_catalogpointgroup(self):
         catalogpointgroup = self.cleaned_data['catalogpointgroup']
@@ -562,302 +539,421 @@ class TensorAdminForm(forms.ModelForm):
         dataproperty_id = None
         catalogcrystalsystem_id = None
         catalogpointgroup_id = None
-        puntualgroupnames_id  = None
+        pointgroupnames_id  = None
         axis_id  = None
         coefficients_ids =  []
         onchange = False
         
         
  
- 
-        if args: #(true if edit and save or save an existing instance, when form was changed), false when instance was selected from change list
-            
-            type_id  = argsToInt(args,'type') 
-            dataproperty_id =  argsToInt(args,'dataproperty')
-            catalogcrystalsystem_id =  argsToInt(args,'catalogcrystalsystem')
-            catalogpointgroup_id = argsToInt(args,'catalogpointgroup',45)
-            puntualgroupnames_id  =  argsToInt(args,'puntualgroupnames',21)
-            axis_id  = argsToInt(args,'axis',4)
-            coefficients_ids = argsListToIntList(args,'coefficients')
-  
-             
-            
-               
-            if not args[0].has_key('_save') and not args[0].has_key('_addanother') and not args[0].has_key('_continue'):    
-                args ={}
-                onchange = True
+        try:
+            if args: #(true if edit and save or save an existing instance, when form was changed), false when instance was selected from change list
                 
-        super(TensorAdminForm, self).__init__(*args, **kwargs)
-        """"f = self.fields.get('type', None)
-        if f is not None:
-            f.queryset = f.queryset
-        """
-
-        self.fields['type']  =forms.ModelChoiceField(queryset=None,label="Type Tensor")
-        self.fields['type'].widget=forms.Select(attrs={"onChange":'submit()'})
-        self.fields['type'].empty_label = None
-        self.fields['dataproperty']  = forms.ModelChoiceField(queryset=None,label="Data Property")
-        self.fields['dataproperty'].widget=forms.Select(attrs={"onChange":'submit()'})
-        self.fields['dataproperty'].empty_label = None
-        self.fields['catalogcrystalsystem']  = forms.ModelChoiceField(queryset=None,label="Crystal System")
-        self.fields['catalogcrystalsystem'].widget=forms.Select(attrs={"onChange":'submit()'})
-        self.fields['catalogcrystalsystem'].empty_label = None
-        self.fields['catalogpointgroup'] = forms.ModelChoiceField(queryset=None,label="Point Group",required=True)
-        self.fields['catalogpointgroup'].widget=forms.Select(attrs={"onChange":'submit()'})
-        self.fields['catalogpointgroup'].empty_label = None
-        self.fields['puntualgroupnames'] =  forms.ModelChoiceField(queryset=None,label="Groups",required=True)
-        self.fields['puntualgroupnames'].widget=forms.Select(attrs={"onChange":'submit()'})
-        self.fields['puntualgroupnames'].empty_label = None
-        self.fields['axis'] =  forms.ModelChoiceField(queryset=None,label="Axis",required=False)
-        self.fields['axis'].widget=forms.Select(attrs={"onChange":'submit()'})
-        self.fields['axis'].empty_label = None
-        self.fields['coefficients'] = forms.ModelMultipleChoiceField(
-            queryset=None,
-            required=False,
-            label="Coefficients",
-            widget=FilteredSelectMultiple(
-                verbose_name='Name',
-                is_stacked=False,
+                type_id  = argsToInt(args,'type') 
+                dataproperty_id =  argsToInt(args,'dataproperty')
+                catalogcrystalsystem_id =  argsToInt(args,'catalogcrystalsystem')
+                catalogpointgroup_id = argsToInt(args,'catalogpointgroup',45)
+                pointgroupnames_id  =  argsToInt(args,'pointgroupnames',21)
+                axis_id  = argsToInt(args,'axis',4)
+                coefficients_ids = argsListToIntList(args,'coefficients')
+      
+                 
+                
+                   
+                if not args[0].has_key('_save') and not args[0].has_key('_addanother') and not args[0].has_key('_continue'):    
+                    args ={}
+                    onchange = True
+                    
+            super(TensorAdminForm, self).__init__(*args, **kwargs)
+            """"f = self.fields.get('type', None)
+            if f is not None:
+                f.queryset = f.queryset
+            """
+    
+            self.fields['type']  =forms.ModelChoiceField(queryset=None,label="Type Tensor")
+            self.fields['type'].widget=forms.Select(attrs={"onChange":'submit()'})
+            self.fields['type'].empty_label = None
+            self.fields['dataproperty']  = forms.ModelChoiceField(queryset=None,label="Data Property")
+            self.fields['dataproperty'].widget=forms.Select(attrs={"onChange":'submit()'})
+            self.fields['dataproperty'].empty_label = None
+            self.fields['catalogcrystalsystem']  = forms.ModelChoiceField(queryset=None,label="Crystal System")
+            self.fields['catalogcrystalsystem'].widget=forms.Select(attrs={"onChange":'submit()'})
+            self.fields['catalogcrystalsystem'].empty_label = None
+            self.fields['catalogpointgroup'] = forms.ModelChoiceField(queryset=None,label="Point Group",required=True)
+            self.fields['catalogpointgroup'].widget=forms.Select(attrs={"onChange":'submit()'})
+            self.fields['catalogpointgroup'].empty_label = None
+            self.fields['pointgroupnames'] =  forms.ModelChoiceField(queryset=None,label="Groups",required=True)
+            self.fields['pointgroupnames'].widget=forms.Select(attrs={"onChange":'submit()'})
+            self.fields['pointgroupnames'].empty_label = None
+            self.fields['axis'] =  forms.ModelChoiceField(queryset=None,label="Axis",required=False)
+            self.fields['axis'].widget=forms.Select(attrs={"onChange":'submit()'})
+            self.fields['axis'].empty_label = None
+            self.fields['coefficients'] = forms.ModelMultipleChoiceField(
+                queryset=None,
+                required=False,
+                label="Coefficients",
+                widget=FilteredSelectMultiple(
+                    verbose_name='Name',
+                    is_stacked=False,
+                )
+                                                                  
             )
-                                                              
-        )
-        
-
-        
-        #self.fields['coefficientsrules']  =forms.ModelMultipleChoiceField(queryset=None,label="Coefficients for capture",required=False)
-        
-        self.fields['coefficientsrules']  =forms.ModelMultipleChoiceField(queryset=None,label="Coefficients for capture",required=False)
-        self.fields['keynotation']  =forms.ModelMultipleChoiceField(queryset=None,label="Rules",required=False)
-        self.fields['zerocomponent']  =forms.ModelMultipleChoiceField(queryset=None,label="Destination value ",required=False)
-        
- 
- 
-
-        #self.fields['crysralsystemdetail'] = forms.CharField(label='Crystal System Detail',widget = DetailFieldWidget, required=False)
-        self.fields['pointgroupdetail'] = forms.CharField(label='Point Group Detail',widget = DetailFieldWidget, required=False)
-        self.fields['puntualgroupnamesdetail'] = forms.CharField(label='Groups Detail',widget = DetailFieldWidget, required=False)
-        self.fields['axisdetail'] = forms.CharField(label='Axis Detail',widget = DetailFieldWidget, required=False) 
-        self.fields['errormessage'] = forms.CharField(widget = DetailFieldWidget, required=False)
-        
-         
-        self.fields['jquery'] = forms.CharField(label='',widget = DetailFieldWidget, required=False) 
-        #self.fields['jquery'].empty_label = None
-        
-        self.fields['detailrules'] = forms.CharField(label='Detail rules',widget = DetailFieldWidget, required=False) 
-        
-        
- 
-       
- 
-         
-  
-        typeSelected = None
-        datapropertySelected = None
-        catalogcrystalsystemSelected = None
-        catalogpointgroupSelected = None
-        puntualgroupnamesSelected = None
-        axisSelected = None
-        if self.instance.pk: 
-            typeQuerySet=Type.objects.filter(active=True,catalogproperty= self.instance)   
-            if not typeQuerySet:
-                typeQuerySet=Type.objects.filter(active=False,catalogproperty= self.instance)                  
-                self.fields['errormessage'].label='Error Message'
-                self.fields['errormessage'].initial = "<strong><font color='red'>" + self.instance.description +" is disabled</font></strong>"
-                #raise  forms.ValidationError("the 'Point Group' field are not selected, you must select one of the two")
-            else:
-                self.fields['errormessage'].label='' 
-                
-       
-            type_ids = getIdsFromQuerySet(typeQuerySet)
-            self.fields['type'].queryset= typeQuerySet
-            if args:
-                #*******************************type*************************************
-                typeSelected = Type.objects.get(id=int(type_id))
-                self.fields['type'].initial= typeSelected
-                
-                #*******************************dataproperty*************************************
-                dataproperty_ids=TypeDataProperty.objects.filter(type=typeSelected).values_list('dataproperty_id',flat=True)  
-                datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids)   
-                self.fields['dataproperty'].queryset=datapropertyQuerySet
-                datapropertySelected = Property.objects.get(id=int(dataproperty_id))  
-                self.fields['dataproperty'].initial  = datapropertySelected
-                
-                #*******************************catalogcrystalsystem*************************************
-                catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance)   
-                catalogcrystalsystem_ids=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance).values_list('id',flat=True) 
-                self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet        
-                catalogcrystalsystemSelected = CatalogCrystalSystem.objects.get(id=int(catalogcrystalsystem_id)) 
-                
-                #*******************************catalogpointgroup*************************************
-                
-                catalogpointgroupSelected = CatalogPointGroup.objects.get(id=int(catalogpointgroup_id))
-                self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()
-                self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
-                self.fields['pointgroupdetail'].initial = "<strong>punctual group assigned</strong>"
-                
-                
-                #*******************************puntualgroupnames*************************************
-                puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=int(puntualgroupnames_id))  
-                self.fields['puntualgroupnames'].queryset = PuntualGroupNames.objects.all()
-                self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                self.fields['puntualgroupnamesdetail'].initial = "<strong>groups assigned</strong>"
-                
-                #*******************************axis*************************************
-                axisSelected = CatalogAxis.objects.get(id=int(axis_id))  
-                self.fields['axis'].queryset = PuntualGroupNames.objects.all()
-                self.fields['axis'].initial = puntualgroupnamesSelected
-                self.fields['axisdetail'].initial = "<strong>axis assigned</strong>"
-                
-                
-            else:
-                if onchange:
-                    if type_id == None:
+            
+    
+            
+            #self.fields['coefficientsrules']  =forms.ModelMultipleChoiceField(queryset=None,label="Coefficients for capture",required=False)
+            
+            self.fields['coefficientsrules']  =forms.ModelMultipleChoiceField(queryset=None,label="Coefficients for capture",required=False)
+            self.fields['keynotation']  =forms.ModelMultipleChoiceField(queryset=None,label="Rules",required=False)
+            self.fields['zerocomponent']  =forms.ModelMultipleChoiceField(queryset=None,label="Destination value ",required=False)
+            
+     
+     
+    
+            #self.fields['crysralsystemdetail'] = forms.CharField(label='Crystal System Detail',widget = DetailFieldWidget, required=False)
+            self.fields['pointgroupdetail'] = forms.CharField(label='Point Group Detail',widget = DetailFieldWidget, required=False)
+            self.fields['pointgroupnamesdetail'] = forms.CharField(label='Groups Detail',widget = DetailFieldWidget, required=False)
+            self.fields['axisdetail'] = forms.CharField(label='Axis Detail',widget = DetailFieldWidget, required=False) 
+            self.fields['errormessage'] = forms.CharField(widget = DetailFieldWidget, required=False)
+            
+             
+            self.fields['jquery'] = forms.CharField(label='',widget = DetailFieldWidget, required=False) 
+            #self.fields['jquery'].empty_label = None
+            
+            self.fields['detailrules'] = forms.CharField(label='Detail rules',widget = DetailFieldWidget, required=False) 
+            
+            
+     
+           
+     
+             
+      
+            typeSelected = None
+            datapropertySelected = None
+            catalogcrystalsystemSelected = None
+            catalogpointgroupSelected = None
+            pointgroupnamesSelected = None
+            axisSelected = None
+            if self.instance.pk: 
+                typeQuerySet=Type.objects.filter(active=True,catalogproperty= self.instance)   
+                if not typeQuerySet:
+                    typeQuerySet=Type.objects.filter(active=False,catalogproperty= self.instance)                  
+                    self.fields['errormessage'].label='Error Message'
+                    self.fields['errormessage'].initial = "<strong><font color='red'>" + self.instance.description +" is disabled</font></strong>"
+                    #raise  forms.ValidationError("the 'Point Group' field are not selected, you must select one of the two")
+                else:
+                    self.fields['errormessage'].label='' 
+                    
+           
+                type_ids = getIdsFromQuerySet(typeQuerySet)
+                self.fields['type'].queryset= typeQuerySet
+                if args:
+                    #*******************************type*************************************
+                    typeSelected = Type.objects.get(id=int(type_id))
+                    self.fields['type'].initial= typeSelected
+                    
+                    #*******************************dataproperty*************************************
+                    dataproperty_ids=TypeDataProperty.objects.filter(type=typeSelected).values_list('dataproperty_id',flat=True)  
+                    datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids, active=True)   
+                    self.fields['dataproperty'].queryset=datapropertyQuerySet
+                    datapropertySelected = Property.objects.get(id=int(dataproperty_id), active=True)  
+                    self.fields['dataproperty'].initial  = datapropertySelected
+                    
+                    #*******************************catalogcrystalsystem*************************************
+                    catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance)   
+                    catalogcrystalsystem_ids=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance).values_list('id',flat=True) 
+                    self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet        
+                    catalogcrystalsystemSelected = CatalogCrystalSystem.objects.get(id=int(catalogcrystalsystem_id)) 
+                    
+                    #*******************************catalogpointgroup*************************************
+                    
+                    catalogpointgroupSelected = CatalogPointGroup.objects.get(id=int(catalogpointgroup_id))
+                    self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()
+                    self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
+                    self.fields['pointgroupdetail'].initial = "<strong>punctual group assigned</strong>"
+                    
+                    
+                    #*******************************pointgroupnames*************************************
+                    pointgroupnamesSelected = PointGroupNames.objects.get(id=int(pointgroupnames_id))  
+                    self.fields['pointgroupnames'].queryset = PointGroupNames.objects.all()
+                    self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                    self.fields['pointgroupnamesdetail'].initial = "<strong>groups assigned</strong>"
+                    
+                    #*******************************axis*************************************
+                    axisSelected = CatalogAxis.objects.get(id=int(axis_id))  
+                    self.fields['axis'].queryset = PointGroupNames.objects.all()
+                    self.fields['axis'].initial = pointgroupnamesSelected
+                    self.fields['axisdetail'].initial = "<strong>axis assigned</strong>"
+                    
+                    
+                else:
+                    if onchange:
+                        if type_id == None:
+                            typeSelected = typeQuerySet[0]
+                            self.fields['type'].initial= typeSelected
+                        else:
+                            #*******************************type*************************************
+                            typeSelected = Type.objects.get(id=int(type_id))
+                            self.fields['type'].initial= typeSelected
+                            
+                            #*******************************dataproperty*************************************
+                            dataproperty_ids=TypeDataProperty.objects.filter(type=typeSelected).values_list('dataproperty_id',flat=True)    
+                            datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids, active=True)   
+                            self.fields['dataproperty'].queryset=datapropertyQuerySet
+                            if dataproperty_id in dataproperty_ids:
+                                datapropertySelected = Property.objects.get(id=int(dataproperty_id), active=True)  
+                            else:
+                                datapropertySelected = datapropertyQuerySet[0]
+                                
+                            self.fields['dataproperty'].initial  = datapropertySelected
+                            
+                            #*******************************catalogcrystalsystem*************************************
+                            catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance)   
+                            catalogcrystalsystemidList = []
+                            for i, crystalsystem in enumerate(catalogcrystalsystemQuerySet):
+                                try:     
+                                    crystalsystemtype=CrystalSystemType.objects.get(catalogcrystalsystem=crystalsystem,type=typeSelected, active=True)
+                                    catalogcrystalsystemidList.append(crystalsystemtype.catalogcrystalsystem.id)
+                                except ObjectDoesNotExist as error:
+                                    print "Message({0}): {1}".format(99, error.message) 
+                                    
+                                    
+                            
+                            if catalogcrystalsystemidList:
+                                catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance,id__in =catalogcrystalsystemidList)  
+                            else:
+                                catalogcrystalsystemQuerySet = None
+                            
+                            if catalogcrystalsystemQuerySet:
+                                catalogcrystalsystem_ids=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance).values_list('id',flat=True) 
+                                self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet                          
+                                if catalogcrystalsystem_id in catalogcrystalsystem_ids:
+                                    catalogcrystalsystemSelected = CatalogCrystalSystem.objects.get(id=int(catalogcrystalsystem_id)) 
+                                else:
+                                    catalogcrystalsystemSelected = catalogcrystalsystemQuerySet[0]
+                            else:
+                                catalogcrystalsystemSelected = CatalogCrystalSystem()
+                                self.fields['catalogcrystalsystem'].help_text = "crystal system not assigned" 
+                                #self.fields['crysralsystemdetail'].initial = html
+      
+                          
+                            self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
+                            
+                            
+                            #*******************************catalogpointgroup*************************************
+                            catalogpointgroup_ids= CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('catalogpointgroup_id',flat=True)  
+                            if catalogpointgroup_ids:
+                                pointgroupQuerySet = CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
+                            
+                                """if checkPointGroup(typeSelected, catalogcrystalsystemSelected,datapropertySelected):  
+                                pointgroupQuerySet = setPointGroup(typeSelected, catalogcrystalsystemSelected,datapropertySelected)
+                                catalogpointgroup_ids = getIdsFromQuerySet(pointgroupQuerySet)"""
+                                
+                                fieldList = ['name','description']
+                                html = getTableHTMLFromQuerySet(pointgroupQuerySet)
+                                if catalogpointgroup_id in catalogpointgroup_ids:
+                                    catalogpointgroupSelected = CatalogPointGroup.objects.get(id=int(catalogpointgroup_id))
+                                    self.fields['pointgroupdetail'].initial = html
+                                else:
+                                    catalogpointgroupSelected = pointgroupQuerySet[0]
+                                    self.fields['catalogpointgroup'].help_text = "punctual group not assigned" 
+                                    self.fields['pointgroupdetail'].initial = html
+                                    
+                                    
+                                self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
+                                self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
+                            else:
+                                """pointgroupQuerySet=CatalogPointGroup.objects.filter(id=45)
+                                self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
+                                
+                                catalogpointgroup_ids =CatalogPointGroup.objects.all().values_list('id',flat=True) 
+                                if catalogpointgroup_id in catalogpointgroup_ids:
+                                    catalogpointgroupSelected = CatalogPointGroup.objects.get(id=catalogpointgroup_id)
+                                else:
+                                    catalogpointgroupSelected = CatalogPointGroup.objects.get(id=45)
+                                    
+                                self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
+                                self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
+                                """
+                                
+                                pointgroupQuerySet=CatalogPointGroup.objects.filter(id=45)
+                                self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
+                                catalogpointgroupSelected = CatalogPointGroup.objects.get(id=45)
+                                self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
+                                self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
+                                
+    
+    
+                            
+                            #*******************************pointgroupnames*************************************
+                            pointgroupnames_ids= CrystalSystemPointGroupNames.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('pointgroupnames_id',flat=True)  
+                            if pointgroupnames_ids:
+                                pointgroupnamesQuerySet = PointGroupNames.objects.filter(id__in=pointgroupnames_ids)
+                                """if checkPointGroupNames(typeSelected, catalogcrystalsystemSelected,datapropertySelected):
+                                pointgroupnamesQuerySet,pointGroupsQuerySet =setPointGroupNames(typeSelected, catalogcrystalsystemSelected,datapropertySelected)
+                                pointgroupnames_ids = getIdsFromQuerySet(pointgroupnamesQuerySet)"""
+                                
+                                fieldsList = ['name','description']
+                                html = getTableHTMLFromQuerySet(pointgroupnamesQuerySet,fields=fieldsList)
+                                if pointgroupnames_id in pointgroupnames_ids:
+                                    pointgroupnamesSelected = PointGroupNames.objects.get(id=int(pointgroupnames_id))  
+                                    self.fields['pointgroupnamesdetail'].initial = html
+                                    self.fields['pointgroupnames'].help_text = "Group assigned,  all the point groups of this crystal system have the same matrix" 
+                                else:
+                                    pointgroupnamesSelected =pointgroupnamesQuerySet[0]  
+                                    self.fields['pointgroupnamesdetail'].initial = html
+                                    self.fields['pointgroupnames'].help_text = "Groups not assigned, Select this option if all groups of points in this crystal system have the same matrix" 
+    
+                                self.fields['pointgroupnames'].queryset = pointgroupnamesQuerySet
+                                self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                                
+                            else:
+                                """pointGroupNamesQuerySet = PointGroupNames.objects.filter(id=21)
+                                self.fields['pointgroupnames'].queryset = pointGroupNamesQuerySet
+                                
+                                pointgroupnames_ids =PointGroupNames.objects.all().values_list('id',flat=True) 
+                                pointgroupnamesSelected = PointGroupNames.objects.get(id=int(pointgroupnames_id))  
+                                if pointgroupnames_id in pointgroupnames_ids:
+                                    pointgroupnamesSelected = PointGroupNames.objects.get(id=int(pointgroupnames_id))  
+                                else:
+                                    pointgroupnamesSelected = PointGroupNames.objects.get(id=21)
+                                 
+                                self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                                self.fields['pointgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
+                                """
+                                
+                                pointGroupNamesQuerySet = PointGroupNames.objects.filter(id=21)
+                                self.fields['pointgroupnames'].queryset = pointGroupNamesQuerySet
+                                self.fields['pointgroupnames'].help_text = "Select this option if all groups of points in this crystal system have the same matrix" 
+                                pointgroupnamesSelected = PointGroupNames.objects.get(id=21)
+                                self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                                self.fields['pointgroupnamesdetail'].initial = "<strong>groups not assigned</strong>"
+                                
+                          
+                            
+                            
+                            #*******************************axis*************************************
+                            axis_ids= CrystalSystemAxis.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,pointgroupnames = pointgroupnamesSelected,active=1).values_list('axis_id',flat=True)  
+                            if axis_ids:
+                                axisQuerySet = CatalogAxis.objects.filter(id__in=axis_ids)
+                                fieldsList = ['name','description']
+                                html = getTableHTMLFromQuerySet(axisQuerySet,fields=fieldsList)
+                                print axis_ids
+                                print axis_id
+                                if axis_id in axis_ids:
+                                    axisSelected = CatalogAxis.objects.get(id=int(axis_id))  
+                                    self.fields['axisdetail'].initial = html
+                                    self.fields['axis'].help_text = "<strong>axis assigned</strong>" 
+                                else:
+                                    axisSelected = axisQuerySet[0]
+                                    self.fields['axisdetail'].initial = html
+                                    self.fields['axis'].help_text = "<strong>axis not assigned</strong>" 
+                                    
+                                self.fields['axis'].queryset =   axisQuerySet
+                                self.fields['axis'].initial = axisSelected
+                            else:
+                                axisQuerySet=  CatalogAxis.objects.filter(id=4) 
+                                self.fields['axis'].queryset = axisQuerySet
+                                self.fields['axis'].help_text = "Axis not assigned"
+                                axisSelected = CatalogAxis.objects.get(id=4)
+                                self.fields['axis'].initial = axisSelected
+                                self.fields['axisdetail'].initial = "<strong>axis not assigneds</strong>"
+                                
+                            
+                        
+                    else:
                         typeSelected = typeQuerySet[0]
                         self.fields['type'].initial= typeSelected
-                    else:
-                        #*******************************type*************************************
-                        typeSelected = Type.objects.get(id=int(type_id))
-                        self.fields['type'].initial= typeSelected
+                        
                         #*******************************dataproperty*************************************
                         dataproperty_ids=TypeDataProperty.objects.filter(type=typeSelected).values_list('dataproperty_id',flat=True)    
-                        datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids)   
+                        datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids, active=True)   
                         self.fields['dataproperty'].queryset=datapropertyQuerySet
-                        if dataproperty_id in dataproperty_ids:
-                            datapropertySelected = Property.objects.get(id=int(dataproperty_id))  
-                        else:
+                        if datapropertyQuerySet:
                             datapropertySelected = datapropertyQuerySet[0]
-                            
-                        self.fields['dataproperty'].initial  = datapropertySelected
+                            self.fields['dataproperty'].initial  = datapropertySelected
+                        
                         
                         #*******************************catalogcrystalsystem*************************************
                         catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance)   
-                        if catalogcrystalsystemQuerySet:
-                            catalogcrystalsystem_ids=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance).values_list('id',flat=True) 
-                            self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet                          
-                            if catalogcrystalsystem_id in catalogcrystalsystem_ids:
-                                catalogcrystalsystemSelected = CatalogCrystalSystem.objects.get(id=int(catalogcrystalsystem_id)) 
-                            else:
-                                catalogcrystalsystemSelected = catalogcrystalsystemQuerySet[0]
+                        catalogcrystalsystemidList = []
+                        for i, crystalsystem in enumerate(catalogcrystalsystemQuerySet):
+                            try:     
+                                crystalsystemtype=CrystalSystemType.objects.get(catalogcrystalsystem=crystalsystem,type=typeSelected)
+                                if crystalsystemtype.active == True:
+                                    catalogcrystalsystemidList.append(crystalsystemtype.catalogcrystalsystem.id)
+                            except ObjectDoesNotExist as error:
+                                print "Message({0}): {1}".format(99, error.message) 
+                                
+                        
+                        if catalogcrystalsystemidList:
+                            catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance,id__in =catalogcrystalsystemidList)  
                         else:
-                            catalogcrystalsystemSelected = CatalogCrystalSystem()
-                            self.fields['catalogcrystalsystem'].help_text = "crystal system not assigned" 
-                            #self.fields['crysralsystemdetail'].initial = html
-  
-                      
-                        self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
+                            catalogcrystalsystemQuerySet = None
                         
-                        
+                        if catalogcrystalsystemQuerySet:
+                            self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet
+                            catalogcrystalsystemSelected = catalogcrystalsystemQuerySet[0]
+                            self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
+                        else:
+                            self.fields['catalogcrystalsystem'].queryset=CatalogCrystalSystem.objects.all()
+                            catalogcrystalsystemSelected = CatalogCrystalSystem.objects.all()[0]
+                            self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
+    
                         #*******************************catalogpointgroup*************************************
+                        
                         catalogpointgroup_ids= CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('catalogpointgroup_id',flat=True)  
                         if catalogpointgroup_ids:
                             pointgroupQuerySet = CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
-                        
-                            """if checkPointGroup(typeSelected, catalogcrystalsystemSelected,datapropertySelected):  
-                            pointgroupQuerySet = setPointGroup(typeSelected, catalogcrystalsystemSelected,datapropertySelected)
-                            catalogpointgroup_ids = getIdsFromQuerySet(pointgroupQuerySet)"""
-                            
-                            fieldList = ['name','description']
-                            html = getTableHTMLFromQuerySet(pointgroupQuerySet)
-                            if catalogpointgroup_id in catalogpointgroup_ids:
-                                catalogpointgroupSelected = CatalogPointGroup.objects.get(id=int(catalogpointgroup_id))
-                                self.fields['pointgroupdetail'].initial = html
-                            else:
-                                catalogpointgroupSelected = pointgroupQuerySet[0]
-                                self.fields['catalogpointgroup'].help_text = "punctual group not assigned" 
-                                self.fields['pointgroupdetail'].initial = html
-                                
-                                
+                            catalogpointgroupSelected = pointgroupQuerySet[0]
                             self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
                             self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
+                            
+                            fieldsList = ['name','description']
+                            html = getTableHTMLFromQuerySet(pointgroupQuerySet,fields=fieldsList)
+                                        
+                            self.fields['pointgroupdetail'].initial = html
                         else:
-                            """pointgroupQuerySet=CatalogPointGroup.objects.filter(id=45)
-                            self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
-                            
-                            catalogpointgroup_ids =CatalogPointGroup.objects.all().values_list('id',flat=True) 
-                            if catalogpointgroup_id in catalogpointgroup_ids:
-                                catalogpointgroupSelected = CatalogPointGroup.objects.get(id=catalogpointgroup_id)
-                            else:
-                                catalogpointgroupSelected = CatalogPointGroup.objects.get(id=45)
-                                
-                            self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
-                            self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
-                            """
-                            
                             pointgroupQuerySet=CatalogPointGroup.objects.filter(id=45)
                             self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
                             catalogpointgroupSelected = CatalogPointGroup.objects.get(id=45)
                             self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
                             self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
-                            
-
-
+                
+                        #*******************************pointgroupnames*************************************
                         
-                        #*******************************puntualgroupnames*************************************
-                        puntualgroupnames_ids= CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('puntualgroupnames_id',flat=True)  
-                        if puntualgroupnames_ids:
-                            puntualgroupnamesQuerySet = PuntualGroupNames.objects.filter(id__in=puntualgroupnames_ids)
-                            """if checkPuntualGroupNames(typeSelected, catalogcrystalsystemSelected,datapropertySelected):
-                            puntualgroupnamesQuerySet,puntualGroupsQuerySet =setPuntualGroupNames(typeSelected, catalogcrystalsystemSelected,datapropertySelected)
-                            puntualgroupnames_ids = getIdsFromQuerySet(puntualgroupnamesQuerySet)"""
-                            
+                        
+                        pointgroupnames_ids= CrystalSystemPointGroupNames.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('pointgroupnames_id',flat=True)  
+                        if pointgroupnames_ids:
+                            pointgroupnamesQuerySet = PointGroupNames.objects.filter(id__in=pointgroupnames_ids)
+                            pointgroupnamesSelected = pointgroupnamesQuerySet[0]
+                            self.fields['pointgroupnames'].queryset = pointgroupnamesQuerySet
+                            self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                            self.fields['pointgroupnames'].help_text = "Group assigned, all the point groups of this crystal system have the same matrix" 
                             fieldsList = ['name','description']
-                            html = getTableHTMLFromQuerySet(puntualgroupnamesQuerySet,fields=fieldsList)
-                            if puntualgroupnames_id in puntualgroupnames_ids:
-                                puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=int(puntualgroupnames_id))  
-                                self.fields['puntualgroupnamesdetail'].initial = html
-                                self.fields['puntualgroupnames'].help_text = "Group assigned,  all the point groups of this crystal system have the same matrix" 
-                            else:
-                                puntualgroupnamesSelected =puntualgroupnamesQuerySet[0]  
-                                self.fields['puntualgroupnamesdetail'].initial = html
-                                self.fields['puntualgroupnames'].help_text = "Groups not assigned, Select this option if all groups of points in this crystal system have the same matrix" 
-
-                            self.fields['puntualgroupnames'].queryset = puntualgroupnamesQuerySet
-                            self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                            
+                            html = getTableHTMLFromQuerySet(pointgroupnamesQuerySet,fields=fieldsList)
+                                        
+                            self.fields['pointgroupnamesdetail'].initial = html
                         else:
-                            """puntualGroupNamesQuerySet = PuntualGroupNames.objects.filter(id=21)
-                            self.fields['puntualgroupnames'].queryset = puntualGroupNamesQuerySet
-                            
-                            puntualgroupnames_ids =PuntualGroupNames.objects.all().values_list('id',flat=True) 
-                            puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=int(puntualgroupnames_id))  
-                            if puntualgroupnames_id in puntualgroupnames_ids:
-                                puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=int(puntualgroupnames_id))  
-                            else:
-                                puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=21)
-                             
-                            self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                            self.fields['puntualgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
-                            """
-                            
-                            puntualGroupNamesQuerySet = PuntualGroupNames.objects.filter(id=21)
-                            self.fields['puntualgroupnames'].queryset = puntualGroupNamesQuerySet
-                            self.fields['puntualgroupnames'].help_text = "Select this option if all groups of points in this crystal system have the same matrix" 
-                            puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=21)
-                            self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                            self.fields['puntualgroupnamesdetail'].initial = "<strong>groups not assigned</strong>"
-                            
-                      
-                        
+                            pointGroupNamesQuerySet = PointGroupNames.objects.filter(id=21)
+                            self.fields['pointgroupnames'].queryset = pointGroupNamesQuerySet
+                            self.fields['pointgroupnames'].help_text = "Select this option if all groups of points in this crystal system have the same matrix" 
+                            pointgroupnamesSelected = PointGroupNames.objects.get(id=21)
+                            self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                            self.fields['pointgroupnamesdetail'].initial = "<strong>groups not assigned</strong>"
                         
                         #*******************************axis*************************************
-                        axis_ids= CrystalSystemAxis.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,puntualgroupnames = puntualgroupnamesSelected,active=1).values_list('axis_id',flat=True)  
+                        
+                        axis_ids= CrystalSystemAxis.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,pointgroupnames = pointgroupnamesSelected,active=1).values_list('axis_id',flat=True)  
                         if axis_ids:
                             axisQuerySet = CatalogAxis.objects.filter(id__in=axis_ids)
                             fieldsList = ['name','description']
                             html = getTableHTMLFromQuerySet(axisQuerySet,fields=fieldsList)
-                            print axis_ids
-                            print axis_id
-                            if axis_id in axis_ids:
-                                axisSelected = CatalogAxis.objects.get(id=int(axis_id))  
-                                self.fields['axisdetail'].initial = html
-                                self.fields['axis'].help_text = "<strong>axis assigned</strong>" 
-                            else:
-                                axisSelected = axisQuerySet[0]
-                                self.fields['axisdetail'].initial = html
-                                self.fields['axis'].help_text = "<strong>axis not assigned</strong>" 
-                                
-                            self.fields['axis'].queryset =   axisQuerySet
-                            self.fields['axis'].initial = axisSelected
+                            self.fields['axis'].queryset = axisQuerySet
+                            self.fields['axis'].help_text = "<strong>axis  assigned</strong>"
+                            axisSelected = axisQuerySet[0]
+                            self.fields['axis'].initial =   axisSelected
+                            self.fields['axisdetail'].initial = html
                         else:
                             axisQuerySet=  CatalogAxis.objects.filter(id=4) 
                             self.fields['axis'].queryset = axisQuerySet
@@ -867,403 +963,327 @@ class TensorAdminForm(forms.ModelForm):
                             self.fields['axisdetail'].initial = "<strong>axis not assigneds</strong>"
                             
                         
-                    
-                else:
-                    typeSelected = typeQuerySet[0]
-                    self.fields['type'].initial= typeSelected
-                    
-                    #*******************************dataproperty*************************************
-                    dataproperty_ids=TypeDataProperty.objects.filter(type=typeSelected).values_list('dataproperty_id',flat=True)    
-                    datapropertyQuerySet=Property.objects.filter(id__in=dataproperty_ids)   
-                    self.fields['dataproperty'].queryset=datapropertyQuerySet
-                    datapropertySelected = datapropertyQuerySet[0]
-                    self.fields['dataproperty'].initial  = datapropertySelected
-                    catalogcrystalsystemQuerySet=CatalogCrystalSystem.objects.filter(catalogproperty= self.instance)   
-                    
-                    #*******************************catalogcrystalsystem*************************************
-                    if catalogcrystalsystemQuerySet:
-                        self.fields['catalogcrystalsystem'].queryset=catalogcrystalsystemQuerySet
-                        catalogcrystalsystemSelected = catalogcrystalsystemQuerySet[0]
-                        self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
-                    else:
-                        self.fields['catalogcrystalsystem'].queryset=CatalogCrystalSystem.objects.all()
-                        catalogcrystalsystemSelected = CatalogCrystalSystem.objects.all()[0]
-                        self.fields['catalogcrystalsystem'].initial=catalogcrystalsystemSelected
-
-                    #*******************************catalogpointgroup*************************************
-                    
-                    catalogpointgroup_ids= CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('catalogpointgroup_id',flat=True)  
-                    if catalogpointgroup_ids:
-                        pointgroupQuerySet = CatalogPointGroup.objects.filter(id__in=catalogpointgroup_ids)
-                        catalogpointgroupSelected = pointgroupQuerySet[0]
-                        self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
-                        self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
+                catalogPropertyDetailQuerySet, catalogPropertyDetailList,catalogPropertyDetailnames = setCoefficients(typeSelected, catalogcrystalsystemSelected,datapropertySelected,catalogpointgroupSelected,pointgroupnamesSelected,axisSelected)
+                catalogPropertyDetailNamesList = []
+                #coefficients_ids = getIdsFromQuerySet(catalogPropertyDetailQuerySet)
+                
+                if not  coefficients_ids:
+                    none_catalogpropertydetailQuerySet=CatalogPropertyDetail.objects.none()
+                    qs = list(chain(none_catalogpropertydetailQuerySet, catalogPropertyDetailList))
+                    CatalogPropertyDetailTemp.objects.all().delete()#clean CatalogPropertyDetailTemp
+                    for i,cname in enumerate(qs):
+                        cpdt=CatalogPropertyDetailTemp()
+                        cpdt.name = cname
+                        cpdt.save()
+                        del cpdt
                         
-                        fieldsList = ['name','description']
-                        html = getTableHTMLFromQuerySet(pointgroupQuerySet,fields=fieldsList)
-                                    
-                        self.fields['pointgroupdetail'].initial = html
-                    else:
-                        pointgroupQuerySet=CatalogPointGroup.objects.filter(id=45)
-                        self.fields['catalogpointgroup'].queryset = pointgroupQuerySet
-                        catalogpointgroupSelected = CatalogPointGroup.objects.get(id=45)
-                        self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
-                        self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
-            
-                    #*******************************puntualgroupnames*************************************
+                    for i,obj in enumerate(catalogPropertyDetailQuerySet):
+                        cpdt=CatalogPropertyDetailTemp()
+                        cpdt.name = catalogPropertyDetailQuerySet[i].name
+                        catalogPropertyDetailNamesList.append(catalogPropertyDetailQuerySet[i].name)
+                        cpdt.save()
+                        del cpdt
                     
-                    
-                    puntualgroupnames_ids= CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,active=1).values_list('puntualgroupnames_id',flat=True)  
-                    if puntualgroupnames_ids:
-                        puntualgroupnamesQuerySet = PuntualGroupNames.objects.filter(id__in=puntualgroupnames_ids)
-                        puntualgroupnamesSelected = puntualgroupnamesQuerySet[0]
-                        self.fields['puntualgroupnames'].queryset = puntualgroupnamesQuerySet
-                        self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                        self.fields['puntualgroupnames'].help_text = "Group assigned, all the point groups of this crystal system have the same matrix" 
-                        fieldsList = ['name','description']
-                        html = getTableHTMLFromQuerySet(puntualgroupnamesQuerySet,fields=fieldsList)
-                                    
-                        self.fields['puntualgroupnamesdetail'].initial = html
-                    else:
-                        puntualGroupNamesQuerySet = PuntualGroupNames.objects.filter(id=21)
-                        self.fields['puntualgroupnames'].queryset = puntualGroupNamesQuerySet
-                        self.fields['puntualgroupnames'].help_text = "Select this option if all groups of points in this crystal system have the same matrix" 
-                        puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=21)
-                        self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                        self.fields['puntualgroupnamesdetail'].initial = "<strong>groups not assigned</strong>"
-                    
-                    #*******************************axis*************************************
-                    
-                    axis_ids= CrystalSystemAxis.objects.filter(catalogcrystalsystem=catalogcrystalsystemSelected,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,puntualgroupnames = puntualgroupnamesSelected,active=1).values_list('axis_id',flat=True)  
-                    if axis_ids:
-                        axisQuerySet = CatalogAxis.objects.filter(id__in=axis_ids)
-                        fieldsList = ['name','description']
-                        html = getTableHTMLFromQuerySet(axisQuerySet,fields=fieldsList)
-                        self.fields['axis'].queryset = axisQuerySet
-                        self.fields['axis'].help_text = "<strong>axis  assigned</strong>"
-                        axisSelected = axisQuerySet[0]
-                        self.fields['axis'].initial =   axisSelected
-                        self.fields['axisdetail'].initial = html
-                    else:
-                        axisQuerySet=  CatalogAxis.objects.filter(id=4) 
-                        self.fields['axis'].queryset = axisQuerySet
-                        self.fields['axis'].help_text = "Axis not assigned"
-                        axisSelected = CatalogAxis.objects.get(id=4)
-                        self.fields['axis'].initial = axisSelected
-                        self.fields['axisdetail'].initial = "<strong>axis not assigneds</strong>"
-                        
-                    
-            catalogPropertyDetailQuerySet, catalogPropertyDetailList,catalogPropertyDetailnames = setCoefficients(typeSelected, catalogcrystalsystemSelected,datapropertySelected,catalogpointgroupSelected,puntualgroupnamesSelected,axisSelected)
-            catalogPropertyDetailNamesList = []
-            #coefficients_ids = getIdsFromQuerySet(catalogPropertyDetailQuerySet)
-            
-            if not  coefficients_ids:
-                none_catalogpropertydetailQuerySet=CatalogPropertyDetail.objects.none()
-                qs = list(chain(none_catalogpropertydetailQuerySet, catalogPropertyDetailList))
-                CatalogPropertyDetailTemp.objects.all().delete()#clean CatalogPropertyDetailTemp
-                for i,cname in enumerate(qs):
-                    cpdt=CatalogPropertyDetailTemp()
-                    cpdt.name = cname
-                    cpdt.save()
-                    del cpdt
-                    
-                for i,obj in enumerate(catalogPropertyDetailQuerySet):
-                    cpdt=CatalogPropertyDetailTemp()
-                    cpdt.name = catalogPropertyDetailQuerySet[i].name
-                    catalogPropertyDetailNamesList.append(catalogPropertyDetailQuerySet[i].name)
-                    cpdt.save()
-                    del cpdt
                 
-            
-           
-            if catalogPropertyDetailQuerySet: #There are exist coefficients for the property and they will be deployed
-                catalogPropertyDetailTempQuerySet=CatalogPropertyDetailTemp.objects.filter(name__in=catalogPropertyDetailNamesList)
-                self.fields['coefficients'].initial = catalogPropertyDetailTempQuerySet
-            elif not catalogPropertyDetailQuerySet and coefficients_ids:
-                catalogPropertyDetailQuerySet  = CatalogPropertyDetailTemp.objects.filter(id__in=coefficients_ids)  
-                self.fields['coefficients'].initial = catalogPropertyDetailQuerySet
-             
-
-            catalogPropertyDetailTempQuerySet=CatalogPropertyDetailTemp.objects.all()#get all newcoefficients
-            self.fields['coefficients'].queryset = catalogPropertyDetailTempQuerySet
-            
-            
-            
-            #******************************Rules**************************************************************************#
-            size = 0
-            if len(catalogPropertyDetailQuerySet) > 0:
-            
-                if len(catalogPropertyDetailnames) > 0:
-                    size = len(catalogPropertyDetailnames) 
-                else:
-                    size = 10
-                
-                catalogpropertydetailnames = json.dumps(catalogPropertyDetailnames)
-                propertydetaillist = json.dumps(catalogPropertyDetailList)
-                url = reverse('admin:Properties_tensor_getrules', args=[self.instance.pk])  
-                
-                    
-                #self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={"onChange":"getRules('" +url +"'," +propertydetaillist +"," +catalogpropertydetailnames +"," + str(datapropertySelected.id )+"," +"this);",'size': size})
-                #self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={'size': size})
-                #self.fields['coefficientsrules'].widget=forms.Select(attrs={"onChange":"getRules('" +url +"'," +propertydetaillist +"," +catalogpropertydetailnames +"," + str(datapropertySelected.id )+"," +"this);",'size': size})
-                #self.fields['coefficientsrules'].widget.attrs['style'] = 'width: 100%;'
-                self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={'size': size})
-                self.fields['coefficientsrules'].queryset  = catalogPropertyDetailQuerySet
-             
-                
-     
-     
-      
-                javascript =  """<script> 
-     
-                                        function getRules(url,propertydetaillist,catalogpropertydetailnames,datapropertySelected_id,obj){
-                                                var propertydetaillistselected = django.jQuery("[name=coefficientsrules]").val();
-                                                var keynotationselected = django.jQuery("[name=keynotation]").val();
-                                                
-                                                //alert(keynotationselected);
-                                                
-                                                datasend ={//'coefficient': obj.value,
-                                                                     'catalogpropertydetaillist': propertydetaillist,
-                                                                     
-                                                                     'catalogpropertydetailnames':catalogpropertydetailnames,
-                                                                     'propertydetaillistselected':propertydetaillistselected,
-                                                                     'datapropertySelected':datapropertySelected_id,
-                                                                     'keynotationselected':keynotationselected  }
-                                                                     
-                                                callajax(url, datasend);
-                                        } 
-                                        
-                                        function saveRule(url,propertydetaillist,catalogpropertydetailnames,datapropertySelected_id,obj){
-                                                var propertydetaillistselected = django.jQuery("[name=coefficientsrules]").val();
-                                                var keynotationselected = django.jQuery("[name=keynotation]").val();
-                                                var zerocomponentselected = django.jQuery("[name=zerocomponent]").val();
+               
+                if catalogPropertyDetailQuerySet: #There are exist coefficients for the property and they will be deployed
+                    catalogPropertyDetailTempQuerySet=CatalogPropertyDetailTemp.objects.filter(name__in=catalogPropertyDetailNamesList)
+                    self.fields['coefficients'].initial = catalogPropertyDetailTempQuerySet
+                elif not catalogPropertyDetailQuerySet and coefficients_ids:
+                    catalogPropertyDetailQuerySet  = CatalogPropertyDetailTemp.objects.filter(id__in=coefficients_ids)  
+                    self.fields['coefficients'].initial = catalogPropertyDetailQuerySet
+                 
     
-                                                
-                                                datasend ={//'coefficient': obj.value,
-                                                                     'zerocomponentselected': zerocomponentselected,
-                                                                     'propertydetaillistselected':propertydetaillistselected,
-                                                                     'datapropertySelected':datapropertySelected_id,
-                                                                     'keynotationselected':keynotationselected  }
-                                                                     
-                                                callajax(url, datasend);
-                                        } 
-                                        
-                                        function  callajax(url, datasend)
-                                        {
-                                             var csrftoken = django.jQuery("[name=csrfmiddlewaretoken]").val();
-                                             function csrfSafeMethod(method) {
-                                                    // these HTTP methods do not require CSRF protection
-                                                    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-                                                }
-                                                                                       
-                                               // start django.jQuery
-                                                 django.jQuery(function($) {
-                                                 
-                                                   // prepare ajax
-                                                    $.ajaxSetup({
-                                                        beforeSend: function(xhr, settings) {
-                                                            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                                                                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                catalogPropertyDetailTempQuerySet=CatalogPropertyDetailTemp.objects.all()#get all newcoefficients
+                self.fields['coefficients'].queryset = catalogPropertyDetailTempQuerySet
+                
+                
+                
+                #******************************Rules**************************************************************************#
+                size = 0
+                if len(catalogPropertyDetailQuerySet) > 0:
+                
+                    if len(catalogPropertyDetailnames) > 0:
+                        size = len(catalogPropertyDetailnames) 
+                    else:
+                        size = 10
+                    
+                    catalogpropertydetailnames = json.dumps(catalogPropertyDetailnames)
+                    propertydetaillist = json.dumps(catalogPropertyDetailList)
+                    url = reverse('admin:Properties_tensor_getrules', args=[self.instance.pk])  
+                    
+                        
+                    #self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={"onChange":"getRules('" +url +"'," +propertydetaillist +"," +catalogpropertydetailnames +"," + str(datapropertySelected.id )+"," +"this);",'size': size})
+                    #self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={'size': size})
+                    #self.fields['coefficientsrules'].widget=forms.Select(attrs={"onChange":"getRules('" +url +"'," +propertydetaillist +"," +catalogpropertydetailnames +"," + str(datapropertySelected.id )+"," +"this);",'size': size})
+                    #self.fields['coefficientsrules'].widget.attrs['style'] = 'width: 100%;'
+                    self.fields['coefficientsrules'].widget=forms.SelectMultiple(attrs={'size': size})
+                    self.fields['coefficientsrules'].queryset  = catalogPropertyDetailQuerySet
+                 
+                    
+         
+         
+          
+                    javascript =  """<script> 
+         
+                                            function getRules(url,propertydetaillist,catalogpropertydetailnames,datapropertySelected_id,obj){
+                                                    var propertydetaillistselected = django.jQuery("[name=coefficientsrules]").val();
+                                                    var keynotationselected = django.jQuery("[name=keynotation]").val();
+                                                    
+                                                    //alert(keynotationselected);
+                                                    
+                                                    datasend ={//'coefficient': obj.value,
+                                                                         'catalogpropertydetaillist': propertydetaillist,
+                                                                         
+                                                                         'catalogpropertydetailnames':catalogpropertydetailnames,
+                                                                         'propertydetaillistselected':propertydetaillistselected,
+                                                                         'datapropertySelected':datapropertySelected_id,
+                                                                         'keynotationselected':keynotationselected  }
+                                                                         
+                                                    callajax(url, datasend);
+                                            } 
+                                            
+                                            function saveRule(url,propertydetaillist,catalogpropertydetailnames,datapropertySelected_id,obj){
+                                                    var propertydetaillistselected = django.jQuery("[name=coefficientsrules]").val();
+                                                    var keynotationselected = django.jQuery("[name=keynotation]").val();
+                                                    var zerocomponentselected = django.jQuery("[name=zerocomponent]").val();
+        
+                                                    
+                                                    datasend ={//'coefficient': obj.value,
+                                                                         'zerocomponentselected': zerocomponentselected,
+                                                                         'propertydetaillistselected':propertydetaillistselected,
+                                                                         'datapropertySelected':datapropertySelected_id,
+                                                                         'keynotationselected':keynotationselected  }
+                                                                         
+                                                    callajax(url, datasend);
+                                            } 
+                                            
+                                            function  callajax(url, datasend)
+                                            {
+                                                 var csrftoken = django.jQuery("[name=csrfmiddlewaretoken]").val();
+                                                 function csrfSafeMethod(method) {
+                                                        // these HTTP methods do not require CSRF protection
+                                                        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                                                    }
+                                                                                           
+                                                   // start django.jQuery
+                                                     django.jQuery(function($) {
+                                                     
+                                                       // prepare ajax
+                                                        $.ajaxSetup({
+                                                            beforeSend: function(xhr, settings) {
+                                                                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                                                                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                                                }
                                                             }
+                                                        });
+                                                        
+                                                        
+                                                    // start ajax
+                                                        $.ajax({
+                                                        url : url,  
+                                                        type: "POST",  
+                                                        dataType: 'json',
+                                                        data : datasend, 
+                                                        success: function (data) {
+                                     
+                                                            console.log(data); // log the returned json to the console
+                                                            console.log("success"); // another sanity check
+                                                            django.jQuery("[name=keynotation]").val(data.keynotationlist);
+                                                            
+                                                        },
+                                                
+                                                        // handle a non-successful response
+                                                        error : function(xhr,errmsg,err) {
+                                                            $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+                                                                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+                                                            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
                                                         }
                                                     });
                                                     
-                                                    
-                                                // start ajax
-                                                    $.ajax({
-                                                    url : url,  
-                                                    type: "POST",  
-                                                    dataType: 'json',
-                                                    data : datasend, 
-                                                    success: function (data) {
-                                 
-                                                        console.log(data); // log the returned json to the console
-                                                        console.log("success"); // another sanity check
-                                                        django.jQuery("[name=keynotation]").val(data.keynotationlist);
-                                                        
-                                                    },
+                                                    //end ajax
+                                                 });
+                                                 // end django.jQuery
                                             
-                                                    // handle a non-successful response
-                                                    error : function(xhr,errmsg,err) {
-                                                        $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-                                                            " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
-                                                        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-                                                    }
-                                                });
-                                                
-                                                //end ajax
-                                             });
-                                             // end django.jQuery
-                                        
-                                        }
-                                        </script>
-                                        
-                                        """
-                
-                url = reverse('admin:Properties_tensor_saverule', args=[self.instance.pk])  
-                onclick = "saveRule(\"" +url +"\"," +propertydetaillist +"," +catalogpropertydetailnames +"," +  str(datapropertySelected.id )+"," +"this);"
-                #html = "<p class='deletelink-box'><a href='#' class='btn btn-sm btn-default' onclick='" +onclick+ "'><span class='glyphicon glyphicon-floppy-save'></span>  Save Rule</a> <input class='default' type='button' value='Save Rule' onclick='" +onclick+ "'> </p>"
-                html = "<p class='deletelink-box'><input class='default' type='button' value='Save Rule' onclick='" +onclick+ "'> </p>"
-               
-                html = html  + javascript
-                self.fields['jquery'].initial = html
-                #print read_write_coefficients
-                
-                
-    
-                keyNotationQuerySet = KeyNotation.objects.all()
-                size = 0
-                if len(keyNotationQuerySet) > 0:
-                    size = len(keyNotationQuerySet) 
-                else:
-                    size = 10
+                                            }
+                                            </script>
+                                            
+                                            """
                     
-            
-                self.fields['keynotation'].widget=forms.Select(attrs={'size': size})
-                self.fields['keynotation'].widget.attrs['style'] = 'width: 100%;'
-                self.fields['keynotation'].queryset  = keyNotationQuerySet
-    
-                
-                """
-                alert_types=self.get_alert_types(3006)
-                self.fields['alert_type'] = forms.MultipleChoiceField(
-                choices=alert_types,
-                required=False
-                )
-                """
-                
-                if int(self.instance.pk) == 1 or int(self.instance.pk) == 3:
-                    symmetry = True
-                elif int(self.instance.pk) ==  2:
-                    symmetry = False
+                    url = reverse('admin:Properties_tensor_saverule', args=[self.instance.pk])  
+                    onclick = "saveRule(\"" +url +"\"," +propertydetaillist +"," +catalogpropertydetailnames +"," +  str(datapropertySelected.id )+"," +"this);"
+                    #html = "<p class='deletelink-box'><a href='#' class='btn btn-sm btn-default' onclick='" +onclick+ "'><span class='glyphicon glyphicon-floppy-save'></span>  Save Rule</a> <input class='default' type='button' value='Save Rule' onclick='" +onclick+ "'> </p>"
+                    html = "<p class='deletelink-box'><input class='default' type='button' value='Save Rule' onclick='" +onclick+ "'> </p>"
+                   
+                    html = html  + javascript
+                    self.fields['jquery'].initial = html
+                    #print read_write_coefficients
                     
                     
-                jsutils = JSUtils()
-      
-                dimensions=datapropertySelected.tensor_dimensions.split(',')
-                scij = None
-                if len(dimensions) == 2:
-                    parts=datapropertySelected.tag.split('_')[-1]
-                    scij =parts.split('ij')
-                    
-                    
-                col_text =['Coefficient','Destination coefficient','Rule']
-                htmlcode = ""   
-                htmlcode += "<table>"
-                htmlcode += "<thead>"
-                htmlcode += "<tr>"
-                for i, name in enumerate(col_text):
-                    htmlcode += "<th scope='col'>"
-                    htmlcode += "<div class='text'>"
-                    htmlcode += "<span>" + name + "</span>"
-                    htmlcode += "</div>"
-                    htmlcode += "<div class='clear'></div>"
-                    htmlcode += "</th>"
-                
-                htmlcode += "</tr>"
-                htmlcode += "</thead>"
-                htmlcode += "<tbody>"
-                
-                response_data = {}
-                for i, obj  in enumerate(catalogPropertyDetailQuerySet):   
-                    keyNotationCatalogPropertyDetail= jsutils.getKeyNotation(obj)
-                    rulesAndTarget =[]
-                    if isinstance(keyNotationCatalogPropertyDetail, QuerySet):
-                        source_target_Dic = {}
-                        for x,knotationpropertydetail in enumerate(keyNotationCatalogPropertyDetail):
-                            source_target = {}
-                            sourceList = [y.strip() for y in knotationpropertydetail.source.split(',')]
-                            if len(sourceList) > 1:
-                                targetList = [y.strip() for y in knotationpropertydetail.target.split(',')]
-                                source_target_Dic[ tuple(sourceList)]=targetList
-                                source_target[ tuple(sourceList)]=targetList
-                                source_target['keynotation']=knotationpropertydetail.keynotation
-                                rulesAndTarget.append(source_target)
-                                
-                            elif len(sourceList) == 1:
-                                targetList = [y.strip() for y in knotationpropertydetail.target.split(',')]
-                                source_target_Dic[obj.name]=targetList
-                                source_target[obj.name]=targetList
-                                source_target['keynotation']=knotationpropertydetail.keynotation
-                                rulesAndTarget.append(source_target)
-                                
-                                
-                        if source_target_Dic:
-                            jsutils.getsimetricandnonzero( obj.name,scij,source_target_Dic,symmetry)
-                            
-                            for i, d in enumerate(rulesAndTarget):
-                                jsutils.getrules(obj.name,scij,d,symmetry)
-                            
-                        
-         
+        
+                    keyNotationQuerySet = KeyNotation.objects.all()
+                    size = 0
+                    if len(keyNotationQuerySet) > 0:
+                        size = len(keyNotationQuerySet) 
                     else:
-                        targetList = [x.strip() for x in keyNotationCatalogPropertyDetail.target.split(',')]
-                        source_target_Dic = {}
-                        source_target_Dic[obj.name]=targetList
-                        source_target_Dic['keynotation']=keyNotationCatalogPropertyDetail.keynotation
-                        if source_target_Dic:
-                            if keyNotationCatalogPropertyDetail.keynotation.id ==4 or keyNotationCatalogPropertyDetail.keynotation.id ==6 or keyNotationCatalogPropertyDetail.keynotation.id ==5 or keyNotationCatalogPropertyDetail.keynotation.id ==10:
+                        size = 10
+                        
+                
+                    self.fields['keynotation'].widget=forms.Select(attrs={'size': size})
+                    self.fields['keynotation'].widget.attrs['style'] = 'width: 100%;'
+                    self.fields['keynotation'].queryset  = keyNotationQuerySet
+        
+                    
+                    """
+                    alert_types=self.get_alert_types(3006)
+                    self.fields['alert_type'] = forms.MultipleChoiceField(
+                    choices=alert_types,
+                    required=False
+                    )
+                    """
+                    
+                    if int(self.instance.pk) == 1 or int(self.instance.pk) == 3:
+                        symmetry = True
+                    elif int(self.instance.pk) ==  2:
+                        symmetry = False
+                        
+                        
+                    jsutils = JSUtils()
+          
+                    dimensions=datapropertySelected.tensor_dimensions.split(',')
+                    scij = None
+                    if len(dimensions) == 2:
+                        parts=datapropertySelected.tag.split('_')[-1]
+                        scij =parts.split('ij')
+                        
+                        
+                    col_text =['Coefficient','Destination coefficient','Rule']
+                    htmlcode = ""   
+                    htmlcode += "<table>"
+                    htmlcode += "<thead>"
+                    htmlcode += "<tr>"
+                    for i, name in enumerate(col_text):
+                        htmlcode += "<th scope='col'>"
+                        htmlcode += "<div class='text'>"
+                        htmlcode += "<span>" + name + "</span>"
+                        htmlcode += "</div>"
+                        htmlcode += "<div class='clear'></div>"
+                        htmlcode += "</th>"
+                    
+                    htmlcode += "</tr>"
+                    htmlcode += "</thead>"
+                    htmlcode += "<tbody>"
+                    
+                    response_data = {}
+                    for i, obj  in enumerate(catalogPropertyDetailQuerySet):   
+                        keyNotationCatalogPropertyDetail= jsutils.getKeyNotation(obj)
+                        rulesAndTarget =[]
+                        if isinstance(keyNotationCatalogPropertyDetail, QuerySet):
+                            source_target_Dic = {}
+                            for x,knotationpropertydetail in enumerate(keyNotationCatalogPropertyDetail):
+                                source_target = {}
+                                sourceList = [y.strip() for y in knotationpropertydetail.source.split(',')]
+                                if len(sourceList) > 1:
+                                    targetList = [y.strip() for y in knotationpropertydetail.target.split(',')]
+                                    source_target_Dic[ tuple(sourceList)]=targetList
+                                    source_target[ tuple(sourceList)]=targetList
+                                    source_target['keynotation']=knotationpropertydetail.keynotation
+                                    rulesAndTarget.append(source_target)
+                                    
+                                elif len(sourceList) == 1:
+                                    targetList = [y.strip() for y in knotationpropertydetail.target.split(',')]
+                                    source_target_Dic[obj.name]=targetList
+                                    source_target[obj.name]=targetList
+                                    source_target['keynotation']=knotationpropertydetail.keynotation
+                                    rulesAndTarget.append(source_target)
+                                    
+                                    
+                            if source_target_Dic:
                                 jsutils.getsimetricandnonzero( obj.name,scij,source_target_Dic,symmetry)
-                                jsutils.getrules(obj.name,scij,source_target_Dic,symmetry)
-                            else:
-                                jsutils.getsimetricandnonzero( obj.name,scij,source_target_Dic,symmetry)
-                                jsutils.getrules(obj.name,scij,source_target_Dic,symmetry)
-                            
+                                
+                                for i, d in enumerate(rulesAndTarget):
+                                    jsutils.getrules(obj.name,scij,d,symmetry)
+                                
                             
              
-                htmlcode +=  str(jsutils.htmlcode )  
-     
-                htmlcode +=    "</tbody>"
-                htmlcode += "</table>"    
+                        else:
+                            targetList = [x.strip() for x in keyNotationCatalogPropertyDetail.target.split(',')]
+                            source_target_Dic = {}
+                            source_target_Dic[obj.name]=targetList
+                            source_target_Dic['keynotation']=keyNotationCatalogPropertyDetail.keynotation
+                            if source_target_Dic:
+                                if keyNotationCatalogPropertyDetail.keynotation.id ==4 or keyNotationCatalogPropertyDetail.keynotation.id ==6 or keyNotationCatalogPropertyDetail.keynotation.id ==5 or keyNotationCatalogPropertyDetail.keynotation.id ==10:
+                                    jsutils.getsimetricandnonzero( obj.name,scij,source_target_Dic,symmetry)
+                                    jsutils.getrules(obj.name,scij,source_target_Dic,symmetry)
+                                else:
+                                    jsutils.getsimetricandnonzero( obj.name,scij,source_target_Dic,symmetry)
+                                    jsutils.getrules(obj.name,scij,source_target_Dic,symmetry)
+                                
+                                
+                 
+                    htmlcode +=  str(jsutils.htmlcode )  
+         
+                    htmlcode +=    "</tbody>"
+                    htmlcode += "</table>"    
+                    
+                    self.fields['detailrules'].initial = htmlcode 
+                    
+                          
+                    zero_component= list(set(catalogPropertyDetailList) - set(jsutils.simetricandnonzeroinputs))
+                    size = 0
+                    if len(zero_component) > 0:
+                        size = len(zero_component) 
+                        keyNotation = KeyNotation.objects.filter(id=1)
+                        self.fields['keynotation'].initial  = keyNotation
+                    else:
+                        size = 5
+                        
+                        
+                   
+                        
+                    
+                    self.fields['zerocomponent'].widget=forms.SelectMultiple(attrs={'size': size})
+                    self.fields['zerocomponent'].widget.attrs['style'] = 'width: 100%;'
+                    self.fields['zerocomponent'].queryset = CatalogPropertyDetailTemp.objects.filter(name__in=zero_component).order_by('name')
+                    
                 
-                self.fields['detailrules'].initial = htmlcode 
-                
-                      
-                zero_component= list(set(catalogPropertyDetailList) - set(jsutils.simetricandnonzeroinputs))
-                size = 0
-                if len(zero_component) > 0:
-                    size = len(zero_component) 
-                    keyNotation = KeyNotation.objects.filter(id=1)
-                    self.fields['keynotation'].initial  = keyNotation
                 else:
-                    size = 5
-                    
-                    
-               
-                    
+                    self.fields['jquery'].initial  = '' 
+                    self.fields['detailrules'].initial = '' 
+                    self.fields['coefficientsrules'].queryset  = CatalogPropertyDetailTemp.objects.none() 
+                    self.fields['keynotation'].queryset  = KeyNotation.objects.none() 
+                    zero_component= list(set(catalogPropertyDetailList))
+                    self.fields['zerocomponent'].queryset = CatalogPropertyDetailTemp.objects.none() 
                 
-                self.fields['zerocomponent'].widget=forms.SelectMultiple(attrs={'size': size})
-                self.fields['zerocomponent'].widget.attrs['style'] = 'width: 100%;'
-                self.fields['zerocomponent'].queryset = CatalogPropertyDetailTemp.objects.filter(name__in=zero_component).order_by('name')
-                
-            
+                  
+    
             else:
-                self.fields['jquery'].initial  = '' 
-                self.fields['detailrules'].initial = '' 
-                self.fields['coefficientsrules'].queryset  = CatalogPropertyDetailTemp.objects.none() 
-                self.fields['keynotation'].queryset  = KeyNotation.objects.none() 
-                zero_component= list(set(catalogPropertyDetailList))
-                self.fields['zerocomponent'].queryset = CatalogPropertyDetailTemp.objects.none() 
-            
+                if args:#save  new
+                    catalogproperty_id = str(args[0]['catalogproperty'])
+                    catalogpointgroupids = None
+                    if catalogpointgroupids:
+                        pass
+                    else:
+                        pass 
+                else:#add new
+                    self.fields['type'].queryset   = Type.objects.all()
+                    self.fields['dataproperty'].queryset = Property.objects.filter(active=True)    
+                    self.fields['catalogcrystalsystem'].queryset=CatalogCrystalSystem.objects.all()       
+                    self.fields['catalogpointgroup'] = CatalogPointGroup.objects.all()    
+                    self.fields['pointgroupnames'] =  PointGroupNames.objects.all()    
+    
+     
+        except Exception  as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            err= {}
+            err['file']=fname
+            err['line']=exc_tb.tb_lineno
+            err['error']="Error: {1}".format( e.message, e.args)    
+            print err
+            #raise forms.ValidationError(str(err))
              
-
-        else:
-            if args:#save  new
-                catalogproperty_id = str(args[0]['catalogproperty'])
-                catalogpointgroupids = None
-                if catalogpointgroupids:
-                    pass
-                else:
-                    pass 
-            else:#add new
-                self.fields['type'].queryset   = Type.objects.all()
-                self.fields['dataproperty'].queryset = Property.objects.all()    
-                self.fields['catalogcrystalsystem'].queryset=CatalogCrystalSystem.objects.all()       
-                self.fields['catalogpointgroup'] = CatalogPointGroup.objects.all()    
-                self.fields['puntualgroupnames'] =  PuntualGroupNames.objects.all()    
-
- 
-            
+        
         
 class CatalogCrystalSystemAdminForm(forms.ModelForm):  
     
@@ -1272,39 +1292,51 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
         
     def clean(self,*args,**kwargs):
          
-        puntualgroupnames=self.cleaned_data.get("puntualgroupnames")
+        catalogpointgroup=self.cleaned_data.get("crystalsystemtype")
+        pointgroupnames=self.cleaned_data.get("pointgroupnames")
         catalogpointgroup=self.cleaned_data.get("catalogpointgroup")
-        if not catalogpointgroup and not puntualgroupnames:
-            raise forms.ValidationError("the 'Point Group' or 'Groups' fields are not selected, you must select one of the two!")
         
-        if  catalogpointgroup  and  puntualgroupnames:
-            if  (catalogpointgroup.id == 45  and  puntualgroupnames.id  != 21 ) or (catalogpointgroup.id  != 45  and  puntualgroupnames.id == 21):
+        if catalogpointgroup == True:
+            if not catalogpointgroup and not pointgroupnames:
+                raise forms.ValidationError("the 'Point Group' or 'Groups' fields are not selected, you must select one of the two!")
+            
+                if  catalogpointgroup  and  pointgroupnames:
+                    if  (catalogpointgroup.id == 45  and  pointgroupnames.id  != 21 ) or (catalogpointgroup.id  != 45  and  pointgroupnames.id == 21):
+                        pass
+                    elif (catalogpointgroup.id  != 45  and  pointgroupnames.id == 21):
+                        pass
+                    elif (catalogpointgroup.id  != 45  and  pointgroupnames.id != 21):
+                        raise forms.ValidationError("the 'Point Group' or 'Groups' fields have selected options, you must select one of the two!")
+            else:
                 pass
-            elif (catalogpointgroup.id  != 45  and  puntualgroupnames.id == 21):
-                pass
-            elif (catalogpointgroup.id  != 45  and  puntualgroupnames.id != 21):
-                raise forms.ValidationError("the 'Point Group' or 'Groups' fields have selected options, you must select one of the two!")
+        
 
         return super(CatalogCrystalSystemAdminForm,self).clean(*args,**kwargs)
     
-    def clean_puntualgroupnames(self):
-        puntualgroupnames = self.cleaned_data['puntualgroupnames']
-        return puntualgroupnames
+    def clean_pointgroupnames(self):
+        pointgroupnames = self.cleaned_data['pointgroupnames']
+        return pointgroupnames
     
     def clean_catalogpointgroup(self):
         catalogpointgroup = self.cleaned_data['catalogpointgroup']
         return catalogpointgroup    
+    
+    def clean_crystalsystemtype(self):
+        catalogpointgroup = self.cleaned_data['crystalsystemtype']
+        return catalogpointgroup   
         
     def __init__(self, *args, **kwargs):   
         catalogproperty_id = None
-        puntualgroupnames_id  = None
+        pointgroupnames_id  = None
         catalogpointgroup_id = None
+        crystalsystemtype_active = False
         onchange = False
         if args: #(true if edit and save or save an existing instance, when form was changed), false when instance was selected from change list
             type_id =  argsToInt(args,'type')
             catalogproperty_id =  argsToInt(args,'catalogproperty')
             catalogpointgroup_id = argsToInt(args,'catalogpointgroup',45)
-            puntualgroupnames_id  =  argsToInt(args,'puntualgroupnames',21)
+            pointgroupnames_id  =  argsToInt(args,'pointgroupnames',21)
+            crystalsystemtype_active= argsToBoolean(args,'crystalsystemtype')
             #axis_id =  argsToInt(args,'axis',4)
             axis_ids= argsListToIntList(args, 'axis')  
             if not args[0].has_key('_save') and not args[0].has_key('_addanother') and not args[0].has_key('_continue'):    
@@ -1322,12 +1354,20 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
         self.fields['type'] = forms.ModelChoiceField(queryset=None,label="Type",required=True)
         self.fields['type'].widget=forms.Select(attrs={"onChange":'submit()'})
         self.fields['type'].empty_label = None        
+        
+        #self.fields['crystalsystemtype'] = forms.ModelChoiceField(queryset=None,label="Active for this Type",required=True)
+        self.fields['crystalsystemtype'] = forms.CharField(max_length=100,label="Active",required=True)
+        self.fields['crystalsystemtype'].widget=forms.CheckboxInput()
+          
+         
+        
+        
         self.fields['catalogpointgroup'] = forms.ModelChoiceField(queryset=None,label="Point Group",required=True)
         self.fields['catalogpointgroup'].widget=forms.Select()
         self.fields['catalogpointgroup'].empty_label = None
-        self.fields['puntualgroupnames'] =  forms.ModelChoiceField(queryset=None,label="Groups",required=True)
-        self.fields['puntualgroupnames'].widget=forms.Select()
-        self.fields['puntualgroupnames'].empty_label = None
+        self.fields['pointgroupnames'] =  forms.ModelChoiceField(queryset=None,label="Groups",required=True)
+        self.fields['pointgroupnames'].widget=forms.Select()
+        self.fields['pointgroupnames'].empty_label = None
         """self.fields['axis'] =  forms.ModelChoiceField(queryset=None,label="Groups",required=True)
         self.fields['axis'].widget=forms.Select()
         self.fields['axis'].empty_label = None"""
@@ -1343,7 +1383,7 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
         )
         
         self.fields['pointgroupdetail'] = forms.CharField(label='Point Group Detail',widget = DetailFieldWidget,required=False)
-        self.fields['puntualgroupnamesdetail'] = forms.CharField(label='Groups Detail',widget = DetailFieldWidget,required=False)
+        self.fields['pointgroupnamesdetail'] = forms.CharField(label='Groups Detail',widget = DetailFieldWidget,required=False)
         self.fields['axisdetail'] = forms.CharField(label='Axis Detail',widget = DetailFieldWidget,required=False)
  
         
@@ -1351,7 +1391,7 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
         datapropertySelected = None
         catalogcrystalsystemSelected = None
         catalogpointgroupSelected = None
-        puntualgroupnamesSelected = None
+        pointgroupnamesSelected = None
         axisSelected = None
         if self.instance.pk: 
             if args:
@@ -1361,17 +1401,26 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                 self.fields['type'].queryset = typeQuerySet
                 self.fields['type'].initial = typeSelected
                 
+                
+                #*******************************crystalsystemtype*************************************  
+                if crystalsystemtype_active == True:
+                    self.fields['crystalsystemtype'].initial= True
+                else:
+                    self.fields['crystalsystemtype'].initial= False
+
+ 
+                
                 #*******************************catalogpointgroup*************************************                
                 catalogpointgroupSelected = CatalogPointGroup.objects.get(id=int(catalogpointgroup_id))
                 self.fields['catalogpointgroup'].queryset = CatalogPointGroup.objects.all()
                 self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
                 self.fields['pointgroupdetail'].initial = "<strong>punctual group assigned</strong>"
 
-                #*******************************puntualgroupnames*************************************
-                puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=int(puntualgroupnames_id))  
-                self.fields['puntualgroupnames'].queryset = PuntualGroupNames.objects.all()
-                self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                self.fields['puntualgroupnamesdetail'].initial = "<strong>groups assigned</strong>"
+                #*******************************pointgroupnames*************************************
+                pointgroupnamesSelected = PointGroupNames.objects.get(id=int(pointgroupnames_id))  
+                self.fields['pointgroupnames'].queryset = PointGroupNames.objects.all()
+                self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                self.fields['pointgroupnamesdetail'].initial = "<strong>groups assigned</strong>"
                 
                 #*******************************axis*************************************
                 axisSelected = CatalogAxis.objects.filter(id__in=axis_ids)
@@ -1393,25 +1442,37 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                     self.fields['type'].queryset = typeQuerySet
                     self.fields['type'].initial = typeSelected
                     
-                    #puntualgroupnamesSelected = PuntualGroupNames.objects.filter(id=puntualgroupnames_id)
+                    #pointgroupnamesSelected = PointGroupNames.objects.filter(id=pointgroupnames_id)
                     #catalogpointgroupSelected = CatalogPointGroup.objects.get(id= catalogpointgroup_id)
                     
-                    #*******************************puntualgroupnames*************************************
-                    puntualgroupnames_ids= CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,active =1).values_list('puntualgroupnames_id',flat=True) 
-                    if puntualgroupnames_ids:
-                        puntualGroupNamesQuerySet= PuntualGroupNames.objects.filter(id__in=puntualgroupnames_ids)
-                        self.fields['puntualgroupnames'].queryset = PuntualGroupNames.objects.all()
-                        self.fields['puntualgroupnames'].initial =puntualGroupNamesQuerySet[0]
-                        puntualgroupnamesSelected= puntualGroupNamesQuerySet[0]
-                        html = getTableHTMLFromQuerySet(puntualGroupNamesQuerySet)
-                        self.fields['puntualgroupnamesdetail'].initial = html
-                        self.fields['puntualgroupnames'].help_text = "Assigned group, all groups of points in this crystal system will have the same matrix" 
+                    #*******************************crystalsystemtype*************************************  
+                    crystalsystemtype=CrystalSystemType.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected)   
+                    if crystalsystemtype:
+                        crystalsystemtypeSelected= crystalsystemtype[0]
+                        if crystalsystemtypeSelected.active == True:
+                            self.fields['crystalsystemtype'].initial= True
+                        else:
+                            self.fields['crystalsystemtype'].initial= False
+                         
                     else:
-                        puntualGroupNamesQuerySet = PuntualGroupNames.objects.all()
-                        puntualgroupnamesSelected= PuntualGroupNames.objects.get(id=21)
-                        self.fields['puntualgroupnames'].queryset =  puntualGroupNamesQuerySet
-                        self.fields['puntualgroupnames'].initial =  PuntualGroupNames.objects.get(id=21)
-                        self.fields['puntualgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
+                        self.fields['crystalsystemtype'].initial= False
+                    
+                    #*******************************pointgroupnames*************************************
+                    pointgroupnames_ids= CrystalSystemPointGroupNames.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,active =1).values_list('pointgroupnames_id',flat=True) 
+                    if pointgroupnames_ids:
+                        pointGroupNamesQuerySet= PointGroupNames.objects.filter(id__in=pointgroupnames_ids)
+                        self.fields['pointgroupnames'].queryset = PointGroupNames.objects.all()
+                        self.fields['pointgroupnames'].initial =pointGroupNamesQuerySet[0]
+                        pointgroupnamesSelected= pointGroupNamesQuerySet[0]
+                        html = getTableHTMLFromQuerySet(pointGroupNamesQuerySet)
+                        self.fields['pointgroupnamesdetail'].initial = html
+                        self.fields['pointgroupnames'].help_text = "Assigned group, all groups of points in this crystal system will have the same matrix" 
+                    else:
+                        pointGroupNamesQuerySet = PointGroupNames.objects.all()
+                        pointgroupnamesSelected= PointGroupNames.objects.get(id=21)
+                        self.fields['pointgroupnames'].queryset =  pointGroupNamesQuerySet
+                        self.fields['pointgroupnames'].initial =  PointGroupNames.objects.get(id=21)
+                        self.fields['pointgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
                         
                     #*******************************catalogpointgroup*************************************
                     catalogpointgroup_ids = CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,active =1).values_list('catalogpointgroup_id',flat=True) 
@@ -1431,7 +1492,7 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                         self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
   
                     #*******************************axis*************************************
-                    axis_ids=  CrystalSystemAxis.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,puntualgroupnames = puntualgroupnamesSelected,active = 1).values_list('axis_id',flat=True)  
+                    axis_ids=  CrystalSystemAxis.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,pointgroupnames = pointgroupnamesSelected,active = 1).values_list('axis_id',flat=True)  
                     if axis_ids:
                         axisQuerySet = CatalogAxis.objects.filter(id__in= axis_ids)
                         self.fields['axis'].queryset =CatalogAxis.objects.all().exclude(id=4)
@@ -1454,23 +1515,41 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                     typeSelected= typeQuerySet[0]
                     self.fields['type'].queryset= typeQuerySet
                     self.fields['type'].initial= typeSelected
-    
-                    puntualgroupnames_ids= CrystalSystemPuntualGroupNames.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,active =1).values_list('puntualgroupnames_id',flat=True) 
-                     
-                    if puntualgroupnames_ids:
-                        puntualGroupNamesQuerySet= PuntualGroupNames.objects.filter(id__in=puntualgroupnames_ids)
-                        self.fields['puntualgroupnames'].queryset =  PuntualGroupNames.objects.all()
-                        self.fields['puntualgroupnames'].initial = puntualGroupNamesQuerySet[0]
-                        puntualgroupnamesSelected = puntualGroupNamesQuerySet[0]
-                        fieldsList = ['name','description']
-                        html = getTableHTMLFromQuerySet(puntualGroupNamesQuerySet,fields=fieldsList)
-                        self.fields['puntualgroupnamesdetail'].initial = html
-                        self.fields['puntualgroupnames'].help_text = "Assigned group, all groups of points in this crystal system will have the same matrix" 
+                    
+                    #*******************************crystalsystemtype*************************************  
+                    crystalsystemtype=CrystalSystemType.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected)   
+                    if crystalsystemtype:
+                        crystalsystemtypeSelected= crystalsystemtype[0]
+                        if crystalsystemtypeSelected.active == True:
+                            self.fields['crystalsystemtype'].initial= True
+                        else:
+                            self.fields['crystalsystemtype'].initial= False
+                         
                     else:
-                        self.fields['puntualgroupnames'].queryset =  PuntualGroupNames.objects.all()
-                        puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=21)
-                        self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                        self.fields['puntualgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
+                        self.fields['crystalsystemtype'].initial= False
+                      
+                
+                    
+                    
+                    
+                    
+    
+                    pointgroupnames_ids= CrystalSystemPointGroupNames.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,active =1).values_list('pointgroupnames_id',flat=True) 
+                     
+                    if pointgroupnames_ids:
+                        pointGroupNamesQuerySet= PointGroupNames.objects.filter(id__in=pointgroupnames_ids)
+                        self.fields['pointgroupnames'].queryset =  PointGroupNames.objects.all()
+                        self.fields['pointgroupnames'].initial = pointGroupNamesQuerySet[0]
+                        pointgroupnamesSelected = pointGroupNamesQuerySet[0]
+                        fieldsList = ['name','description']
+                        html = getTableHTMLFromQuerySet(pointGroupNamesQuerySet,fields=fieldsList)
+                        self.fields['pointgroupnamesdetail'].initial = html
+                        self.fields['pointgroupnames'].help_text = "Assigned group, all groups of points in this crystal system will have the same matrix" 
+                    else:
+                        self.fields['pointgroupnames'].queryset =  PointGroupNames.objects.all()
+                        pointgroupnamesSelected = PointGroupNames.objects.get(id=21)
+                        self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                        self.fields['pointgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
 
                     catalogpointgroup_ids = CrystalSystemPointGroup.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,active =1).values_list('catalogpointgroup_id',flat=True)  
                     
@@ -1489,7 +1568,7 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                         self.fields['catalogpointgroup'].initial =catalogpointgroupSelected
                         self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
 
-                    axis_ids=  CrystalSystemAxis.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,puntualgroupnames = puntualgroupnamesSelected,active = 1).values_list('axis_id',flat=True)  
+                    axis_ids=  CrystalSystemAxis.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected,catalogpointgroup= catalogpointgroupSelected,pointgroupnames = pointgroupnamesSelected,active = 1).values_list('axis_id',flat=True)  
                     if axis_ids:
                         axisQuerySet = CatalogAxis.objects.filter(id__in= axis_ids)
                         self.fields['axis'].queryset =CatalogAxis.objects.all().exclude(id=4)
@@ -1514,6 +1593,18 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                 self.fields['type'].queryset= typeQuerySet
                 self.fields['type'].initial= typeSelected
                 
+                #*******************************crystalsystemtype*************************************  
+                crystalsystemtype=CrystalSystemType.objects.filter(catalogcrystalsystem=self.instance,type=typeSelected)   
+                if crystalsystemtype:
+                    crystalsystemtypeSelected= crystalsystemtype[0]
+                    if crystalsystemtypeSelected.active == True:
+                        self.fields['crystalsystemtype'].initial= True
+                    else:
+                        self.fields['crystalsystemtype'].initial= False
+                     
+                else:
+                    self.fields['crystalsystemtype'].initial= False
+                
                 
                 #*******************************catalogpointgroup*************************************                
                 catalogpointgroupSelected = CatalogPointGroup.objects.get(id=int(catalogpointgroup_id))
@@ -1521,16 +1612,16 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                 self.fields['catalogpointgroup'].initial = catalogpointgroupSelected
                 self.fields['pointgroupdetail'].initial = "<strong>punctual group assigned</strong>"
 
-                #*******************************puntualgroupnames*************************************
-                puntualgroupnamesSelected = PuntualGroupNames.objects.get(id=int(puntualgroupnames_id))  
-                self.fields['puntualgroupnames'].queryset = PuntualGroupNames.objects.all()
-                self.fields['puntualgroupnames'].initial = puntualgroupnamesSelected
-                self.fields['puntualgroupnamesdetail'].initial = "<strong>groups assigned</strong>"
+                #*******************************pointgroupnames*************************************
+                pointgroupnamesSelected = PointGroupNames.objects.get(id=int(pointgroupnames_id))  
+                self.fields['pointgroupnames'].queryset = PointGroupNames.objects.all()
+                self.fields['pointgroupnames'].initial = pointgroupnamesSelected
+                self.fields['pointgroupnamesdetail'].initial = "<strong>groups assigned</strong>"
                 
                 #*******************************axis*************************************
                 axisSelected = CatalogAxis.objects.get(id__in=axis_ids)
-                self.fields['axis'].queryset = PuntualGroupNames.objects.all().exclude(id=4)
-                self.fields['axis'].initial = puntualgroupnamesSelected
+                self.fields['axis'].queryset = PointGroupNames.objects.all().exclude(id=4)
+                self.fields['axis'].initial = pointgroupnamesSelected
                 self.fields['axisdetail'].initial = "<strong>groups assigned</strong>"
                 
                 
@@ -1542,9 +1633,9 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                 self.fields['type'].initial= typeQuerySet[0]
             
                 
-                #*******************************puntualgroupnames*************************************
-                self.fields['puntualgroupnames'].queryset =  PuntualGroupNames.objects.all()
-                self.fields['puntualgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
+                #*******************************pointgroupnames*************************************
+                self.fields['pointgroupnames'].queryset =  PointGroupNames.objects.all()
+                self.fields['pointgroupnamesdetail'].initial = "<strong>Group not assigned</strong>"
                 #*******************************catalogpointgroup*************************************        
                 self.fields['catalogpointgroup'].queryset =CatalogPointGroup.objects.all()
                 self.fields['pointgroupdetail'].initial = "<strong>punctual group not assigned</strong>"
@@ -1555,6 +1646,136 @@ class CatalogCrystalSystemAdminForm(forms.ModelForm):
                 self.fields['axisdetail'].initial = "<strong>Axis  not assigned</strong>"
         
         
+        
+
+        
+class FileUserAdminFormv2(forms.ModelForm):  
+    
+    class Meta:
+        model = FileUser
+        #widgets = {'datafile': forms.HiddenInput()}
+        
+        
+    def __init__(self, *args, **kwargs):
+        process = True
+        if kwargs.has_key('process'):
+            process= kwargs.pop('process')
+            
+        publish = None
+        onchange = False
+        datepublished = None
+        pointGroupSelectedName = None
+        if args:
+            
+            if not args[0].has_key('_save') and not args[0].has_key('_addanother') and not args[0].has_key('_continue'):    
+                args ={}
+                onchange = True
+        
+        super(FileUserAdminFormv2, self).__init__(*args, **kwargs)
+      
+        self.fields['filenamepublished'] = forms.CharField(widget = DetailFieldWidget, required=False)
+        self.fields['filenamepublished'].label='File name published'   
+        
+        self.fields['reportvalidation'] = forms.CharField(widget = forms.Textarea, required=False)
+        self.fields['reportvalidation'].label='Report  validation'   
+        self.fields['reportvalidation'].widget.attrs['readonly'] = True
+        
+        
+        self.fields['filenametemp'] = forms.CharField(widget = DetailFieldWidget, required=False)
+        self.fields['filenametemp'].label='Show file'   
+
+        #self.fields['datepublished'].widget.attrs['readonly'] = True
+ 
+        if self.instance.pk: 
+            if args:
+                if self.instance.datafile != None:
+                    print self.instance.datafile.filename
+                else:
+                    print ""
+                    
+                    
+                #self.fields['filenamepublished'].initial = self.instance.datafile
+                
+    
+                        
+            else:
+                if onchange:
+                    pass
+                else:#select from list for change
+                    if  self.instance.publish:
+                        if  self.instance.datafile:
+                            self.fields['filenamepublished'].initial = "<a href='/datafiles/" + self.instance.datafile.filename  +"' target='_blank'>"  + self.instance.datafile.filename  +"</a>"
+                        else:
+                            self.fields['filenamepublished'].initial = ""
+                    else:
+                        self.fields['filenamepublished'].initial = ""
+                        
+                    
+                    
+                    self.fields['filenametemp'].initial = "<a href='/datafiles/valid/" + self.instance.filename  +"' target='_blank'>"  + self.instance.filename  +"</a>"
+                    print self.fields['filenametemp'].initial
+ 
+                    self.fields['datafile'].widget = forms.HiddenInput()
+                    self.fields['datafile'].required = False
+                    self.fields['datafile'].label= ''
+                    
+ 
+  
+           
+                    if process:
+                        customfile = False
+                        loadtodatabase = False
+                        fds2 = []    
+                        fds2.append(self.instance.filename)
+                        edff= ExtractDataFormFields()
+                        edff.debug = False
+                        edff.processData(loadtodatabase,fds2,customfile)
+
+    
+                        if edff:
+                            self.fields.update(edff.customForm.fields)
+                            """
+                            for key, v in self.fields.iteritems():
+                                if edff.customForm.readonly_fields.has_key(key):
+                                    self.fields[key].widget.attrs['readonly'] = True
+                                    print 'readonly',key
+                            """
+                                    
+
+                     
+                    #urlproperties = reverse('admin:Files_fileuser_property', args=[self.instance.pk]) 
+                    #urlexperimentalcon = reverse('admin:Files_fileuser_experimental', args=[self.instance.pk]) 
+                    urlupdatecoefficients = reverse('admin:Files_fileuser_updatecoefficients', args=[self.instance.pk]) 
+                    #urlupdatecondition=reverse('admin:Files_fileuser_updatecondition', args=[self.instance.pk]) 
+                     
+                    javascript =  "<script>"
+                    #javascript += "var urlproperties = \"" +urlproperties +"\""
+                    javascript +="\n"
+                    #javascript +="var urlexperimentalcon = \"" +urlexperimentalcon +"\""   
+                    javascript +="\n"
+                    javascript +="var urlupdatecoefficients = \"" +urlupdatecoefficients +"\""   
+                    javascript +="\n"
+                    #javascript +="var urlupdatecondition = \"" +urlupdatecondition +"\""  
+                    javascript +="</script>"""
+                    
+                    
+                    
+                    self.fields['js'] = forms.CharField(label='',widget = JQueryCustomFieldWidget, required=False) 
+                    self.fields['js'].initial = javascript
+ 
+                
+        else:
+            if args:#save  new
+                pass
+            else:#add new
+                pass
+
+
+        
+        
+        
+ 
+
   
 class FileUserAdminForm(forms.ModelForm):  
     
@@ -1660,8 +1881,10 @@ class FileUserAdminForm(forms.ModelForm):
 
         )
  
-        self.fields['properties_click'] = forms.CharField(widget=HiddenInput,required=False,label="")
-        self.fields['properties_click'].initial="properties"
+        
+        self.fields['jquery'] = forms.CharField(label='',widget = DetailFieldWidget, required=False) 
+        #self.fields['jquery'].initial  = ''
+        #self.fields['properties_click'].initial="properties"
  
  
         """self.fields['reportvalidationcustom'] = forms.CharField(widget = DetailFieldWidget, required=False)
@@ -1725,6 +1948,12 @@ class FileUserAdminForm(forms.ModelForm):
         
         self.fields['cod_code']  = forms.CharField(label='Code', required=False)
         self.fields['cod_code'].widget = forms.TextInput() 
+        
+        self.fields['pointgroup']  = forms.CharField(label='Point group', required=False)
+        self.fields['pointgroup'].widget = forms.TextInput() 
+        self.fields['pointgroup'].widget.attrs['readonly'] = True
+        
+        
       
         self.fields['experimentalcon'] = forms.ModelMultipleChoiceField(queryset=None,
                                                                                                                 required=False,
@@ -1740,6 +1969,10 @@ class FileUserAdminForm(forms.ModelForm):
         self.fields['experimentalcon'].widget=forms.SelectMultiple()
         self.fields['experimentalcon'].empty_label = None
         """
+        
+        
+        #self.fields['foo']  = forms.CharField(label='foo',required=False)
+        #self.fields['foo'].widget = forms.TextInput() 
         
         
         
@@ -1760,13 +1993,16 @@ class FileUserAdminForm(forms.ModelForm):
                     
                     objDataFileTemp = DataFileTemp.objects.get(filename__exact=self.instance.filename)
                     objPublArticleTemp = objDataFileTemp.publication
-                    propertyTempQuerySet= PropertyTemp.objects.filter(id__in=properties_ids)
+                    propertyTempQuerySet= PropertyTemp.objects.filter(id__in=properties_ids, active=True)
 
                     experimentalcondQuerySet = ExperimentalParCondTemp.objects.filter(id__in=experimentalcond_ids)
                     self.fields['experimentalcon'].queryset= ExperimentalParCondTemp.objects.all()
                     self.fields['experimentalcon'].initial= experimentalcondQuerySet
 
-                    self.fields['properties'].queryset = PropertyTemp.objects.all() 
+                    
+                    
+
+                    self.fields['properties'].queryset = PropertyTemp.objects.filer(active=True) 
                     self.fields['properties'].initial = propertyTempQuerySet
                     
                     #self.fields['reportvalidationcustom'].initial = "<strong><font color='black'>" + self.instance.reportvalidation +" </font></strong>" 
@@ -1812,35 +2048,44 @@ class FileUserAdminForm(forms.ModelForm):
                             
                     except Exception  as error:
                         print "message in the function get_conds for debug purposes.  Message({0}): {1}".format(99, error)  
-           
 
-                  
-                    
-                        
                     try:
                         objDataFileTemp = DataFileTemp.objects.get(filename__exact=self.instance.filename)
                         self.fields['datafile_tempid'].initial = objDataFileTemp.pk
                         objPublArticleTemp = objDataFileTemp.publication
                         propertyTempQuerySet= objDataFileTemp.properties.all()
                         experimentalcond_ids = ExperimentalParCondTemp_DataFileTemp.objects.filter(datafiletemp=objDataFileTemp).values_list('experimentalfilecontemp_id',flat=True)  
-                       
              
-                        experimentalcondQuerySet = ExperimentalParCondTemp.objects.filter(id__in=experimentalcond_ids)
+                        experimentalcondQuerySet = ExperimentalParCondTemp.objects.filter(id__in=experimentalcond_ids, active=True)
                   
                         
-                        self.fields['experimentalcon'].queryset= ExperimentalParCondTemp.objects.all()
+                        self.fields['experimentalcon'].queryset= ExperimentalParCondTemp.objects.filter(active=True)
                         self.fields['experimentalcon'].initial= experimentalcondQuerySet
                         
                          
-                        self.fields['properties'].queryset = PropertyTemp.objects.all() 
+                        fileuserutil =  FileUserUtil()
+                        #print propertyTempQuerySet[0].pk
+                        fileuserutil.seDataProperty(propertyTempQuerySet[0].tag)
+                        fileuserutil.setFile(self.instance)
+                        fileuserutil.findPointGroupSelectedName('_symmetry_point_group_name_H-M')
+                        fileuserutil.setDataProperties()
+                        
+                        
+                        
+                        self.fields['pointgroup'].initial = fileuserutil.catalogPointGroupSelectedName
+                        
+                        self.fields['properties'].queryset = fileuserutil.dataPropertyTempQuerySet
                         self.fields['properties'].initial = propertyTempQuerySet
+                        del fileuserutil
+                        
+                        
                         
                         self.fields['phase_generic'].initial = objDataFileTemp.phase_generic
                         self.fields['phase_name'].initial = objDataFileTemp.phase_name
                         self.fields['chemical_formula'].initial = objDataFileTemp.chemical_formula
                         
                         if objDataFileTemp.cod_code:
-                            self.fields['cod_code'] = objDataFileTemp.cod_code
+                            self.fields['cod_code'].initial = objDataFileTemp.cod_code
                         
                         self.fields['title'].initial = objPublArticleTemp.title
                         self.fields['authors'].initial = objPublArticleTemp.authors
@@ -1858,7 +2103,287 @@ class FileUserAdminForm(forms.ModelForm):
                     except ObjectDoesNotExist as error:
                         print "message in the function extractProperties  for debug purposes Message({0}): {1}".format(99, error.message)  
  
+ 
+ 
+
+ 
+                    urlproperties = reverse('admin:Files_fileuser_property', args=[self.instance.pk]) 
+                    urlexperimentalcon = reverse('admin:Files_fileuser_experimental', args=[self.instance.pk]) 
+                    urlupdatecoefficients = reverse('admin:Files_fileuser_updatecoefficients', args=[self.instance.pk]) 
+                    urlupdatecondition=reverse('admin:Files_fileuser_updatecondition', args=[self.instance.pk]) 
+                    #print urlproperties
+                    #print urlexperimentalcon
+                     
+                    javascript =  "<script>"
+                    javascript += "var urlproperties = \"" +urlproperties +"\""
+                    javascript +="\n"
+                    javascript +="var urlexperimentalcon = \"" +urlexperimentalcon +"\""   
+                    javascript +="\n"
+                    javascript +="var urlupdatecoefficients = \"" +urlupdatecoefficients +"\""   
+                    javascript +="\n"
+                    javascript +="var urlupdatecondition = \"" +urlupdatecondition +"\""  
                     
+                    
+                    
+                                             
+                                            
+                                            
+                    javascript +=  """
+                                                       var listOfSelectMultiple = []
+                                                       django.jQuery(function($) {
+                                                           $( window ).load(function() {
+                                                                  
+                                                                  $( "select" ).each(function( index ) {
+                                                                          if($( this ).attr('multiple'))
+                                                                          {
+                                                                                //console.log( index + ": " + $( this ).attr('name'));
+                                                                                //console.log( $( this ).attr('id'));
+                                                                                
+                                                                                domId=$( this ).attr('id');
+                                                                                
+                                                                                strId= "id_";
+                                                                                strFrom= "_from";
+                                                                                strTo= "_to";
+                                                                                var domName = domId.substring(strId.length, domId.length);
+                                                                                var url='';
+                                                                                var todo = '';
+                                                                                var fullUrl ='';
+                                                                                divformrowfield = "div.form-row.field-" ;
+                                                                             
+                                                                                if (domName.indexOf("_from") >= 0)
+                                                                                {
+                                                                                    url = domName.substring(0 ,  domName.length - strFrom.length );
+                                                                                    todo='from'
+                                                                                }
+                                                                               
+                                                                                if (domName.indexOf("_to") >= 0)
+                                                                                {
+                                                                                    url = domName.substring(0 ,  domName.length - strTo.length );
+                                                                                    todo='to'
+                                                                                }
+                                                                                    
+                                                                                   
+                                                                                if(url == 'properties')
+                                                                                {
+                                                                                   fullUrl = urlproperties;
+                                                                                   listOfSelectMultiple[index] = $( this ).attr('id')
+                                                                                    
+                                                                                }
+                                                                                   
+                                                                                if(url == 'experimentalcon')
+                                                                                {
+                                                                                   fullUrl = urlexperimentalcon;
+                                                                                   
+                                                                                }
+                                                                                  
+                                                                               
+                                                                                divformrowfield = divformrowfield + url;
+                                                                                iddivformrowfield = "divformrowfield" + url
+                                                                                //console.log($('#' + iddivformrowfield).html());
+                                                                                if  ($('#' + iddivformrowfield).html() == null)
+                                                                                {
+                                                                                    //console.log(  $('#' + iddivformrowfield).html() == null )
+                                                                                
+                                                                                    //$(divformrowfield).append('<div id="' + iddivformrowfield+ '" style="display:none;" > </div>');
+                                                                                    $(divformrowfield).append('<div   id="' + iddivformrowfield+ '" style="border:0px solid black; width: 40%; float: left;  " > </div>');
+                                                                                 }
+                             
+                                                                              //console.log( $( this ).attr('id'));
+                                                                              $( this ).click(function() {
+                                                                                    iddivformrowfield = "divformrowfield" + url;        
+                                                                                    
+                                                                                    datasend ={
+                                                                                                         'todo': todo,
+                                                                                                         'value':$(this).val()[0] 
+                                                                                                         }
+                                                                                 
+                                                                                    callajax(fullUrl, datasend,iddivformrowfield);
+                                                                                });
+                                                                          }
+                                                                    });
+
+                                                                });
+            
+                                                           /* $(document).ready(function() {
+                                                                  django.jQuery("[name=properties]").change(function() {
+                                                                        console.log($(this).val());
+                                                                    });
+
+                                                            });*/
+                                                            
+                                                            
+                                                         });
+
+                                                    function updatecondition(conditionId)
+                                                    {
+                                                       var listParams= []
+                                                       datasend ={}
+                                                       listConditionId= conditionId.split(",")
+                                                       for (var i=0; i <  (listConditionId.length); i++) 
+                                                       {
+                                                           extra = listConditionId[i].split("=")
+                                                           if (extra.length > 1)
+                                                           {
+                                                              //console.log(listConditionId[i] );
+                                                              if (extra[0] =='labelmsgid')
+                                                              {
+                                                                  django.jQuery('#' + extra[1]).text('');
+                                                                  id_to_display_result =  extra[1]
+                                                              }
+                                                              else
+                                                              {
+                                                                  datasend[extra[0]]= extra[1]
+                                                              }
+                                              
+                                                            //datasend[extra[0]]= extra[1]
+                                                 
+                                                    
+                                                              //console.log(extra[1]);
+                                                              
+                                                           }
+                                                           else
+                                                           {
+                                                              datasend[listConditionId[i] ]=  django.jQuery('#' + listConditionId[i]).val();
+                                                            }
+                                                       }
+                                                       
+                                                       
+                                                       datasend['todo'] = 'update';
+                                                 
+                                                            
+                                                       console.log(datasend)
+                                                       
+                                                        
+                                                       fullUrl = urlupdatecondition;
+                                                       callajax(fullUrl, datasend,id_to_display_result)
+       
+                                                       
+                                                    }
+                                                 
+                                                    function updatecoefficient(coeffTags)
+                                                    {
+                                                       var listParams= []
+                                                       datasend ={}
+                                                       listCoeffTags = coeffTags.split(",")
+                                                       for (var i=0; i <  (listCoeffTags.length); i++) 
+                                                       {
+                                                           extra = listCoeffTags[i].split("=")
+                                                           if (extra.length > 1)
+                                                           {
+                                                              //console.log(listCoeffTags[i] );
+                                                              if (extra[0] =='idupdatemessage_id')
+                                                              {
+                                                                  django.jQuery('#' + extra[1]).text('');
+                                                                  id_to_display_result =  extra[1]
+                                                              }
+                                                              else
+                                                              {
+                                                                  datasend[extra[0]]= extra[1].replace(/\s/g, '');
+                                                            }
+                                                 
+                                                    
+                                                              //console.log(extra[1]);
+                                                              
+                                                           }
+                                                           else
+                                                           {
+                                                              datasend[listCoeffTags[i] ]=  parseFloat(django.jQuery('#' + listCoeffTags[i]).val());
+                                                            }
+                                                       }
+                                                       
+                                                       
+                                                       datasend['todo'] = 'update';
+                                                 
+                                                            
+                                                       //console.log(datasend)
+                                                       
+                                                        
+                                                       fullUrl = urlupdatecoefficients;
+                                                       callajax(fullUrl, datasend,id_to_display_result)
+       
+                                                       
+                                                    }
+        
+                                                    
+                                                    function  callajax(url, datasend,id_to_display_result)
+                                                    {
+                                                         var csrftoken = django.jQuery("[name=csrfmiddlewaretoken]").val();
+                                                         function csrfSafeMethod(method) {
+                                                                // these HTTP methods do not require CSRF protection
+                                                                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                                                            }
+                                                                                                   
+                                                           // start django.jQuery
+                                                             django.jQuery(function($) {
+                                                             
+                                                               // prepare ajax
+                                                                $.ajaxSetup({
+                                                                    beforeSend: function(xhr, settings) {
+                                                                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                                                                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                                                        }
+                                                                    }
+                                                                });
+                                                                
+                                                               
+                                                               for (var i=0; i <  (listOfSelectMultiple.length); i++) 
+                                                               {
+                                                                    if($('#' + listOfSelectMultiple[i]).val() != null)
+                                                                    {
+                                                                       //console.log(listOfSelectMultiple[i]);
+                                                                       //console.log($('#' + listOfSelectMultiple[i]).val());
+                                                                       datasend[listOfSelectMultiple[i]] = $('#' + listOfSelectMultiple[i]).val()[0];
+                                                                   }
+                                                               }
+                                                               
+                                                               console.log(datasend);
+                                                            // start ajax
+                                                                $.ajax({
+                                                                url : url,  
+                                                                type: "POST",  
+                                                                dataType: 'json',
+                                                                data : datasend, 
+                                                                success: function (data) {
+                                              
+                                                                    console.log("success"); // another sanity check
+                                                                    
+ 
+                                                                    
+                                                                    html = django.jQuery('#' + id_to_display_result).html( );
+                                                                    if(django.jQuery('#' + id_to_display_result).html( ) == null) 
+                                                                    {
+                                                                        django.jQuery('#' + id_to_display_result).text( data.result ); 
+                                                                         
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        django.jQuery('#' + id_to_display_result).empty();
+                                                                        django.jQuery('#' + id_to_display_result).html( data.result );
+                                                                        django.jQuery('#' + id_to_display_result).show();
+                                                                    }
+                                                                    
+                                                                    
+                                                                    
+                                                                    
+                                                                },
+                                                        
+                                                                // handle a non-successful response
+                                                                error : function(xhr,errmsg,err) {
+                                                                    $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+                                                                        " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+                                                                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                                                                }
+                                                            });
+                                                            
+                                                            //end ajax
+                                                         });
+                                                         // end django.jQuery
+                                                    
+                                                    }
+                                                    </script>
+                                        
+                                        """
+                    self.fields['jquery'].initial = javascript
                     
         else:
             if args:#save  new
@@ -1867,7 +2392,15 @@ class FileUserAdminForm(forms.ModelForm):
                 pass
         
         
+class CategoryModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        # Return a string of the format: "description  (name)"
+        return "%s (%s)"%( obj.description,obj.name)  
         
+class DictionaryForm(forms.ModelForm):
+    category = CategoryModelChoiceField(Category.objects.all().order_by('description'))
+    class Meta:
+        model = Dictionary    
         
         
 class CatalogPropertyAdminForm(forms.ModelForm):  

@@ -1,0 +1,50 @@
+#------------------------------------------------------------------------------
+#$Date: 2015-07-11 08:00:00 +0000 $
+#$Revision: 001 $ Luis Fuentes
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://www.materialproperties.org/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_ywrtaw4=ozowhuwyxvccbid
+_cod_database_code   8103501
+_structure_refined 'no'
+_chemical_name_mineral  'lithium-cobalt Olivine'
+_phase_name 'lithium-cobalt double orthophosphate'
+_phase_formula 'LiCoPO4'
+_chemical_formula_sum 'LiCoPO4'
+_symmetry_point_group_name_H-M 'm m m'
+_cell_length_a  10.20
+_cell_length_b  5.92
+_cell_length_c  4.69
+_cell_angle_alpha  90
+_cell_angle_beta   90
+_cell_angle_gamma  90
+
+_publ_author_name
+'Rivera JP.'
+_publ_section_title
+;
+'The linear magnetoelectric effect in LiCoPO4 Revisited'
+;
+
+_journal_name_full               'Ferroelectrics'
+_journal_page_first               147
+_journal_page_last                164
+_journal_volume                   161
+_journal_year                     1994
+
+_prop_conditions_temperature 4.2
+_prop_magnetoelectric_MEalphaij 'MEalphaij'
+
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+MEalphaij 12 18.4
+MEalphaij 21 30.6
+

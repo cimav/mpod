@@ -47,6 +47,7 @@ import json
 import urllib2
  
 from UtilPlot  import *
+from django.utils.timezone import get_current_timezone
 
 
 
@@ -341,7 +342,7 @@ def file_detail_view(request,pk):
 #                                ''' SEARCH BY '''
 ######################################################################################
 def sbproperty(request):
-    ogge = Property.objects.all()
+    ogge = Property.objects.filter(active=True)
     properties_list_table_html = view_linked_properties_list(oggetti=ogge, header=None)
     return render_to_response('sbproperty.html', {"properties_list_table" : properties_list_table_html}, context_instance=RequestContext(request))
 
@@ -352,11 +353,11 @@ def viewproperty(request, property_id):
     html_res = None
     html_res2 = None
     try:
-        ogge = Property.objects.get(id__exact = property_id)
+        ogge = Property.objects.get(id__exact = property_id, active=True)
     except:
         pass
     if ogge:
-        datafiles = DataFile.objects.filter(properties__id__exact = property_id)
+        datafiles = DataFile.objects.filter(properties__id__exact = property_id, active=True)
         html_res = view_obj_as_2cols_table (Property, ogge, cap="Property details")
         html_res2 = view_as_linked_table(DataFile, oggetti=datafiles, header='Associated datafiles')
     #request_path=request.get_full_path()
@@ -1451,7 +1452,7 @@ def viewarticle(request, article_id):
 def viewexparcond(request, exparcond_id):
     request_path=request.get_full_path()
     debug_info=request_path
-    ogge = ExperimentalParCond.objects.filter(id__exact = exparcond_id).distinct()
+    ogge = ExperimentalParCond.objects.filter(id__exact = exparcond_id , active=True).distinct()
     html_res = None
     if ogge:
         ogge = ogge[0]
@@ -1482,33 +1483,33 @@ def get_datafiles(phase_name_q='', formula_q='', mpod_code_q='', cod_code_q='', 
     res_obj = None
     if phase_name_q:
         name_set = (Q(phase_name__icontains=phase_name_q) | Q(phase_generic__icontains=phase_name_q))
-        res_obj = DataFile.objects.filter(name_set)
+        res_obj = DataFile.objects.filter(name_set, active=True)
 
     if formula_q:
         formula_set = Q(chemical_formula__icontains=formula_q)
         if res_obj:
             res_obj = res_obj.filter(formula_set)
         else:
-            res_obj = DataFile.objects.filter(formula_set)
+            res_obj = DataFile.objects.filter(formula_set,active=True)
     
     if publ_author_q:
         author_set = Q(publication__authors__icontains=publ_author_q)
         if res_obj:
             res_obj = res_obj.filter(author_set)
         else:
-            res_obj = DataFile.objects.filter(author_set)
+            res_obj = DataFile.objects.filter(author_set, active=True)
 
     if mpod_code_q:
         try:
             mpod_code_set = Q(code__icontains = int(mpod_code_q))
-            res_obj = DataFile.objects.filter(mpod_code_set)
+            res_obj = DataFile.objects.filter(mpod_code_set, active=True).order_by('code')
         except:
             pass
 
     if cod_code_q:
         try:
             cod_code_set = Q(cod_code__exact = int(cod_code_q))
-            res_obj = DataFile.objects.filter(cod_code_set)
+            res_obj = DataFile.objects.filter(cod_code_set, active=True).order_by('code')
         except:
             pass
         
@@ -1653,7 +1654,7 @@ def newcasev2(request):
     questionAxis=''
     axisList=''
     questionGp=''
-    puntualGroupList=''
+    pointGroupList=''
     inputList=''
     questionAxis=''
     message=""
@@ -1662,15 +1663,16 @@ def newcasev2(request):
     
     
     catalogCrystalSystemList = [];
-    list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=propertyCategoryName[0],active=True)
+    """list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=propertyCategoryName[0],active=True)
     for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
         objCatalogCrystalSystem=CatalogCrystalSystem();
         objCatalogCrystalSystem = register_catalogCrystalSystem
         catalogCrystalSystemList.append(objCatalogCrystalSystem)   
         del objCatalogCrystalSystem
+    """
+    
         
-    if 'catalogCrystalSystemListOnSession' not in request.session  or not request.session['catalogCrystalSystemListOnSession']:
-        request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
+    
    
     typeList =  [];
    
@@ -1698,13 +1700,23 @@ def newcasev2(request):
         pass
     else:
         del request.session['dataPropertyListOnSession']    
+        
     
-    
+    list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=CatalogProperty.objects.get(name__exact=catalogproperty_name),active=True)
+    for i,crystalsystem in enumerate(list_CatalogCrystalSystem): 
+        try:
+            crystalsystemtype=CrystalSystemType.objects.get(catalogcrystalsystem=crystalsystem,type=Type.objects.filter(active=True, name=typeselected),active=True)
+            catalogCrystalSystemList.append(crystalsystemtype.catalogcrystalsystem)
+        except ObjectDoesNotExist as error:
+                print "Message({0}): {1}".format(99, error.message) 
+        
+    if 'catalogCrystalSystemListOnSession' not in request.session  or not request.session['catalogCrystalSystemListOnSession']:
+        request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
      
     ids=CatalogProperty.objects.filter(active=True,name=catalogproperty_name).values_list('id', flat=True)    
     type_ids=Type.objects.filter(catalogproperty_id__in=ids,active=True, name=typeselected).values_list('id',flat=True)    
     data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
-    dataPropertyList=Property.objects.filter(id__in=data_property_ids)
+    dataPropertyList=Property.objects.filter(id__in=data_property_ids,active=True)
     request.session['dataPropertyListOnSession']=dataPropertyList
     property=Property()
     property = dataPropertyList[0] 
@@ -1854,7 +1866,7 @@ def onhold(request,todo,index):
                 del propertyMaster.propertyList[int(index)-1]       
                 sizelist = len(propertyMaster.propertyList)
                 if sizelist==0:
-                    propertyMaster.puntualgroup = None
+                    propertyMaster.pointgroup = None
                     
                 request.session['propertyMaster']=propertyMaster    
                    
@@ -1879,7 +1891,7 @@ def onhold(request,todo,index):
                     #del request.session['propertyMaster']     
                     propertyMaster.propertyList = []
                     
-                    propertyMaster.puntualgroup = None
+                    propertyMaster.pointgroup = None
                     request.session['propertyMaster'] = propertyMaster
                     data = {
                         'tblProperty': "tblProperty",
@@ -1918,13 +1930,12 @@ def onhold(request,todo,index):
                         
                         filename = newusernamebase64.lower() + name_str(15) 
                                           
-                        
+                        """
                         if 'newDictionaryList' not in request.session  or not request.session['newDictionaryList']:
                             pass
                         else:
                             newDictionaryList =  request.session['newDictionaryList']
                             for d in newDictionaryList:
-                                print d.tag
                                 try:
                                     dictionary=Dictionary.objects.get(tag__exact=d.tag)                                                          
                                 except ObjectDoesNotExist as error:
@@ -1941,12 +1952,14 @@ def onhold(request,todo,index):
                                         pt=PropTags()
                                         pt.tag= parts[1]
                                         pt.save()
+                            """
                                 
                                 
                         mpodutil=MPODUtil()
                         mpodutil.mpodwrite(filename,propertyMaster)
                         mpodutil.addinfo()
                         mpodutil.adddatavalue()                
+                        mpodutil.user = user
                         mpodutil.savefile()
                         
                         if mpodutil.message:
@@ -1955,16 +1968,17 @@ def onhold(request,todo,index):
                             response = render_to_response('account/500.html', { "message":message, "current" :"File created and sent","description" :description,}, context_instance=RequestContext(request))  
                             return response
     
-                        
+                        """
                         u= User()
                         u=user
                         fileuser = FileUser()
                         fileuser.filename=mpodutil.cif_created
                         fileuser.authuser=u 
+                        fileuser.date = datetime.datetime.now(tz=get_current_timezone()).strftime('%Y-%m-%d %H:%M:%S')
                         fileuser.reportvalidation = mpodutil.reportValidation
                         fileuser.save()
                         
-                       
+                       """
                         
                         
                         
@@ -1982,6 +1996,8 @@ def onhold(request,todo,index):
                         
                         messageCategoryDetailQuerySet1=MessageCategoryDetail.objects.filter(messagecategory=MessageCategory.objects.get(pk=3))#3 for category staff notification
                         #messageMailQuerySet1= MessageMail.objects.filter(pk=messageCategoryDetail1.message.pk)
+                        sendmsg = True
+                        
                         try:
                             for mcd in messageCategoryDetailQuerySet1:
                                 messageCategoryDetail = MessageCategoryDetail()
@@ -2034,7 +2050,9 @@ def onhold(request,todo,index):
                                                                                 connection=backend)
                                     
                                     email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
-                                    email.send()
+                                    if sendmsg:
+                                        email.send()
+                                        
                         except Exception  as e:
                             response = render_to_response('account/500.html', { "message":e, "current" :"File created and sent","description" :"Error when sending the email for staff notification",}, context_instance=RequestContext(request))  
                             return response
@@ -2089,7 +2107,8 @@ def onhold(request,todo,index):
                                                                             connection=backend)
                                 
                                 email.attach_file(os.path.join(str(mpodutil.cifs_dir_valids), mpodutil.cif_created))
-                                email.send()
+                                if sendmsg:
+                                    email.send()
                                 
                                 
                         del request.session['propertyMaster']     
@@ -2291,7 +2310,7 @@ def showmatrix(request,pk):
         datafiletemp = DataFileTemp.objects.get(id=int(datafile_id))
         
         
-        objPropertyTemp=PropertyTemp.objects.get(id=pk)
+        objPropertyTemp=PropertyTemp.objects.get(id=pk, active=True)
         dim = get_dimensions(objPropertyTemp.tensor_dimensions)
         coefficents = get_coefficents_total(objPropertyTemp.tensor_dimensions)
         #parts=objPropertyTemp.tag.split('_')[-1]
@@ -2496,7 +2515,7 @@ def updatecoefficient(request,pk):
         
         datafiletemp = DataFileTemp.objects.get(id=int(datafile_id))
         
-        objPropertyTemp=PropertyTemp.objects.get(id=pk)
+        objPropertyTemp=PropertyTemp.objects.get(id=pk, active=True)
         dim = get_dimensions(objPropertyTemp.tensor_dimensions)
         coefficents = get_coefficents_total(objPropertyTemp.tensor_dimensions)
         #parts=objPropertyTemp.tag.split('_')[-1]
@@ -2596,7 +2615,7 @@ def addmaterial(request,pk):
     in_list = False
     error =""
     dictionary_pk =  request.POST.get('dictionary_pk', False) 
-    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk) 
+    objDictionarySelected = Dictionary.objects.get(pk=dictionary_pk, active=True) 
     print objDictionarySelected.type
     if dicvalue != "":
         if objDictionarySelected.type == "numb":
@@ -2681,18 +2700,6 @@ def addcasev2(request):
             else:
                 del request.session['inputList']
                 
-        """
-        if 'coefficientsparts' not in request.session  or not request.session['coefficientsparts']:
-            pass
-        else:
-            selectChange = request.POST.get('selectChange', False)  
-            #print selectChange
-            if selectChange == "0":
-                coefficientsparts=request.session['coefficientsparts']
-            else:
-                del request.session['coefficientsparts']
-        """
- 
  
             
         #list initialisation 
@@ -2733,14 +2740,16 @@ def addcasev2(request):
                 if typeselected == '':
                     typeselected = 's'
             if catalogproperty_name == "p":
-                print  len(typeselected)  == int(0)
-               
-                if typeselected != "dg" and typeselected != "eh" and (len(typeselected)  == int(0)) != True:
+                print len(typeselected)
+                if typeselected != "dg" and typeselected != "eh" and (len(typeselected)  == 0) != True:
                     typeselected='dg'
                 else:
-                    objDataProperty = Property.objects.get(id=int(datapropertytagselected))  
-                    objTypeDataProperty=TypeDataProperty.objects.get(dataproperty=objDataProperty)
-                    typeselected=objTypeDataProperty.type.name
+                    objDataProperty = Property.objects.get(id=int(datapropertytagselected), active=True)  
+                    typeQuerySet=Type.objects.filter(catalogproperty=CatalogProperty.objects.get(name__exact=catalogproperty_name))
+           
+                     
+                    
+                    typeselected=typeQuerySet[0].name
                   
                 typeselecteddg='dg'
                 typeselectedeh='eh'
@@ -2761,10 +2770,10 @@ def addcasev2(request):
         if axisselected_name == False:
             axisselected_name =''
         
-        puntualgroupselected_name =''
-        puntualgroupselected_name =  request.POST.get('puntualgroupselected_name', False)
-        if puntualgroupselected_name == False:
-            puntualgroupselected_name =''
+        pointgroupselected_name =''
+        pointgroupselected_name =  request.POST.get('pointgroupselected_name', False)
+        if pointgroupselected_name == False:
+            pointgroupselected_name =''
         
         
         if 'propertyCategoryNameListOnSession' not in request.session  or not request.session['propertyCategoryNameListOnSession']:
@@ -2775,20 +2784,23 @@ def addcasev2(request):
           
           
         list_CatalogCrystalSystem= CatalogCrystalSystem.objects.filter(catalogproperty=CatalogProperty.objects.get(name__exact=catalogproperty_name),active=True)
-        for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
+        """for register_catalogCrystalSystem in list_CatalogCrystalSystem: 
             objCatalogCrystalSystem=CatalogCrystalSystem();
             objCatalogCrystalSystem = register_catalogCrystalSystem
-            catalogCrystalSystemList.append(objCatalogCrystalSystem)
+            catalogCrystalSystemList.append(objCatalogCrystalSystem)"""
+        for i,crystalsystem in enumerate(list_CatalogCrystalSystem): 
+            try:
+                crystalsystemtype=CrystalSystemType.objects.get(catalogcrystalsystem=crystalsystem,type=Type.objects.filter(active=True, name=typeselected),active=True)
+                catalogCrystalSystemList.append(crystalsystemtype.catalogcrystalsystem)
+            except ObjectDoesNotExist as error:
+                print "Message({0}): {1}".format(99, error.message) 
 
         if 'catalogCrystalSystemListOnSession' not in request.session  or not request.session['catalogCrystalSystemListOnSession']:
             pass
         else:
             del request.session['catalogCrystalSystemListOnSession']
 
-        """if (chkBoxmge == False or str(chkBoxmge[0]) == '1'  and catalogproperty_name == "2nd") or catalogproperty_name != "2nd":
-            request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
-        else:
-            catalogCrystalSystemList=[]"""
+ 
             
         request.session['catalogCrystalSystemListOnSession']=catalogCrystalSystemList
             
@@ -2810,12 +2822,12 @@ def addcasev2(request):
  
         
         data_property_ids=TypeDataProperty.objects.filter(type_id__in=type_ids).values_list('dataproperty_id',flat=True)    
-        dataPropertyList=Property.objects.filter(id__in=data_property_ids)
+        dataPropertyList=Property.objects.filter(id__in=data_property_ids, active=True)
         request.session['dataPropertyListOnSession']=dataPropertyList
 
 
         dictionaryList=[]
-        dictionaryQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=9), deploy = 1)
+        dictionaryQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=9), deploy = 1, active=True)
         for dictionary in dictionaryQuerySet: 
             objDictionary =Dictionary();
             objDictionary = dictionary
@@ -2827,8 +2839,8 @@ def addcasev2(request):
         
         dictionaryPhaseList=[]
         
-        dictionaryPhaseQuerySet1= Dictionary.objects.filter(category = Category.objects.get(pk=4), deploy = 1)
-        dictionaryPhaseQuerySet2= Dictionary.objects.filter(category = Category.objects.get(pk=8), deploy = 1)
+        dictionaryPhaseQuerySet1= Dictionary.objects.filter(category = Category.objects.get(pk=4), deploy = 1, active=True)
+        dictionaryPhaseQuerySet2= Dictionary.objects.filter(category = Category.objects.get(pk=8), deploy = 1, active=True)
         dictionaryPhaseQuerySet= (dictionaryPhaseQuerySet1 | dictionaryPhaseQuerySet2).distinct()
         for dictionary in dictionaryPhaseQuerySet: 
             objDictionary =Dictionary();
@@ -2839,7 +2851,7 @@ def addcasev2(request):
         request.session['dictionaryPhaseList'] =dictionaryPhaseList
         
         dictionaryPhaseCharacteristicList=[]
-        dictionaryPhaseCharacteristicQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=11), deploy = 1)
+        dictionaryPhaseCharacteristicQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=11), deploy = 1, active=True)
         for dictionary in dictionaryPhaseCharacteristicQuerySet: 
             objDictionary =Dictionary();
             objDictionary = dictionary
@@ -2848,7 +2860,7 @@ def addcasev2(request):
             
             
         dictionaryMeasurementList=[]
-        dictionaryMeasurementQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=12), deploy = 1)
+        dictionaryMeasurementQuerySet= Dictionary.objects.filter(category = Category.objects.get(pk=12), deploy = 1, active=True)
         for dictionary in dictionaryMeasurementQuerySet: 
             objDictionary =Dictionary();
             objDictionary = dictionary
@@ -2887,21 +2899,21 @@ def addcasev2(request):
       
         warning2 = ""
         warning = ""
-        samepuntualgroup = True
+        samepointgroup = True
         if form.is_valid():
             #request.POST = form.data
            
-            if not propertyMaster.puntualgroup:
-                propertyMaster.puntualgroup = puntualgroupselected_name
-            elif not propertyMaster.puntualgroup == puntualgroupselected_name:
-                samepuntualgroup = False
-                warning = "The punctual group " +propertyMaster.puntualgroup +" must be the same for all the properties of this case"
+            if not propertyMaster.pointgroup:
+                propertyMaster.pointgroup = pointgroupselected_name
+            elif not propertyMaster.pointgroup == pointgroupselected_name:
+                samepointgroup = False
+                warning = "The punctual group " +propertyMaster.pointgroup +" must be the same for all the properties of this case"
             
             
             propertiesv2=Propertiesv2(catalogproperty_name, crystalsystem_name, typeselected,datapropertytagselected, chkBoxmge,request.POST, inputList=inputList)#,coefficientsparts=coefficientsparts)
             qd =[]
             qd.append(form.data)
-            propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name,*qd)
+            propertiesv2.NewProperties(pointgroupselected_name,axisselected_name,*qd)
 
             sucess=propertiesv2.sucess  
 
@@ -2919,19 +2931,7 @@ def addcasev2(request):
  
                 print "continue"
             else:
-                
-                #propertiesv2.releaseRequet()
-                """propertiesv2.title = request.POST.get('title', False)
-                propertiesv2.authors = request.POST.get('author', False)
-                propertiesv2.journal = request.POST.get('journal', False)
-                propertiesv2.year = request.POST.get('year', False)
-                propertiesv2.volume = request.POST.get('volume', False)
-                propertiesv2.page_first = request.POST.get('page_first', False)
-                propertiesv2.page_last = request.POST.get('page_last', False)
-                """
-                
-                
-                
+ 
                 propertyMaster.title = request.POST.get('title', False)
                 propertyMaster.authors = request.POST.get('author', False)
                 propertyMaster.journal = request.POST.get('journal', False)
@@ -2995,14 +2995,6 @@ def addcasev2(request):
                     print propertyMaster.headerBlockValues  
                     print propertiesv2.loopBlockValues
  
-                     
-                    #propertiesv2.headerBlockValues = list
-                    
-                    
-                    
-                 
-           
-                
                 print "add to list"
                 
                 
@@ -3014,27 +3006,16 @@ def addcasev2(request):
                     del request.session['dictionaryValues' ] 
                 
                 if added == 0:
-                    warning2 = "Property previously added with same values"
+                    warning2 = "Property previously added"
                 else:
-                    if samepuntualgroup:
+                    if samepointgroup:
                         propertyMaster.propertyList.append(propertiesv2)  
                                      
                     lengthlist =len(propertyMaster.propertyList) 
                      
                  
                 request.session['propertyMaster']= propertyMaster    
-                 
-                    
-
-                """added =addToSession(request,propertiesv2,'propertySessionList')
-                propertySessionList= request.session['propertySessionList'];
-                
  
-                if added == 0:
-                    warning2 = "Property previously added"
-                else:
-                    lengthlist =len(propertySessionList) 
-                """
 
                 validationbyform = 0
                 #ShowBtnSend=0
@@ -3063,16 +3044,16 @@ def addcasev2(request):
             ShowBtnSend=1
             validationbyform = 1
             propertiesv2=Propertiesv2(catalogproperty_name,crystalsystem_name,typeselected,datapropertytagselected, chkBoxmge,request.POST)
-            propertiesv2.NewProperties(puntualgroupselected_name,axisselected_name)
+            propertiesv2.NewProperties(pointgroupselected_name,axisselected_name)
             
-            puntualgroupselected_name = propertiesv2.puntualgroupselected_name
+            pointgroupselected_name = propertiesv2.pointgroupselected_name
 
             if  len(inputList) > 0:                
                 for cpd in inputList:
                     value =request.POST.get(cpd.name, False)
                     if value != False:
-                        if value != "" :
-                            inputListValues[cpd.name] = value
+                        #if value != "" :
+                        inputListValues[cpd.name] = value
 
 
                 inputListReadOnly = propertiesv2.catalogPropertyDetailReadOnly
@@ -3117,7 +3098,7 @@ def addcasev2(request):
                                                                                              "propertyCategoryName":propertyCategoryName,
                                                                                              "catalogproperty_name":catalogproperty_name,
                                                                                              "catalogCrystalSystemList":catalogCrystalSystemList,
-                                                                                             "puntualGroupList":propertiesv2.puntualGroupList,
+                                                                                             "pointGroupList":propertiesv2.pointGroupList,
                                                                                              "questionGp":propertiesv2.questionGp,
                                                                                              "axisList":propertiesv2.axisList, 
                                                                                              "questionAxis":propertiesv2.questionAxis, 
@@ -3128,7 +3109,7 @@ def addcasev2(request):
                                                                                              "inputListReadOnly":inputListReadOnly,
                                                                                              "jquery" :propertiesv2.jquery,
                                                                                              "inputListValues":inputListValues,
-                                                                                             "puntualgroupselected_name":puntualgroupselected_name,
+                                                                                             "pointgroupselected_name":pointgroupselected_name,
                                                                                              "axisselected_name":axisselected_name,
                                                                                              "typeList":typeList,
                                                                                              "inputList":inputList,

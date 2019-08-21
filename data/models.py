@@ -87,7 +87,7 @@ class PublArticle(models.Model):
     journal = models.CharField(max_length=127)
     year = models.IntegerField(max_length=4, null=True)
     volume = models.CharField(max_length=6)
-    issue = models.IntegerField(max_length=6, null=True, blank=True)
+    issue = models.CharField(max_length=255, null=True, blank=True)
     first_page = models.IntegerField(max_length=6, null=True, blank=True)
     last_page = models.IntegerField(max_length=6, null=True, blank=True)
     reference = models.CharField(max_length=14, blank=True)
@@ -113,7 +113,7 @@ class PublArticleTemp(models.Model):
     journal = models.CharField(max_length=127)
     year = models.IntegerField(max_length=4, null=True)
     volume = models.CharField(max_length=6)
-    issue = models.IntegerField(max_length=6, null=True, blank=True)
+    issue = models.CharField(max_length=255, null=True, blank=True)
     first_page = models.IntegerField(max_length=6, null=True, blank=True)
     last_page = models.IntegerField(max_length=6, null=True, blank=True)
     reference = models.CharField(max_length=14, blank=True)
@@ -132,6 +132,7 @@ class Property(models.Model):
     tensor_dimensions = models.CharField(max_length=10)
     units = models.CharField(max_length=25)
     units_detail = models.CharField(max_length=60)
+    active = models.BooleanField(_(u'Active'),default=False)
 
     def __unicode__(self):
         return str(self.name) +", "+  str(self.units)
@@ -150,6 +151,7 @@ class PropertyTemp(models.Model):
     units = models.CharField(max_length=25)
     units_detail = models.CharField(max_length=60)
     short_tag = models.CharField(max_length=45)
+    active = models.BooleanField(_(u'Active'),default=True)
 
     def __unicode__(self):
         return str(self.name) +", "+  str(self.units)
@@ -166,6 +168,7 @@ class DataFile(models.Model):
     phase_generic = models.CharField(max_length=255, null=True, blank=True)
     phase_name = models.CharField(max_length=255)
     chemical_formula = models.CharField(max_length=255)
+    active = models.BooleanField(_(u'Active'),default=False)
     publication = models.ForeignKey(PublArticle,verbose_name="Article")
     properties = models.ManyToManyField(Property, null=True, blank=True, db_table = 'data_datafile_property',verbose_name="Properties")
     
@@ -189,8 +192,7 @@ class DataFile(models.Model):
                 break
 
 
-    def __unicode__(self):
-        return str(self.code)+", "+str(self.phase_generic)+", "+str(self.phase_name)
+ 
     
     
     
@@ -226,14 +228,13 @@ class DataFileProperty(models.Model):
         verbose_name_plural = _('File Properties')
 
 class DataFilePropertyTemp(models.Model):    
-    datafiletemp =models.ForeignKey(DataFileTemp)
-    propertytemp=models.ForeignKey(PropertyTemp)
+    datafiletemp =models.ForeignKey(DataFileTemp,verbose_name="Data File")
+    propertytemp=models.ForeignKey(PropertyTemp,verbose_name="Property")
     
     class Meta:
         db_table = 'data_datafile_property_temp'    
         
-    def __unicode__(self):
-        return str(self.datafiletemp.filename) +", "+  str(self.propertytemp.name)
+ 
         
    
 class PropertyValues(models.Model):
@@ -241,11 +242,9 @@ class PropertyValues(models.Model):
     label=  models.CharField(max_length=255)
     tensorial_index= models.IntegerField(max_length=11)
     value  =  models.CharField(max_length=500)
-    
+    tensorindex = models.IntegerField(max_length=11)
 
-
-    def __unicode__(self):
-        return str(self.prop_data_label)  
+ 
     
     class Meta:
         db_table = 'property_values' 
@@ -253,17 +252,19 @@ class PropertyValues(models.Model):
         verbose_name = _('File Property Information')
         verbose_name_plural = _('File Properties')
 
+
 class PropertyValuesTemp(models.Model):
     datafilepropertytemp=models.ForeignKey(DataFilePropertyTemp)
     label=  models.CharField(max_length=255)
     tensorial_index= models.IntegerField(max_length=11)
     value  =  models.CharField(max_length=500)
+    tensorindex = models.IntegerField(max_length=11)
     
     
     
 
     def __unicode__(self):
-        return str(self.prop_data_label) 
+        return str(self.label) 
     
     class Meta:
         db_table = 'property_values_temp' 
@@ -281,6 +282,7 @@ class ExperimentalParCond(models.Model):
     description = models.CharField(max_length=511)
     units = models.CharField(max_length=25)
     units_detail = models.CharField(max_length=60)
+    active = models.BooleanField(_(u'Active'),default=False)
     
     class Meta:
         db_table = 'data_experimentalparcond' 
@@ -300,7 +302,7 @@ class ExperimentalParCondTemp(models.Model):
     description = models.CharField(max_length=511)
     units = models.CharField(max_length=25)
     units_detail = models.CharField(max_length=60)
-    #active= models.CharField(max_length=1)
+    active = models.BooleanField(_(u'Active'),default=False)
 
     def __unicode__(self):
         return str(self.name) +", "+  str(self.units)  
@@ -330,12 +332,8 @@ class PropertyConditionDetail(models.Model):
     datafileproperty=models.ForeignKey(DataFileProperty)
     condition=models.ForeignKey(ExperimentalParCond)
     value  =  models.CharField(max_length=511)
-    
-    
-    
-
-    def __unicode__(self):
-        return str(self.prop_data_label) 
+    tensorindex = models.IntegerField(max_length=11)
+ 
     
     class Meta:
         db_table = 'datafileproperty_condition_detail' 
@@ -347,12 +345,9 @@ class PropertyConditionDetailTemp(models.Model):
     datafileproperty=models.ForeignKey(DataFilePropertyTemp)
     condition=models.ForeignKey(ExperimentalParCondTemp)
     value  =  models.CharField(max_length=511)
+    tensorindex = models.IntegerField(max_length=11)
     
-    
-    
-
-    def __unicode__(self):
-        return str(self.prop_data_label) 
+ 
     
     class Meta:
         db_table = 'datafileproperty_condition_detail_temp' 
@@ -431,14 +426,14 @@ class CatalogAxis(models.Model):
        
 
      
-class PuntualGroupNames(models.Model): 
+class PointGroupNames(models.Model): 
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=511,blank=True)   
       
     
    
     class Meta:
-        db_table = 'puntual_group_names'    
+        db_table = 'point_group_names'    
         app_label = string_with_title("Properties", "Properties Settings")
         """verbose_name = _('Group')
         verbose_name_plural = _('Groups')"""
@@ -452,7 +447,7 @@ class CrystalSystemAxis(models.Model):
     type =  models.ForeignKey(Type,verbose_name="Type")     
     active = models.BooleanField(_(u'Active'),default=False)
     catalogpointgroup= models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
-    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")   
+    pointgroupnames = models.ForeignKey(PointGroupNames,verbose_name="Group Names")   
     
     class Meta:
         db_table = 'crystalsystem_axis'  
@@ -461,21 +456,33 @@ class CrystalSystemAxis(models.Model):
         #verbose_name_plural = _('CrystalSystem')
         
         
-class PuntualGroupGroups(models.Model): 
+class PointGroupGroups(models.Model): 
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group") 
-    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")     
+    pointgroupnames = models.ForeignKey(PointGroupNames,verbose_name="Group Names")     
    
     class Meta:
-        db_table = 'puntual_group_groups'            
+        db_table = 'point_group_groups'            
         #app_label = 'Propertie_Settings'
         app_label = string_with_title("Properties", "Properties Settings")
         verbose_name = _('Point Group and Group')
         verbose_name_plural = _('Point Groups and Groups')
          
     def __unicode__(self):
-        return  str(self.puntualgroupnames)    
+        return  str(self.pointgroupnames)    
     
     
+class CrystalSystemType(models.Model): 
+    catalogcrystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
+    type =  models.ForeignKey(Type,verbose_name="Type")    
+    active = models.BooleanField(_(u'Active'),default=False)
+        
+    class Meta:
+        db_table = 'crystalsystem_type'    
+        app_label = string_with_title("Properties", "Properties Settings")
+        #verbose_name = _('Crystal System')
+        #verbose_name_plural = _('CrystalSystem')       
+        
+        
 class CrystalSystemPointGroup(models.Model): 
     catalogcrystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
@@ -484,19 +491,17 @@ class CrystalSystemPointGroup(models.Model):
         
     class Meta:
         db_table = 'crystalsystem_point_group'    
-        app_label = string_with_title("Properties", "Properties Settings")
-        #verbose_name = _('Crystal System')
-        #verbose_name_plural = _('CrystalSystem')        
+        app_label = string_with_title("Properties", "Properties Settings") 
         
         
-class CrystalSystemPuntualGroupNames(models.Model): 
+class CrystalSystemPointGroupNames(models.Model): 
     catalogcrystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")   
-    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")   
+    pointgroupnames = models.ForeignKey(PointGroupNames,verbose_name="Group Names")   
     type =  models.ForeignKey(Type,verbose_name="Type")    
     active = models.BooleanField(_(u'Active'),default=False)
         
     class Meta:
-        db_table = 'crystalsystem_puntualgroupnames'    
+        db_table = 'crystalsystem_pointgroupnames'    
         app_label = string_with_title("Properties", "Properties Settings")
          
     
@@ -524,7 +529,7 @@ class CatalogPropertyDetail(models.Model):
     crystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")    
     catalogaxis= models.ForeignKey(CatalogAxis,verbose_name="Axes")  
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
-    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
+    pointgroupnames = models.ForeignKey(PointGroupNames,verbose_name="Group Names")  
     dataproperty = models.ForeignKey(Property,verbose_name="Tag",blank=True)  
    
     class Meta:
@@ -567,7 +572,7 @@ class CatalogPropertyDetailTemp(models.Model):
     crystalsystem= models.ForeignKey(CatalogCrystalSystem,verbose_name="Crystal System")    
     catalogaxis= models.ForeignKey(CatalogAxis,verbose_name="Axes")  
     catalogpointgroup =   models.ForeignKey(CatalogPointGroup,verbose_name="Point Group")  
-    puntualgroupnames = models.ForeignKey(PuntualGroupNames,verbose_name="Group Names")  
+    pointgroupnames = models.ForeignKey(PointGroupNames,verbose_name="Group Names")  
     dataproperty = models.ForeignKey(Property,verbose_name="Tag",blank=True)  
     class Meta:
         db_table = 'catalog_property_detail_temp'       
@@ -724,8 +729,15 @@ class FileUser(models.Model):
     def user_name(self):
         return   self.authuser.username
 
-        
-        
+      
+    
+    def datafile_code(self):
+        if self.datafile:
+            return self.datafile.code
+        else:
+            return ''
+    
+            
         
         
 
@@ -757,11 +769,7 @@ def create_profile(sender, **kwargs):
 post_save.connect(create_profile, sender=User)
 
 
-
-
-
-
-    
+ 
     
 class Category(models.Model):
     name = models.CharField(_(u'Name'),max_length=100)
@@ -769,14 +777,45 @@ class Category(models.Model):
     
     class Meta:
         db_table = 'category'
-        app_label = 'Dictionaries'
-        verbose_name = _('Category')
-        verbose_name_plural = _('Categories')
+        app_label = string_with_title("Dictionaries", "DictionariesSettings")
+        verbose_name = _('Dictionary Category')
+        verbose_name_plural = _('Dictionary  Categories')
         
     def __unicode__(self): # __str__ on Python 3
-        return str(self.name)
+        return str(self.description)
         
         
+        
+class CategoryTag(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
+    
+    class Meta:
+        db_table = 'category_tag'
+        app_label = string_with_title("Dictionaries", "DictionariesSettings")
+        verbose_name = _('Tag Category')
+        verbose_name_plural = _('Tag Category')
+        
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.description)
+    
+    
+    
+
+class Tags(models.Model):
+    tag = models.CharField(_(u'tag'),max_length=100)
+    active= models.BooleanField(_(u'Active'),max_length=1,default=True)
+    categorytag = models.ForeignKey(CategoryTag, on_delete=models.CASCADE,verbose_name="Tag Category")
+    
+    class Meta:
+        db_table = 'tags'
+        app_label = string_with_title("Dictionaries", "Dictionaries Settings")
+        verbose_name = _('Tag')
+        verbose_name_plural = _('Tags')
+        
+    def __unicode__(self): # __str__ on Python 3
+        return str(self.tag)
+    
 class Dictionary(models.Model):
     tag = models.CharField(_(u'Tag'),max_length=255)
     name = models.CharField(_(u'Name'),max_length=255)
@@ -787,13 +826,15 @@ class Dictionary(models.Model):
     definition= models.TextField()  
     deploy= models.BooleanField(_(u'Deploy'),max_length=1)
     type = models.CharField(_(u'Data type'),max_length=45,choices=(('char','char'),('numb','numb')))
-    category = models.ForeignKey(Category,related_name="Category",verbose_name="Category")
+    category = models.ForeignKey(Category,verbose_name="Dictionary Category")
+    categorytag =models.ForeignKey(CategoryTag,related_name="CategoryTag",verbose_name="Tag Category")
     
     class Meta:
         db_table = 'dictionary'
         
         
-        app_label = 'Dictionaries'
+        #app_label = 'Dictionaries'
+        app_label = string_with_title("Dictionaries", "Dictionaries Settings")
         verbose_name = _('Properties')
         verbose_name_plural = _('Dictionary')
          
@@ -822,26 +863,7 @@ class PropTags(models.Model):
     
     
     
-class CategoryTag(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.CharField(max_length=100)
-    
-    class Meta:
-        db_table = 'category_tag'
-        
-    def __unicode__(self): # __str__ on Python 3
-        return str(self.description)
 
-class Tags(models.Model):
-    tag = models.CharField(_(u'tag'),max_length=100)
-    active= models.BooleanField(_(u'Active'),max_length=1,default=True)
-    categorytag = models.ForeignKey(CategoryTag, on_delete=models.CASCADE)
-    
-    class Meta:
-        db_table = 'tags'
-        
-    def __unicode__(self): # __str__ on Python 3
-        return str(self.tag)
     
     
 class PropLoopedTags(models.Model):
@@ -884,6 +906,8 @@ class CatalogpropertyDictionary(models.Model):
 class  ExperimentalParCond_DataFile(models.Model):
     datafile =models.ForeignKey(DataFile,verbose_name="Data File")
     experimentalfilecon = models.ForeignKey(ExperimentalParCond, verbose_name="Experimental conditions")
+    value  =  models.CharField(max_length=511)
+    data =  models.CharField(max_length=511)
   
     
     class Meta:
@@ -896,6 +920,9 @@ class  ExperimentalParCond_DataFile(models.Model):
 class  ExperimentalParCondTemp_DataFileTemp(models.Model):
     datafiletemp =models.ForeignKey(DataFileTemp,verbose_name="Data File")
     experimentalfilecontemp = models.ForeignKey(ExperimentalParCondTemp, verbose_name="Experimental conditions")
+    value  =  models.CharField(max_length=511)
+    data =  models.CharField(max_length=511)
+ 
   
     
     class Meta:
@@ -941,7 +968,7 @@ class Tensor(CatalogProperty):
         
         
         
-class GroupNamesDetail(PuntualGroupNames):
+class GroupNamesDetail(PointGroupNames):
     class Meta:
         proxy=True
         app_label = string_with_title("Properties", "Properties Settings")

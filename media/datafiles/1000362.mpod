@@ -17,7 +17,7 @@ _chemical_name_mineral  'rubidium erythrosiderite'
 _phase_name 'rubidium erythrosiderite'
 _phase_formula 'Rb2[FeCl5(H2O)]'
 _chemical_formula_sum 'Rb2[FeCl5(H2O)]'
-_symmetry_point_group_name_H-M 'm´ m´ m´'
+_symmetry_point_group_name_H-M 'm*m*m*'
 _cell_length_a  13.825
 _cell_length_b  9.918
 _cell_length_c  7.10
@@ -40,7 +40,7 @@ _journal_page_last                ?
 _journal_volume                   26
 _journal_year                     2014
 
-_prop_conditions_temperature 8 K
+_prop_conditions_temperature 8
 _prop_magnetoelectric_MEalphaij 'MEalphaij'
 
 loop_

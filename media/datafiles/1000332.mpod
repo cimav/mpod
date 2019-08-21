@@ -16,7 +16,7 @@ _structure_refined 'yes'
 _phase_name 'Iron Tetraborate'
 _chemical_formula_structural 'FeB4'
 _chemical_formula_sum 'Fe1 B4'
-_symmetry_point_group_name_H-M 'm m m'
+_symmetry_point_group_name_H-M 'mmm'
 _cell_length_a                     4.5786(3)
 _cell_length_b                     5.2981(3)
 _cell_length_c                     2.9991(2)

@@ -190,34 +190,87 @@ def get_labels_and_data_links(model, oggetti=None, cap=True, esc=True):
 ##            oggettil=[oggetti]
         else:
             oggettil=oggetti
+ 
+        
+    dictionaryfields = {}
+    dictionaryfields['filename'] =  'filename' 
+    dictionaryfields['code'] =  'code' 
+    dictionaryfields['cod_code'] =  'cod_code'    
+    dictionaryfields['publication'] =  'publication_id'   
+    
     for ii, f in enumerate(opts.fields):
         if not f.editable or isinstance(f, models.AutoField):
             continue
-        field_list.append(format_name(f.name))
-        if oggettil:
-            data_list=[]
-            links_list=[]
-            data_links_list=[]
-            for oggetto in oggettil:
-                val = f.value_from_object(oggetto)
-                data_list.append(val)
-                link_item=None
-                if ii in link_f:
-                    if ii==0:
-                        link_item = "/dataitem/"+str(val)
-                    if ii==1:
-                        link_item = "/datafiles/"+val
-                    if ii==2:
-                        if val:
-                            cod_str=str(val)
-                            link_item="http://www.crystallography.net/cif/"+cod_str[0]+"/"+cod_str+".cif"
-                    if ii==6:
-                        link_item = "/articles/"+str(val)
-                links_list.append(link_item)
-                data_links_list.append([val, link_item])
+        
+        #if dictionaryfields.has_key( f.name ):
+        if f.name != 'active':
+            field_list.append(format_name(f.name))
+        
+
+            if oggettil:
+                data_list=[]
+                links_list=[]
+                data_links_list=[]
+                for oggetto in oggettil:
+                    val = f.value_from_object(oggetto)
+            
+                    if val != 0 and val != None:
+                        data_list.append(val)
+                    else:
+                        data_list.append('No data')
+                        
+                    
+                    link_item=None
+                    """
+                    if ii in link_f:
+                        if ii==0:
+                            link_item = "/dataitem/"+str(val)
+                        if ii==1:
+                            link_item = "/datafiles/"+val
+                        if ii==2:
+                            if val:
+                                cod_str=str(val)
+                                link_item="http://www.crystallography.net/cif/"+cod_str[0]+"/"+cod_str+".cif"
+                        if ii==6:
+                            link_item = "/articles/"+str(val)
+                    """
+                    if dictionaryfields.has_key( f.name ):
+                        if f.name == 'code' :
+                            if val != None:
+                                link_item = "/dataitem/"+str(val)
+                                
+                        elif f.name == 'filename' :
+                            if val != None:
+                                link_item = "/datafiles/"+val
+                        elif f.name == 'cod_code' :
+                            if val != 0 and val != None:
+                                cod_str=str(val)
+                                #"9/00/84/" +"/"+cod_str+".cif"
+                                pathcode=cod_str[0] +"/"+ cod_str[1] + cod_str[2] +"/"+ cod_str[3] + cod_str[4]  
+                                
+                                link_item="http://www.crystallography.net/cif/"+pathcode+"/"+cod_str+".cif"
+                            else:
+                                link_item = ''
+                                
+                        elif f.name == 'publication' :
+                            if val != None:
+                                link_item = "/articles/"+str(val)
+            
+                    if val != 0 and val != None:
+                        pass
+                    else:
+                        val =  ''
+                   
+                        
+                    links_list.append(link_item)
+                    data_links_list.append([val, link_item])
+                        
+                
             data_lists.append(data_list)
             links_lists.append(links_list)
             data_links_lists.append(data_links_list)
+                
+                
     return (field_list, zip(*data_lists), zip(*links_lists), zip(*data_links_lists))
 
 def view_as_table(modello, oggetti=None, cap=True, esc=True, header=None):
@@ -333,14 +386,17 @@ def html_linked_dataitem(dataitem=None,item=None,arraylist=None):
     """
     prints the model header and or instance as a 2 cols table
     """
+    """
     labels_data = get_labels_and_data_1obj(DataFile, dataitem)
     opts = DataFile._meta
     link_f = [0,1,2,6]
     data_links_list = []
     for ii, f in enumerate(opts.fields):
+        
         if not f.editable or isinstance(f, models.AutoField):
             continue
         val = f.value_from_object(dataitem)
+        
         link_item = None
         if ii in link_f:
             if ii==0:
@@ -351,9 +407,60 @@ def html_linked_dataitem(dataitem=None,item=None,arraylist=None):
                 if val:
                     cod_str=str(val)
                     link_item="http://www.crystallography.net/cif/"+cod_str[0]+"/"+cod_str+".cif"
-            if ii==6:
+            if ii==7:
                 link_item = "/articles/"+str(val)
+       
         data_links_list.append([format_name(f.name), val, link_item])
+    """    
+        
+    dictionaryfields = {}
+    dictionaryfields['filename'] =  'filename' 
+    dictionaryfields['code'] =  'code' 
+    dictionaryfields['cod_code'] =  'cod_code'    
+    dictionaryfields['publication'] =  'publication_id'   
+   
+    link_item = ''
+    opts = DataFile._meta
+    data_links_list = []
+ 
+    for f in opts.fields:    
+        val = f.value_from_object(dataitem)
+        
+        if dictionaryfields.has_key( f.name ):
+            if f.name == 'code' :
+                if val != None:
+                    link_item = "/dataitem/"+str(val)
+                    
+            elif f.name == 'filename' :
+                if val != None:
+                    link_item = "/datafiles/"+val
+            elif f.name == 'cod_code' :
+                """
+                if val != 0:
+                    cod_str=str(val)
+                    link_item="http://www.crystallography.net/cif/"+cod_str[0]+"/"+cod_str+".cif"
+                """
+                if val != 0 and val != None:
+                    cod_str=str(val)
+                    #"9/00/84/" +"/"+cod_str+".cif"
+                    pathcode=cod_str[0] +"/"+ cod_str[1] + cod_str[2] +"/"+ cod_str[3] + cod_str[4]  
+                    
+                    link_item="http://www.crystallography.net/cif/"+pathcode+"/"+cod_str+".cif"
+                else:
+                    link_item = ''
+                    
+            elif f.name == 'publication' :
+                if val != None:
+                    link_item = "/articles/"+str(val)
+             
+            
+        if f.name != 'active':
+            if val== None  or  val == 0:
+                val = 'No data'
+                
+            data_links_list.append([format_name(f.name), val, link_item])  
+             
+        link_item = ''
         
     
     if item:
@@ -393,7 +500,7 @@ def view_as_linked_table(modello, oggetti=None, cap=True, esc=True, header=None)
 def data_item_html(dataitem_id):
     datafile_item = None
     try:
-        datafile_item = DataFile.objects.get(code__exact = dataitem_id)
+        datafile_item = DataFile.objects.get(code__exact = dataitem_id,active=True)
     except:
         return None, None
 
@@ -424,16 +531,16 @@ def data_item_html(dataitem_id):
     lnl_props_ids_dict = {}
     lnl_props_units_dict = {}
     for tp in tenso_props:
-        tprp = Property.objects.get(tag__exact = tp)
+        tprp = Property.objects.get(tag__exact = tp, active=True)
         tenso_props_dims_dict[tp] = tprp.tensor_dimensions
         tenso_props_ids_dict[tp] = tprp.id
         tenso_props_units_dict[tp] = tprp.units
     for nlp in nl_props:
-        nlprp = ExperimentalParCond.objects.get(tag__exact = nlp)
+        nlprp = ExperimentalParCond.objects.get(tag__exact = nlp, active=True)
         lnl_props_ids_dict[nlp] = nlprp.id
         lnl_props_units_dict[nlp] = nlprp.units
     for lp in l_props:
-        lprp = ExperimentalParCond.objects.get(tag__exact = lp)
+        lprp = ExperimentalParCond.objects.get(tag__exact = lp, active=True)
         lnl_props_ids_dict[lp] = lprp.id
         lnl_props_units_dict[lp] = lprp.units
     props_ids = [tenso_props_dims_dict, tenso_props_ids_dict, lnl_props_ids_dict,tenso_props_units_dict, lnl_props_units_dict ]
@@ -471,7 +578,7 @@ def data_item_html(dataitem_id):
                             filename = filename.replace(' ',"")   + str(pcounter)
                             print filename
                            
-                            objProperty=Property.objects.get(id=tens_prop[1]) 
+                            objProperty=Property.objects.get(id=tens_prop[1], active=True) 
                             try:
                                 objTypeDataProperty= TypeDataProperty.objects.get(dataproperty=objProperty)
                             except ObjectDoesNotExist as error:
@@ -491,15 +598,16 @@ def data_item_html(dataitem_id):
                                         newtens_val=remove_all("(",str(tens_val))
                                         if ( coefficents== int(j+1) ):                                    
                                             if newtens_val == "?":
-                                                values = values + "value" +str(j+1)  +"=" + str(float(0)) 
+                                                #values = values + "value" +str(j+1)  +"=" + str(float(0)) 
+                                                values = values + "value" +str(j+1)  +"=" + str(newtens_val) 
                                               
                                             else:
                                                 values = values + "value" +str(j+1)  +"=" + newtens_val
                                            
                                         else:                                        
                                             if newtens_val == "?":
-                                                values = values + "value" +str(j+1)  +"=" +  str(float(0)) +"&"
-                                        
+                                                #values = values + "value" +str(j+1)  +"=" +  str(float(0)) +"&"
+                                                values = values + "value" +str(j+1)  +"=" +  str(newtens_val) +"&"
                                             else:
                                                 values = values + "value" +str(j+1)  +"=" +  newtens_val +"&"
                                      
@@ -510,14 +618,16 @@ def data_item_html(dataitem_id):
                                         newtens_val=remove_all("(",str(tens_val))
                                         if ( coefficents== int(int(i+1) * int( j+1)) ):               
                                             if newtens_val == "?":
-                                                values = values + "value" +str(i+1) + str( j+1) +"=" + str(float(0))
+                                                #values = values + "value" +str(i+1) + str( j+1) +"=" + str(float(0))
+                                                values = values + "value" +str(i+1) + str( j+1) +"=" + str(newtens_val)
                                              
                                             else:
                                                 values = values + "value" +str(i+1) + str( j+1) +"=" + newtens_val
                                             
                                         else:                                       
                                             if newtens_val == "?":
-                                                values = values + "value" +str(i+1) + str( j+1) +"=" +  str(float(0)) +"&"
+                                                #values = values + "value" +str(i+1) + str( j+1) +"=" +  str(float(0)) +"&"
+                                                values = values + "value" +str(i+1) + str( j+1) +"=" +  str(newtens_val) +"&"
                                             
                                             else:
                                                 values = values + "value" +str(i+1) + str( j+1) +"=" +  newtens_val +"&"
@@ -528,14 +638,16 @@ def data_item_html(dataitem_id):
                                             newtens_val=remove_all("(",str(tens_val2))
                                             if ( coefficents== int(int(i+1) * int( j+1) * int( x+1))):      
                                                 if newtens_val == "?":
-                                                    values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + str(float(0))
+                                                    #values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + str(float(0))
+                                                    values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + str(newtens_val)
                                                  
                                                 else:
                                                     values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" + newtens_val
                                                  
                                             else:                                            
                                                 if newtens_val == "?":
-                                                    values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +   str(float(0))  +"&"
+                                                    #values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +   str(float(0))  +"&"
+                                                    values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +   str(newtens_val)  +"&"
                                             
                                                 else:
                                                     values = values + "value" +str(i+1) + str( j+1) + str( x+1)  +"=" +  newtens_val +"&"

@@ -1,4 +1,8 @@
+'''
+Created on Feb 10, 2019
 
+@author: Jorge Alberto Torres Acosta
+'''
 
 import os
  
@@ -16,7 +20,7 @@ class PropertyMaster(object):
             self.year = ""
             self.page_first =  ""
             self.page_last = ""
-            self.puntualgroup = None
+            self.pointgroup = None
             self.propertyList=[]
             self.headerBlockValues = None
             

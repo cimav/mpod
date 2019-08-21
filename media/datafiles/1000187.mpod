@@ -16,7 +16,7 @@ _structure_refined 'yes'
 _phase_name 'Mullite 2:1'
 _phase_formula '(Al2O3)0.655-(Si02)0.345'
 _chemical_formula_sum 'Al4.78 Si1.22 O9.61'
-_symmetry_point_group_name_H-M 'm m m'
+_symmetry_point_group_name_H-M 'mmm'
 _cell_length_a 7.5823(6)
 _cell_length_b 7.6819(5)
 _cell_length_c 2.8865(2)

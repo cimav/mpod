@@ -1,0 +1,52 @@
+#------------------------------------------------------------------------------
+#$Date: 2019-04-25 16:33:40 +0000 (Thu, 25 Apr 2019) $
+#$Revision: 001 $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Material Properties Open Database (MPOD),
+# http://mpod.cimav.edu.mx/
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_ywrtaw4=diasauyzjkluels
+_cod_database_code ?
+_symmetry_point_group_name_H-M m3
+_phase_name 'BaF2'
+loop_
+_publ_author_name
+'Poterala'
+_publ_section_title
+;
+aaaaaa
+;
+_journal_name_full 'european' 
+_journal_volume  '1' 
+_journal_page_first  '3' 
+_journal_page_last  '4' 
+_journal_year  '2' 
+_prop_elastic_stiffness_cij 'cij'
+_prop_elastic_stiffness_cijD 'cijD'
+loop_
+_prop_data_label
+_prop_data_tensorial_index
+_prop_data_value
+cij 11 1 
+cij 12 2 
+cij 13 2 
+cij 22 1 
+cij 23 2 
+cij 33 1 
+cij 44 3 
+cij 55 3 
+cij 66 3 
+cijD 11 4 
+cijD 12 5 
+cijD 13 5 
+cijD 22 4 
+cijD 23 5 
+cijD 33 4 
+cijD 44 6 
+cijD 55 6 
+cijD 66 6 

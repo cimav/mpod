@@ -1,7 +1,7 @@
 '''
 Created on Dec 1, 2014
 
-@author: admin
+@author: Jorge Torres Acosta
 '''
 
 #from mpl_toolkits.mplot3d import Axes3D

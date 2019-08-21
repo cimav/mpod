@@ -17,7 +17,7 @@ _phase_name 'High temperature chromium oxide'
 _chemical_name_mineral  'High temperature eskolaite'
 _phase_formula 'Cr2O3'
 _chemical_formula_sum 'Cr2O3'
-_symmetry_point_group_name_H-M '-3´ m´'
+_symmetry_point_group_name_H-M '-3*m*'
 _cell_length_a  4.96
 _cell_length_b  4.96
 _cell_length_c  13.599
@@ -44,7 +44,7 @@ _journal_page_last                146
 _journal_volume                   162
 _journal_year                     1994
 
-_prop_conditions_temperature 270 K
+_prop_conditions_temperature 270
 _prop_magnetoelectric_MEalphaij 'MEalphaij'
 
 loop_
